@@ -1,0 +1,20 @@
+ply
+format binary_little_endian 1.0
+comment Running Screened Poisson Reconstruction (Version 5.5)
+comment 	--in poisson_in.ply
+comment 	--depth 7
+comment 	--out poisson_out.ply
+comment 	--pointWeight 0.000000
+comment 	--voxel poisson_field.raw
+comment #             Tree set in:       1.0 (s),       6.8 (MB)
+comment #      Constraints set in:       0.1 (s),       9.6 (MB)
+comment # Linear system solved in:       0.1 (s),      44.0 (MB)
+comment #        Got triangles in:       0.0 (s),      21.1 (MB)
+comment #             Total Solve:       1.2 (s),      44.0 (MB)
+element vertex 0
+property float x
+property float y
+property float z
+element face 0
+property list uchar int vertex_indices
+end_header

@@ -1,0 +1,597 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>poisson_paras</class>
+ <widget class="QWidget" name="poisson_paras">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>248</width>
+    <height>754</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Poisson paras</string>
+  </property>
+  <widget class="QTabWidget" name="tabWidget">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>241</width>
+     <height>731</height>
+    </rect>
+   </property>
+   <property name="currentIndex">
+    <number>0</number>
+   </property>
+   <widget class="QWidget" name="tab">
+    <attribute name="title">
+     <string>Tab 1</string>
+    </attribute>
+    <widget class="QCheckBox" name="checkBox_show_slices_Z">
+     <property name="geometry">
+      <rect>
+       <x>150</x>
+       <y>420</y>
+       <width>91</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Show Z</string>
+     </property>
+    </widget>
+    <widget class="QDoubleSpinBox" name="poisson_depth">
+     <property name="geometry">
+      <rect>
+       <x>120</x>
+       <y>50</y>
+       <width>101</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="decimals">
+      <number>5</number>
+     </property>
+     <property name="minimum">
+      <double>0.000010000000000</double>
+     </property>
+     <property name="maximum">
+      <double>1000.000000000000000</double>
+     </property>
+     <property name="singleStep">
+      <double>0.010000000000000</double>
+     </property>
+     <property name="value">
+      <double>1.000000000000000</double>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="checkBox_show_slices">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>390</y>
+       <width>91</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Show Slices</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label">
+     <property name="geometry">
+      <rect>
+       <x>12</x>
+       <y>17</y>
+       <width>102</width>
+       <height>26</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Grid Radius</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_2">
+     <property name="geometry">
+      <rect>
+       <x>12</x>
+       <y>47</y>
+       <width>102</width>
+       <height>26</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Octree Depth</string>
+     </property>
+    </widget>
+    <widget class="QDoubleSpinBox" name="radius">
+     <property name="geometry">
+      <rect>
+       <x>120</x>
+       <y>20</y>
+       <width>101</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="decimals">
+      <number>5</number>
+     </property>
+     <property name="minimum">
+      <double>0.000010000000000</double>
+     </property>
+     <property name="maximum">
+      <double>1000.000000000000000</double>
+     </property>
+     <property name="singleStep">
+      <double>0.010000000000000</double>
+     </property>
+     <property name="value">
+      <double>1.000000000000000</double>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="checkBox_show_slices_Y">
+     <property name="geometry">
+      <rect>
+       <x>70</x>
+       <y>420</y>
+       <width>91</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Show Y</string>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="checkBox_show_slices_X">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>420</y>
+       <width>91</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Show X</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_3">
+     <property name="geometry">
+      <rect>
+       <x>12</x>
+       <y>77</y>
+       <width>102</width>
+       <height>26</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>ISO Interal</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pushButton_slice">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>360</y>
+       <width>211</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Slice</string>
+     </property>
+    </widget>
+    <widget class="QWidget" name="layoutWidget">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>170</y>
+       <width>231</width>
+       <height>161</height>
+      </rect>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <item>
+       <widget class="QPushButton" name="pushButton_poisson_field_original">
+        <property name="text">
+         <string>Generate Poisson Field on original</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pushButton_poisson_field_samples">
+        <property name="text">
+         <string>Generate Poisson Field on samples</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pushButton_poisson_MC_original">
+        <property name="text">
+         <string>Extract ISO points on original</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pushButton_poisson_MC_samples">
+        <property name="text">
+         <string>Extract ISO points on sample</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+    <widget class="QDoubleSpinBox" name="poisson_ISO_interval">
+     <property name="geometry">
+      <rect>
+       <x>120</x>
+       <y>80</y>
+       <width>101</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="decimals">
+      <number>5</number>
+     </property>
+     <property name="minimum">
+      <double>0.000010000000000</double>
+     </property>
+     <property name="maximum">
+      <double>1000.000000000000000</double>
+     </property>
+     <property name="singleStep">
+      <double>0.010000000000000</double>
+     </property>
+     <property name="value">
+      <double>1.000000000000000</double>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="checkBox_show_slices_transparent">
+     <property name="geometry">
+      <rect>
+       <x>100</x>
+       <y>390</y>
+       <width>131</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Transparent Slices</string>
+     </property>
+    </widget>
+    <widget class="QDoubleSpinBox" name="poisson_sample_number">
+     <property name="geometry">
+      <rect>
+       <x>120</x>
+       <y>110</y>
+       <width>101</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="decimals">
+      <number>5</number>
+     </property>
+     <property name="minimum">
+      <double>0.000010000000000</double>
+     </property>
+     <property name="maximum">
+      <double>2000000000.000000000000000</double>
+     </property>
+     <property name="singleStep">
+      <double>0.010000000000000</double>
+     </property>
+     <property name="value">
+      <double>1.000000000000000</double>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_4">
+     <property name="geometry">
+      <rect>
+       <x>12</x>
+       <y>107</y>
+       <width>102</width>
+       <height>26</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Poisson sample</string>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="checkBox_parallel_slice_mode">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>450</y>
+       <width>151</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Parallel Slice Mode</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pushButton_clear_slice">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>510</y>
+       <width>211</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Clear Slice</string>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="checkBox_show_view_grid_slice">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>480</y>
+       <width>151</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Show View Grid Slice</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pushButton_smooth_grid_confidence">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>540</y>
+       <width>211</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Smooth Grid Confidence</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pushButton_slice_points">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>570</y>
+       <width>211</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Slice Points</string>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QWidget" name="tab_2">
+    <attribute name="title">
+     <string>Tab 2</string>
+    </attribute>
+    <widget class="QCheckBox" name="checkBox_use_confidence1">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>20</y>
+       <width>201</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>use confidence 1 (density)</string>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="checkBox_use_confidence2">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>50</y>
+       <width>201</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>use confidence 2 (curvature)</string>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="checkBox_use_confidence3">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>80</y>
+       <width>231</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>use confidence 3 (proj error)</string>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="checkBox_use_confidence4">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>110</y>
+       <width>231</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>use confidence 4 (eigen)</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pushButton_compute_confidence_original">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>220</y>
+       <width>201</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Compute Confidence on Original</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pushButton_compute_confidence_samples">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>260</y>
+       <width>201</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Compute Confidence on Samples</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pushButton_compute_confidence_iso">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>300</y>
+       <width>211</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Compute Poisson Confidence on ISO</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pushButton_compute_confidence_iso_new">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>340</y>
+       <width>231</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Compute Smoothness Confidence on ISO</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pushButton_add_samples_to_iso_points">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>380</y>
+       <width>201</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Add samples to iso-points</string>
+     </property>
+    </widget>
+    <widget class="QDoubleSpinBox" name="original_knn_number">
+     <property name="geometry">
+      <rect>
+       <x>110</x>
+       <y>420</y>
+       <width>101</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="decimals">
+      <number>5</number>
+     </property>
+     <property name="minimum">
+      <double>0.000010000000000</double>
+     </property>
+     <property name="maximum">
+      <double>20000000.000000000000000</double>
+     </property>
+     <property name="singleStep">
+      <double>0.010000000000000</double>
+     </property>
+     <property name="value">
+      <double>1.000000000000000</double>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_5">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>420</y>
+       <width>102</width>
+       <height>26</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Original KNN</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pushButton_estimate_original_knn">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>450</y>
+       <width>201</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Estimate Original KNN</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pushButton_label_smooth">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>490</y>
+       <width>191</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Smooth ISO Confidence</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pushButton_BallPivotingReconstruction">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>520</y>
+       <width>211</width>
+       <height>41</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Ball Pivoting Reconstruction</string>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="checkBox_use_confidence5">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>134</y>
+       <width>231</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>use confidence 5 (hole)</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pushButton_compute_hole_confidence">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>180</y>
+       <width>201</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Compute Hole Confidence</string>
+     </property>
+    </widget>
+   </widget>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

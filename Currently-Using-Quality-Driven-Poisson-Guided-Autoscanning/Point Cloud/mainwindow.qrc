@@ -1,0 +1,15 @@
+<RCC>
+  <qresource prefix="/mainwindow">
+    <file>Icons/normalize.png</file>
+    <file>Icons/poisson.png</file>
+    <file>Icons/camera.png</file>
+    <file>Icons/125.png</file>
+    <file>Icons/eraser.png</file>
+    <file>Icons/heyzap_128x128-32.png</file>
+    <file>Icons/lighton.png</file>
+    <file>Icons/open.png</file>
+    <file>Icons/reload.png</file>
+    <file>Icons/rgbt.png</file>
+    <file>Icons/save.png</file>
+  </qresource>
+</RCC>
