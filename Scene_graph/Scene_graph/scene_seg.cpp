@@ -2023,7 +2023,7 @@ void object_seg_Plane(PointCloudPtr_RGB sourceCloud, std::vector<pcl::ModelCoeff
 }
 
 //VCCS over-segmentation
-void VCCS_over_segmentation(PointCloudPtr_RGB cloud, NormalCloudTPtr normals, float voxel_resolution,float seed_resolution,float color_importance,float spatial_importance,float normal_importance,vector<MyPointCloud_RGB>& patch_clouds, PointCloudT::Ptr colored_cloud){
+void VCCS_over_segmentation(PointCloudPtr_RGB cloud, NormalCloudTPtr normals, float voxel_resolution,float seed_resolution,float color_importance,float spatial_importance,float normal_importance,vector<MyPointCloud_RGB>& patch_clouds, PointCloudT::Ptr colored_cloud, PointNCloudT::Ptr normal_cloud){
   PointCloudT::Ptr ct(new PointCloudT);
 
   for(int l=0;l<cloud->size();l++){
@@ -2044,7 +2044,9 @@ void VCCS_over_segmentation(PointCloudPtr_RGB cloud, NormalCloudTPtr normals, fl
   super.setSpatialImportance (spatial_importance);
   super.setNormalImportance (normal_importance);
 
-  super.setNormalCloud (normals);
+  if(normals->size()>0){
+    super.setNormalCloud (normals);
+  }
 
   std::map <uint32_t, pcl::Supervoxel<PointT>::Ptr > supervoxel_clusters;
 
@@ -2052,12 +2054,21 @@ void VCCS_over_segmentation(PointCloudPtr_RGB cloud, NormalCloudTPtr normals, fl
   super.extract (supervoxel_clusters);
   printf("Found %d supervoxels\n", supervoxel_clusters.size ());
 
-  super.getPatchCloud(patch_clouds);
+  vector<MyPointCloud_RGB> patch_clouds_tem;
+  super.getPatchCloud(patch_clouds_tem);
+
+  for(int i=0;i<patch_clouds_tem.size();i++){
+    if(patch_clouds_tem.at(i).mypoints.size()>0){
+      patch_clouds.push_back(patch_clouds_tem.at(i));
+    }
+  }
 
   PointCloudT::Ptr cvc = super.getColoredCloud();
   pcl::copyPointCloud(*cvc,*colored_cloud);
-  //viewer->addPointCloud (colored_voxel_cloud, "colored voxels");
-  //viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_OPACITY,0.8, "colored voxels");
+
+  PointNCloudT::Ptr sv_normal_cloud = super.makeSupervoxelNormalCloud (supervoxel_clusters);
+  pcl::copyPointCloud(*sv_normal_cloud,*normal_cloud);
+
 }
 
 //merge plane in objects
