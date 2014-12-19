@@ -27,7 +27,7 @@
 #include <Eigen/Dense>
 #include <Eigen/Eigenvalues>
 
-#include <pcl/segmentation/supervoxel_clustering.h>
+#include "supervoxel_clustering.h"
 
 #include <pcl/octree/octree.h>
 
@@ -283,7 +283,7 @@ void find_min_rect(PointCloudPtr_RGB cloud, cv::Point2f &p0,cv::Point2f &p1,cv::
 //pcl pointCloud pop up
 void pointCloudPopUp(PointCloudPtr_RGB cloud){
   PointCloudPtr_RGB pc(new PointCloud_RGB);
-  
+
   for(int i=0;i<cloud->size()-1;i++){
     pc->push_back(cloud->at(i));
   }
@@ -304,7 +304,7 @@ void getRectForPlaneCloud(PointCloudPtr_RGB plane_cloud, pcl::ModelCoefficients:
   pr.x=0;
   pr.y=0;
   pr.z=(-plane_coefficients->values[3])/plane_coefficients->values[2];
-  
+
   plane_cloud_tem->push_back(pr);
 
   Eigen::Vector3d plane_normal;
@@ -339,7 +339,7 @@ void getRectForPlaneCloud(PointCloudPtr_RGB plane_cloud, pcl::ModelCoefficients:
   float cloud_z=min_z;
 
   if(max_z-avg_z<avg_z-min_z){
-    cloud_z=max_z;
+  cloud_z=max_z;
   }*/
 
   PointCloudPtr points(new PointCloud());
@@ -520,12 +520,15 @@ bool findNearestNeighbor(PointCloudPtr cloud, PointCloudPtr except_cloud, Point 
 
   for(int i=0;i<cloud->size();i++){
     int dis=sqrt(pow(search_pt.x-cloud->at(i).x, 2)+pow(search_pt.y-cloud->at(i).y, 2)+pow(search_pt.z-cloud->at(i).z, 2));
-    if(dis<min&&!isPointInCloud(search_pt, except_cloud)){
+    if(dis<min){
       min=dis;
       finded_pt.x=cloud->at(i).x;
       finded_pt.y=cloud->at(i).y;
       finded_pt.z=cloud->at(i).z;
-      flag=true;
+
+      if(!isPointInCloud(finded_pt, except_cloud)){
+        flag=true;
+      }
     }
   }
 
@@ -544,7 +547,7 @@ void get_intr_points(MyPointCloud& source_mpc, MyPointCloud& sample_mpc, float s
 
   PointCloudPtr intr_cloud(new PointCloud);
 
-  float resolution = 0.01f;
+  float resolution = 0.005f;
 
   pcl::octree::OctreePointCloudSearch<pcl::PointXYZ> octree (resolution);
 
@@ -563,13 +566,14 @@ void get_intr_points(MyPointCloud& source_mpc, MyPointCloud& sample_mpc, float s
       if(pointIdxRadiusSearch.size()>0){
         PointCloudPtr cloud_tem(new PointCloud);
 
-        for (size_t i = 0; i < pointIdxRadiusSearch.size (); ++i){
-          cloud_tem->push_back(source_cloud->points[ pointIdxRadiusSearch[i]]);
+        for (size_t j = 0; j < pointIdxRadiusSearch.size (); ++j){
+          cloud_tem->push_back(source_cloud->points[ pointIdxRadiusSearch[j]]);
         }
 
         Point finded_pt;
 
         if(findNearestNeighbor(cloud_tem, intr_cloud, sample_cloud->at(i), finded_pt)){
+          intr_cloud->push_back(finded_pt);
           (*intr_points_num)+=1;
         }
       }
@@ -578,8 +582,8 @@ void get_intr_points(MyPointCloud& source_mpc, MyPointCloud& sample_mpc, float s
 }
 
 //compute Jaccard Index
-void computeJaccardIndex(int a_num, int b_num, int intr_num, float *result){
-  *result=intr_num*1.0/(a_num+b_num-intr_num);
+void computeJaccardIndex(int a_num, int intr_num, float *result){
+  *result=intr_num*1.0/(a_num+intr_num);
 }
 
 //compute Plane Jaccard Index
@@ -593,16 +597,25 @@ void computePlaneJaccardIndex(MyPointCloud& source_mpc, MyPointCloud& rect_mpc, 
   PointCloudPtr pc_source(new PointCloud);
   MyPointCloud2PointCloud(source_mpc,pc_source);
 
-  appendCloud(pc_source,pc);
+  showPointCloud2(pc,"plane_sample");
 
-  showPointCloud2(pc,"plane");*/
+  showPointCloud2(pc_source,"plane_source");*/
 
   int intr_points_num;
-  get_intr_points(source_mpc, sample_mpc, 0.01, &intr_points_num);
+  get_intr_points(source_mpc, sample_mpc, 0.0025, &intr_points_num);
 
+  cout<<"source_mpc_plane.mypoints.size():"<<source_mpc.mypoints.size()<<endl;
+  cout<<"sample_mpc_plane.mypoints.size():"<<sample_mpc.mypoints.size()<<endl;
   cout<<"intr_points_num_plane:"<<intr_points_num<<endl;
 
-  computeJaccardIndex(source_mpc.mypoints.size(), sample_mpc.mypoints.size(), intr_points_num, result);
+  float rate=intr_points_num*1.0/sample_mpc.mypoints.size();
+  cout<<"rate_plane>>>>>>>>>>>>>>>>>>>>>>>>>>>:"<<rate<<endl;
+  if(rate>0.1){
+    computeJaccardIndex(source_mpc.mypoints.size(), intr_points_num, result);
+  }
+  else{
+    *result=0;
+  }
 }
 
 //compute Cylinder Jaccard Index
@@ -615,11 +628,20 @@ void computeCylinderJaccardIndex(MyPointCloud& source_mpc, Point cenPoint0, Poin
   showPointCloud2(pc,"cylinder");*/
 
   int intr_points_num;
-  get_intr_points(source_mpc, sample_mpc, 0.01, &intr_points_num);
+  get_intr_points(source_mpc, sample_mpc, 0.0025, &intr_points_num);
 
+  cout<<"source_mpc_cylinder.mypoints.size():"<<source_mpc.mypoints.size()<<endl;
+  cout<<"sample_mpc_cylinder.mypoints.size():"<<sample_mpc.mypoints.size()<<endl;
   cout<<"intr_points_num_cylinder:"<<intr_points_num<<endl;
 
-  computeJaccardIndex(source_mpc.mypoints.size(), sample_mpc.mypoints.size(), intr_points_num, result);
+  float rate=intr_points_num*1.0/sample_mpc.mypoints.size();
+  cout<<"rate_cylinder>>>>>>>>>>>>>>>>>>>>>>>>>>>:"<<rate<<endl;
+  if(rate>0.05){
+   computeJaccardIndex(source_mpc.mypoints.size(), intr_points_num, result);
+  }
+  else{
+    *result=0;
+  }
 }
 
 //compute Sphere Jaccard Index
@@ -632,11 +654,16 @@ void computeSphereJaccardIndex(MyPointCloud& source_mpc, Point cenPoint, float r
   showPointCloud2(pc,"sphere");*/
 
   int intr_points_num;
-  get_intr_points(source_mpc, sample_mpc, 0.01, &intr_points_num);
+  get_intr_points(source_mpc, sample_mpc, 0.0025, &intr_points_num);
 
+  cout<<"source_mpc_sphere.mypoints.size():"<<source_mpc.mypoints.size()<<endl;
+  cout<<"sample_mpc_sphere.mypoints.size():"<<sample_mpc.mypoints.size()<<endl;
   cout<<"intr_points_num_sphere:"<<intr_points_num<<endl;
 
-  computeJaccardIndex(source_mpc.mypoints.size(), sample_mpc.mypoints.size(), intr_points_num, result);
+  float rate=intr_points_num*1.0/sample_mpc.mypoints.size();
+  cout<<"rate_sphere>>>>>>>>>>>>>>>>>>>>>>>>>>>:"<<rate<<endl;
+  computeJaccardIndex(source_mpc.mypoints.size(), intr_points_num, result);
+
 }
 
 //detect table
@@ -990,23 +1017,17 @@ void cylinder_fitting(PointCloudPtr_RGB cloud, MyPointCloud_RGB &cylinder_cloud,
     if(tem_inliers->indices.size()==0||tem_inliers->indices.size()>10000||h>0.5){
     }
     else{
-      double l=2*PI*cylinder_coefficients->values[6];
-      double rate=inliers_cylinder->indices.size()/(h*l);
-      cout<<"rate_cylinder========================:"<< rate <<endl;
+      extract.setIndices (tem_inliers);
+      extract.setNegative (false);
+      extract.filter (*cloud_f);
 
-      if(rate>10000){
-        extract.setIndices (tem_inliers);
-        extract.setNegative (false);
-        extract.filter (*cloud_f);
-
-        PointCloud2MyPointCloud_RGB(cloud_f, cylinder_cloud);
+      PointCloud2MyPointCloud_RGB(cloud_f, cylinder_cloud);
 
 
-        extract.setIndices (tem_inliers);
-        extract.setNegative (true);
-        extract.filter (*cloud_f);
-        cloud_filtered.swap (cloud_f);
-      }
+      extract.setIndices (tem_inliers);
+      extract.setNegative (true);
+      extract.filter (*cloud_f);
+      cloud_filtered.swap (cloud_f);
     }
   }
 
@@ -1173,7 +1194,7 @@ void findPointsIn_Sphere(PointCloudPtr_RGB cloud, pcl::ModelCoefficients::Ptr &c
 
     float dist=sqrt(pow((x-coefficients->values[0]),2)+pow((y-coefficients->values[1]),2)+pow((z-coefficients->values[2]),2));
 
-    if(dist<=coefficients->values[3]+0.005){
+    if(dist<=coefficients->values[3]+0.01){
       inliers->indices.push_back(i);
     }
   }
@@ -1198,7 +1219,7 @@ void sphere_fitting(PointCloudPtr_RGB cloud, MyPointCloud_RGB &sphere_cloud, pcl
   seg.setModelType (pcl::SACMODEL_SPHERE);
   seg.setMethodType (pcl::SAC_RANSAC);
   seg.setMaxIterations (10000);
-  seg.setDistanceThreshold (0.1);
+  seg.setDistanceThreshold (0.02);
 
   // Segment the sphere component from the remaining cloud
   seg.setInputCloud (cloud_filtered);
@@ -1219,13 +1240,8 @@ void sphere_fitting(PointCloudPtr_RGB cloud, MyPointCloud_RGB &sphere_cloud, pcl
     pcl::copyPointCloud(*cloud_filtered,*remained_cloud);
     return;
   }
-  else{
-    double area=4*PI*sphere_coefficients->values[3]*sphere_coefficients->values[3];
-    rate=inliers_sphere->indices.size()/area;
-    cout<<"rate_sphere========================:"<< rate <<endl;
-  }
 
-  if(sphere_coefficients->values[3]>0.5||sphere_coefficients->values[2]-sphere_coefficients->values[3]<0||rate<5000){
+  if(sphere_coefficients->values[3]>0.5||sphere_coefficients->values[2]-sphere_coefficients->values[3]<0){
     std::cerr << "Could not estimate a sphere model for the given dataset===." << std::endl;
     pcl::copyPointCloud(*cloud_filtered,*remained_cloud);
     return;
@@ -1393,7 +1409,7 @@ void plane_for_boxs_fitting(PointCloudPtr_RGB sourceCloud, MyPointCloud_RGB &pla
     pcl::copyPointCloud(*cloud_tem,*remained_cloud);
     return;
   }
-  else{
+ /* else{
     PointCloudPtr_RGB cloud_in_plane(new PointCloud_RGB());
 
     Eigen::Vector3d plane_normal;
@@ -1426,7 +1442,7 @@ void plane_for_boxs_fitting(PointCloudPtr_RGB sourceCloud, MyPointCloud_RGB &pla
     cout<<"rate_plane===============::"<<rate<<endl;
   }
 
-  if(rate>30000){
+  if(rate>30000){*/
     PointCloudPtr rect_cl(new PointCloud);
     getRectForPlaneCloud(cloud_p, plane_coefficients, rect_cl);
     PointCloud2MyPointCloud_RGB(cloud_p, plane_cloud);
@@ -1436,7 +1452,7 @@ void plane_for_boxs_fitting(PointCloudPtr_RGB sourceCloud, MyPointCloud_RGB &pla
     extract.setNegative (true);
     extract.filter (*cloud_f);
     cloud_tem.swap (cloud_f);
-  }
+ // }
 
   pcl::copyPointCloud(*cloud_tem,*remained_cloud);
 }
@@ -2007,7 +2023,7 @@ void object_seg_Plane(PointCloudPtr_RGB sourceCloud, std::vector<pcl::ModelCoeff
 }
 
 //VCCS over-segmentation
-void VCCS_over_segmentation(PointCloudPtr_RGB cloud, float voxel_resolution,float seed_resolution,float color_importance,float spatial_importance,float normal_importance,PointCloudT::Ptr colored_voxel_cloud){
+void VCCS_over_segmentation(PointCloudPtr_RGB cloud, NormalCloudTPtr normals, float voxel_resolution,float seed_resolution,float color_importance,float spatial_importance,float normal_importance,vector<MyPointCloud_RGB>& patch_clouds, PointCloudT::Ptr colored_cloud){
   PointCloudT::Ptr ct(new PointCloudT);
 
   for(int l=0;l<cloud->size();l++){
@@ -2028,20 +2044,24 @@ void VCCS_over_segmentation(PointCloudPtr_RGB cloud, float voxel_resolution,floa
   super.setSpatialImportance (spatial_importance);
   super.setNormalImportance (normal_importance);
 
+  super.setNormalCloud (normals);
+
   std::map <uint32_t, pcl::Supervoxel<PointT>::Ptr > supervoxel_clusters;
 
   printf("Extracting supervoxels!\n");
   super.extract (supervoxel_clusters);
   printf("Found %d supervoxels\n", supervoxel_clusters.size ());
 
+  super.getPatchCloud(patch_clouds);
+
   PointCloudT::Ptr cvc = super.getColoredCloud();
-  pcl::copyPointCloud(*cvc,*colored_voxel_cloud);
+  pcl::copyPointCloud(*cvc,*colored_cloud);
   //viewer->addPointCloud (colored_voxel_cloud, "colored voxels");
   //viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_OPACITY,0.8, "colored voxels");
 }
 
 //merge plane in objects
-void merge_Plane(std::vector<MyPointCloud_RGB>& plane_clouds, std::vector<pcl::ModelCoefficients> &coefficients_vector, std::vector<MyPointCloud_RGB>& new_plane_clouds, std::vector<MyPointCloud> new_rect_clouds){
+void merge_Plane(std::vector<MyPointCloud_RGB>& plane_clouds, std::vector<pcl::ModelCoefficients> &coefficients_vector, std::vector<MyPointCloud_RGB>& new_plane_clouds, std::vector<MyPointCloud>& new_rect_clouds){
 
   PointCloudPtr_RGB cloud_f (new PointCloud_RGB);
 
@@ -2418,81 +2438,92 @@ void object_fitting(PointCloudPtr_RGB cloud, vector<MyPointCloud_RGB> &plane_clo
 
   std::vector<pcl::ModelCoefficients> plane_coefficients_vector;
   vector<MyPointCloud_RGB> plane_clouds_tem;
-  
+
   while(1){
-  PointCloudPtr_RGB remained_tem0(new PointCloud_RGB);
-  PointCloudPtr_RGB remained_tem1(new PointCloud_RGB);
-  PointCloudPtr_RGB remained_tem2(new PointCloud_RGB);
+    PointCloudPtr_RGB remained_tem0(new PointCloud_RGB);
+    PointCloudPtr_RGB remained_tem1(new PointCloud_RGB);
+    PointCloudPtr_RGB remained_tem2(new PointCloud_RGB);
 
-  MyPointCloud_RGB cylinder_cloud;
-  MyPointCloud_RGB sphere_cloud;
-  MyPointCloud_RGB plane_cloud;
+    MyPointCloud_RGB cylinder_cloud;
+    MyPointCloud_RGB sphere_cloud;
+    MyPointCloud_RGB plane_cloud;
 
-  MyPointCloud cylinder_cloud_n;
-  MyPointCloud sphere_cloud_n;
-  MyPointCloud plane_cloud_n;
-  MyPointCloud rect_cloud;
+    MyPointCloud cylinder_cloud_n;
+    MyPointCloud sphere_cloud_n;
+    MyPointCloud plane_cloud_n;
+    MyPointCloud rect_cloud;
 
-  pcl::ModelCoefficients::Ptr cylinder_coefficients(new pcl::ModelCoefficients());
-  pcl::ModelCoefficients::Ptr sphere_coefficients(new pcl::ModelCoefficients());
-  pcl::ModelCoefficients::Ptr plane_coefficients(new pcl::ModelCoefficients());
+    pcl::ModelCoefficients::Ptr cylinder_coefficients(new pcl::ModelCoefficients());
+    pcl::ModelCoefficients::Ptr sphere_coefficients(new pcl::ModelCoefficients());
+    pcl::ModelCoefficients::Ptr plane_coefficients(new pcl::ModelCoefficients());
 
-  float result0=0;
-  float result1=0;
-  float result2=0;
+    float result0=0;
+    float result1=0;
+    float result2=0;
 
-  cylinder_fitting(cloud_tem, cylinder_cloud, cylinder_coefficients,remained_tem0);
-  sphere_fitting(cloud_tem, sphere_cloud, sphere_coefficients, remained_tem1);
-  plane_for_boxs_fitting(cloud_tem, plane_cloud, rect_cloud, plane_coefficients, remained_tem2);
+    cylinder_fitting(cloud_tem, cylinder_cloud, cylinder_coefficients,remained_tem0);
+    sphere_fitting(cloud_tem, sphere_cloud, sphere_coefficients, remained_tem1);
+    plane_for_boxs_fitting(cloud_tem, plane_cloud, rect_cloud, plane_coefficients, remained_tem2);
 
-  MyPointCloud_RGB2MyPointCloud(cylinder_cloud, cylinder_cloud_n);
-  MyPointCloud_RGB2MyPointCloud(sphere_cloud, sphere_cloud_n);
-  MyPointCloud_RGB2MyPointCloud(plane_cloud, plane_cloud_n);
+    MyPointCloud_RGB2MyPointCloud(cylinder_cloud, cylinder_cloud_n);
+    MyPointCloud_RGB2MyPointCloud(sphere_cloud, sphere_cloud_n);
+    MyPointCloud_RGB2MyPointCloud(plane_cloud, plane_cloud_n);
 
-  if(cylinder_cloud.mypoints.size()==0&&sphere_cloud.mypoints.size()==0&&plane_cloud.mypoints.size()==0){
-    printf("Can't fit any more\n");
-    break;
-  }
+    if(cylinder_cloud.mypoints.size()==0&&sphere_cloud.mypoints.size()==0&&plane_cloud.mypoints.size()==0){
+      printf("Can't fit any more\n");
+      break;
+    }
 
-  if(cylinder_cloud.mypoints.size()>0){
-    Point cenPoint0(cylinder_coefficients->values[0],cylinder_coefficients->values[1],cylinder_coefficients->values[2]);
-    Point cenPoint1(cylinder_coefficients->values[7],cylinder_coefficients->values[8],cylinder_coefficients->values[9]);
-    Vector3<float> direction(cylinder_coefficients->values[3],cylinder_coefficients->values[4],cylinder_coefficients->values[5]);
+    if(cylinder_cloud.mypoints.size()>0){
+      Point cenPoint0(cylinder_coefficients->values[0],cylinder_coefficients->values[1],cylinder_coefficients->values[2]);
+      Point cenPoint1(cylinder_coefficients->values[7],cylinder_coefficients->values[8],cylinder_coefficients->values[9]);
+      Vector3<float> direction(cylinder_coefficients->values[3],cylinder_coefficients->values[4],cylinder_coefficients->values[5]);
 
-    computeCylinderJaccardIndex(cylinder_cloud_n, cenPoint0, cenPoint1, direction, cylinder_coefficients->values[6], 0.002, &result0);
-  }
+      computeCylinderJaccardIndex(cylinder_cloud_n, cenPoint0, cenPoint1, direction, cylinder_coefficients->values[6], 0.002, &result0);
+    }
 
-  if(sphere_cloud.mypoints.size()>0){
-    Point cenPoint(sphere_coefficients->values[0],sphere_coefficients->values[1],sphere_coefficients->values[2]);
-    computeSphereJaccardIndex(sphere_cloud_n, cenPoint, sphere_coefficients->values[3], 0.002, &result1);
-  }
+    if(sphere_cloud.mypoints.size()>0){
+      Point cenPoint(sphere_coefficients->values[0],sphere_coefficients->values[1],sphere_coefficients->values[2]);
+      computeSphereJaccardIndex(sphere_cloud_n, cenPoint, sphere_coefficients->values[3], 0.002, &result1);
+    }
 
-  if(plane_cloud.mypoints.size()>0){
-    computePlaneJaccardIndex(plane_cloud_n, rect_cloud, 0.002, &result2);
-  }
+    if(plane_cloud.mypoints.size()>0){
+      computePlaneJaccardIndex(plane_cloud_n, rect_cloud, 0.002, &result2);
+    }
 
-  cout<<"result0=====================:"<<result0<<endl;
-  cout<<"result1=====================:"<<result1<<endl;
-  cout<<"result2=====================:"<<result2<<endl;
+    cout<<"result0=====================:"<<result0<<endl;
+    cout<<"result1=====================:"<<result1<<endl;
+    cout<<"result2=====================:"<<result2<<endl;
 
-  //use cylinder fitting
-  if(result0>result1&&result0>result2){
-    pcl::copyPointCloud(*remained_tem0, *cloud_tem);
-    cylinder_clouds.push_back(cylinder_cloud);
-  }
+    float thresdhold=0.17;
 
-  //use sphere fitting
-  if(result1>result0&&result1>result2){
-    pcl::copyPointCloud(*remained_tem1, *cloud_tem);
-    sphere_clouds.push_back(sphere_cloud);
-  }
+    if(result0<thresdhold&&result1<thresdhold&&result2<thresdhold){
+      printf("Can't fit any more\n");
+      break;
+    }
 
-  //use plane fitting
-  if(result2>result0&&result2>result1){
-    pcl::copyPointCloud(*remained_tem2, *cloud_tem);
-    plane_clouds_tem.push_back(plane_cloud);
-    plane_coefficients_vector.push_back(*plane_coefficients);
-  }
+    //use cylinder fitting
+    if(result0>result1&&result0>result2&&result0>thresdhold){
+      pcl::copyPointCloud(*remained_tem0, *cloud_tem);
+      cylinder_clouds.push_back(cylinder_cloud);
+
+      /*PointCloudPtr_RGB cloud_in_cylinder(new PointCloud_RGB());
+      MyPointCloud_RGB2PointCloud(cylinder_cloud, cloud_in_cylinder);
+      showPointCloud(cloud_in_cylinder,"cloud_in_cylinder");*/
+    }
+
+    //use sphere fitting
+    if(result1>result0&&result1>result2&&result1>thresdhold){
+      pcl::copyPointCloud(*remained_tem1, *cloud_tem);
+      sphere_clouds.push_back(sphere_cloud);
+    }
+
+    //use plane fitting
+    if(result2>result0&&result2>result1&&result2>thresdhold){
+      pcl::copyPointCloud(*remained_tem2, *cloud_tem);
+      plane_clouds_tem.push_back(plane_cloud);
+      plane_coefficients_vector.push_back(*plane_coefficients);
+    }
   }
 
   merge_Plane(plane_clouds_tem, plane_coefficients_vector, plane_clouds, rect_clouds);

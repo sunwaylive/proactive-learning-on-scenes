@@ -146,6 +146,8 @@
     <ClInclude Include="file_io.h" />
     <ClInclude Include="scene_graph.h" />
     <ClInclude Include="scene_seg.h" />
+    <ClInclude Include="supervoxel_clustering.h" />
+    <ClInclude Include="supervoxel_clustering.hpp" />
     <ClInclude Include="visualizer.h" />
   </ItemGroup>
   <ItemGroup>
@@ -155,6 +157,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="scene_graph.cpp" />
     <ClCompile Include="scene_seg.cpp" />
+    <ClCompile Include="supervoxel_clustering.cpp" />
     <ClCompile Include="visualizer.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

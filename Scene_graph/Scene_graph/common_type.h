@@ -17,8 +17,6 @@ typedef pcl::PointCloud<Point_RGB> PointCloud_RGB;
 typedef PointCloud_RGB::Ptr PointCloudPtr_RGB;
 typedef PointCloud_RGB::ConstPtr PointCloudConstPtr_RGB;
 
-
-
 typedef pcl::PointXYZRGBA PointT;
 typedef pcl::PointCloud<PointT> PointCloudT;
 typedef pcl::PointNormal PointNT;
@@ -26,8 +24,10 @@ typedef pcl::PointCloud<PointNT> PointNCloudT;
 typedef pcl::PointXYZL PointLT;
 typedef pcl::PointCloud<PointLT> PointLCloudT;
 
-
-
+typedef pcl::Normal Normal;
+typedef pcl::PointCloud<Normal> NormalCloudT;
+typedef NormalCloudT::Ptr NormalCloudTPtr;
+typedef NormalCloudT::ConstPtr NormalCloudTConstPtr;
 
 typedef struct MyPoint{
   float x;

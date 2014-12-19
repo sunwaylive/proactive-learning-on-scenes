@@ -33,6 +33,12 @@
     <ClInclude Include="visualizer.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="supervoxel_clustering.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="supervoxel_clustering.hpp">
+      <Filter>源文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="color_op.cpp">
@@ -54,6 +60,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="visualizer.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="supervoxel_clustering.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
