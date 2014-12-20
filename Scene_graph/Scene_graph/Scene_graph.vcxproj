@@ -141,9 +141,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="BinarySeg.h" />
+    <ClInclude Include="block.h" />
     <ClInclude Include="color_op.h" />
     <ClInclude Include="common_type.h" />
     <ClInclude Include="file_io.h" />
+    <ClInclude Include="graph.h" />
     <ClInclude Include="scene_graph.h" />
     <ClInclude Include="scene_seg.h" />
     <ClInclude Include="supervoxel_clustering.h" />
@@ -151,14 +154,20 @@
     <ClInclude Include="visualizer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="BinarySeg.cpp" />
     <ClCompile Include="color_op.cpp" />
     <ClCompile Include="common_type.cpp" />
     <ClCompile Include="file_io.cpp" />
+    <ClCompile Include="graph.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="maxflow.cpp" />
     <ClCompile Include="scene_graph.cpp" />
     <ClCompile Include="scene_seg.cpp" />
     <ClCompile Include="supervoxel_clustering.cpp" />
     <ClCompile Include="visualizer.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="instances.inc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

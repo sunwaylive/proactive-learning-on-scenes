@@ -29,6 +29,8 @@ typedef pcl::PointCloud<Normal> NormalCloudT;
 typedef NormalCloudT::Ptr NormalCloudTPtr;
 typedef NormalCloudT::ConstPtr NormalCloudTConstPtr;
 
+typedef pcl::PointXYZ PointXYZ;
+
 typedef struct MyPoint{
   float x;
   float y;
