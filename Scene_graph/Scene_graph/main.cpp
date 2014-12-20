@@ -196,8 +196,8 @@ int main (int argc, char *argv[])
   //  }*/
   //}
 
-  float voxel_resolution = 0.005f;
-  float seed_resolution = 0.05f;
+  float voxel_resolution = 0.004f;
+  float seed_resolution = 0.06f;
   float color_importance = 0.2f;
   float spatial_importance = 0.4f;
   float normal_importance = 1.0f;
@@ -211,24 +211,39 @@ int main (int argc, char *argv[])
 
   PointCloudT::Ptr colored_cloud(new PointCloudT);
   vector<MyPointCloud_RGB> patch_clouds;
-  VCCS_over_segmentation(cluster_points.at(i),normals,voxel_resolution,seed_resolution,color_importance,spatial_importance,normal_importance,patch_clouds,colored_cloud);
+  PointNCloudT::Ptr normal_cloud(new PointNCloudT);
+  VCCS_over_segmentation(cluster_points.at(i),normals,voxel_resolution,seed_resolution,color_importance,spatial_importance,normal_importance,patch_clouds,colored_cloud,normal_cloud);
 
   std::stringstream str;
   str<<"colored_voxel_cloud"<<i;
   std::string id_pc=str.str();
 
   vs.viewer->addPointCloud (colored_cloud, id_pc);
+
+  str<<"supervoxel_normals"<<i;
+  id_pc=str.str();
+  vs.viewer->addPointCloudNormals<pcl::PointNormal> (normal_cloud,1,0.05f, id_pc);
+
   /*cout<<"patch_clouds.size():"<<patch_clouds.size()<<endl;
-  for(int i=0;i<patch_clouds.size();i++){
+  cout<<"normal_cloud->size():"<<normal_cloud->size()<<endl;
+  PointNCloudT::Ptr normal_cloud_tem(new PointNCloudT);
+  for(int j=0;j<patch_clouds.size();j++){
+    normal_cloud_tem->push_back(normal_cloud->at(j));
+
     PointCloudPtr_RGB pc(new PointCloud_RGB);
-    MyPointCloud_RGB2PointCloud(patch_clouds.at(i), pc);
+    MyPointCloud_RGB2PointCloud(patch_clouds.at(j), pc);
 
     std::stringstream str;
-    str<<"patch_clouds"<<i;
+    str<<"patch_clouds"<<i<<j;
     std::string id_pc=str.str();
 
     vs.viewer->addPointCloud (pc, id_pc);
-  }*/
+  }
+
+  std::stringstream str;
+  str<<"supervoxel_normals"<<i;
+  std::string id_pc=str.str();
+  vs.viewer->addPointCloudNormals<pcl::PointNormal> (normal_cloud_tem,1,0.05f, id_pc);*/
   }
 
   vs.show();
