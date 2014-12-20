@@ -982,7 +982,7 @@ void cylinder_fitting(PointCloudPtr_RGB cloud, MyPointCloud_RGB &cylinder_cloud,
   seg.setModelType (pcl::SACMODEL_CYLINDER);
   seg.setMethodType (pcl::SAC_RANSAC);
   seg.setNormalDistanceWeight (0.1);
-  seg.setMaxIterations (10000);
+  seg.setMaxIterations (1000);
   //seg.setDistanceThreshold (0.04);
   seg.setDistanceThreshold (0.025);
   seg.setRadiusLimits (0.01, 0.1);
@@ -1218,7 +1218,7 @@ void sphere_fitting(PointCloudPtr_RGB cloud, MyPointCloud_RGB &sphere_cloud, pcl
   // Mandatory
   seg.setModelType (pcl::SACMODEL_SPHERE);
   seg.setMethodType (pcl::SAC_RANSAC);
-  seg.setMaxIterations (10000);
+  seg.setMaxIterations (1000);
   seg.setDistanceThreshold (0.02);
 
   // Segment the sphere component from the remaining cloud

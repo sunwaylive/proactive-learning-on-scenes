@@ -100,7 +100,7 @@ int main (int argc, char *argv[])
   //loadPointCloud_normal_ply("E:/HaoLi/MyWorkspace/Scene_graph/Scene_graph/data/big_table_normal.ply", cloud, normals);
   //loadPointCloud_normal_ply("E:/HaoLi/MyWorkspace/Scene_graph/Scene_graph/data/small_normal.ply", cloud, normals);
 
-  loadPointCloud_ply("E:/HaoLi/MyWorkspace/Scene_graph/Scene_graph/data/big_table1.ply", cloud);
+  loadPointCloud_ply("data/big_table1.ply", cloud);
   //loadPointCloud_ply("E:/HaoLi/MyWorkspace/Scene_graph/Scene_graph/data/scene03.ply", cloud);
   //loadPointCloud_ply("E:/HaoLi/MyWorkspace/Scene_graph/Scene_graph/data/testData.ply", cloud);
   PointCloudPtr_RGB cloud_mark(new PointCloud_RGB);
@@ -281,7 +281,7 @@ int main (int argc, char *argv[])
   //  }*/
   //}
 
-  float voxel_resolution = 0.004f;
+  float voxel_resolution = 0.006f;
   float seed_resolution = 0.06f;
   float color_importance = 0.2f;
   float spatial_importance = 0.4f;
