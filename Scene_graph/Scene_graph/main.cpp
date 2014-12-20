@@ -200,7 +200,7 @@ int main (int argc, char *argv[])
   //  }*/
   //}
 
-  float voxel_resolution = 0.004f;
+  float voxel_resolution = 0.006f;
   float seed_resolution = 0.06f;
   float color_importance = 0.2f;
   float spatial_importance = 0.4f;
