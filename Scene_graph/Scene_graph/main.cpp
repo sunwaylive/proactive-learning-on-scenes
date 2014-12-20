@@ -3,6 +3,91 @@
 #include "file_io.h"
 #include "scene_seg.h"
 
+
+vector<MyPointCloud_RGB> patch_clouds;
+vector<MyPoint> vecPatchCenPoint;
+vector<ColorType> vecPatchColor;
+vector<Normal> vecPatcNormal;
+vector<pair<int,int>> vecpairPatchConnection;
+
+double GetMinDisBetPatch(int m,int n)
+{
+	double minDis=99999999;
+	for(int i = 0;i < patch_clouds[m].mypoints.size();i++)
+	{
+		for(int j = 0;j < patch_clouds[n].mypoints.size();j++)
+		{
+			double dis = sqrt(pow(patch_clouds[m].mypoints[i].x-patch_clouds[n].mypoints[j].x,2)
+				+ pow(patch_clouds[m].mypoints[i].y-patch_clouds[n].mypoints[j].y,2)
+				+ pow(patch_clouds[m].mypoints[i].z-patch_clouds[n].mypoints[j].z,2));
+			if(minDis > dis)	
+				minDis = dis;
+		}
+	}
+	return minDis;
+}
+
+double GetCenDisBetPatch(int m,int n)
+{
+	double dis =  sqrt(pow(vecPatchCenPoint[m].x-vecPatchCenPoint[n].x,2)
+		+ pow(vecPatchCenPoint[m].y-vecPatchCenPoint[n].y,2)
+		+ pow(vecPatchCenPoint[m].z-vecPatchCenPoint[n].z,2));
+	return dis;
+}
+
+double GetBinaryDataValue(double d)
+{
+	// 	double w,o;
+	// 	o = 0.1;
+	// 	w = exp(-pow(d/1,2));
+	// 	return w;
+	double penaltyValue;
+	penaltyValue = 0.5 + 0.2 * d;
+	return penaltyValue;
+}
+
+double GetBinarySmoothValue(int m,int n)
+{
+	double smoothValue,geometryValue,appearenceValue;
+
+	//考虑法向量
+	MyPoint cenM,cenN;
+	Normal norM,norN,norMN;
+	cenM = vecPatchCenPoint[m];
+	cenN = vecPatchCenPoint[n];
+	norM = vecPatcNormal[m];
+	norN = vecPatcNormal[n];
+	norMN.normal_x = cenN.x - cenM.x;
+	norMN.normal_y = cenN.y - cenM.y;
+	norMN.normal_z = cenN.z - cenM.z;
+
+	bool convexFlag;
+	double convexValue;   //convex if > 0
+	convexValue = norMN.normal_x * norN.normal_x +  norMN.normal_y * norN.normal_y + norMN.normal_z * norN.normal_z;
+	if(convexValue >= 0)	convexFlag = true;
+	else	convexFlag = false;
+
+	double cosValue;
+	cosValue = (norM.normal_x * norN.normal_x + norM.normal_y * norN.normal_y + norM.normal_z * norN.normal_z);
+	if(convexFlag)
+	{
+		geometryValue = 0.1 * cosValue + 0.9;
+	}
+	else
+	{
+		geometryValue = 2 * cosValue;
+	}
+
+	//考虑颜色
+	appearenceValue = (vecPatchColor[m].mRed - vecPatchColor[n].mRed) 
+		+(vecPatchColor[m].mGreen- vecPatchColor[n].mGreen)
+		+(vecPatchColor[m].mBlue - vecPatchColor[n].mBlue);
+	appearenceValue /= 256 * 3;
+
+	smoothValue = geometryValue + appearenceValue;
+	return smoothValue;
+}  
+
 int main (int argc, char *argv[])
 {
   Visualizer vs;
@@ -245,6 +330,122 @@ int main (int argc, char *argv[])
   std::string id_pc=str.str();
   vs.viewer->addPointCloudNormals<pcl::PointNormal> (normal_cloud_tem,1,0.05f, id_pc);*/
   }
+
+  /******************Graph Pre All************************/
+  //   for(int i = 0;i <patch_clouds.size();i++)
+  //   {
+  // 	  ColorType color;
+  // 	  MyPoint point;
+  // 	  color.mRed = color.mGreen = color.mBlue = 0;
+  // 	  point.x = point.y = point.z =0;
+  // 
+  // 	  for(int j = 0;j < patch_clouds[i].mypoints.size();j++)
+  // 	  {
+  // 		  color.mRed += patch_clouds[i].mypoints[j].r;
+  // 		  color.mGreen += patch_clouds[i].mypoints[j].g;
+  // 		  color.mBlue += patch_clouds[i].mypoints[j].b;
+  // 		  point.x += patch_clouds[i].mypoints[j].x;
+  // 		  point.y += patch_clouds[i].mypoints[j].y;
+  // 		  point.z += patch_clouds[i].mypoints[j].z;
+  // 	  }//
+  // 	  if(patch_clouds[i].mypoints.size() > 0)
+  // 	  {
+  // 		  color.mRed /= patch_clouds[i].mypoints.size();
+  // 		  color.mGreen /= patch_clouds[i].mypoints.size();
+  // 		  color.mBlue /= patch_clouds[i].mypoints.size();
+  // 		  point.x/= patch_clouds[i].mypoints.size();
+  // 		  point.y /= patch_clouds[i].mypoints.size();
+  // 		  point.z /= patch_clouds[i].mypoints.size();
+  // 	  }
+  // 	  
+  // 	  vecPatchColor.push_back(color);
+  // 	  vecPatchCenPoint.push_back(point);
+  // 
+  // 	  Normal nor;
+  // 	  nor.normal_x = nor.normal_y = nor.normal_z = 0.577;
+  // 	  vecPatcNormal.push_back(nor);
+  //   }
+  // 
+  //   vector<vector<double>> vecvecPatchMinDis;
+  //   vector<vector<double>> vecvecPatchCenDis;
+  //   pair<int,int> pairPatchConnection;
+  // 
+  //   vecvecPatchMinDis.resize(patch_clouds.size());
+  //   vecvecPatchCenDis.resize(patch_clouds.size());
+  //   for(int i = 0;i <patch_clouds.size();i++)
+  //   {
+  // 	  vecvecPatchMinDis[i].resize(patch_clouds.size());
+  // 	  vecvecPatchCenDis[i].resize(patch_clouds.size());
+  //   }
+  // 
+  //   for(int i = 0;i <patch_clouds.size();i++)
+  // 	  for(int j = 0;j <patch_clouds.size();j++)
+  // 		  if(i != j)
+  // 		  {
+  // 			  vecvecPatchMinDis[i][j] = GetMinDisBetPatch(i,j);
+  // 			  vecvecPatchCenDis[i][j] = GetCenDisBetPatch(i,j);
+  // 			  pairPatchConnection.first = i;
+  // 			  pairPatchConnection.second = j;
+  // 			  if(vecvecPatchMinDis[i][j]<0.1)
+  // 				 vecpairPatchConnection.push_back(pairPatchConnection);
+  // 		  }
+  // 		  else
+  // 		  {
+  // 			  vecvecPatchMinDis[i][j] = 0;
+  // 			  vecvecPatchCenDis[i][j] = 0;
+  // 		  }
+  // 
+  // 	
+  //    /******************Graph Pre One************************/
+  // 	int m=0; 
+  // 	vector<double> vecDataValue;
+  // 	vector<double> vecSmoothValue;
+  // 	vector<pair<int,int>> verpairSmoothVertex;
+  // 	pair<int,int> pairSmoothVertex;
+  // 
+  // 	for(int i = 0;i <patch_clouds.size();i++)
+  // 	{
+  // 		vecDataValue.push_back(GetBinaryDataValue(vecvecPatchMinDis[m][i]));
+  // 	}
+  // 
+  // 	for(int i = 0;i <vecpairPatchConnection.size();i++)
+  // 	{
+  // 		vecSmoothValue.push_back(GetBinarySmoothValue(vecpairPatchConnection[i].first,vecpairPatchConnection[i].second));
+  // 	}
+  // 
+  // 
+  //   /******************Graph Cut************************/
+  //   typedef Graph<int,int,int> GraphType;
+  //   GraphType *g = new GraphType(/*estimated # of nodes*/ patch_clouds.size(), /*estimated # of edges*/ vecpairPatchConnection.size()); 
+  // 
+  //   g -> add_node(patch_clouds.size()); 
+  // 
+  //   for(int i = 0;i <vecDataValue.size();i++)
+  //   {
+  // 	  g -> add_tweights( i,   /* capacities */  0, vecDataValue[i]);
+  //   }
+  // 
+  //   for(int i = 0;i <vecSmoothValue.size();i++)
+  //   {
+  // 	  g -> add_edge( vecpairPatchConnection[i].first,vecpairPatchConnection[i].second,    /* capacities */  vecSmoothValue[i], vecSmoothValue[i]);
+  //   }
+  // 
+  //   int flow = g -> maxflow();
+  // 
+  //   printf("Flow = %d\n", flow);
+  //   printf("Minimum cut:\n");
+  // 
+  //   int countSOURCE,countSINK;
+  //   countSINK = countSOURCE =0;
+  //   for(int i=0;i<patch_clouds.size();i++)
+  //   if (g->what_segment(i) == GraphType::SOURCE)
+  // 	  countSOURCE++;
+  //   else
+  // 	  countSINK++;
+  // 
+  //   printf("node0 is in the SOURCE set %d,%d\n",countSOURCE,countSINK);
+  // 
+  //   delete g;
 
   vs.show();
 
