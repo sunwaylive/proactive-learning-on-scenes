@@ -3,10 +3,10 @@
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
-    <IncludePath>D:\Program Files (x86)\OpenCV\opencv\build\include;E:\HaoLi\MyWorkspace\Scene_graph\Scene_graph\IncludeLib\Boost\include;E:\HaoLi\MyWorkspace\Scene_graph\Scene_graph\IncludeLib\Eigen\include;E:\HaoLi\MyWorkspace\Scene_graph\Scene_graph\IncludeLib\flann\include;E:\HaoLi\MyWorkspace\Scene_graph\Scene_graph\IncludeLib\GeometricTool\include;E:\HaoLi\MyWorkspace\Scene_graph\Scene_graph\IncludeLib\PCL\include\pcl-1.7;E:\HaoLi\MyWorkspace\Scene_graph\Scene_graph\IncludeLib\qhull\include;E:\HaoLi\MyWorkspace\Scene_graph\Scene_graph\IncludeLib\VTK\include\vtk-5.8;$(IncludePath)</IncludePath>
+    <IncludePath>IncludeLib\opencv\include;IncludeLib\Boost\include;IncludeLib\Eigen\include;IncludeLib\flann\include;IncludeLib\GeometricTool\include;IncludeLib\PCL\include\pcl-1.7;IncludeLib\qhull\include;IncludeLib\VTK\include\vtk-5.8;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup>
-    <LibraryPath>D:\Program Files (x86)\OpenCV\opencv\build\x64\vc10\lib;E:\HaoLi\MyWorkspace\Scene_graph\Scene_graph\IncludeLib\Boost\lib;E:\HaoLi\MyWorkspace\Scene_graph\Scene_graph\IncludeLib\flann\lib;E:\HaoLi\MyWorkspace\Scene_graph\Scene_graph\IncludeLib\GeometricTool\lib;E:\HaoLi\MyWorkspace\Scene_graph\Scene_graph\IncludeLib\PCL\lib;E:\HaoLi\MyWorkspace\Scene_graph\Scene_graph\IncludeLib\qhull\lib;E:\HaoLi\MyWorkspace\Scene_graph\Scene_graph\IncludeLib\VTK\lib\vtk-5.8;$(LibraryPath)</LibraryPath>
+    <LibraryPath>IncludeLib\opencv\lib\x64\vc10\lib;IncludeLib\Boost\lib;IncludeLib\flann\lib;IncludeLib\GeometricTool\lib;IncludeLib\PCL\lib;IncludeLib\qhull\lib;IncludeLib\VTK\lib\vtk-5.8;$(LibraryPath)</LibraryPath>
     <_PropertySheetDisplayName>scene_graph_x64_release</_PropertySheetDisplayName>
   </PropertyGroup>
   <ItemDefinitionGroup>
