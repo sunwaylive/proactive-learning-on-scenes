@@ -12,80 +12,80 @@ vector<pair<int,int>> vecpairPatchConnection;
 
 double GetMinDisBetPatch(int m,int n)
 {
-	double minDis=99999999;
-	for(int i = 0;i < patch_clouds[m].mypoints.size();i++)
-	{
-		for(int j = 0;j < patch_clouds[n].mypoints.size();j++)
-		{
-			double dis = sqrt(pow(patch_clouds[m].mypoints[i].x-patch_clouds[n].mypoints[j].x,2)
-				+ pow(patch_clouds[m].mypoints[i].y-patch_clouds[n].mypoints[j].y,2)
-				+ pow(patch_clouds[m].mypoints[i].z-patch_clouds[n].mypoints[j].z,2));
-			if(minDis > dis)	
-				minDis = dis;
-		}
-	}
-	return minDis;
+  double minDis=99999999;
+  for(int i = 0;i < patch_clouds[m].mypoints.size();i++)
+  {
+    for(int j = 0;j < patch_clouds[n].mypoints.size();j++)
+    {
+      double dis = sqrt(pow(patch_clouds[m].mypoints[i].x-patch_clouds[n].mypoints[j].x,2)
+        + pow(patch_clouds[m].mypoints[i].y-patch_clouds[n].mypoints[j].y,2)
+        + pow(patch_clouds[m].mypoints[i].z-patch_clouds[n].mypoints[j].z,2));
+      if(minDis > dis)	
+        minDis = dis;
+    }
+  }
+  return minDis;
 }
 
 double GetCenDisBetPatch(int m,int n)
 {
-	double dis =  sqrt(pow(vecPatchCenPoint[m].x-vecPatchCenPoint[n].x,2)
-		+ pow(vecPatchCenPoint[m].y-vecPatchCenPoint[n].y,2)
-		+ pow(vecPatchCenPoint[m].z-vecPatchCenPoint[n].z,2));
-	return dis;
+  double dis =  sqrt(pow(vecPatchCenPoint[m].x-vecPatchCenPoint[n].x,2)
+    + pow(vecPatchCenPoint[m].y-vecPatchCenPoint[n].y,2)
+    + pow(vecPatchCenPoint[m].z-vecPatchCenPoint[n].z,2));
+  return dis;
 }
 
 double GetBinaryDataValue(double d)
 {
-	// 	double w,o;
-	// 	o = 0.1;
-	// 	w = exp(-pow(d/1,2));
-	// 	return w;
-	double penaltyValue;
-	penaltyValue = 0.5 + 0.2 * d;
-	return penaltyValue;
+  // 	double w,o;
+  // 	o = 0.1;
+  // 	w = exp(-pow(d/1,2));
+  // 	return w;
+  double penaltyValue;
+  penaltyValue = 0.5 + 0.2 * d;
+  return penaltyValue;
 }
 
 double GetBinarySmoothValue(int m,int n)
 {
-	double smoothValue,geometryValue,appearenceValue;
+  double smoothValue,geometryValue,appearenceValue;
 
-	//考虑法向量
-	MyPoint cenM,cenN;
-	Normal norM,norN,norMN;
-	cenM = vecPatchCenPoint[m];
-	cenN = vecPatchCenPoint[n];
-	norM = vecPatcNormal[m];
-	norN = vecPatcNormal[n];
-	norMN.normal_x = cenN.x - cenM.x;
-	norMN.normal_y = cenN.y - cenM.y;
-	norMN.normal_z = cenN.z - cenM.z;
+  //考虑法向量
+  MyPoint cenM,cenN;
+  Normal norM,norN,norMN;
+  cenM = vecPatchCenPoint[m];
+  cenN = vecPatchCenPoint[n];
+  norM = vecPatcNormal[m];
+  norN = vecPatcNormal[n];
+  norMN.normal_x = cenN.x - cenM.x;
+  norMN.normal_y = cenN.y - cenM.y;
+  norMN.normal_z = cenN.z - cenM.z;
 
-	bool convexFlag;
-	double convexValue;   //convex if > 0
-	convexValue = norMN.normal_x * norN.normal_x +  norMN.normal_y * norN.normal_y + norMN.normal_z * norN.normal_z;
-	if(convexValue >= 0)	convexFlag = true;
-	else	convexFlag = false;
+  bool convexFlag;
+  double convexValue;   //convex if > 0
+  convexValue = norMN.normal_x * norN.normal_x +  norMN.normal_y * norN.normal_y + norMN.normal_z * norN.normal_z;
+  if(convexValue >= 0)	convexFlag = true;
+  else	convexFlag = false;
 
-	double cosValue;
-	cosValue = (norM.normal_x * norN.normal_x + norM.normal_y * norN.normal_y + norM.normal_z * norN.normal_z);
-	if(convexFlag)
-	{
-		geometryValue = 0.1 * cosValue + 0.9;
-	}
-	else
-	{
-		geometryValue = 2 * cosValue;
-	}
+  double cosValue;
+  cosValue = (norM.normal_x * norN.normal_x + norM.normal_y * norN.normal_y + norM.normal_z * norN.normal_z);
+  if(convexFlag)
+  {
+    geometryValue = 0.1 * cosValue + 0.9;
+  }
+  else
+  {
+    geometryValue = 2 * cosValue;
+  }
 
-	//考虑颜色
-	appearenceValue = (vecPatchColor[m].mRed - vecPatchColor[n].mRed) 
-		+(vecPatchColor[m].mGreen- vecPatchColor[n].mGreen)
-		+(vecPatchColor[m].mBlue - vecPatchColor[n].mBlue);
-	appearenceValue /= 256 * 3;
+  //考虑颜色
+  appearenceValue = (vecPatchColor[m].mRed - vecPatchColor[n].mRed) 
+    +(vecPatchColor[m].mGreen- vecPatchColor[n].mGreen)
+    +(vecPatchColor[m].mBlue - vecPatchColor[n].mBlue);
+  appearenceValue /= 256 * 3;
 
-	smoothValue = geometryValue + appearenceValue;
-	return smoothValue;
+  smoothValue = geometryValue + appearenceValue;
+  return smoothValue;
 }  
 
 int main (int argc, char *argv[])
@@ -95,20 +95,16 @@ int main (int argc, char *argv[])
   vs.viewer->removeCoordinateSystem();
   vs.viewer->setBackgroundColor(0,0,0);
 
-  PointCloudPtr_RGB cloud(new PointCloud_RGB);
-  NormalCloudTPtr normals(new NormalCloudT);
-  //loadPointCloud_normal_ply("E:/HaoLi/MyWorkspace/Scene_graph/Scene_graph/data/big_table_normal.ply", cloud, normals);
-  //loadPointCloud_normal_ply("E:/HaoLi/MyWorkspace/Scene_graph/Scene_graph/data/small_normal.ply", cloud, normals);
+  PointCloudPtr_RGB_NORMAL cloud(new PointCloud_RGB_NORMAL);
+  //loadPointCloud_normal_ply("data/big_table_normal.ply", cloud, normals);
+  loadPointCloud_normal_ply("data/small_normal.ply", cloud);
 
-  loadPointCloud_ply("data/big_table1.ply", cloud);
-  //loadPointCloud_ply("E:/HaoLi/MyWorkspace/Scene_graph/Scene_graph/data/scene03.ply", cloud);
-  //loadPointCloud_ply("E:/HaoLi/MyWorkspace/Scene_graph/Scene_graph/data/testData.ply", cloud);
-  PointCloudPtr_RGB cloud_mark(new PointCloud_RGB);
+  PointCloudPtr_RGB_NORMAL cloud_mark(new PointCloud_RGB_NORMAL);
   pcl::copyPointCloud(*cloud,*cloud_mark);
 
   /******************detect table************************/
-  PointCloudPtr_RGB tabletopCloud(new PointCloud_RGB());
-  PointCloudPtr_RGB planeCloud(new PointCloud_RGB());
+  PointCloudPtr_RGB_NORMAL tabletopCloud(new PointCloud_RGB_NORMAL());
+  PointCloudPtr_RGB_NORMAL planeCloud(new PointCloud_RGB_NORMAL());
   //detect_table_plane_r(cloud, planeCloud, tabletopCloud);
   detect_table_plane(cloud, planeCloud, tabletopCloud);
   //showPointClound(planeCloud,"planeCloud");
@@ -117,21 +113,40 @@ int main (int argc, char *argv[])
   pcl::PointIndices::Ptr inliers_plane(new pcl::PointIndices);
   detect_table(cloud, coefficients_plane, inliers_plane);
 
-  PointCloudPtr_RGB cloud_tem(new PointCloud_RGB());
+  PointCloudPtr_RGB_NORMAL table_cloud(new PointCloud_RGB_NORMAL());
 
-  pcl::ExtractIndices<Point_RGB> extract0;// Create the filtering object
+  pcl::ExtractIndices<Point_RGB_NORMAL> extract0;// Create the filtering object
   // Extract the inliers
   extract0.setInputCloud (cloud);
   extract0.setIndices (inliers_plane);
   extract0.setNegative (false);
-  extract0.filter (*cloud_tem);
+  extract0.filter (*table_cloud);
+
+  PointCloudPtr_RGB pc(new PointCloud_RGB);
+  
+  for(int i=0;i<table_cloud->size();i++){
+    Point_RGB pr;
+    pr.x=table_cloud->at(i).x;
+    pr.y=table_cloud->at(i).y;
+    pr.z=table_cloud->at(i).z;
+    pr.r=table_cloud->at(i).r;
+    pr.g=table_cloud->at(i).g;
+    pr.b=table_cloud->at(i).b;
+    pc->push_back(pr);
+  }
+
+  //showPointCloud (pc,"table_cloud");
+
+  cout<<"pc->size()================"<<pc->size()<<endl;
+
+  vs.viewer->addPointCloud (pc, "table_cloud");
 
   //cv::Point2f p0;
   //cv::Point2f p1;
   //cv::Point2f p2;
   //cv::Point2f p3;
 
-  //find_min_rect(cloud_tem, p0, p1, p2, p3);
+  //find_min_rect(table_cloud, p0, p1, p2, p3);
 
   ///******************Euclidean Cluster Extraction************************/
   //std::vector<PointCloudPtr_RGB> cluster_points;
@@ -281,38 +296,38 @@ int main (int argc, char *argv[])
   //  }*/
   //}
 
-  float voxel_resolution = 0.006f;
+  float voxel_resolution = 0.004f;
   float seed_resolution = 0.06f;
   float color_importance = 0.2f;
   float spatial_importance = 0.4f;
   float normal_importance = 1.0f;
 
   /******************Euclidean Cluster Extraction************************/
-  std::vector<PointCloudPtr_RGB> cluster_points;
+  std::vector<PointCloudPtr_RGB_NORMAL> cluster_points;
 
   object_seg_ECE(tabletopCloud, cluster_points);
 
   for(int i=0;i<cluster_points.size();i++){
 
-  PointCloudT::Ptr colored_cloud(new PointCloudT);
-  vector<MyPointCloud_RGB> patch_clouds;
-  PointNCloudT::Ptr normal_cloud(new PointNCloudT);
-  VCCS_over_segmentation(cluster_points.at(i),normals,voxel_resolution,seed_resolution,color_importance,spatial_importance,normal_importance,patch_clouds,colored_cloud,normal_cloud);
+    PointCloudT::Ptr colored_cloud(new PointCloudT);
+    vector<MyPointCloud_RGB> patch_clouds;
+    PointNCloudT::Ptr normal_cloud(new PointNCloudT);
+    VCCS_over_segmentation(cluster_points.at(i),voxel_resolution,seed_resolution,color_importance,spatial_importance,normal_importance,patch_clouds,colored_cloud,normal_cloud);
 
-  std::stringstream str;
-  str<<"colored_voxel_cloud"<<i;
-  std::string id_pc=str.str();
+    std::stringstream str;
+    str<<"colored_voxel_cloud"<<i;
+    std::string id_pc=str.str();
 
-  vs.viewer->addPointCloud (colored_cloud, id_pc);
+    vs.viewer->addPointCloud (colored_cloud, id_pc);
 
-  str<<"supervoxel_normals"<<i;
-  id_pc=str.str();
-  vs.viewer->addPointCloudNormals<pcl::PointNormal> (normal_cloud,1,0.05f, id_pc);
+    str<<"supervoxel_normals"<<i;
+    id_pc=str.str();
+    vs.viewer->addPointCloudNormals<pcl::PointNormal> (normal_cloud,1,0.05f, id_pc);
 
-  /*cout<<"patch_clouds.size():"<<patch_clouds.size()<<endl;
-  cout<<"normal_cloud->size():"<<normal_cloud->size()<<endl;
-  PointNCloudT::Ptr normal_cloud_tem(new PointNCloudT);
-  for(int j=0;j<patch_clouds.size();j++){
+    /*cout<<"patch_clouds.size():"<<patch_clouds.size()<<endl;
+    cout<<"normal_cloud->size():"<<normal_cloud->size()<<endl;
+    PointNCloudT::Ptr normal_cloud_tem(new PointNCloudT);
+    for(int j=0;j<patch_clouds.size();j++){
     normal_cloud_tem->push_back(normal_cloud->at(j));
 
     PointCloudPtr_RGB pc(new PointCloud_RGB);
@@ -323,12 +338,12 @@ int main (int argc, char *argv[])
     std::string id_pc=str.str();
 
     vs.viewer->addPointCloud (pc, id_pc);
-  }
+    }
 
-  std::stringstream str;
-  str<<"supervoxel_normals"<<i;
-  std::string id_pc=str.str();
-  vs.viewer->addPointCloudNormals<pcl::PointNormal> (normal_cloud_tem,1,0.05f, id_pc);*/
+    std::stringstream str;
+    str<<"supervoxel_normals"<<i;
+    std::string id_pc=str.str();
+    vs.viewer->addPointCloudNormals<pcl::PointNormal> (normal_cloud_tem,1,0.05f, id_pc);*/
   }
 
   /******************Graph Pre All************************/

@@ -11,7 +11,7 @@ public:
     ~Visualizer();
 
 public:
-	void showPoints_RGB(PointCloudPtr_RGB cloud);
+	//void addPointCloud_RGB_NORMAL(PointCloudPtr_RGB_NORMAL cloud, char* id);
 	void show();
 
 public:

@@ -29,6 +29,11 @@ typedef pcl::PointCloud<Normal> NormalCloudT;
 typedef NormalCloudT::Ptr NormalCloudTPtr;
 typedef NormalCloudT::ConstPtr NormalCloudTConstPtr;
 
+typedef pcl::PointXYZRGBNormal Point_RGB_NORMAL;
+typedef pcl::PointCloud<Point_RGB_NORMAL> PointCloud_RGB_NORMAL;
+typedef PointCloud_RGB_NORMAL::Ptr PointCloudPtr_RGB_NORMAL;
+typedef PointCloud_RGB_NORMAL::ConstPtr PointCloudConstPtr_RGB_NORMAL;
+
 typedef struct MyPoint{
   float x;
   float y;
@@ -65,8 +70,8 @@ public:
 void MyPointCloud2PointCloud(MyPointCloud& mc, PointCloudPtr pc);
 void PointCloud2MyPointCloud(PointCloudPtr pc, MyPointCloud& mc);
 
-void MyPointCloud_RGB2PointCloud(MyPointCloud_RGB& mc, PointCloudPtr_RGB pc);
-void PointCloud2MyPointCloud_RGB(PointCloudPtr_RGB pc, MyPointCloud_RGB& mc);
+void MyPointCloud_RGB2PointCloud(MyPointCloud_RGB& mc, PointCloudPtr_RGB_NORMAL pc);
+void PointCloud2MyPointCloud_RGB(PointCloudPtr_RGB_NORMAL pc, MyPointCloud_RGB& mc);
 
 void MyPointCloud_RGB2MyPointCloud(MyPointCloud_RGB& mc_rgb, MyPointCloud& mc);
 #endif 
