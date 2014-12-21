@@ -13,6 +13,12 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="源文件\GraphCut">
+      <UniqueIdentifier>{4d2a026d-770d-4889-b9d7-f08af48d2321}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\GraphCut">
+      <UniqueIdentifier>{ff80efbb-5c95-4905-a91f-3a07eccc38fe}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="color_op.h">
@@ -38,6 +44,15 @@
     </ClInclude>
     <ClInclude Include="supervoxel_clustering.hpp">
       <Filter>源文件</Filter>
+    </ClInclude>
+    <ClInclude Include="BinarySeg.h">
+      <Filter>头文件\GraphCut</Filter>
+    </ClInclude>
+    <ClInclude Include="block.h">
+      <Filter>头文件\GraphCut</Filter>
+    </ClInclude>
+    <ClInclude Include="graph.h">
+      <Filter>头文件\GraphCut</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -65,5 +80,19 @@
     <ClCompile Include="supervoxel_clustering.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="BinarySeg.cpp">
+      <Filter>源文件\GraphCut</Filter>
+    </ClCompile>
+    <ClCompile Include="graph.cpp">
+      <Filter>源文件\GraphCut</Filter>
+    </ClCompile>
+    <ClCompile Include="maxflow.cpp">
+      <Filter>源文件\GraphCut</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="instances.inc">
+      <Filter>头文件\GraphCut</Filter>
+    </None>
   </ItemGroup>
 </Project>

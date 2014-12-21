@@ -47,6 +47,7 @@
 
 
 
+
 // captype: type of edge capacities (excluding t-links)
 // tcaptype: type of t-links (edges between nodes and terminals)
 // flowtype: type of total flow
@@ -501,6 +502,7 @@ template <typename captype, typename tcaptype, typename flowtype>
 	}
 	i->is_marked = 1;
 }
+
 
 
 #endif

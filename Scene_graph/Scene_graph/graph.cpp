@@ -11,7 +11,6 @@
 #include "scene_seg.h"
 
 
-extern vector<MyPointCloud_RGB> patch_clouds;
 
 template <typename captype, typename tcaptype, typename flowtype> 
 	Graph<captype, tcaptype, flowtype>::Graph(int node_num_max, int edge_num_max, void (*err_function)(char *))
