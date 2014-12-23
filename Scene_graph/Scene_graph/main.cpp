@@ -216,7 +216,7 @@ int main (int argc, char *argv[])
   //}
 
   float voxel_resolution = 0.004f;
-  float seed_resolution = 0.06f;//调patch大小
+  float seed_resolution = 0.04f;//调patch大小
   float color_importance = 0.2f;
   float spatial_importance = 0.4f;
   float normal_importance = 1.0f;

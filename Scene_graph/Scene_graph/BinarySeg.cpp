@@ -13,10 +13,10 @@ CBinarySeg::CBinarySeg(vector<MyPointCloud_RGB> points,vector<Normal> normals)
 	paraConvexK = 0.1;
 	paraConvexT = 0.9;
 	paraConcave = 1.0;
-	paraGeometry = 5;
-	paraAppearence = 0.5;
+	paraGeometry = 1.0;
+	paraAppearence = 1.0;
 	m = 30;
-	paraAlpha = 1.2;
+	paraAlpha = 0.0;
 }
 
 
@@ -29,7 +29,7 @@ void CBinarySeg::MainStep()
 	PointCloudPreprocess();
 
 	paraAlpha = 0;
-	while(paraAlpha <= 4.0)
+	while(paraAlpha <= 10.0)
 	{
 		vecvecObjectPool.clear();
 		for(int i =0; i <vecPatchPoint.size(); i ++)
@@ -44,6 +44,8 @@ void CBinarySeg::MainStep()
 		paraAlpha += (double)0.1;
 
 		//output
+
+
 		ofstream outFile0("ObjectPool.txt",ios::out|ios::app);
 		outFile0 <<paraAlpha<<  "  "<< endl;
 		for(int i=0;i<vecvecObjectPool.size();i++)
@@ -241,22 +243,22 @@ void CBinarySeg::GraphConstruct()
 
 	for(int i = 0;i <vecpairPatchConnection.size();i++)
 	{
-		vecSmoothValue[i] = paraGeometry * vecGeometryValue[i] /*+ paraAppearence * vecAppearenceValue[i]*/;
+		vecSmoothValue[i] = paraGeometry * vecGeometryValue[i] + paraAppearence * vecAppearenceValue[i];
 	}
 
 	//output
-// 	ofstream outFile1("datasmooth.txt");
-// 	for(int i = 0;i <vecPatchColor.size();i++)
-// 	{
-// 		outFile1 << "data  " << vecDataValue[i] << endl;
-// 	}
-// 	for(int i = 0;i <vecpairPatchConnection.size();i++)
-// 	{
-// 		outFile1 << "GeometryValue  " << vecGeometryValue[i] << endl;
-// 		outFile1 << "AppearenceValue  " << vecAppearenceValue[i] << endl;
-// 		outFile1 << "smooth  " << vecSmoothValue[i] << endl;
-// 	}
-// 	outFile1.close();
+	ofstream outFile1("datasmooth.txt");
+	for(int i = 0;i <vecPatchColor.size();i++)
+	{
+		outFile1 << "data  " << vecDataValue[i] << endl;
+	}
+	for(int i = 0;i <vecpairPatchConnection.size();i++)
+	{
+		outFile1 << "GeometryValue  " << vecGeometryValue[i] << endl;
+		outFile1 << "AppearenceValue  " << vecAppearenceValue[i] << endl;
+		outFile1 << "smooth  " << vecSmoothValue[i] << endl;
+	}
+	outFile1.close();
 }
 
 void CBinarySeg::GraphCutSolve(vector<int>& vecObjectHypo)
