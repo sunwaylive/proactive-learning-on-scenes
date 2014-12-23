@@ -2,88 +2,88 @@
 #include "color_op.h"
 #include "file_io.h"
 #include "scene_seg.h"
-#include "graph.h"
-#include "BinarySeg.h"
+//#include "graph.h"
+//#include "BinarySeg.h"
 
 
 
-double GetMinDisBetPatch(int m,int n)
-{
-  double minDis=99999999;
-  for(int i = 0;i < patch_clouds[m].mypoints.size();i++)
-  {
-    for(int j = 0;j < patch_clouds[n].mypoints.size();j++)
-    {
-      double dis = sqrt(pow(patch_clouds[m].mypoints[i].x-patch_clouds[n].mypoints[j].x,2)
-        + pow(patch_clouds[m].mypoints[i].y-patch_clouds[n].mypoints[j].y,2)
-        + pow(patch_clouds[m].mypoints[i].z-patch_clouds[n].mypoints[j].z,2));
-      if(minDis > dis)	
-        minDis = dis;
-    }
-  }
-  return minDis;
-}
-
-double GetCenDisBetPatch(int m,int n)
-{
-  double dis =  sqrt(pow(vecPatchCenPoint[m].x-vecPatchCenPoint[n].x,2)
-    + pow(vecPatchCenPoint[m].y-vecPatchCenPoint[n].y,2)
-    + pow(vecPatchCenPoint[m].z-vecPatchCenPoint[n].z,2));
-  return dis;
-}
-
-double GetBinaryDataValue(double d)
-{
-  // 	double w,o;
-  // 	o = 0.1;
-  // 	w = exp(-pow(d/1,2));
-  // 	return w;
-  double penaltyValue;
-  penaltyValue = 0.5 + 0.2 * d;
-  return penaltyValue;
-}
-
-double GetBinarySmoothValue(int m,int n)
-{
-  double smoothValue,geometryValue,appearenceValue;
-
-  //考虑法向量
-  MyPoint cenM,cenN;
-  Normal norM,norN,norMN;
-  cenM = vecPatchCenPoint[m];
-  cenN = vecPatchCenPoint[n];
-  norM = vecPatcNormal[m];
-  norN = vecPatcNormal[n];
-  norMN.normal_x = cenN.x - cenM.x;
-  norMN.normal_y = cenN.y - cenM.y;
-  norMN.normal_z = cenN.z - cenM.z;
-
-  bool convexFlag;
-  double convexValue;   //convex if > 0
-  convexValue = norMN.normal_x * norN.normal_x +  norMN.normal_y * norN.normal_y + norMN.normal_z * norN.normal_z;
-  if(convexValue >= 0)	convexFlag = true;
-  else	convexFlag = false;
-
-  double cosValue;
-  cosValue = (norM.normal_x * norN.normal_x + norM.normal_y * norN.normal_y + norM.normal_z * norN.normal_z);
-  if(convexFlag)
-  {
-    geometryValue = 0.1 * cosValue + 0.9;
-  }
-  else
-  {
-    geometryValue = 2 * cosValue;
-  }
-
-  //考虑颜色
-  appearenceValue = (vecPatchColor[m].mRed - vecPatchColor[n].mRed) 
-    +(vecPatchColor[m].mGreen- vecPatchColor[n].mGreen)
-    +(vecPatchColor[m].mBlue - vecPatchColor[n].mBlue);
-  appearenceValue /= 256 * 3;
-
-  smoothValue = geometryValue + appearenceValue;
-  return smoothValue;
-}  
+//double GetMinDisBetPatch(int m,int n)
+//{
+//  double minDis=99999999;
+//  for(int i = 0;i < patch_clouds[m].mypoints.size();i++)
+//  {
+//    for(int j = 0;j < patch_clouds[n].mypoints.size();j++)
+//    {
+//      double dis = sqrt(pow(patch_clouds[m].mypoints[i].x-patch_clouds[n].mypoints[j].x,2)
+//        + pow(patch_clouds[m].mypoints[i].y-patch_clouds[n].mypoints[j].y,2)
+//        + pow(patch_clouds[m].mypoints[i].z-patch_clouds[n].mypoints[j].z,2));
+//      if(minDis > dis)	
+//        minDis = dis;
+//    }
+//  }
+//  return minDis;
+//}
+//
+//double GetCenDisBetPatch(int m,int n)
+//{
+//  double dis =  sqrt(pow(vecPatchCenPoint[m].x-vecPatchCenPoint[n].x,2)
+//    + pow(vecPatchCenPoint[m].y-vecPatchCenPoint[n].y,2)
+//    + pow(vecPatchCenPoint[m].z-vecPatchCenPoint[n].z,2));
+//  return dis;
+//}
+//
+//double GetBinaryDataValue(double d)
+//{
+//  // 	double w,o;
+//  // 	o = 0.1;
+//  // 	w = exp(-pow(d/1,2));
+//  // 	return w;
+//  double penaltyValue;
+//  penaltyValue = 0.5 + 0.2 * d;
+//  return penaltyValue;
+//}
+//
+//double GetBinarySmoothValue(int m,int n)
+//{
+//  double smoothValue,geometryValue,appearenceValue;
+//
+//  //考虑法向量
+//  MyPoint cenM,cenN;
+//  Normal norM,norN,norMN;
+//  cenM = vecPatchCenPoint[m];
+//  cenN = vecPatchCenPoint[n];
+//  norM = vecPatcNormal[m];
+//  norN = vecPatcNormal[n];
+//  norMN.normal_x = cenN.x - cenM.x;
+//  norMN.normal_y = cenN.y - cenM.y;
+//  norMN.normal_z = cenN.z - cenM.z;
+//
+//  bool convexFlag;
+//  double convexValue;   //convex if > 0
+//  convexValue = norMN.normal_x * norN.normal_x +  norMN.normal_y * norN.normal_y + norMN.normal_z * norN.normal_z;
+//  if(convexValue >= 0)	convexFlag = true;
+//  else	convexFlag = false;
+//
+//  double cosValue;
+//  cosValue = (norM.normal_x * norN.normal_x + norM.normal_y * norN.normal_y + norM.normal_z * norN.normal_z);
+//  if(convexFlag)
+//  {
+//    geometryValue = 0.1 * cosValue + 0.9;
+//  }
+//  else
+//  {
+//    geometryValue = 2 * cosValue;
+//  }
+//
+//  //考虑颜色
+//  appearenceValue = (vecPatchColor[m].mRed - vecPatchColor[n].mRed) 
+//    +(vecPatchColor[m].mGreen- vecPatchColor[n].mGreen)
+//    +(vecPatchColor[m].mBlue - vecPatchColor[n].mBlue);
+//  appearenceValue /= 256 * 3;
+//
+//  smoothValue = geometryValue + appearenceValue;
+//  return smoothValue;
+//}  
 
 int main (int argc, char *argv[])
 {
@@ -325,7 +325,7 @@ int main (int argc, char *argv[])
     vs.viewer->addPointCloudNormals<pcl::PointNormal> (normal_cloud,1,0.05f, id_pc);
 
   // data transfer to Graph Cut
-  for(int i=0;i<patch_clouds.size();i++)
+ /* for(int i=0;i<patch_clouds.size();i++)
   {
 	  vecPatchPoint.push_back(patch_clouds[i]);
 	  Normal nor;
@@ -338,7 +338,7 @@ int main (int argc, char *argv[])
 	  nor.normal_y /= normalizeValue;
 	  nor.normal_z /= normalizeValue;
 	  vecPatcNormal.push_back(nor);
-  }
+  }*/
   
   /*cout<<"patch_clouds.size():"<<patch_clouds.size()<<endl;
   cout<<"normal_cloud->size():"<<normal_cloud->size()<<endl;
@@ -363,24 +363,24 @@ int main (int argc, char *argv[])
   }
 
   /******************Binary Segmetation************************/
-  CBinarySeg cBinarySeg(vecPatchPoint,vecPatcNormal);
-  cBinarySeg.MainStep();
+  //CBinarySeg cBinarySeg(vecPatchPoint,vecPatcNormal);
+  //cBinarySeg.MainStep();
 
-  /******************Show Segmetation************************/
-  int countFore = 0;
-  for(int i = 0; i < cBinarySeg.vecFore.size();i++)
-  {
-	  std::stringstream str;
-	  str<<"cube"<<countFore<<i;
-	  std::string id_pc=str.str();
-	  countFore++;
+  ///******************Show Segmetation************************/
+  //int countFore = 0;
+  //for(int i = 0; i < cBinarySeg.vecFore.size();i++)
+  //{
+	 // std::stringstream str;
+	 // str<<"cube"<<countFore<<i;
+	 // std::string id_pc=str.str();
+	 // countFore++;
 
-	  int index = cBinarySeg.vecFore[i];
-	  vs.viewer->addCube(cBinarySeg.vecPatchCenPoint[index].x,cBinarySeg.vecPatchCenPoint[index].x + cBinarySeg.boundingBoxSize/100,
-						 cBinarySeg.vecPatchCenPoint[index].y,cBinarySeg.vecPatchCenPoint[index].y + cBinarySeg.boundingBoxSize/100,
-						 cBinarySeg.vecPatchCenPoint[index].z,cBinarySeg.vecPatchCenPoint[index].z + cBinarySeg.boundingBoxSize/100,
-						 0,0,1,id_pc);
-  }
+	 // int index = cBinarySeg.vecFore[i];
+	 // vs.viewer->addCube(cBinarySeg.vecPatchCenPoint[index].x,cBinarySeg.vecPatchCenPoint[index].x + cBinarySeg.boundingBoxSize/100,
+		//				 cBinarySeg.vecPatchCenPoint[index].y,cBinarySeg.vecPatchCenPoint[index].y + cBinarySeg.boundingBoxSize/100,
+		//				 cBinarySeg.vecPatchCenPoint[index].z,cBinarySeg.vecPatchCenPoint[index].z + cBinarySeg.boundingBoxSize/100,
+		//				 0,0,1,id_pc);
+  //}
   
   vs.show();
 
