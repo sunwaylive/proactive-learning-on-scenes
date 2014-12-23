@@ -13,9 +13,9 @@
 #include <opencv2/imgproc/imgproc.hpp>
 
 typedef struct TriFace{
-Point p0;
-Point p1;
-Point p2;
+  Point p0;
+  Point p1;
+  Point p2;
 }Face;
 
 #include <iostream>
@@ -57,18 +57,18 @@ void showPointCloud (PointCloudPtr_RGB cloud,std::string name);
 //show cloud
 void showPointCloud2 (PointCloudPtr cloud,std::string name);
 //detect table
-void detect_table(PointCloudPtr_RGB sourceCloud, pcl::ModelCoefficients::Ptr coefficients, pcl::PointIndices::Ptr inliers);
+void detect_table(PointCloudPtr_RGB_NORMAL sourceCloud, pcl::ModelCoefficients::Ptr coefficients, pcl::PointIndices::Ptr inliers);
 //detect table plane
-void detect_table_plane(PointCloudPtr_RGB sourceCloud, PointCloudPtr_RGB planeCloud, PointCloudPtr_RGB remainCloud);
+void detect_table_plane(PointCloudPtr_RGB_NORMAL sourceCloud, PointCloudPtr_RGB_NORMAL planeCloud, PointCloudPtr_RGB_NORMAL remainCloud);
 //detect table plane
-void detect_table_plane_r(PointCloudPtr_RGB sourceCloud, PointCloudPtr_RGB planeCloud, PointCloudPtr_RGB remainCloud);
+void detect_table_plane_r(PointCloudPtr_RGB_NORMAL sourceCloud, PointCloudPtr_RGB_NORMAL planeCloud, PointCloudPtr_RGB_NORMAL remainCloud);
 //Euclidean Cluster Extraction
-void object_seg_ECE(PointCloudPtr_RGB clound, std::vector<PointCloudPtr_RGB> &cluster_points);
+void object_seg_ECE(PointCloudPtr_RGB_NORMAL clound, std::vector<PointCloudPtr_RGB_NORMAL> &cluster_points);
 //find a minimum bounding rect
-void find_min_rect(PointCloudPtr_RGB cloud, cv::Point2f &p0,cv::Point2f &p1,cv::Point2f &p2,cv::Point2f &p3);
+void find_min_rect(PointCloudPtr_RGB_NORMAL cloud, cv::Point2f &p0,cv::Point2f &p1,cv::Point2f &p2,cv::Point2f &p3);
 //VCCS over-segmentation
-void VCCS_over_segmentation(PointCloudPtr_RGB cloud, NormalCloudTPtr normals, float voxel_resolution,float seed_resolution,float color_importance,float spatial_importance,float normal_importance,vector<MyPointCloud_RGB>& patch_clouds, PointCloudT::Ptr colored_cloud, PointNCloudT::Ptr normal_cloud);
+void VCCS_over_segmentation(PointCloudPtr_RGB_NORMAL cloud, float voxel_resolution,float seed_resolution,float color_importance,float spatial_importance,float normal_importance,vector<MyPointCloud_RGB>& patch_clouds, PointCloudT::Ptr colored_cloud, PointNCloudT::Ptr normal_cloud);
 //object fitting
-void object_fitting(PointCloudPtr_RGB cloud, vector<MyPointCloud_RGB> &plane_clouds, std::vector<MyPointCloud> &rect_clouds, vector<MyPointCloud_RGB> &cylinder_clouds, vector<MyPointCloud_RGB> &sphere_clouds, PointCloudPtr_RGB remained_cloud);
+void object_fitting(PointCloudPtr_RGB_NORMAL cloud, vector<MyPointCloud_RGB> &plane_clouds, std::vector<MyPointCloud> &rect_clouds, vector<MyPointCloud_RGB> &cylinder_clouds, vector<MyPointCloud_RGB> &sphere_clouds, PointCloudPtr_RGB_NORMAL remained_cloud);
 
 #endif // SCENE_SEG_H

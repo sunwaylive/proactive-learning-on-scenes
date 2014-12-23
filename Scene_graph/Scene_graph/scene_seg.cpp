@@ -37,7 +37,7 @@ using namespace std;
 using namespace Wm5;
 
 //for least square
-bool getPlaneByLeastSquare(PointCloudPtr_RGB cloud_all_in_plane, pcl::ModelCoefficients::Ptr coefficients)
+bool getPlaneByLeastSquare(PointCloudPtr_RGB_NORMAL cloud_all_in_plane, pcl::ModelCoefficients::Ptr coefficients)
 {
   double coeffA = 0.0, coeffB = 0.0, coeffC = 0.0, coeffD = 0.0;
   int matrixSize = 3;
@@ -126,7 +126,7 @@ void showPointCloud2 (PointCloudPtr cloud,std::string name)
 }
 
 //compute bounding box
-void com_bounding_box(PointCloudPtr_RGB cloud,float *min_x,float *min_y,float *min_z, float *max_x, float *max_y, float *max_z){
+void com_bounding_box(PointCloudPtr_RGB_NORMAL cloud,float *min_x,float *min_y,float *min_z, float *max_x, float *max_y, float *max_z){
   *min_x=cloud->points[0].x;
   *min_y=cloud->points[0].y;
   *min_z=cloud->points[0].z;
@@ -164,7 +164,7 @@ void com_bounding_box(PointCloudPtr_RGB cloud,float *min_x,float *min_y,float *m
 }
 
 //compute max value, min value, and average value along z axis of the point cloud
-void com_max_and_min_and_avg_z(PointCloudPtr_RGB cloud,float *min_z,float *max_z,float *avg_z){
+void com_max_and_min_and_avg_z(PointCloudPtr_RGB_NORMAL cloud,float *min_z,float *max_z,float *avg_z){
   *min_z=cloud->points[0].z;
   *max_z=cloud->points[0].z;
 
@@ -189,7 +189,7 @@ void com_max_and_min_and_avg_z(PointCloudPtr_RGB cloud,float *min_z,float *max_z
 }
 
 //append a cloud to another cloud
-void appendCloud_RGB(PointCloudPtr_RGB sourceCloud,PointCloudPtr_RGB targetCloud){
+void appendCloud_RGB_NORMAL(PointCloudPtr_RGB_NORMAL sourceCloud,PointCloudPtr_RGB_NORMAL targetCloud){
   for(int i=0;i<sourceCloud->size();i++){
     targetCloud->push_back(sourceCloud->at(i));
   }
@@ -229,7 +229,7 @@ void getRotationMatrix(Eigen::Vector3d &axis, double angleArc, Eigen::Matrix4d &
 }
 
 //find a minimum bounding rect
-void find_min_rect(PointCloudPtr_RGB cloud, cv::Point2f &p0,cv::Point2f &p1,cv::Point2f &p2,cv::Point2f &p3){
+void find_min_rect(PointCloudPtr_RGB_NORMAL cloud, cv::Point2f &p0,cv::Point2f &p1,cv::Point2f &p2,cv::Point2f &p3){
   std::vector<cv::Point2f> points_clu_2d;
 
   for(int j=0;j<cloud->points.size();j++){
@@ -281,8 +281,8 @@ void find_min_rect(PointCloudPtr_RGB cloud, cv::Point2f &p0,cv::Point2f &p1,cv::
 }
 
 //pcl pointCloud pop up
-void pointCloudPopUp(PointCloudPtr_RGB cloud){
-  PointCloudPtr_RGB pc(new PointCloud_RGB);
+void pointCloudPopUp(PointCloudPtr_RGB_NORMAL cloud){
+  PointCloudPtr_RGB_NORMAL pc(new PointCloud_RGB_NORMAL);
 
   for(int i=0;i<cloud->size()-1;i++){
     pc->push_back(cloud->at(i));
@@ -294,13 +294,13 @@ void pointCloudPopUp(PointCloudPtr_RGB cloud){
 }
 
 //get Rect For PlaneCloud
-void getRectForPlaneCloud(PointCloudPtr_RGB plane_cloud, pcl::ModelCoefficients::Ptr plane_coefficients, PointCloudPtr rect_cloud){
-  PointCloudPtr_RGB cloud_in_plane(new PointCloud_RGB);
+void getRectForPlaneCloud(PointCloudPtr_RGB_NORMAL plane_cloud, pcl::ModelCoefficients::Ptr plane_coefficients, PointCloudPtr rect_cloud){
+  PointCloudPtr_RGB_NORMAL cloud_in_plane(new PointCloud_RGB_NORMAL);
 
-  PointCloudPtr_RGB plane_cloud_tem(new PointCloud_RGB);
+  PointCloudPtr_RGB_NORMAL plane_cloud_tem(new PointCloud_RGB_NORMAL);
   pcl::copyPointCloud(*plane_cloud,*plane_cloud_tem);
 
-  Point_RGB pr;
+  Point_RGB_NORMAL pr;
   pr.x=0;
   pr.y=0;
   pr.z=(-plane_coefficients->values[3])/plane_coefficients->values[2];
@@ -321,7 +321,7 @@ void getRectForPlaneCloud(PointCloudPtr_RGB plane_cloud, pcl::ModelCoefficients:
   Eigen::Matrix4f matrix_transform = matrix.cast<float>();
   pcl::transformPointCloud (*plane_cloud_tem, *cloud_in_plane, matrix_transform);
 
-  Point_RGB new_pr=cloud_in_plane->at(cloud_in_plane->size()-1);
+  Point_RGB_NORMAL new_pr=cloud_in_plane->at(cloud_in_plane->size()-1);
 
   pointCloudPopUp(cloud_in_plane);
 
@@ -637,7 +637,7 @@ void computeCylinderJaccardIndex(MyPointCloud& source_mpc, Point cenPoint0, Poin
   float rate=intr_points_num*1.0/sample_mpc.mypoints.size();
   cout<<"rate_cylinder>>>>>>>>>>>>>>>>>>>>>>>>>>>:"<<rate<<endl;
   if(rate>0.05){
-   computeJaccardIndex(source_mpc.mypoints.size(), intr_points_num, result);
+    computeJaccardIndex(source_mpc.mypoints.size(), intr_points_num, result);
   }
   else{
     *result=0;
@@ -667,9 +667,9 @@ void computeSphereJaccardIndex(MyPointCloud& source_mpc, Point cenPoint, float r
 }
 
 //detect table
-void detect_table(PointCloudPtr_RGB sourceCloud, pcl::ModelCoefficients::Ptr coefficients, pcl::PointIndices::Ptr inliers){
+void detect_table(PointCloudPtr_RGB_NORMAL sourceCloud, pcl::ModelCoefficients::Ptr coefficients, pcl::PointIndices::Ptr inliers){
   // Create the segmentation object
-  pcl::SACSegmentation<Point_RGB> seg;
+  pcl::SACSegmentation<Point_RGB_NORMAL> seg;
   // Optional
   seg.setOptimizeCoefficients (true);
   // Mandatory
@@ -695,14 +695,14 @@ void detect_table(PointCloudPtr_RGB sourceCloud, pcl::ModelCoefficients::Ptr coe
 }
 
 //detect table plane
-void detect_table_plane(PointCloudPtr_RGB sourceCloud, PointCloudPtr_RGB planeCloud, PointCloudPtr_RGB remainCloud){
+void detect_table_plane(PointCloudPtr_RGB_NORMAL sourceCloud, PointCloudPtr_RGB_NORMAL planeCloud, PointCloudPtr_RGB_NORMAL remainCloud){
 
-  pcl::ExtractIndices<Point_RGB> extract;// Create the filtering object
+  pcl::ExtractIndices<Point_RGB_NORMAL> extract;// Create the filtering object
 
   pcl::ModelCoefficients::Ptr coefficients (new pcl::ModelCoefficients);
   pcl::PointIndices::Ptr inliers (new pcl::PointIndices);
   // Create the segmentation object
-  pcl::SACSegmentation<Point_RGB> seg;
+  pcl::SACSegmentation<Point_RGB_NORMAL> seg;
   // Optional
   seg.setOptimizeCoefficients (true);
   // Mandatory
@@ -732,9 +732,25 @@ void detect_table_plane(PointCloudPtr_RGB sourceCloud, PointCloudPtr_RGB planeCl
   Eigen::Matrix4d matrix;
   getRotationMatrix(axis, angle, matrix);
   Eigen::Matrix4f matrix_transform = matrix.cast<float>();
-  PointCloud_RGB sourceCloud_temp;
+  PointCloud_RGB_NORMAL sourceCloud_temp;
   pcl::copyPointCloud(*sourceCloud,sourceCloud_temp);
   pcl::transformPointCloud (sourceCloud_temp, *sourceCloud, matrix_transform);
+
+  PointCloud sourceCloud_normal;
+  for(int i=0;i<sourceCloud->size();i++){
+    Point point(sourceCloud->at(i).normal_x,sourceCloud->at(i).normal_y,sourceCloud->at(i).normal_z);
+    sourceCloud_normal.push_back(point);
+  }
+
+  PointCloud sourceCloud_normal_temp;
+  pcl::copyPointCloud(sourceCloud_normal,sourceCloud_normal_temp);
+  pcl::transformPointCloud (sourceCloud_normal_temp, sourceCloud_normal, matrix_transform);
+
+  for(int i=0;i<sourceCloud->size();i++){
+    sourceCloud->at(i).normal_x=sourceCloud_normal.at(i).x;
+    sourceCloud->at(i).normal_y=sourceCloud_normal.at(i).y;
+    sourceCloud->at(i).normal_z=sourceCloud_normal.at(i).z;
+  }
 
   // Extract the inliers
   extract.setInputCloud (sourceCloud);
@@ -750,7 +766,7 @@ void detect_table_plane(PointCloudPtr_RGB sourceCloud, PointCloudPtr_RGB planeCl
     sourceCloud->at(i).z-=max_z;
   }
 
-  PointCloudPtr_RGB cloud_tem(new PointCloud_RGB());
+  PointCloudPtr_RGB_NORMAL cloud_tem(new PointCloud_RGB_NORMAL());
   // Create the filtering object
   extract.setNegative (true);
   extract.filter (*cloud_tem);
@@ -763,14 +779,14 @@ void detect_table_plane(PointCloudPtr_RGB sourceCloud, PointCloudPtr_RGB planeCl
 }
 
 //detect table plane
-void detect_table_plane_r(PointCloudPtr_RGB sourceCloud, PointCloudPtr_RGB planeCloud, PointCloudPtr_RGB remainCloud){
+void detect_table_plane_r(PointCloudPtr_RGB_NORMAL sourceCloud, PointCloudPtr_RGB_NORMAL planeCloud, PointCloudPtr_RGB_NORMAL remainCloud){
 
-  pcl::ExtractIndices<Point_RGB> extract;// Create the filtering object
+  pcl::ExtractIndices<Point_RGB_NORMAL> extract;// Create the filtering object
 
   pcl::ModelCoefficients::Ptr coefficients (new pcl::ModelCoefficients);
   pcl::PointIndices::Ptr inliers (new pcl::PointIndices);
   // Create the segmentation object
-  pcl::SACSegmentation<Point_RGB> seg;
+  pcl::SACSegmentation<Point_RGB_NORMAL> seg;
   // Optional
   seg.setOptimizeCoefficients (true);
   // Mandatory
@@ -800,7 +816,7 @@ void detect_table_plane_r(PointCloudPtr_RGB sourceCloud, PointCloudPtr_RGB plane
   Eigen::Matrix4d matrix;
   getRotationMatrix(axis, -(PI-angle), matrix);
   Eigen::Matrix4f matrix_transform = matrix.cast<float>();
-  PointCloud_RGB sourceCloud_temp;
+  PointCloud_RGB_NORMAL sourceCloud_temp;
   pcl::copyPointCloud(*sourceCloud,sourceCloud_temp);
   pcl::transformPointCloud (sourceCloud_temp, *sourceCloud, matrix_transform);
 
@@ -820,7 +836,7 @@ void detect_table_plane_r(PointCloudPtr_RGB sourceCloud, PointCloudPtr_RGB plane
     sourceCloud->at(i).z-=max_z;
   }
 
-  PointCloudPtr_RGB cloud_tem(new PointCloud_RGB());
+  PointCloudPtr_RGB_NORMAL cloud_tem(new PointCloud_RGB_NORMAL());
   // Create the filtering object
   extract.setNegative (true);
   extract.filter (*cloud_tem);
@@ -833,13 +849,13 @@ void detect_table_plane_r(PointCloudPtr_RGB sourceCloud, PointCloudPtr_RGB plane
 }
 
 //Euclidean Cluster Extraction
-void object_seg_ECE(PointCloudPtr_RGB cloud, std::vector<PointCloudPtr_RGB> &cluster_points){
+void object_seg_ECE(PointCloudPtr_RGB_NORMAL cloud, std::vector<PointCloudPtr_RGB_NORMAL> &cluster_points){
   // Creating the KdTree object for the search method of the extraction
-  pcl::search::KdTree<Point_RGB>::Ptr tree (new pcl::search::KdTree<Point_RGB>);
+  pcl::search::KdTree<Point_RGB_NORMAL>::Ptr tree (new pcl::search::KdTree<Point_RGB_NORMAL>);
   tree->setInputCloud (cloud);
 
   std::vector<pcl::PointIndices> cluster_indices;
-  pcl::EuclideanClusterExtraction<Point_RGB> ec;
+  pcl::EuclideanClusterExtraction<Point_RGB_NORMAL> ec;
   ec.setClusterTolerance (0.015); // 2cm
   ec.setMinClusterSize (100);
   ec.setMaxClusterSize (50000);
@@ -850,7 +866,7 @@ void object_seg_ECE(PointCloudPtr_RGB cloud, std::vector<PointCloudPtr_RGB> &clu
   int j = 0;
   for (std::vector<pcl::PointIndices>::const_iterator it = cluster_indices.begin (); it != cluster_indices.end (); ++it)
   {
-    PointCloudPtr_RGB cloud_cluster (new PointCloud_RGB);
+    PointCloudPtr_RGB_NORMAL cloud_cluster (new PointCloud_RGB_NORMAL);
     for (std::vector<int>::const_iterator pit = it->indices.begin (); pit != it->indices.end (); pit++){
       cloud_cluster->points.push_back (cloud->points[*pit]); //*
     }
@@ -861,7 +877,7 @@ void object_seg_ECE(PointCloudPtr_RGB cloud, std::vector<PointCloudPtr_RGB> &clu
 }
 
 //Find Points In Cylinder
-void findPointsIn_Cylinder(PointCloudPtr_RGB cloud, pcl::ModelCoefficients::Ptr &coefficients, pcl::PointIndices::Ptr &inliers){
+void findPointsIn_Cylinder(PointCloudPtr_RGB_NORMAL cloud, pcl::ModelCoefficients::Ptr &coefficients, pcl::PointIndices::Ptr &inliers){
 
   Eigen::Vector3d cylinder_normal;
   cylinder_normal << coefficients->values[3], coefficients->values[4], coefficients->values[5];
@@ -946,13 +962,13 @@ void findPointsIn_Cylinder(PointCloudPtr_RGB cloud, pcl::ModelCoefficients::Ptr 
 }
 
 //cylinder fitting
-void cylinder_fitting(PointCloudPtr_RGB cloud, MyPointCloud_RGB &cylinder_cloud, pcl::ModelCoefficients::Ptr cylinder_coefficients,PointCloudPtr_RGB remained_cloud){
+void cylinder_fitting(PointCloudPtr_RGB_NORMAL cloud, MyPointCloud_RGB &cylinder_cloud, pcl::ModelCoefficients::Ptr cylinder_coefficients,PointCloudPtr_RGB_NORMAL remained_cloud){
   // All the objects needed
-  pcl::PassThrough<Point_RGB> pass;
+  pcl::PassThrough<Point_RGB_NORMAL> pass;
 
   // Datasets
-  pcl::PointCloud<Point_RGB>::Ptr cloud_filtered (new pcl::PointCloud<Point_RGB>);
-  pcl::PointCloud<Point_RGB>::Ptr cloud_f (new pcl::PointCloud<Point_RGB>);
+  pcl::PointCloud<Point_RGB_NORMAL>::Ptr cloud_filtered (new pcl::PointCloud<Point_RGB_NORMAL>);
+  pcl::PointCloud<Point_RGB_NORMAL>::Ptr cloud_f (new pcl::PointCloud<Point_RGB_NORMAL>);
 
   // Build a passthrough filter to remove spurious NaNs
   pass.setInputCloud (cloud);
@@ -961,11 +977,11 @@ void cylinder_fitting(PointCloudPtr_RGB cloud, MyPointCloud_RGB &cylinder_cloud,
   pass.filter (*cloud_filtered);
   std::cerr << "PointCloud after filtering has: " << cloud_filtered->points.size () << " data points." << std::endl;
 
-  pcl::SACSegmentationFromNormals<Point_RGB, pcl::Normal> seg;
+  pcl::SACSegmentationFromNormals<Point_RGB_NORMAL, pcl::Normal> seg;
 
-  pcl::ExtractIndices<Point_RGB> extract;
-  pcl::NormalEstimation<Point_RGB, pcl::Normal> ne;
-  pcl::search::KdTree<Point_RGB>::Ptr tree (new pcl::search::KdTree<Point_RGB> ());
+  pcl::ExtractIndices<Point_RGB_NORMAL> extract;
+  pcl::NormalEstimation<Point_RGB_NORMAL, pcl::Normal> ne;
+  pcl::search::KdTree<Point_RGB_NORMAL>::Ptr tree (new pcl::search::KdTree<Point_RGB_NORMAL> ());
 
   pcl::PointIndices::Ptr inliers_cylinder (new pcl::PointIndices);
 
@@ -995,7 +1011,7 @@ void cylinder_fitting(PointCloudPtr_RGB cloud, MyPointCloud_RGB &cylinder_cloud,
   extract.setInputCloud (cloud_filtered);
   extract.setIndices (inliers_cylinder);
   extract.setNegative (false);
-  PointCloudPtr_RGB cloud_cylinder (new PointCloud_RGB());
+  PointCloudPtr_RGB_NORMAL cloud_cylinder (new PointCloud_RGB_NORMAL());
   extract.filter (*cloud_cylinder);
   if (cloud_cylinder->points.size()<500){
     std::cerr << "Can't find the cylindrical component." << std::endl;
@@ -1035,14 +1051,14 @@ void cylinder_fitting(PointCloudPtr_RGB cloud, MyPointCloud_RGB &cylinder_cloud,
 }
 
 //segment cylinder from the data
-void object_seg_Cylinder(PointCloudPtr_RGB cloud, std::vector<MyPointCloud_RGB> &cluster_points, std::vector<pcl::ModelCoefficients> &coefficients,PointCloudPtr_RGB remained_cloud){
+void object_seg_Cylinder(PointCloudPtr_RGB_NORMAL cloud, std::vector<MyPointCloud_RGB> &cluster_points, std::vector<pcl::ModelCoefficients> &coefficients,PointCloudPtr_RGB_NORMAL remained_cloud){
   // All the objects needed
-  pcl::PassThrough<Point_RGB> pass;
+  pcl::PassThrough<Point_RGB_NORMAL> pass;
 
   // Datasets
-  pcl::PointCloud<Point_RGB>::Ptr cloud_filtered (new pcl::PointCloud<Point_RGB>);
-  pcl::PointCloud<Point_RGB>::Ptr cloud_filtered_tem (new pcl::PointCloud<Point_RGB>);
-  pcl::PointCloud<Point_RGB>::Ptr cloud_f (new pcl::PointCloud<Point_RGB>);
+  pcl::PointCloud<Point_RGB_NORMAL>::Ptr cloud_filtered (new pcl::PointCloud<Point_RGB_NORMAL>);
+  pcl::PointCloud<Point_RGB_NORMAL>::Ptr cloud_filtered_tem (new pcl::PointCloud<Point_RGB_NORMAL>);
+  pcl::PointCloud<Point_RGB_NORMAL>::Ptr cloud_f (new pcl::PointCloud<Point_RGB_NORMAL>);
 
   // Build a passthrough filter to remove spurious NaNs
   pass.setInputCloud (cloud);
@@ -1056,11 +1072,11 @@ void object_seg_Cylinder(PointCloudPtr_RGB cloud, std::vector<MyPointCloud_RGB> 
   int d=0;//debug
 
   do{
-    pcl::SACSegmentationFromNormals<Point_RGB, pcl::Normal> seg;
+    pcl::SACSegmentationFromNormals<Point_RGB_NORMAL, pcl::Normal> seg;
 
-    pcl::ExtractIndices<Point_RGB> extract;
-    pcl::NormalEstimation<Point_RGB, pcl::Normal> ne;
-    pcl::search::KdTree<Point_RGB>::Ptr tree (new pcl::search::KdTree<Point_RGB> ());
+    pcl::ExtractIndices<Point_RGB_NORMAL> extract;
+    pcl::NormalEstimation<Point_RGB_NORMAL, pcl::Normal> ne;
+    pcl::search::KdTree<Point_RGB_NORMAL>::Ptr tree (new pcl::search::KdTree<Point_RGB_NORMAL> ());
 
     pcl::ModelCoefficients::Ptr coefficients_cylinder (new pcl::ModelCoefficients);
     pcl::PointIndices::Ptr inliers_cylinder (new pcl::PointIndices);
@@ -1097,10 +1113,10 @@ void object_seg_Cylinder(PointCloudPtr_RGB cloud, std::vector<MyPointCloud_RGB> 
     extract.setInputCloud (cloud_filtered);
     extract.setIndices (inliers_cylinder);
     extract.setNegative (false);
-    pcl::PointCloud<Point_RGB>::Ptr cloud_cylinder (new pcl::PointCloud<Point_RGB> ());
+    pcl::PointCloud<Point_RGB_NORMAL>::Ptr cloud_cylinder (new pcl::PointCloud<Point_RGB_NORMAL> ());
     extract.filter (*cloud_cylinder);
     if (cloud_cylinder->points.size()<500){
-      appendCloud_RGB(cloud_filtered,cloud_filtered_tem);
+      appendCloud_RGB_NORMAL(cloud_filtered,cloud_filtered_tem);
       std::cerr << "Can't find the cylindrical component." << std::endl;
       break;
     }
@@ -1123,7 +1139,7 @@ void object_seg_Cylinder(PointCloudPtr_RGB cloud, std::vector<MyPointCloud_RGB> 
         extract.setNegative (false);
         extract.filter (*cloud_f);
 
-        appendCloud_RGB(cloud_f,cloud_filtered_tem);
+        appendCloud_RGB_NORMAL(cloud_f,cloud_filtered_tem);
 
         extract.setNegative (true);
         extract.filter (*cloud_f);
@@ -1166,7 +1182,7 @@ void object_seg_Cylinder(PointCloudPtr_RGB cloud, std::vector<MyPointCloud_RGB> 
           extract.setNegative (false);
           extract.filter (*cloud_f);
 
-          appendCloud_RGB(cloud_f,cloud_filtered_tem);
+          appendCloud_RGB_NORMAL(cloud_f,cloud_filtered_tem);
 
           extract.setIndices (inliers_cylinder);
           extract.setNegative (true);
@@ -1186,7 +1202,7 @@ void object_seg_Cylinder(PointCloudPtr_RGB cloud, std::vector<MyPointCloud_RGB> 
 
 
 //Find Points In Sphere
-void findPointsIn_Sphere(PointCloudPtr_RGB cloud, pcl::ModelCoefficients::Ptr &coefficients, pcl::PointIndices::Ptr &inliers){
+void findPointsIn_Sphere(PointCloudPtr_RGB_NORMAL cloud, pcl::ModelCoefficients::Ptr &coefficients, pcl::PointIndices::Ptr &inliers){
   for(int i=0;i<cloud->size();i++){
     float x=cloud->points[i].x;
     float y=cloud->points[i].y;
@@ -1201,17 +1217,17 @@ void findPointsIn_Sphere(PointCloudPtr_RGB cloud, pcl::ModelCoefficients::Ptr &c
 }
 
 //sphere fitting
-void sphere_fitting(PointCloudPtr_RGB cloud, MyPointCloud_RGB &sphere_cloud, pcl::ModelCoefficients::Ptr sphere_coefficients, PointCloudPtr_RGB remained_cloud){
+void sphere_fitting(PointCloudPtr_RGB_NORMAL cloud, MyPointCloud_RGB &sphere_cloud, pcl::ModelCoefficients::Ptr sphere_coefficients, PointCloudPtr_RGB_NORMAL remained_cloud){
   // Datasets
-  PointCloudPtr_RGB cloud_filtered (new PointCloud_RGB);
-  PointCloudPtr_RGB cloud_f (new PointCloud_RGB);
+  PointCloudPtr_RGB_NORMAL cloud_filtered (new PointCloud_RGB_NORMAL);
+  PointCloudPtr_RGB_NORMAL cloud_f (new PointCloud_RGB_NORMAL);
 
   pcl::copyPointCloud(*cloud,*cloud_filtered);
 
   // Create the segmentation object
-  pcl::SACSegmentation<Point_RGB> seg;
+  pcl::SACSegmentation<Point_RGB_NORMAL> seg;
   pcl::PointIndices::Ptr inliers_sphere(new pcl::PointIndices);
-  pcl::ExtractIndices<Point_RGB> extract;
+  pcl::ExtractIndices<Point_RGB_NORMAL> extract;
 
   // Optional
   seg.setOptimizeCoefficients (true);
@@ -1229,7 +1245,7 @@ void sphere_fitting(PointCloudPtr_RGB cloud, MyPointCloud_RGB &sphere_cloud, pcl
   extract.setInputCloud (cloud_filtered);
   extract.setIndices (inliers_sphere);
   extract.setNegative (false);
-  pcl::PointCloud<Point_RGB>::Ptr cloud_sphere (new pcl::PointCloud<Point_RGB> ());
+  pcl::PointCloud<Point_RGB_NORMAL>::Ptr cloud_sphere (new pcl::PointCloud<Point_RGB_NORMAL> ());
   extract.filter (*cloud_sphere);
 
   double rate=0;
@@ -1268,22 +1284,22 @@ void sphere_fitting(PointCloudPtr_RGB cloud, MyPointCloud_RGB &sphere_cloud, pcl
 }
 
 //segment sphere from the data
-void object_seg_Sphere(PointCloudPtr_RGB cloud, std::vector<MyPointCloud_RGB> &cluster_points, std::vector<pcl::ModelCoefficients> &coefficients,PointCloudPtr_RGB remained_cloud){
+void object_seg_Sphere(PointCloudPtr_RGB_NORMAL cloud, std::vector<MyPointCloud_RGB> &cluster_points, std::vector<pcl::ModelCoefficients> &coefficients,PointCloudPtr_RGB_NORMAL remained_cloud){
 
   // Datasets
-  PointCloudPtr_RGB cloud_filtered (new PointCloud_RGB);
-  PointCloudPtr_RGB cloud_filtered_tem (new PointCloud_RGB);
-  PointCloudPtr_RGB cloud_f (new PointCloud_RGB);
+  PointCloudPtr_RGB_NORMAL cloud_filtered (new PointCloud_RGB_NORMAL);
+  PointCloudPtr_RGB_NORMAL cloud_filtered_tem (new PointCloud_RGB_NORMAL);
+  PointCloudPtr_RGB_NORMAL cloud_f (new PointCloud_RGB_NORMAL);
 
   //pcl::copyPointCloud(*cloud,*cloud_filtered);
   pcl::copyPointCloud(*cloud,*cloud_filtered_tem);
 
   while(1){
     // Create the segmentation object
-    pcl::SACSegmentation<Point_RGB> seg;
+    pcl::SACSegmentation<Point_RGB_NORMAL> seg;
     pcl::ModelCoefficients::Ptr coefficients_sphere (new pcl::ModelCoefficients);
     pcl::PointIndices::Ptr inliers_sphere(new pcl::PointIndices);
-    pcl::ExtractIndices<Point_RGB> extract;
+    pcl::ExtractIndices<Point_RGB_NORMAL> extract;
 
     // Optional
     seg.setOptimizeCoefficients (true);
@@ -1302,14 +1318,14 @@ void object_seg_Sphere(PointCloudPtr_RGB cloud, std::vector<MyPointCloud_RGB> &c
     extract.setInputCloud (cloud_filtered_tem);
     extract.setIndices (inliers_sphere);
     extract.setNegative (false);
-    pcl::PointCloud<Point_RGB>::Ptr cloud_sphere (new pcl::PointCloud<Point_RGB> ());
+    pcl::PointCloud<Point_RGB_NORMAL>::Ptr cloud_sphere (new pcl::PointCloud<Point_RGB_NORMAL> ());
     extract.filter (*cloud_sphere);
 
     double rate=0;
 
     if (inliers_sphere->indices.size () < 500)
     {
-      appendCloud_RGB(cloud_filtered_tem,cloud_filtered);
+      appendCloud_RGB_NORMAL(cloud_filtered_tem,cloud_filtered);
       std::cerr << "Could not estimate a sphere model for the given dataset." << std::endl;
       break;
     }
@@ -1325,7 +1341,7 @@ void object_seg_Sphere(PointCloudPtr_RGB cloud, std::vector<MyPointCloud_RGB> &c
       extract.setNegative (false);
       extract.filter (*cloud_f);
 
-      appendCloud_RGB(cloud_f,cloud_filtered);
+      appendCloud_RGB_NORMAL(cloud_f,cloud_filtered);
 
       extract.setIndices (inliers_sphere);
       extract.setNegative (true);
@@ -1366,17 +1382,17 @@ void object_seg_Sphere(PointCloudPtr_RGB cloud, std::vector<MyPointCloud_RGB> &c
 }
 
 //plane for boxs fitting
-void plane_for_boxs_fitting(PointCloudPtr_RGB sourceCloud, MyPointCloud_RGB &plane_cloud, MyPointCloud &rect_cloud, pcl::ModelCoefficients::Ptr plane_coefficients, PointCloudPtr_RGB remained_cloud){
-  PointCloudPtr_RGB cloud_tem(new PointCloud_RGB);
+void plane_for_boxs_fitting(PointCloudPtr_RGB_NORMAL sourceCloud, MyPointCloud_RGB &plane_cloud, MyPointCloud &rect_cloud, pcl::ModelCoefficients::Ptr plane_coefficients, PointCloudPtr_RGB_NORMAL remained_cloud){
+  PointCloudPtr_RGB_NORMAL cloud_tem(new PointCloud_RGB_NORMAL);
   pcl::copyPointCloud(*sourceCloud,*cloud_tem);
 
-  PointCloudPtr_RGB cloud_p (new PointCloud_RGB);
-  PointCloudPtr_RGB cloud_f (new PointCloud_RGB);
+  PointCloudPtr_RGB_NORMAL cloud_p (new PointCloud_RGB_NORMAL);
+  PointCloudPtr_RGB_NORMAL cloud_f (new PointCloud_RGB_NORMAL);
   pcl::PointIndices::Ptr inliers (new pcl::PointIndices ());
-  pcl::ExtractIndices<Point_RGB> extract;
+  pcl::ExtractIndices<Point_RGB_NORMAL> extract;
 
   // Create the segmentation object
-  pcl::SACSegmentation<Point_RGB> seg;
+  pcl::SACSegmentation<Point_RGB_NORMAL> seg;
   // Optional
   seg.setOptimizeCoefficients (true);
   // Mandatory
@@ -1409,68 +1425,68 @@ void plane_for_boxs_fitting(PointCloudPtr_RGB sourceCloud, MyPointCloud_RGB &pla
     pcl::copyPointCloud(*cloud_tem,*remained_cloud);
     return;
   }
- /* else{
-    PointCloudPtr_RGB cloud_in_plane(new PointCloud_RGB());
+  /* else{
+  PointCloudPtr_RGB_NORMAL cloud_in_plane(new PointCloud_RGB());
 
-    Eigen::Vector3d plane_normal;
-    plane_normal << plane_coefficients->values[0], plane_coefficients->values[1], plane_coefficients->values[2];
-    plane_normal.normalize();
+  Eigen::Vector3d plane_normal;
+  plane_normal << plane_coefficients->values[0], plane_coefficients->values[1], plane_coefficients->values[2];
+  plane_normal.normalize();
 
-    double angle=acos(plane_normal.dot(Eigen::Vector3d(0,0,1)));
-    Eigen::Vector3d axis=plane_normal.cross(Eigen::Vector3d(0,0,1));
-    axis.normalize();
+  double angle=acos(plane_normal.dot(Eigen::Vector3d(0,0,1)));
+  Eigen::Vector3d axis=plane_normal.cross(Eigen::Vector3d(0,0,1));
+  axis.normalize();
 
-    Eigen::Matrix4d matrix;
-    getRotationMatrix(axis, angle, matrix);
+  Eigen::Matrix4d matrix;
+  getRotationMatrix(axis, angle, matrix);
 
-    Eigen::Matrix4f matrix_transform = matrix.cast<float>();
-    pcl::transformPointCloud (*cloud_p, *cloud_in_plane, matrix_transform);
+  Eigen::Matrix4f matrix_transform = matrix.cast<float>();
+  pcl::transformPointCloud (*cloud_p, *cloud_in_plane, matrix_transform);
 
-    cv::Point2f p0;
-    cv::Point2f p1;
-    cv::Point2f p2;
-    cv::Point2f p3;
+  cv::Point2f p0;
+  cv::Point2f p1;
+  cv::Point2f p2;
+  cv::Point2f p3;
 
-    find_min_rect(cloud_in_plane, p0, p1, p2, p3);
+  find_min_rect(cloud_in_plane, p0, p1, p2, p3);
 
-    float a=sqrt(pow((p0.x-p1.x),2)+pow((p0.y-p1.y),2));
-    float b=sqrt(pow((p2.x-p1.x),2)+pow((p2.y-p1.y),2));
-    double area=a*b;
+  float a=sqrt(pow((p0.x-p1.x),2)+pow((p0.y-p1.y),2));
+  float b=sqrt(pow((p2.x-p1.x),2)+pow((p2.y-p1.y),2));
+  double area=a*b;
 
-    rate=cloud_p->size()/area;
+  rate=cloud_p->size()/area;
 
-    cout<<"rate_plane===============::"<<rate<<endl;
+  cout<<"rate_plane===============::"<<rate<<endl;
   }
 
   if(rate>30000){*/
-    PointCloudPtr rect_cl(new PointCloud);
-    getRectForPlaneCloud(cloud_p, plane_coefficients, rect_cl);
-    PointCloud2MyPointCloud_RGB(cloud_p, plane_cloud);
-    PointCloud2MyPointCloud(rect_cl, rect_cloud);
+  PointCloudPtr rect_cl(new PointCloud);
+  getRectForPlaneCloud(cloud_p, plane_coefficients, rect_cl);
+  PointCloud2MyPointCloud_RGB(cloud_p, plane_cloud);
+  PointCloud2MyPointCloud(rect_cl, rect_cloud);
 
-    // Create the filtering object
-    extract.setNegative (true);
-    extract.filter (*cloud_f);
-    cloud_tem.swap (cloud_f);
- // }
+  // Create the filtering object
+  extract.setNegative (true);
+  extract.filter (*cloud_f);
+  cloud_tem.swap (cloud_f);
+  // }
 
   pcl::copyPointCloud(*cloud_tem,*remained_cloud);
 }
 
-void detect_plane_for_boxs(PointCloudPtr_RGB sourceCloud, std::vector<pcl::ModelCoefficients> &coefficients_vector, std::vector<MyPointCloud_RGB> &plane_points,PointCloudPtr_RGB remained_cloud){
+void detect_plane_for_boxs(PointCloudPtr_RGB_NORMAL sourceCloud, std::vector<pcl::ModelCoefficients> &coefficients_vector, std::vector<MyPointCloud_RGB> &plane_points,PointCloudPtr_RGB_NORMAL remained_cloud){
 
-  PointCloudPtr_RGB clound_tem(new PointCloud_RGB);
-  PointCloudPtr_RGB cloud_remaining(new PointCloud_RGB);
+  PointCloudPtr_RGB_NORMAL clound_tem(new PointCloud_RGB_NORMAL);
+  PointCloudPtr_RGB_NORMAL cloud_remaining(new PointCloud_RGB_NORMAL);
   pcl::copyPointCloud(*sourceCloud,*clound_tem);
 
-  PointCloudPtr_RGB cloud_p (new PointCloud_RGB);
-  PointCloudPtr_RGB cloud_f (new PointCloud_RGB);
+  PointCloudPtr_RGB_NORMAL cloud_p (new PointCloud_RGB_NORMAL);
+  PointCloudPtr_RGB_NORMAL cloud_f (new PointCloud_RGB_NORMAL);
   pcl::PointIndices::Ptr inliers (new pcl::PointIndices ());
   pcl::ModelCoefficients::Ptr coefficients (new pcl::ModelCoefficients ());
-  pcl::ExtractIndices<Point_RGB> extract;
+  pcl::ExtractIndices<Point_RGB_NORMAL> extract;
 
   // Create the segmentation object
-  pcl::SACSegmentation<Point_RGB> seg;
+  pcl::SACSegmentation<Point_RGB_NORMAL> seg;
   // Optional
   seg.setOptimizeCoefficients (true);
   // Mandatory
@@ -1487,7 +1503,7 @@ void detect_plane_for_boxs(PointCloudPtr_RGB sourceCloud, std::vector<pcl::Model
     seg.segment (*inliers, *coefficients);
     if (inliers->indices.size () == 0)
     {
-      appendCloud_RGB(clound_tem,cloud_remaining);
+      appendCloud_RGB_NORMAL(clound_tem,cloud_remaining);
 
       std::cerr << "Could not estimate a planar model for the given dataset." << std::endl;
       break;
@@ -1503,11 +1519,11 @@ void detect_plane_for_boxs(PointCloudPtr_RGB sourceCloud, std::vector<pcl::Model
     double rate=0;
 
     if(cloud_p->size()<200){
-      appendCloud_RGB(clound_tem,cloud_remaining);
+      appendCloud_RGB_NORMAL(clound_tem,cloud_remaining);
       break;
     }
     else{
-      PointCloudPtr_RGB cloud_in_plane(new PointCloud_RGB());
+      PointCloudPtr_RGB_NORMAL cloud_in_plane(new PointCloud_RGB_NORMAL());
       //pcl::copyPointCloud(*,*cloud_in_plane);
 
       Eigen::Vector3d plane_normal;
@@ -1551,7 +1567,7 @@ void detect_plane_for_boxs(PointCloudPtr_RGB sourceCloud, std::vector<pcl::Model
       extract.setNegative (false);
       extract.filter (*cloud_f);
 
-      appendCloud_RGB(cloud_f,cloud_remaining);
+      appendCloud_RGB_NORMAL(cloud_f,cloud_remaining);
     }
 
     // Create the filtering object
@@ -1594,7 +1610,7 @@ bool testIntrRectangle3Rectangle3(MyPt p0_0, MyPt p0_1,MyPt p0_2,MyPt p0_3, MyPt
 }
 
 //Find Points In Box
-void findPointsIn_Box(PointCloudPtr_RGB cloud, PointCloudPtr box_points, pcl::PointIndices::Ptr &inliers){
+void findPointsIn_Box(PointCloudPtr_RGB_NORMAL cloud, PointCloudPtr box_points, pcl::PointIndices::Ptr &inliers){
 
   Eigen::Vector3d box_plane_normal0;
   Eigen::Vector3d box_plane_normal1;
@@ -1636,22 +1652,22 @@ void findPointsIn_Box(PointCloudPtr_RGB cloud, PointCloudPtr box_points, pcl::Po
 }
 
 //seg plane in objects
-void object_seg_Plane(PointCloudPtr_RGB sourceCloud, std::vector<pcl::ModelCoefficients> &coefficients_vector, std::vector<MyPointCloud_RGB>& new_plane_clouds, std::vector<MyPointCloud> &debug_clouds,PointCloudPtr_RGB remained_cloud){
+void object_seg_Plane(PointCloudPtr_RGB_NORMAL sourceCloud, std::vector<pcl::ModelCoefficients> &coefficients_vector, std::vector<MyPointCloud_RGB>& new_plane_clouds, std::vector<MyPointCloud> &debug_clouds,PointCloudPtr_RGB_NORMAL remained_cloud){
 
   std::vector<MyPointCloud_RGB> plane_clouds;
 
-  PointCloudPtr_RGB clound_tem(new PointCloud_RGB);
-  PointCloudPtr_RGB cloud_f (new PointCloud_RGB);
+  PointCloudPtr_RGB_NORMAL clound_tem(new PointCloud_RGB_NORMAL);
+  PointCloudPtr_RGB_NORMAL cloud_f (new PointCloud_RGB_NORMAL);
   pcl::copyPointCloud(*sourceCloud,*clound_tem);
 
   detect_plane_for_boxs(sourceCloud,coefficients_vector,plane_clouds,remained_cloud);
 
   if(coefficients_vector.size()<2){
     if(coefficients_vector.size()==1){
-      PointCloudPtr_RGB cloud_temp(new PointCloud_RGB);
+      PointCloudPtr_RGB_NORMAL cloud_temp(new PointCloud_RGB_NORMAL);
       PointCloud points_temp;
 
-      PointCloudPtr_RGB cloud_in_plane(new PointCloud_RGB());
+      PointCloudPtr_RGB_NORMAL cloud_in_plane(new PointCloud_RGB_NORMAL());
       //pcl::copyPointCloud(plane_clouds.at(0),*cloud_in_plane);
       MyPointCloud_RGB2PointCloud(plane_clouds.at(0), cloud_in_plane);
       std::cout<<"plane_clouds.at(0).mypoints.size:"<< plane_clouds.at(0).mypoints.size() <<std::endl;
@@ -1742,7 +1758,7 @@ void object_seg_Plane(PointCloudPtr_RGB sourceCloud, std::vector<pcl::ModelCoeff
   std::cout<<"&&&&&&&&&&&&&&&&&******cout"<<cout<<std::endl;
 
   while(cout >0){
-    PointCloud_RGB cloud_temp;
+    PointCloud_RGB_NORMAL cloud_temp;
     PointCloud points_temp;
     std::vector<MyPointCloud> horizontal_points;
     std::vector<int> horizontal_index;
@@ -1755,7 +1771,7 @@ void object_seg_Plane(PointCloudPtr_RGB sourceCloud, std::vector<pcl::ModelCoeff
       }
     }
 
-    PointCloudPtr_RGB cloud_projected0(new PointCloud_RGB());
+    PointCloudPtr_RGB_NORMAL cloud_projected0(new PointCloud_RGB_NORMAL());
     //pcl::copyPointCloud(plane_clouds.at(index),*cloud_projected0);
     MyPointCloud_RGB2PointCloud(plane_clouds.at(index), cloud_projected0);
     std::cout<<"plane_clouds.at(index).mypoints.size:"<<plane_clouds.at(index).mypoints.size()<<std::endl;
@@ -1822,7 +1838,7 @@ void object_seg_Plane(PointCloudPtr_RGB sourceCloud, std::vector<pcl::ModelCoeff
 
           horizontal_index.push_back(i);
 
-          PointCloudPtr_RGB cloud_projected_h(new PointCloud_RGB());
+          PointCloudPtr_RGB_NORMAL cloud_projected_h(new PointCloud_RGB_NORMAL());
           //pcl::copyPointCloud(plane_clouds.at(i),*cloud_projected_h);
           MyPointCloud_RGB2PointCloud(plane_clouds.at(i), cloud_projected_h);
 
@@ -1906,7 +1922,7 @@ void object_seg_Plane(PointCloudPtr_RGB sourceCloud, std::vector<pcl::ModelCoeff
 
 
     if(horizontal_points.size()>1){
-      PointCloudPtr_RGB cloud_all_in_plane(new PointCloud_RGB());
+      PointCloudPtr_RGB_NORMAL cloud_all_in_plane(new PointCloud_RGB_NORMAL());
 
       //cout<<"horizontal_points2.size():"<<horizontal_points2.size()<<endl;
       for(int i=0;i<horizontal_points.size();i++){
@@ -1914,7 +1930,7 @@ void object_seg_Plane(PointCloudPtr_RGB sourceCloud, std::vector<pcl::ModelCoeff
         //cout<<"plane_clouds.at(horizontal_index.at(i)).points.size():"<<plane_clouds.at(horizontal_index.at(i)).points.size()<<endl;
         for(int j=0;j<plane_clouds.at(horizontal_index.at(i)).mypoints.size();j++){
 
-          Point_RGB point_tem;
+          Point_RGB_NORMAL point_tem;
           point_tem.x=plane_clouds.at(horizontal_index.at(i)).mypoints.at(j).x;
           point_tem.y=plane_clouds.at(horizontal_index.at(i)).mypoints.at(j).y;
           point_tem.z=plane_clouds.at(horizontal_index.at(i)).mypoints.at(j).z;
@@ -2023,11 +2039,13 @@ void object_seg_Plane(PointCloudPtr_RGB sourceCloud, std::vector<pcl::ModelCoeff
 }
 
 //VCCS over-segmentation
-void VCCS_over_segmentation(PointCloudPtr_RGB cloud, NormalCloudTPtr normals, float voxel_resolution,float seed_resolution,float color_importance,float spatial_importance,float normal_importance,vector<MyPointCloud_RGB>& patch_clouds, PointCloudT::Ptr colored_cloud, PointNCloudT::Ptr normal_cloud){
+void VCCS_over_segmentation(PointCloudPtr_RGB_NORMAL cloud, float voxel_resolution,float seed_resolution,float color_importance,float spatial_importance,float normal_importance,vector<MyPointCloud_RGB>& patch_clouds, PointCloudT::Ptr colored_cloud, PointNCloudT::Ptr normal_cloud){
   PointCloudT::Ptr ct(new PointCloudT);
+  NormalCloudTPtr normals(new NormalCloudT);
 
   for(int l=0;l<cloud->size();l++){
     PointT ptt;
+    Normal normal;
     ptt.x=cloud->at(l).x;
     ptt.y=cloud->at(l).y;
     ptt.z=cloud->at(l).z;
@@ -2035,18 +2053,19 @@ void VCCS_over_segmentation(PointCloudPtr_RGB cloud, NormalCloudTPtr normals, fl
     ptt.g=cloud->at(l).g;
     ptt.b=cloud->at(l).b;
     ptt.a=0;
+    normal.normal_x=cloud->at(l).normal_x;
+    normal.normal_y=cloud->at(l).normal_y;
+    normal.normal_z=cloud->at(l).normal_z;
     ct->push_back(ptt);
+    normals->push_back(normal);
   }
 
   pcl::SupervoxelClustering<PointT> super (voxel_resolution, seed_resolution, false);
   super.setInputCloud (ct);
+  super.setNormalCloud (normals);
   super.setColorImportance (color_importance);
   super.setSpatialImportance (spatial_importance);
   super.setNormalImportance (normal_importance);
-
-  if(normals->size()>0){
-    super.setNormalCloud (normals);
-  }
 
   std::map <uint32_t, pcl::Supervoxel<PointT>::Ptr > supervoxel_clusters;
 
@@ -2074,14 +2093,14 @@ void VCCS_over_segmentation(PointCloudPtr_RGB cloud, NormalCloudTPtr normals, fl
 //merge plane in objects
 void merge_Plane(std::vector<MyPointCloud_RGB>& plane_clouds, std::vector<pcl::ModelCoefficients> &coefficients_vector, std::vector<MyPointCloud_RGB>& new_plane_clouds, std::vector<MyPointCloud>& new_rect_clouds){
 
-  PointCloudPtr_RGB cloud_f (new PointCloud_RGB);
+  PointCloudPtr_RGB_NORMAL cloud_f (new PointCloud_RGB_NORMAL);
 
   if(coefficients_vector.size()<2){
     if(coefficients_vector.size()==1){
-      PointCloudPtr_RGB cloud_temp(new PointCloud_RGB);
+      PointCloudPtr_RGB_NORMAL cloud_temp(new PointCloud_RGB_NORMAL);
       PointCloud points_temp;
 
-      PointCloudPtr_RGB cloud_in_plane(new PointCloud_RGB());
+      PointCloudPtr_RGB_NORMAL cloud_in_plane(new PointCloud_RGB_NORMAL());
 
       MyPointCloud_RGB2PointCloud(plane_clouds.at(0), cloud_in_plane);
       std::cout<<"plane_clouds.at(0).mypoints.size:"<< plane_clouds.at(0).mypoints.size() <<std::endl;
@@ -2169,7 +2188,7 @@ void merge_Plane(std::vector<MyPointCloud_RGB>& plane_clouds, std::vector<pcl::M
   std::cout<<"&&&&&&&&&&&&&&&&&******cout"<<cout<<std::endl;
 
   while(cout >0){
-    PointCloud_RGB cloud_temp;
+    PointCloud_RGB_NORMAL cloud_temp;
     PointCloud points_temp;
     std::vector<MyPointCloud> horizontal_points;
     std::vector<int> horizontal_index;
@@ -2182,7 +2201,7 @@ void merge_Plane(std::vector<MyPointCloud_RGB>& plane_clouds, std::vector<pcl::M
       }
     }
 
-    PointCloudPtr_RGB cloud_projected0(new PointCloud_RGB());
+    PointCloudPtr_RGB_NORMAL cloud_projected0(new PointCloud_RGB_NORMAL());
     //pcl::copyPointCloud(plane_clouds.at(index),*cloud_projected0);
     MyPointCloud_RGB2PointCloud(plane_clouds.at(index), cloud_projected0);
     std::cout<<"plane_clouds.at(index).mypoints.size:"<<plane_clouds.at(index).mypoints.size()<<std::endl;
@@ -2248,7 +2267,7 @@ void merge_Plane(std::vector<MyPointCloud_RGB>& plane_clouds, std::vector<pcl::M
 
           horizontal_index.push_back(i);
 
-          PointCloudPtr_RGB cloud_projected_h(new PointCloud_RGB());
+          PointCloudPtr_RGB_NORMAL cloud_projected_h(new PointCloud_RGB_NORMAL());
           //pcl::copyPointCloud(plane_clouds.at(i),*cloud_projected_h);
           MyPointCloud_RGB2PointCloud(plane_clouds.at(i), cloud_projected_h);
 
@@ -2330,7 +2349,7 @@ void merge_Plane(std::vector<MyPointCloud_RGB>& plane_clouds, std::vector<pcl::M
 
 
     if(horizontal_points.size()>1){
-      PointCloudPtr_RGB cloud_all_in_plane(new PointCloud_RGB());
+      PointCloudPtr_RGB_NORMAL cloud_all_in_plane(new PointCloud_RGB_NORMAL());
 
       //cout<<"horizontal_points2.size():"<<horizontal_points2.size()<<endl;
       for(int i=0;i<horizontal_points.size();i++){
@@ -2338,7 +2357,7 @@ void merge_Plane(std::vector<MyPointCloud_RGB>& plane_clouds, std::vector<pcl::M
         //cout<<"plane_clouds.at(horizontal_index.at(i)).points.size():"<<plane_clouds.at(horizontal_index.at(i)).points.size()<<endl;
         for(int j=0;j<plane_clouds.at(horizontal_index.at(i)).mypoints.size();j++){
 
-          Point_RGB point_tem;
+          Point_RGB_NORMAL point_tem;
           point_tem.x=plane_clouds.at(horizontal_index.at(i)).mypoints.at(j).x;
           point_tem.y=plane_clouds.at(horizontal_index.at(i)).mypoints.at(j).y;
           point_tem.z=plane_clouds.at(horizontal_index.at(i)).mypoints.at(j).z;
@@ -2443,17 +2462,17 @@ void merge_Plane(std::vector<MyPointCloud_RGB>& plane_clouds, std::vector<pcl::M
 }
 
 //object fitting
-void object_fitting(PointCloudPtr_RGB cloud, vector<MyPointCloud_RGB> &plane_clouds, std::vector<MyPointCloud> &rect_clouds, vector<MyPointCloud_RGB> &cylinder_clouds, vector<MyPointCloud_RGB> &sphere_clouds, PointCloudPtr_RGB remained_cloud){
-  PointCloudPtr_RGB cloud_tem(new PointCloud_RGB);
+void object_fitting(PointCloudPtr_RGB_NORMAL cloud, vector<MyPointCloud_RGB> &plane_clouds, std::vector<MyPointCloud> &rect_clouds, vector<MyPointCloud_RGB> &cylinder_clouds, vector<MyPointCloud_RGB> &sphere_clouds, PointCloudPtr_RGB_NORMAL remained_cloud){
+  PointCloudPtr_RGB_NORMAL cloud_tem(new PointCloud_RGB_NORMAL);
   pcl::copyPointCloud(*cloud, *cloud_tem);
 
   std::vector<pcl::ModelCoefficients> plane_coefficients_vector;
   vector<MyPointCloud_RGB> plane_clouds_tem;
 
   while(1){
-    PointCloudPtr_RGB remained_tem0(new PointCloud_RGB);
-    PointCloudPtr_RGB remained_tem1(new PointCloud_RGB);
-    PointCloudPtr_RGB remained_tem2(new PointCloud_RGB);
+    PointCloudPtr_RGB_NORMAL remained_tem0(new PointCloud_RGB_NORMAL);
+    PointCloudPtr_RGB_NORMAL remained_tem1(new PointCloud_RGB_NORMAL);
+    PointCloudPtr_RGB_NORMAL remained_tem2(new PointCloud_RGB_NORMAL);
 
     MyPointCloud_RGB cylinder_cloud;
     MyPointCloud_RGB sphere_cloud;
@@ -2518,7 +2537,7 @@ void object_fitting(PointCloudPtr_RGB cloud, vector<MyPointCloud_RGB> &plane_clo
       pcl::copyPointCloud(*remained_tem0, *cloud_tem);
       cylinder_clouds.push_back(cylinder_cloud);
 
-      /*PointCloudPtr_RGB cloud_in_cylinder(new PointCloud_RGB());
+      /*PointCloudPtr_RGB_NORMAL cloud_in_cylinder(new PointCloud_RGB());
       MyPointCloud_RGB2PointCloud(cylinder_cloud, cloud_in_cylinder);
       showPointCloud(cloud_in_cylinder,"cloud_in_cylinder");*/
     }
