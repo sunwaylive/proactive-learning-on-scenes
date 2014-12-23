@@ -78,6 +78,9 @@ void CameraParaDlg::initConnects()
   connect(ui->checkBox_show_sdf_slice_X,SIGNAL(clicked(bool)),this,SLOT(showSDFSliceX(bool)));
   connect(ui->checkBox_show_sdf_slice_Y,SIGNAL(clicked(bool)),this,SLOT(showSDFSliceY(bool)));
   connect(ui->checkBox_show_sdf_slice_Z,SIGNAL(clicked(bool)),this,SLOT(showSDFSliceZ(bool)));
+
+  //auto scene related
+  connect(ui->pushButton_detect_plane, SIGNAL(clicked()), this, SLOT(detectPlane()));
 }
 
 bool CameraParaDlg::initWidgets()
@@ -1250,4 +1253,16 @@ void CameraParaDlg::prepareSDFSlicePlane()
   area->dataMgr.z_sdf_slice_plane.vn = area->dataMgr.z_sdf_slice_plane.vert.size();
 
   cout<<"prepare sdf slice plane done!" <<endl;
+}
+
+void CameraParaDlg::detectPlane()
+{
+  std::cout<<"detect plane" <<endl;
+  CMesh *original = area->dataMgr.getCurrentOriginal();
+  if (original == NULL) {
+    std::cout<<"original point NULL, No Plane Detected!" <<std::endl;
+    return;
+  }
+
+  
 }

@@ -105,6 +105,8 @@ signals:
     void showSDFSliceY(bool _val);
     void showSDFSliceZ(bool _val);
 
+    //auto scene related
+    void detectPlane();
 
 private:
   Ui::camera_paras * ui;
