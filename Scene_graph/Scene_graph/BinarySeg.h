@@ -16,6 +16,7 @@ public:
 	vector<Normal> vecPatcNormal;
 	vector<MyPoint> vecPatchCenPoint;
 	vector<ColorType> vecPatchColor;
+	vector<vector<int>> vecvecPatchColorDetial;
 	vector<pair<int,int>> vecpairPatchConnection;
 
 	double boundingBoxSize;
@@ -27,17 +28,24 @@ public:
 
 	vector<double> vecDataValue;
 	vector<double> vecSmoothValue;
+	vector<double> vecGeometryValue;
+	vector<double> vecAppearenceValue;
 	vector<pair<int,int>> verpairSmoothVertex;
 
 	int m; 
 
 	vector<int> vecFore,vecBack;
+	vector<double> vecFlow;
+	double m_flow;
 
 	//parameter
 	double paraClose;
 	double paraS,paraK;
 	double paraConvexK,paraConvexT,paraConcave;
 	double paraGeometry,paraAppearence;
+	double paraAlpha;
+
+	int backSeedIndex;
 
 public:
 	CBinarySeg(vector<MyPointCloud_RGB> points,vector<Normal> normals);
@@ -46,7 +54,7 @@ public:
 	void MainStep();
 	void PointCloudPreprocess();
 	void GraphConstruct();
-	void GraphCutSolve();
+	void GraphCutSolve(vector<int> &vecObjectHypo);
 	double GetMinDisBetPatch(int m,int n);
 	double GetCenDisBetPatch(int m,int n);
 	double GetBinaryDataValue(double d);
