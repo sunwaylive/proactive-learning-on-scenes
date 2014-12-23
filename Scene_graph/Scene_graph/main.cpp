@@ -2,6 +2,8 @@
 #include "color_op.h"
 #include "file_io.h"
 #include "scene_seg.h"
+#include "graph.h"
+#include "BinarySeg.h"
 
 
 int main (int argc, char *argv[])
@@ -214,6 +216,7 @@ int main (int argc, char *argv[])
   //}
 
   float voxel_resolution = 0.004f;
+  float seed_resolution = 0.04f;//µ÷patch´óÐ¡
   float color_importance = 0.2f;
   float spatial_importance = 0.4f;
   float normal_importance = 1.0f;
@@ -221,14 +224,14 @@ int main (int argc, char *argv[])
   /******************Euclidean Cluster Extraction************************/
   std::vector<PointCloudPtr_RGB_NORMAL> cluster_points;
 
-  vector<MyPointCloud_RGB> vecPatchPoint;
+  vector<MyPointCloud_RGB_NORMAL> vecPatchPoint;
   vector<Normal> vecPatcNormal;
 
 
   for(int i=0;i<cluster_points.size();i++){
 
     PointCloudT::Ptr colored_cloud(new PointCloudT);
-    vector<MyPointCloud_RGB> patch_clouds;
+    vector<MyPointCloud_RGB_NORMAL> patch_clouds;
     PointNCloudT::Ptr normal_cloud(new PointNCloudT);
     VCCS_over_segmentation(cluster_points.at(i),voxel_resolution,seed_resolution,color_importance,spatial_importance,normal_importance,patch_clouds,colored_cloud,normal_cloud);
 	
