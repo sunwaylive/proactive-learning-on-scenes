@@ -685,7 +685,7 @@ template <typename PointT> pcl::PointCloud<pcl::PointXYZRGBA>::Ptr
 
 
 //get Patch Cloud
-template <typename PointT> void pcl::SupervoxelClustering<PointT>::getPatchCloud(std::vector<MyPointCloud_RGB>& patch_clouds) const
+template <typename PointT> void pcl::SupervoxelClustering<PointT>::getPatchCloud(std::vector<MyPointCloud_RGB_NORMAL>& patch_clouds) const
 {
   pcl::PointCloud<pcl::PointXYZRGBA>::Ptr colored_cloud (new pcl::PointCloud<pcl::PointXYZRGBA>);
   pcl::copyPointCloud (*input_,*colored_cloud);
@@ -718,12 +718,13 @@ template <typename PointT> void pcl::SupervoxelClustering<PointT>::getPatchCloud
   //std::cout<<"max_label:"<<max_label<<std::endl;
 
   for (int i = 0; i < max_label; ++i){
-    MyPointCloud_RGB mpc_rgb;
+    MyPointCloud_RGB_NORMAL mpc_rgb;
     patch_clouds.push_back(mpc_rgb);
   }
 
   i_input = input_->begin ();
 
+  int index=0;
   for (i_colored = colored_cloud->begin (); i_colored != colored_cloud->end (); ++i_colored,++i_input)
   {
     if ( !pcl::isFinite<PointT> (*i_input))
@@ -735,16 +736,20 @@ template <typename PointT> void pcl::SupervoxelClustering<PointT>::getPatchCloud
       //std::cout<<"voxel_data.owner_->getLabel():"<<voxel_data.owner_->getLabel()<<std::endl;
 
       if (voxel_data.owner_){
-        MyPt_RGB mpt_rgb;
+        MyPt_RGB_NORMAL mpt_rgb;
         mpt_rgb.x=i_colored->x;
         mpt_rgb.y=i_colored->y;
         mpt_rgb.z=i_colored->z;
         mpt_rgb.r=i_colored->r;
         mpt_rgb.g=i_colored->g;
         mpt_rgb.b=i_colored->b;
+        mpt_rgb.normal_x=input_normals_->at(index).normal_x;
+        mpt_rgb.normal_y=input_normals_->at(index).normal_y;
+        mpt_rgb.normal_z=input_normals_->at(index).normal_z;
         patch_clouds.at(voxel_data.owner_->getLabel()-1).mypoints.push_back(mpt_rgb);
       }
     }
+    index++;
   }
   //std::cout<<"================"<<std::endl;
 }

@@ -243,7 +243,7 @@ namespace pcl
       pcl::PointCloud<pcl::PointXYZRGBA>::Ptr
       getColoredVoxelCloud () const;
 
-      void getPatchCloud(std::vector<MyPointCloud_RGB>& patch_cloud) const;
+      void getPatchCloud(std::vector<MyPointCloud_RGB_NORMAL>& patch_cloud) const;
       
       /** \brief Returns labeled voxelized cloud
        * Points that belong to the same supervoxel have the same label.

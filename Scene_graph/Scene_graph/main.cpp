@@ -224,15 +224,14 @@ int main (int argc, char *argv[])
   /******************Euclidean Cluster Extraction************************/
   std::vector<PointCloudPtr_RGB_NORMAL> cluster_points;
 
-  vector<MyPointCloud_RGB> vecPatchPoint;
+  vector<MyPointCloud_RGB_NORMAL> vecPatchPoint;
   vector<Normal> vecPatcNormal;
 
-  object_seg_ECE(tabletopCloud, cluster_points);
 
   for(int i=0;i<cluster_points.size();i++){
 
     PointCloudT::Ptr colored_cloud(new PointCloudT);
-    vector<MyPointCloud_RGB> patch_clouds;
+    vector<MyPointCloud_RGB_NORMAL> patch_clouds;
     PointNCloudT::Ptr normal_cloud(new PointNCloudT);
     VCCS_over_segmentation(cluster_points.at(i),voxel_resolution,seed_resolution,color_importance,spatial_importance,normal_importance,patch_clouds,colored_cloud,normal_cloud);
 	

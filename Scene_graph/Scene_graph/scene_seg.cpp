@@ -2039,7 +2039,7 @@ void object_seg_Plane(PointCloudPtr_RGB_NORMAL sourceCloud, std::vector<pcl::Mod
 }
 
 //VCCS over-segmentation
-void VCCS_over_segmentation(PointCloudPtr_RGB_NORMAL cloud, float voxel_resolution,float seed_resolution,float color_importance,float spatial_importance,float normal_importance,vector<MyPointCloud_RGB>& patch_clouds, PointCloudT::Ptr colored_cloud, PointNCloudT::Ptr normal_cloud){
+void VCCS_over_segmentation(PointCloudPtr_RGB_NORMAL cloud, float voxel_resolution,float seed_resolution,float color_importance,float spatial_importance,float normal_importance,vector<MyPointCloud_RGB_NORMAL>& patch_clouds, PointCloudT::Ptr colored_cloud, PointNCloudT::Ptr normal_cloud){
   PointCloudT::Ptr ct(new PointCloudT);
   NormalCloudTPtr normals(new NormalCloudT);
 
@@ -2073,7 +2073,7 @@ void VCCS_over_segmentation(PointCloudPtr_RGB_NORMAL cloud, float voxel_resoluti
   super.extract (supervoxel_clusters);
   printf("Found %d supervoxels\n", supervoxel_clusters.size ());
 
-  vector<MyPointCloud_RGB> patch_clouds_tem;
+  vector<MyPointCloud_RGB_NORMAL> patch_clouds_tem;
   super.getPatchCloud(patch_clouds_tem);
 
   for(int i=0;i<patch_clouds_tem.size();i++){
