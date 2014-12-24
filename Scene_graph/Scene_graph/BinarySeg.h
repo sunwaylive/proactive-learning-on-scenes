@@ -9,18 +9,46 @@
 #define LARGE_NUM 9999999
 #define SMALL_NUM -9999999
 
+struct NEARBYPOINT
+{
+	int patchFirst;
+	int patchSecond;
+
+	int indexFirst;
+	int indexSecond;
+};
+
+struct NEARBYPOINTSUM
+{
+	vector<NEARBYPOINT> nearbyPoint;
+};
+
+struct NEARBYNORMAL
+{
+	Normal normal0,normal1;
+};
+
 class CBinarySeg
 {
 public:
-	vector<MyPointCloud_RGB> vecPatchPoint;
+	CBinarySeg();
+	~CBinarySeg(void);
+
+public:
+	vector<MyPointCloud_RGB_NORMAL> vecPatchPoint;
+	vector<int> clusterPatchNum;
+	PointCloudPtr_RGB_NORMAL tablePoint;
 	vector<Normal> vecPatcNormal;
+	vector<vector<NEARBYNORMAL>> vecvecPatctNearbyNormal;
 	vector<MyPoint> vecPatchCenPoint;
 	vector<ColorType> vecPatchColor;
 	vector<vector<int>> vecvecPatchColorDetial;
 	vector<pair<int,int>> vecpairPatchConnection;
+	vector<vector<NEARBYPOINTSUM>> vecvecNearbyPoint; 
 
 	double boundingBoxSize;
-	double closeThreshold;
+	double thresholdClose0; 
+	double thresholdClose1; 
 	double xMin,xMax,yMin,yMax,zMin,zMax;
 
 	vector<vector<double>> vecvecPatchMinDis;
@@ -39,7 +67,6 @@ public:
 	double m_flow;
 
 	//parameter
-	double paraClose;
 	double paraS,paraK;
 	double paraConvexK,paraConvexT,paraConcave;
 	double paraGeometry,paraAppearence;
@@ -47,11 +74,14 @@ public:
 
 	int backSeedIndex;
 
-public:
-	CBinarySeg(vector<MyPointCloud_RGB> points,vector<Normal> normals);
-	~CBinarySeg(void);
+	vector<bool> vecIfConnectTable;
+	MyPoint tableCen;
 
+public:
+	void GetTable(PointCloudPtr_RGB_NORMAL &table);
+	void GetClusterPoints(vector<MyPointCloud_RGB_NORMAL> &points);
 	void MainStep();
+	void GetAdjacency(int patchBegin,int patchEnd);
 	void PointCloudPreprocess();
 	void GraphConstruct();
 	void GraphCutSolve(vector<int> &vecObjectHypo);
@@ -59,6 +89,9 @@ public:
 	double GetCenDisBetPatch(int m,int n);
 	double GetBinaryDataValue(double d);
 	double GetBinarySmoothValue(int m,int n);
+	bool IfConnectTable(vector<MyPt_RGB_NORMAL> points);
+	void NomalizeData();
+	void NomalizeSmooth();
 
 };
 
