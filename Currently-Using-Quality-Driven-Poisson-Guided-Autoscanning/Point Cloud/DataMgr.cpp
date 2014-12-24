@@ -41,11 +41,13 @@ void DataMgr::transformToGroundAxis()
   Matrix44f toGroundAxis44;
   toGroundAxis44.SetIdentity();
 
-  //Point3f trans_mat3(0.239, -0.553, 0.840);
-  Point3f trans_mat3(-0.325, -2.668, 1.118);
-  //trans_mat3 = -trans_mat3;
-  //Quaternionf rot_mat44(0.365, 0.696, 0.487, 0.380);
-  Quaternionf rot_mat44(0.517, 0.514, 0.436, 0.528);
+  ifstream in;
+  in.open("transform.tf");
+
+  Point3f trans_mat3;
+  in>>trans_mat3.X() >>trans_mat3.Y() >>trans_mat3.Z();
+  Quaternionf rot_mat44;
+  in>>rot_mat44.X() >>rot_mat44.Y() >>rot_mat44.Z() >>rot_mat44.W();
 
   Matrix33f rot_mat = GlobalFun::myQuaternionToMatrix33(rot_mat44);
 
@@ -76,6 +78,7 @@ void DataMgr::transformToGroundAxis()
   }
 
   cout<<"end to ground" <<endl;
+  in.close();
 }
 
 void DataMgr::initDefaultScanCamera()
