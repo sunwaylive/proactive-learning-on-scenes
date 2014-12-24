@@ -62,7 +62,7 @@ int main (int argc, char *argv[])
 
   vs.viewer->addPointCloud (pc, "table_cloud");
 
-  cBinarySeg.GetTable(table_cloud);
+  cBinarySeg.AddTable(table_cloud);
   
   //cv::Point2f p0;
   //cv::Point2f p1;
@@ -248,13 +248,28 @@ int main (int argc, char *argv[])
 
     vs.viewer->addPointCloud (colored_cloud, id_pc);
 
+	for(int i=0;i<patch_clouds.size();i++)
+	{
+		vecPatchPoint.push_back(patch_clouds[i]);
+		Normal nor;
+		pcl::PointNormal pn=normal_cloud->at(i);
+		nor.normal_x = pn.normal_x;
+		nor.normal_y = pn.normal_y;
+		nor.normal_z = pn.normal_z;
+		double normalizeValue = pow(nor.normal_x,2) + pow(nor.normal_y,2) + pow(nor.normal_z,2);
+		nor.normal_x /= normalizeValue;
+		nor.normal_y /= normalizeValue;
+		nor.normal_z /= normalizeValue;
+		vecPatcNormal.push_back(nor);
+	}
+
     str<<"supervoxel_normals"<<i;
     id_pc=str.str();
 //    vs.viewer->addPointCloudNormals<pcl::PointNormal> (normal_cloud,1,0.05f, id_pc);
 
 
 	// data transfer to Graph Cut`
-	cBinarySeg.GetClusterPoints(patch_clouds);
+	cBinarySeg.AddClusterPoints(patch_clouds);
 
 
     /*cout<<"patch_clouds.size():"<<patch_clouds.size()<<endl;
@@ -280,6 +295,7 @@ int main (int argc, char *argv[])
   }
 
 /******************Binary Segmetation************************/
+cBinarySeg.AddPatchNormal(vecPatcNormal);
 cBinarySeg.MainStep();
 
 /******************Show Segmetation************************/
