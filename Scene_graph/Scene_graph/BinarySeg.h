@@ -60,7 +60,7 @@ public:
 	vector<double> vecAppearenceValue;
 	vector<pair<int,int>> verpairSmoothVertex;
 
-	int m; 
+	int seedPatch; 
 
 	vector<int> vecFore,vecBack;
 	vector<double> vecFlow;
@@ -78,8 +78,9 @@ public:
 	MyPoint tableCen;
 
 public:
-	void GetTable(PointCloudPtr_RGB_NORMAL &table);
-	void GetClusterPoints(vector<MyPointCloud_RGB_NORMAL> &points);
+	void AddTable(PointCloudPtr_RGB_NORMAL &table);
+	void AddClusterPoints(vector<MyPointCloud_RGB_NORMAL> &points);
+	void AddPatchNormal(vector<Normal> &normal);
 	void MainStep();
 	void GetAdjacency(int patchBegin,int patchEnd);
 	void PointCloudPreprocess();
