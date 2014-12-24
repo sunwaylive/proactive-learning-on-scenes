@@ -86,7 +86,7 @@ public:
 	void PointCloudPreprocess();
 	void GraphConstruct();
 	void GraphCutSolve(vector<int> &vecObjectHypo);
-	double GetMinDisBetPatch(int m,int n);
+	double GetMinDisBetPatch(int m,int n,bool &stable);
 	double GetCenDisBetPatch(int m,int n);
 	double GetBinaryDataValue(double d);
 	double GetBinarySmoothValue(int m,int n);

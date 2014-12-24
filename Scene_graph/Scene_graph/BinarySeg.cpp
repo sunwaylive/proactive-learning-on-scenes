@@ -6,7 +6,7 @@ CBinarySeg::CBinarySeg()
 {
 	thresholdClose0 = 0.005;  //判断patch是否相连
 	thresholdClose1 = 0.05;	  //计算局部法向量
-	paraK = 10;
+	paraK = 3;
 	paraS = 0.02;
 	paraConvexK = 0.1;
 	paraConvexT = 0.9;
@@ -57,15 +57,15 @@ void CBinarySeg::MainStep()
 {
 	PointCloudPreprocess();
 
-	paraGeometry = 0.2;
+	paraGeometry = 0.4;
 	paraAppearence = 0.1;
-	paraAlpha = 1.2;
+	paraAlpha = 0.8;
 
 // 	while(paraGeometry < 0.3)
 // 	{
 // 		while(paraAppearence < 0.3)
 // 		{
-// 			while(paraAlpha < 1.4)
+// 			while(paraAlpha < 3)
 // 			{
 				vecvecObjectPool.clear();
 //				for(int i =172; i <240; i ++)
@@ -80,7 +80,7 @@ void CBinarySeg::MainStep()
 				}
 
 				//output
-				ofstream outFile0("ObjectPool.txt",ios::out|ios::app);
+				ofstream outFile0("Output\\ObjectPool.txt",ios::out|ios::app);
 				outFile0 <<paraK<<  "  "<<paraGeometry<<  "  "<<paraAppearence<<  "  "<<paraAlpha<<  "  "<< endl;
 				for(int i=0;i<vecvecObjectPool.size();i++)
 				{
@@ -94,7 +94,7 @@ void CBinarySeg::MainStep()
 				outFile0 <<  "  " << endl;
 				outFile0.close();
 
-				paraAlpha += (double)0.1;
+//				paraAlpha += (double)0.2;
 //			}
 // 			paraAlpha = 0;
 // 			paraAppearence += (double)0.02;
@@ -106,7 +106,7 @@ void CBinarySeg::MainStep()
 
 		
 		//output
-// 		ofstream outFile1("PatchPoint.txt");
+// 		ofstream outFile1("Output\\PatchPoint.txt");
 // 		for(int i=0;i<vecPatchPoint.size();i++)
 // 		{
 // 			for(int j=0;j<vecPatchPoint[i].mypoints.size();j++)
@@ -122,6 +122,23 @@ void CBinarySeg::MainStep()
 // 		}
 // 		outFile1.close();
 
+ 	//output
+// 	ofstream outFile1("Output\\ClusterSize.txt");
+// 	for(int i=0;i<clusterPatchNum.size();i++)
+// 	{
+// 		outFile1 << clusterPatchNum[i] <<  "  ";
+// 		
+// 	}
+// 	outFile1 <<  "  " << endl;
+// 	outFile1.close();
+// 
+// 	//output
+// 	ofstream outFile2("Output\\PatchNormal.txt");
+// 	for(int i=0;i<vecPatcNormal.size();i++)
+// 	{
+// 		outFile2 << vecPatcNormal[i].normal_x <<  "  " << vecPatcNormal[i].normal_y <<  "  " << vecPatcNormal[i].normal_z << endl;
+// 	}
+// 	outFile2.close();
 }
 
 void CBinarySeg::PointCloudPreprocess()
@@ -210,7 +227,7 @@ void CBinarySeg::PointCloudPreprocess()
 	}
 
 	//output
-// 	ofstream outFile1("color.txt");
+// 	ofstream outFile1("Output\\color.txt");
 // 	for(int i = 0;i <vecvecPatchColorDetial.size();i++)
 // 	{
 // 		outFile1 << "patch "<< i << endl;
@@ -224,7 +241,7 @@ void CBinarySeg::PointCloudPreprocess()
 // 	outFile1.close();
 
 	//output
-	ofstream outFile0("basicinfo.txt");
+	ofstream outFile0("Output\\basicinfo.txt");
 	for(int i = 0;i <clusterPatchNum.size();i++)
 	{
 		outFile0 << "clusterPatchNum: " << clusterPatchNum[i] << " " ;
@@ -263,7 +280,7 @@ void CBinarySeg::PointCloudPreprocess()
 	outFile0.close();
 
 	//output
-	ofstream outFile2("nearbyinfo.txt");
+	ofstream outFile2("Output\\nearbyinfo.txt");
 // 	for(int i = 0;i <vecIfConnectTable.size();i++)
 // 	{
 // 		outFile2 << "connecttable " << vecIfConnectTable[i] <<  " "  ;
@@ -289,7 +306,7 @@ void CBinarySeg::PointCloudPreprocess()
 	outFile2 << "   " << endl;
 	outFile2.close();
 
-// 	ofstream outFile3("nearbynormal.txt");
+// 	ofstream outFile3("Output\\nearbynormal.txt");
 // 	for(int i = 0;i <vecvecPatctNearbyNormal.size();i++)
 // 	{
 // 		for(int j = 0;j <vecvecPatctNearbyNormal[i].size();j++)
@@ -312,7 +329,6 @@ void CBinarySeg::PointCloudPreprocess()
 
 void CBinarySeg::GraphConstruct()
 {
-	/******************Graph Preprocess One************************/
 	//graph value
 	pair<int,int> pairSmoothVertex;
 
@@ -356,10 +372,10 @@ void CBinarySeg::GraphConstruct()
 	}
 
 // 	NomalizeData();
-// 	NomalizeSmooth();
+ 	NomalizeSmooth();
 
 	//output
-	ofstream outFile1("datasmooth.txt");
+	ofstream outFile1("Output\\datasmooth.txt");
 	for(int i = 0;i <vecPatchColor.size();i++)
 	{
 		outFile1 << "data  " << vecDataValue[i] << endl;
@@ -433,17 +449,18 @@ void CBinarySeg::GetAdjacency(int patchBegin,int patchEnd)
 		for(int j = patchBegin;j <patchEnd;j++)
 			if(i != j)
 			{
-				vecvecPatchMinDis[i][j] = vecvecPatchMinDis[j][i] = GetMinDisBetPatch(i,j);
+				bool  stable;   // if connect stable
+				vecvecPatchMinDis[i][j] = vecvecPatchMinDis[j][i] = GetMinDisBetPatch(i,j,stable);
 				vecvecPatchCenDis[i][j] = vecvecPatchMinDis[j][i] = GetCenDisBetPatch(i,j);
 				pairPatchConnection.first = i;
 				pairPatchConnection.second = j;
-				if(vecvecPatchMinDis[i][j] < thresholdClose0)
+				if(vecvecPatchMinDis[i][j] < thresholdClose0 && stable)
 				{
 					vecpairPatchConnection.push_back(pairPatchConnection);
 				} 
 				pairPatchConnection.first = j;
 				pairPatchConnection.second = i;
-				if(vecvecPatchMinDis[i][j] < thresholdClose0)
+				if(vecvecPatchMinDis[i][j] < thresholdClose0 && stable)
 				{
 					vecpairPatchConnection.push_back(pairPatchConnection);
 				} 
@@ -456,13 +473,17 @@ void CBinarySeg::GetAdjacency(int patchBegin,int patchEnd)
 
 }
 
-double CBinarySeg::GetMinDisBetPatch(int m,int n)
+double CBinarySeg::GetMinDisBetPatch(int m,int n,bool &stable)
 {
 	double minDis=LARGE_NUM;
-	Normal normal0,normal1;
-	normal0.normal_x = normal0.normal_y = normal0.normal_z = 0;
-	normal1.normal_x = normal1.normal_y = normal1.normal_z = 0;
+// 	Normal normal0,normal1;
+// 	normal0.normal_x = normal0.normal_y = normal0.normal_z = 0;
+// 	normal1.normal_x = normal1.normal_y = normal1.normal_z = 0;
 
+	vector<double> vecDisQueue;
+	vector<bool> vecPointClose0(vecPatchPoint[m].mypoints.size(),false);
+	vector<bool> vecPointClose1(vecPatchPoint[n].mypoints.size(),false);
+	
 	for(int i = 0;i < vecPatchPoint[m].mypoints.size();i++)
 	{
 		for(int j = 0;j < vecPatchPoint[n].mypoints.size();j++)
@@ -470,9 +491,16 @@ double CBinarySeg::GetMinDisBetPatch(int m,int n)
 			double dis = sqrt(pow(vecPatchPoint[m].mypoints[i].x-vecPatchPoint[n].mypoints[j].x,2)
 				+ pow(vecPatchPoint[m].mypoints[i].y-vecPatchPoint[n].mypoints[j].y,2)
 				+ pow(vecPatchPoint[m].mypoints[i].z-vecPatchPoint[n].mypoints[j].z,2));
-			if(minDis > dis)	
+			if(minDis > dis)
+			{
 				minDis = dis;
+			}
 
+			if(dis < thresholdClose0 * 3)
+			{
+				vecPointClose0[i] = true;
+				vecPointClose1[j] = true;
+			}
 // 			if(dis < thresholdClose1 * boundingBoxSize)
 // 			{
 // 				NEARBYPOINT nearbyPoint;
@@ -520,6 +548,25 @@ double CBinarySeg::GetMinDisBetPatch(int m,int n)
 // 
 // 		vecvecPatctNearbyNormal[n][m] = vecvecPatctNearbyNormal[m][n];
 // 	}
+
+	int count0=0;
+	int count1=0;
+	for(int i = 0; i < vecPointClose0.size();i++)
+	{
+		if(vecPointClose0[i] == true)
+			count0++;
+	}
+	for(int i = 0; i < vecPointClose1.size();i++)
+	{
+		if(vecPointClose1[i] == true)
+			count1++;
+	}
+	
+
+	if(count0 > 5 && count1 >5)
+		stable = true;
+	else
+		stable = false;
 
 	return minDis;
 }
@@ -673,6 +720,6 @@ void CBinarySeg::NomalizeSmooth()
 	}
 	for(int i = 0;i <vecSmoothValue.size();i++)
 	{
-		vecSmoothValue[i] =  (vecSmoothValue[i] - minSV)/(maxSV - minSV);
+		vecSmoothValue[i] =  0.5 * (vecSmoothValue[i] - minSV)/(maxSV - minSV);
 	}
 }
