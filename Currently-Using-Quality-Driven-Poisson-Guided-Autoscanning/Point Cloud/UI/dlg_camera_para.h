@@ -7,6 +7,11 @@
 #include "glarea.h"
 #include "OneKeyNBVBack.h"
 
+#include "common_type.h"
+#include <pcl/sample_consensus/method_types.h>
+#include <pcl/sample_consensus/model_types.h>
+#include <pcl/segmentation/sac_segmentation.h>
+
 #include <QtGui>
 #include <QtGui/QFrame>
 #include <QtGui/QWidget>
