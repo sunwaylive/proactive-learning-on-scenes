@@ -37,7 +37,7 @@ public:
 public:
 	vector<MyPointCloud_RGB_NORMAL> vecPatchPoint;
 	vector<int> clusterPatchNum;
-	PointCloudPtr_RGB_NORMAL tablePoint;
+	//	PointCloudPtr_RGB_NORMAL tablePoint;
 	vector<Normal> vecPatcNormal;
 	vector<vector<NEARBYNORMAL>> vecvecPatctNearbyNormal;
 	vector<MyPoint> vecPatchCenPoint;
@@ -67,9 +67,11 @@ public:
 	double m_flow;
 
 	//parameter
-	double paraS,paraK;
+	double paraSmallS,paraSmallK;
+	double paraLargeS,paraLargeK;
 	double paraConvexK,paraConvexT,paraConcave;
 	double paraGeometry,paraAppearence;
+	double paraMinPatchInObject,paraMaxCutEnergy;
 	double paraAlpha;
 
 	int backSeedIndex;
@@ -78,14 +80,14 @@ public:
 	MyPoint tableCen;
 
 public:
-	void AddTable(PointCloudPtr_RGB_NORMAL &table);
+	//	void AddTable(PointCloudPtr_RGB_NORMAL &table);
 	void AddClusterPoints(vector<MyPointCloud_RGB_NORMAL> &points);
 	void AddPatchNormal(vector<Normal> &normal);
 	void MainStep();
 	void GetAdjacency(int patchBegin,int patchEnd);
 	void PointCloudPreprocess();
 	void GraphConstruct();
-	void GraphCutSolve(vector<int> &vecObjectHypo);
+	void GraphCutSolve(vector<int> &vecObjectHypo, double &cutEnergy);
 	double GetMinDisBetPatch(int m,int n,bool &stable);
 	double GetCenDisBetPatch(int m,int n);
 	double GetBinaryDataValue(double d);

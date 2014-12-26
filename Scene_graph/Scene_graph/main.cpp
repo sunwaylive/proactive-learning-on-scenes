@@ -62,7 +62,7 @@ int main (int argc, char *argv[])
 
   vs.viewer->addPointCloud (pc, "table_cloud");
 
-  cBinarySeg.AddTable(table_cloud);
+//  cBinarySeg.AddTable(table_cloud);
   
   //cv::Point2f p0;
   //cv::Point2f p1;
