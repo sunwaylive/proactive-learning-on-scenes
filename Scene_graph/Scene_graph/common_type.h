@@ -88,6 +88,7 @@ public:
   vector<MyPt_RGB_NORMAL> mypoints;
 };
 
+
 void MyPointCloud2PointCloud(MyPointCloud& mc, PointCloudPtr pc);
 void PointCloud2MyPointCloud(PointCloudPtr pc, MyPointCloud& mc);
 
