@@ -1534,3 +1534,9 @@ void NBV::runSDFSlice()
     }
   }
 }
+
+
+void NBV::viewPruneUsingPlane()
+{
+
+}
