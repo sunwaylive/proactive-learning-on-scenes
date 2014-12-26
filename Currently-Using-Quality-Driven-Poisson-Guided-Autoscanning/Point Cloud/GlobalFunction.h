@@ -20,7 +20,7 @@
 #include <algorithm>
 #include <math.h>
 #include "ANN/ANN.h"
-#include <eigenlib/Eigen/Dense>
+#include <Eigen/Dense>
 
 #define EIGEN_DEFAULT_TO_ROW_MAJOR
 #define EIGEN_EXCEPTIONS

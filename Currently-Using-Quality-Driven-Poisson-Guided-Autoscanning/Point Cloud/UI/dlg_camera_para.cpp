@@ -1264,5 +1264,10 @@ void CameraParaDlg::detectPlane()
     return;
   }
 
-  
+  pcl::SACSegmentation<Point_RGB_NORMAL> seg;
+  seg.setOptimizeCoefficients(true);
+  seg.setMethodType(pcl::SACMODEL_PLANE);
+  seg.setMaxIterations(1000);
+  seg.setDistanceThreshold(0.015);
+
 }
