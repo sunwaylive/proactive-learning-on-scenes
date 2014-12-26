@@ -247,7 +247,39 @@ template <typename PointT> void
 
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//template <typename PointT> void
+//  pcl::SupervoxelClustering<PointT>::expandSupervoxels ( int depth )
+//{
+//
+//
+//  for (int i = 1; i < depth; ++i)
+//  {
+//    //Expand the the supervoxels by one iteration
+//    for (typename HelperListT::iterator sv_itr = supervoxel_helpers_.begin (); sv_itr != supervoxel_helpers_.end (); ++sv_itr)
+//    {
+//      sv_itr->expand ();
+//    }
+//
+//    //Update the centers to reflect new centers
+//    for (typename HelperListT::iterator sv_itr = supervoxel_helpers_.begin (); sv_itr != supervoxel_helpers_.end (); )
+//    {
+//      if (sv_itr->size () == 0)
+//      {
+//        sv_itr = supervoxel_helpers_.erase (sv_itr);
+//      }
+//      else
+//      {
+//        sv_itr->updateCentroid ();
+//        ++sv_itr;
+//      } 
+//    }
+//
+//  }
+//
+//}
+
+//=====================================================================
 template <typename PointT> void
   pcl::SupervoxelClustering<PointT>::expandSupervoxels ( int depth )
 {
@@ -274,7 +306,59 @@ template <typename PointT> void
         ++sv_itr;
       } 
     }
+  }
 
+  //===============remove discrete points===================
+  for (typename HelperListT::iterator sv_itr = supervoxel_helpers_.begin (); sv_itr != supervoxel_helpers_.end (); ++sv_itr)
+    {
+      pcl::PointCloud<PointT>::Ptr voxels_tem(new pcl::PointCloud<PointT>);
+      sv_itr->getVoxels (voxels_tem);
+
+      // Creating the KdTree object for the search method of the extraction
+      pcl::search::KdTree<PointT>::Ptr tree (new pcl::search::KdTree<PointT>);
+      tree->setInputCloud (voxels_tem);
+
+      std::vector<pcl::PointIndices> cluster_indices;
+      pcl::EuclideanClusterExtraction<PointT> ec;
+      ec.setClusterTolerance (1.8*resolution_);
+      ec.setMinClusterSize (1);
+      ec.setMaxClusterSize (1000);
+      ec.setSearchMethod (tree);
+      ec.setInputCloud (voxels_tem);
+      ec.extract (cluster_indices);
+
+      for (std::vector<pcl::PointIndices>::const_iterator it = cluster_indices.begin (); it != cluster_indices.end (); ++it)
+      {
+        pcl::PointCloud<PointT>::Ptr cloud_cluster (new pcl::PointCloud<PointT>);
+        for (std::vector<int>::const_iterator pit = it->indices.begin (); pit != it->indices.end (); pit++){
+          cloud_cluster->points.push_back (voxels_tem->points[*pit]); //*
+        }
+        
+        if(cloud_cluster->size()<10){
+          for(int i=0;i<cloud_cluster->size();i++){
+            LeafContainerT* leaf_arg = adjacency_octree_->getLeafContainerAtPoint(cloud_cluster->at(i));
+            VoxelData& data_tem = leaf_arg->getData();
+            data_tem.owner_ = 0;
+            data_tem.distance_ = std::numeric_limits<float>::max ();
+
+            sv_itr->removeLeaf(leaf_arg);
+          }
+        }
+      }
+    }
+
+  //Update the centers to reflect new centers
+  for (typename HelperListT::iterator sv_itr = supervoxel_helpers_.begin (); sv_itr != supervoxel_helpers_.end (); )
+  {
+    if (sv_itr->size () == 0)
+    {
+      sv_itr = supervoxel_helpers_.erase (sv_itr);
+    }
+    else
+    {
+      sv_itr->updateCentroid ();
+      ++sv_itr;
+    } 
   }
 
 }

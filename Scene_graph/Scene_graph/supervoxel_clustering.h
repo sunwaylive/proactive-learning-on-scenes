@@ -9,6 +9,8 @@
 #include <pcl/octree/octree_pointcloud_adjacency.h>
 #include <pcl/search/search.h>
 #include <pcl/segmentation/boost.h>
+#include <pcl/segmentation/extract_clusters.h>
+#include <pcl/segmentation/sac_segmentation.h>
 
 #include "common_type.h"
 
