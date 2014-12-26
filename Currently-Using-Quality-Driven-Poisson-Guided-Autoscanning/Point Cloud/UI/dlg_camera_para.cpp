@@ -1259,15 +1259,8 @@ void CameraParaDlg::prepareSDFSlicePlane()
 
 void CameraParaDlg::loadScene()
 {
-  QString file = QFileDialog::getOpenFileName(this, "Select a ply file", "", "*.ply");
-  if(!file.size()) return;
-
-  area->dataMgr.loadPlyToOriginal(file);
-
-  area->dataMgr.normalizeAllMesh();
-  area->initView();
-  area->initAfterOpenFile();
-  area->updateGL();
+  //load scene to original
+  loadToOriginal();
 }
 
 void CameraParaDlg::detectPlane()

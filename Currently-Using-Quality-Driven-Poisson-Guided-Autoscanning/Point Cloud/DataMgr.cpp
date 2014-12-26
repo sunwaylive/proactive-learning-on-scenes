@@ -646,6 +646,355 @@ void DataMgr::recomputeBox()
 
 }
 
+
+bool cmp_angle(const CVertex &v1, const CVertex &v2)
+{
+  if (v1.ground_angle == v2.ground_angle) 
+    return false;
+
+  //in ascending order
+  return v1.ground_angle > v2.ground_angle;
+}
+
+void DataMgr::savePR2_orders(QString fileName_commands)
+{
+  if (nbv_candidates.vert.empty())
+  {
+    return;
+  }
+
+  double max_normalize_length = global_paraMgr.data.getDouble("Max Normalize Length");
+
+  ofstream outfile;
+  outfile.open(fileName_commands.toStdString().c_str());
+
+  vector<PR2_order> pr2_orders;
+  CVertex v_start = nbv_candidates.vert[0];
+  //v_start.P() = Point3f(131.07, -135.973, -113.974);
+  //v_start.P() = Point3f(116.07, 139, 159);
+  //v_start.P() = Point3f(135, -7, -223);
+
+  //v_start.P() = Point3f(135, -7, -223);
+  //v_start.P() = scanner_position;
+
+  //v_start.P() = Point3f(164, -7, -254); //hunter 1-13
+  //v_start.P() = Point3f(-42.3699, -101.141, 150.589);
+  //v_start.P() = Point3f(135, -7, -223); // saiya 1-14 overview
+  //v_start.P() = Point3f(134, -8, -253); //lion 1-15
+
+  v_start.P() = scanner_position; 
+
+  cout << "!!!scanner_position before normalize" << endl;
+  GlobalFun::printPoint3(cout, v_start.P());
+
+  CVertex first_v = nbv_candidates.vert[0];
+
+  //cout << "scanner_position after normalize" << endl;
+  //GlobalFun::printPoint3(cout, first_v.P());
+
+  first_v.P() = (first_v.P() + original_center_point) * max_normalize_length;
+
+  //cout << "scanner_position before normalize" << endl;
+  //GlobalFun::printPoint3(cout, first_v.P());
+
+
+  //v_start.P() = (v_start.P() + original_center_point) * max_normalize_length;
+
+  PR2_order order = computePR2orderFromTwoCandidates(v_start, first_v);
+  pr2_orders.push_back(order);
+
+  for (int i = 0; i < nbv_candidates.vert.size()-1; i++)
+  {
+    CVertex v0 = nbv_candidates.vert[i];
+    CVertex v1 = nbv_candidates.vert[i+1];
+
+    //cout << "before transform: " << endl;
+    //GlobalFun::printPoint3(cout, v0.P());
+
+    v0.P() = (v0.P() + original_center_point) * max_normalize_length;
+    v1.P() = (v1.P() + original_center_point) * max_normalize_length;
+
+    //cout << "after transform: " << endl;
+    //GlobalFun::printPoint3(cout, v1.P());
+
+    //PR2_order order = computePR2orderFromTwoCandidates(v0, v1);
+    PR2_order order = computePR2orderFromTwoCandidates(v_start, v1);    
+
+    pr2_orders.push_back(order);
+  }
+
+  outfile <<  pr2_orders.size() << endl;
+  for (int i = 0; i < pr2_orders.size(); i++)
+  {
+    PR2_order order = pr2_orders[i];
+    outfile  << order.left_rotation << endl;
+  }
+  for (int i = 0; i < pr2_orders.size(); i++)
+  {
+    PR2_order order = pr2_orders[i];
+
+    outfile  << order.L_to_R_translation.X() << " "
+      << order.L_to_R_translation.Y() << " "
+      << order.L_to_R_translation.Z() << " "
+      /*outfile */<< order.L_to_R_rotation_Qua.X() << " "
+      << order.L_to_R_rotation_Qua.Y() << " "
+      << order.L_to_R_rotation_Qua.Z() << " "
+      << order.L_to_R_rotation_Qua.W() << endl;
+  }
+
+  //outfile.write( strStream.str().c_str(), strStream.str().size() ); 
+  outfile.close();
+}
+
+void DataMgr::nbvReoders()
+{
+  Timer timer;
+  timer.start("1");
+  recomputeCandidatesAxis();
+  timer.insert("2");
+
+  for (int i = 0; i < nbv_candidates.vert.size(); i++)
+  {
+    CVertex& v = nbv_candidates.vert[i];
+
+    Point3f direction = v.N();
+    direction.X() = 0;
+    direction = direction.Normalize();
+
+    Point3f Z_axis = Point3f(0, 0, -1);
+    Point3f X_axis(1, 0, 0);
+    double angle = GlobalFun::computeRealAngleOfTwoVertor(direction, Z_axis);
+    Point3f up_direction = Z_axis ^ direction;
+    if (up_direction.X() > 0)
+    {
+      angle = 360 - angle;
+    }
+
+    v.ground_angle = 360 - angle;
+  }
+  timer.insert("3");
+  sort(nbv_candidates.vert.begin(), nbv_candidates.vert.end(), cmp_angle);
+  timer.insert("4");
+  vector<CVertex> up_candidates;
+  vector<CVertex> down_candidates;
+
+  for (int i = 0; i < nbv_candidates.vert.size(); i++)
+  {
+    CVertex& v = nbv_candidates.vert[i];
+
+    if (v.P().X() < -0.85)
+    {
+      cout << "rotate Y axis" << endl;
+
+      //v.eigen_vector1 = v.eigen_vector0;  //Y-yellow-axis
+      //v.eigen_vector0 = v.eigen_vector1 ^ v.N(); // X-red-axis
+
+      //double step = 0.1;
+      //Point3f y_step = v.P() + v.eigen_vector1 * step;
+      //Point3f X_step = v.P() + v.eigen_vector0 * step;
+
+
+
+      Point3f X_Y_middle = (v.eigen_vector1 + v.eigen_vector0).Normalize();
+      Point3f X_Y_middle2 = (X_Y_middle + v.eigen_vector0).Normalize();
+      v.eigen_vector1 = X_Y_middle2;
+      v.eigen_vector0 = v.eigen_vector1 ^ v.N();
+
+      //v.eigen_vector1 *= -1;
+      //v.eigen_vector0 *= -1;
+
+      down_candidates.push_back(v);
+    }
+    else
+    {
+      up_candidates.push_back(v);
+    }
+  }
+  timer.insert("5");
+  nbv_candidates.vert.clear();
+  for (int i = 0; i < up_candidates.size(); i++)
+  {
+    nbv_candidates.vert.push_back(up_candidates[i]);
+  }
+  for (int i = 0; i < down_candidates.size(); i++)
+  {
+    nbv_candidates.vert.push_back(down_candidates[i]);
+  }
+
+  timer.insert("6");
+  for (int i = 0; i < nbv_candidates.vert.size(); i++)
+  {
+    CVertex& v = nbv_candidates.vert[i];
+    v.m_index = i;
+  }
+
+
+  for (int i = 0; i < nbv_candidates.vert.size(); i++)
+  {
+    CVertex& v = nbv_candidates.vert[i];
+    //v.P() -= v.N() * 0.
+  }
+
+  //double max_normalize_length = global_paraMgr.data.getDouble("Max Normalize Length");
+
+  //CVertex v_start = nbv_candidates.vert[0];
+
+  //v_start.P() = Point3f(135, -7, -223);
+
+  //cout << "origin before normalize" << endl;
+  //GlobalFun::printPoint3(cout, v_start.P());
+  //v_start.P() = v_start.P() / max_normalize_length - original_center_point;
+  //cout << "origin after normalize" << endl;  
+  //GlobalFun::printPoint3(cout, v_start.P());
+
+  //cout << "trans trans: ";
+  //GlobalFun::printPoint3(cout, original_center_point);
+  //cout << max_normalize_length << endl;
+
+  //v_start.N() = v_start.P();
+  //v_start.N().Normalize();
+
+  //Point3f X_axis(1, 0, 0);;
+
+  //Point3f directionX = v_start.N() ^ X_axis;
+  //Point3f directionY = directionX ^ v_start.N();
+
+  //v_start.eigen_vector0 = directionX.Normalize();
+  //v_start.eigen_vector1 = directionY.Normalize();
+
+  //nbv_candidates.vert.insert(nbv_candidates.vert.begin(), v_start);
+
+  //for (int i = 0; i < nbv_candidates.vert.size(); i++)
+  //{
+  //  nbv_candidates.vert[i].m_index = i;
+  //  GlobalFun::printPoint3(cout, nbv_candidates.vert[i].P());
+  //}
+  //nbv_candidates.vn = nbv_candidates.vert.size();
+  //cout << "NBV size:  " << nbv_candidates.vn << endl;
+}
+
+PR2_order DataMgr::computePR2orderFromTwoCandidates(CVertex v0, CVertex v1)
+{
+  PR2_order order;
+  Point3f dir0 = Point3f(0, v0.P().Y(), v0.P().Z());
+  Point3f dir1 = Point3f(0, v1.P().Y(), v1.P().Z());
+  double angle = GlobalFun::computeRealAngleOfTwoVertor(dir0, dir1) * 3.1415926 / 180.;
+  Point3f up_direction = dir0 ^ dir1;
+  if (up_direction.X() > 0)
+  {
+    angle = 3.1415926*2 - angle;
+  }
+  order.left_rotation = angle;
+
+  //cout << "2 to 3" << endl;
+  //GlobalFun::printPoint3(cout, v0.P());
+  //GlobalFun::printPoint3(cout, v1.P());
+
+  Matrix33f T_to_S_Rotation_mat33 = GlobalFun::axisToMatrix33(v1); //»¹Ã»×ªÖÃ
+
+  Matrix44f T_to_S_Matirx44 = GlobalFun::getMat44FromMat33AndVector(T_to_S_Rotation_mat33.transpose(), v1.P());
+  //cout << "T_to_S_Matirx44" << endl;
+  //GlobalFun::printMatrix44(cout, T_to_S_Matirx44); 
+
+  Matrix44f S_to_R_Matrix44 =  vcg::Inverse(R_to_S_Matrix44);
+  //   cout << "S_to_R_Matrix44" << endl;
+  //   GlobalFun::printMatrix44(cout, S_to_R_Matrix44);
+
+  Matrix44f T_to_R_Matrix44 = T_to_S_Matirx44 * S_to_R_Matrix44;
+  //   cout << "T_to_R_Matrix44" << endl;
+  //   GlobalFun::printMatrix44(cout, T_to_R_Matrix44);
+
+  Matrix44f L_to_R_Matrix44 = vcg::Inverse(T_to_L_Matrix44) * T_to_R_Matrix44;
+  //   cout << "L_to_R_Matrix44" << endl;
+  //   GlobalFun::printMatrix44(cout, L_to_R_Matrix44);
+
+  Matrix33f L_to_R_Matrix33 = GlobalFun::getMat33FromMat44(L_to_R_Matrix44);
+  Quaternionf L_to_R_Qua;
+  L_to_R_Qua.FromMatrix(L_to_R_Matrix33);
+
+  order.L_to_R_rotation_Qua.X() = L_to_R_Qua.Y();
+  order.L_to_R_rotation_Qua.Y() = L_to_R_Qua.Z();
+  order.L_to_R_rotation_Qua.Z() = L_to_R_Qua.W();
+  order.L_to_R_rotation_Qua.W() = L_to_R_Qua.X();
+
+  order.L_to_R_translation = GlobalFun::getVectorFromMat44(L_to_R_Matrix44);
+  order.L_to_R_translation *= 0.001;
+
+  //cout << "leftRotation " << order.left_rotation << endl;
+  //cout << "Trans_LR ";
+  //GlobalFun::printPoint3(cout, order.L_to_R_translation);
+  //cout << endl;
+
+  //cout << "Q_LR ";
+  //GlobalFun::printQuaternionf(cout, order.L_to_R_rotation_Qua);
+  //cout << endl;
+
+  return order;
+}
+
+void DataMgr::recomputeCandidatesAxis()
+{
+  for (int i = 0; i < nbv_candidates.vert.size(); i++)
+  {
+    CVertex& v = nbv_candidates.vert[i];
+
+    Point3f directionZ = v.N();
+
+    Point3f X_axis(1, 0, 0);;
+
+    Point3f directionX = directionZ ^ X_axis;
+    Point3f directionY = directionX ^ directionZ;
+
+    v.eigen_vector0 = -directionX.Normalize();
+    v.eigen_vector1 = -directionY.Normalize();
+  }
+
+  for (int i = 0; i < nbv_candidates.vert.size(); i++)
+  {
+    CVertex& v = nbv_candidates.vert[i];
+
+    v.N() *= -1;
+    v.eigen_vector0 *= -1;
+    v.eigen_vector1 *= -1;
+  }
+
+  //for (int i = 0; i < nbv_candidates.vert.size(); i++)
+  //{
+  //  CVertex& v = nbv_candidates.vert[i];
+
+  //  Point3f directionZ = v.N();
+
+  //  Point3f Y_axis(0, 1, 0);;
+
+  //  Point3f directionX = directionZ ^ Y_axis;
+  //  Point3f directionY = directionX ^ directionZ;
+
+  //  v.eigen_vector0 = directionX;
+  //  v.eigen_vector1 = directionY;
+  //}
+
+  //for (int i = 0; i < nbv_candidates.vert.size(); i++)
+  //{
+  //  CVertex& v = nbv_candidates.vert[i];
+  //  
+  //  Point3f directionZ = v.N();
+
+  //  float rand_fvalue1 = (rand() % 1000) * 0.001;
+  //  float rand_fvalue2 = (rand() % 1000) * 0.001;
+
+  //  Point3f ground_dir(rand_fvalue1, 0, rand_fvalue2);
+  //  ground_dir = ground_dir.Normalize();
+
+  //  Point3f directionY = directionZ ^ ground_dir;
+  //  Point3f directionX = directionY ^ directionZ;
+
+  //  v.eigen_vector0 = directionX;
+  //  v.eigen_vector1 = directionY;
+  //}
+
+}
+
+
 double DataMgr::getInitRadiuse()
 {
   double init_para = para->getDouble("Init Radius Para");
@@ -916,14 +1265,6 @@ void DataMgr::recomputeQuad()
   }
 }
 
-bool cmp_angle(const CVertex &v1, const CVertex &v2)
-{
-  if (v1.ground_angle == v2.ground_angle) 
-    return false;
-
-  //in ascending order
-  return v1.ground_angle > v2.ground_angle;
-}
 
 void DataMgr::saveFieldPoints(QString fileName)
 {

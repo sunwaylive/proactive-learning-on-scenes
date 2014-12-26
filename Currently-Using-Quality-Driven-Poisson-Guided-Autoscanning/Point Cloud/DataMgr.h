@@ -25,6 +25,14 @@ using namespace tri;
 typedef pair<Point3f, Point3f> ScanCandidate;
 typedef vcg::tri::UpdateFlags<CMesh>::EdgeSorter MyBoarderEdge;
 
+class PR2_order
+{
+public:
+  double left_rotation;
+  Quaternionf L_to_R_rotation_Qua;
+  Point3f L_to_R_translation;
+};
+
 class DataMgr
 {
 public:
@@ -111,8 +119,14 @@ public:
   void replaceMesh(CMesh& src_mesh, CMesh& target_mesh, bool isOriginal);
   void replaceMeshISO(CMesh& src_mesh, CMesh& target_mesh, bool isIso);
   void replaceMeshView(CMesh& src_mesh, CMesh& target_mesh, bool isViewGrid);
-    
+  
+  //auto scene related
+  PR2_order computePR2orderFromTwoCandidates(CVertex v0, CVertex v1);
+  void savePR2_orders(QString fileName_commands);
+  void nbvReoders();
   void transformToGroundAxis();
+  void recomputeCandidatesAxis();
+
 private:
 	void clearCMesh(CMesh& mesh);
   void initDefaultScanCamera();
@@ -154,6 +168,9 @@ public:
   int                    scan_count;
 
   //sdf related
+  Matrix44f              R_to_S_Matrix44;
+  Matrix44f              T_to_L_Matrix44;
+
   CMesh                  sdf_voxels;
   CMesh                  x_sdf_slice_plane;
   CMesh                  y_sdf_slice_plane;
