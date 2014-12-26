@@ -1258,23 +1258,24 @@ void CameraParaDlg::prepareSDFSlicePlane()
 void CameraParaDlg::detectPlane()
 {
   std::cout<<"detect plane" <<endl;
-  CMesh *original = area->dataMgr.getCurrentSamples();
-  if (original == NULL) {
+  CMesh *sample = area->dataMgr.getCurrentSamples();
+  if (sample == NULL) {
     std::cout<<"original point NULL, No Plane Detected!" <<std::endl;
     return;
   }
 
   pcl::SACSegmentation<PclPoint> seg;
   seg.setOptimizeCoefficients(true);
-  seg.setMethodType(pcl::SACMODEL_PLANE);
+  seg.setModelType(pcl::SACMODEL_PLANE);
+  seg.setMethodType (pcl::SAC_RANSAC);
   seg.setMaxIterations(1000);
-  seg.setDistanceThreshold(0.03);
+  seg.setDistanceThreshold(0.02);
 
   PclPointCloudPtr original_point_cloud(new PclPointCloud);
-  GlobalFun::CMesh2PclPointCloud(original, original_point_cloud);
 
+  GlobalFun::CMesh2PclPointCloud(sample, original_point_cloud);
   seg.setInputCloud(original_point_cloud);
-
+  
   pcl::ModelCoefficients::Ptr coefficients (new pcl::ModelCoefficients);
   pcl::PointIndices::Ptr inliers (new pcl::PointIndices);
   seg.segment(*inliers, *coefficients);
@@ -1285,6 +1286,5 @@ void CameraParaDlg::detectPlane()
   }else{
     std::cout<< "coefficients:" <<  *coefficients <<std::endl;
   }
-
   return;
 }

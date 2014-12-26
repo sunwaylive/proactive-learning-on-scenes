@@ -7,6 +7,7 @@
 
 //pcl related
 #include "common_type.h"
+#include <pcl/visualization/cloud_viewer.h>
 
 #include "TriMesh.h"
 #include "TriMesh_algo.h"
@@ -128,6 +129,7 @@ namespace GlobalFun
 
   //pcl related
   void CMesh2PclPointCloud(const CMesh * const src, PclPointCloudPtr dst);
+  void PclPointCloud2CMesh(PclPointCloudPtr src, CMesh * const dst);
 }
 
 class Timer
