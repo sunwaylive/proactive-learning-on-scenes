@@ -111,6 +111,7 @@ signals:
     void showSDFSliceZ(bool _val);
 
     //auto scene related
+    void loadScene();
     void detectPlane();
 
 private:

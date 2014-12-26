@@ -80,6 +80,7 @@ void CameraParaDlg::initConnects()
   connect(ui->checkBox_show_sdf_slice_Z,SIGNAL(clicked(bool)),this,SLOT(showSDFSliceZ(bool)));
 
   //auto scene related
+  connect(ui->pushButton_load_scene, SIGNAL(clicked()), this, SLOT(loadScene()));
   connect(ui->pushButton_detect_plane, SIGNAL(clicked()), this, SLOT(detectPlane()));
 }
 
@@ -1255,11 +1256,25 @@ void CameraParaDlg::prepareSDFSlicePlane()
   cout<<"prepare sdf slice plane done!" <<endl;
 }
 
+
+void CameraParaDlg::loadScene()
+{
+  QString file = QFileDialog::getOpenFileName(this, "Select a ply file", "", "*.ply");
+  if(!file.size()) return;
+
+  area->dataMgr.loadPlyToOriginal(file);
+
+  area->dataMgr.normalizeAllMesh();
+  area->initView();
+  area->initAfterOpenFile();
+  area->updateGL();
+}
+
 void CameraParaDlg::detectPlane()
 {
   std::cout<<"detect plane" <<endl;
-  CMesh *sample = area->dataMgr.getCurrentSamples();
-  if (sample == NULL) {
+  CMesh *original = area->dataMgr.getCurrentOriginal();
+  if (original == NULL) {
     std::cout<<"original point NULL, No Plane Detected!" <<std::endl;
     return;
   }
@@ -1273,7 +1288,7 @@ void CameraParaDlg::detectPlane()
 
   PclPointCloudPtr original_point_cloud(new PclPointCloud);
 
-  GlobalFun::CMesh2PclPointCloud(sample, original_point_cloud);
+  GlobalFun::CMesh2PclPointCloud(original, original_point_cloud);
   seg.setInputCloud(original_point_cloud);
   
   pcl::ModelCoefficients::Ptr coefficients (new pcl::ModelCoefficients);
