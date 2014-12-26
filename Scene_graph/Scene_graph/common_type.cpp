@@ -16,6 +16,14 @@ MyPointCloud_RGB::~MyPointCloud_RGB(){
 
 }
 
+MyPointCloud_RGB_NORMAL::MyPointCloud_RGB_NORMAL(){
+
+}
+
+MyPointCloud_RGB_NORMAL::~MyPointCloud_RGB_NORMAL(){
+
+}
+
 //convert MyPointCloud to PointCloud
 void MyPointCloud2PointCloud(MyPointCloud& mc, PointCloudPtr pc){
   for(int i=0;i<mc.mypoints.size();i++){
