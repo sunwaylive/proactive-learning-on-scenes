@@ -5,6 +5,9 @@
 #include "CMesh.h"
 #include "grid.h"
 
+//pcl related
+#include "common_type.h"
+
 #include "TriMesh.h"
 #include "TriMesh_algo.h"
 #include "vcg/complex/trimesh/create/ball_pivoting.h"//#include "LAP_Others/eigen.h"
@@ -122,6 +125,9 @@ namespace GlobalFun
   vcg::Matrix44f getMat44FromMat33AndVector(vcg::Matrix33f mat33, Point3f vec);
   void convertCMeshO2CMesh(CMeshO &src, CMesh &dst);
   void convertCMesh2CMeshO(CMesh &src, CMeshO &dst);
+
+  //pcl related
+  void CMesh2PclPointCloud(const CMesh * const src, PclPointCloudPtr dst);
 }
 
 class Timer

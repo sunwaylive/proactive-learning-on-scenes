@@ -1258,16 +1258,33 @@ void CameraParaDlg::prepareSDFSlicePlane()
 void CameraParaDlg::detectPlane()
 {
   std::cout<<"detect plane" <<endl;
-  CMesh *original = area->dataMgr.getCurrentOriginal();
+  CMesh *original = area->dataMgr.getCurrentSamples();
   if (original == NULL) {
     std::cout<<"original point NULL, No Plane Detected!" <<std::endl;
     return;
   }
 
-  pcl::SACSegmentation<Point_RGB_NORMAL> seg;
+  pcl::SACSegmentation<PclPoint> seg;
   seg.setOptimizeCoefficients(true);
   seg.setMethodType(pcl::SACMODEL_PLANE);
   seg.setMaxIterations(1000);
-  seg.setDistanceThreshold(0.015);
+  seg.setDistanceThreshold(0.03);
 
+  PclPointCloudPtr original_point_cloud(new PclPointCloud);
+  GlobalFun::CMesh2PclPointCloud(original, original_point_cloud);
+
+  seg.setInputCloud(original_point_cloud);
+
+  pcl::ModelCoefficients::Ptr coefficients (new pcl::ModelCoefficients);
+  pcl::PointIndices::Ptr inliers (new pcl::PointIndices);
+  seg.segment(*inliers, *coefficients);
+
+  if (inliers->indices.size () == 0) {
+    std::cout << "Could not estimate a planar model for the given dataset." << std::endl;
+    return;
+  }else{
+    std::cout<< "coefficients:" <<  *coefficients <<std::endl;
+  }
+
+  return;
 }
