@@ -147,7 +147,7 @@ void ParameterMgr::initDrawerParameter()
 	drawer.addParam(new RichDouble("Sample Draw Width", 0.005));
 	drawer.addParam(new RichDouble("Sample Dot Size", 6));
 	drawer.addParam(new RichDouble("ISO Dot Size", 4));
-	drawer.addParam(new RichDouble("Original Dot Size", 10));
+	drawer.addParam(new RichDouble("Original Dot Size", 2));
 	drawer.addParam(new RichDouble("Normal Line Width", 2));
 	drawer.addParam(new RichDouble("Normal Line Length", 0.25f));
 
@@ -249,21 +249,29 @@ void ParameterMgr::initCameraParameter()
   camera.addParam(new RichBool("Show Camera Border", true));
 
 
-  camera.addParam(new RichDouble("Camera Far Distance", 30.0f));   //cm anno 25
-  camera.addParam(new RichDouble("Camera Near Distance", 10.0f));  //cm anno: 10
-  camera.addParam(new RichDouble("Predicted Model Size", 37.0f));  //cm anno: 37 lion:20
-  camera.addParam(new RichDouble("Camera Horizon Dist", 20.0f));   //cm anno: 14
-  camera.addParam(new RichDouble("Camera Vertical Dist", 18.0f));  //cm anno: 18
-  camera.addParam(new RichDouble("Camera Dist To Model", 30.0f)); //cm  anno: 30 ((30.0f + 17.0f)/2 + 0.6 * 20.0f)
-  //camera.addParam(new RichDouble("Camera Far Distance", 24.8f));   //cm
-  //camera.addParam(new RichDouble("Camera Near Distance", 19.6f));  //cm
-  //camera.addParam(new RichDouble("Camera Far Distance", 22.2f));   //cm
-  //camera.addParam(new RichDouble("Camera Near Distance", 17.0f));  //cm
-  //camera.addParam(new RichDouble("Camera Far Distance", 23.2f));   //cm
-  //camera.addParam(new RichDouble("Camera Near Distance", 19.0f));  //cm
+  //camera.addParam(new RichDouble("Camera Far Distance", 30.0f));   //cm anno 25
+  //camera.addParam(new RichDouble("Camera Near Distance", 10.0f));  //cm anno: 10
+  //camera.addParam(new RichDouble("Predicted Model Size", 37.0f));  //cm anno: 37 lion:20
+  //camera.addParam(new RichDouble("Camera Horizon Dist", 20.0f));   //cm anno: 14
+  //camera.addParam(new RichDouble("Camera Vertical Dist", 18.0f));  //cm anno: 18
+  //camera.addParam(new RichDouble("Camera Dist To Model", 30.0f));  //cm  anno: 30 ((30.0f + 17.0f)/2 + 0.6 * 20.0f)
 
-  camera.addParam(new RichDouble("Optimal Plane Width", 4.0f));    //cm
-  camera.addParam(new RichDouble("Camera FOV Angle", 28.07)); // tan-1(Vert_dist/2 / far_dist)
+  camera.addParam(new RichDouble("Camera Far Distance", 2.0f));       //kinect 2.0 meter, use it with "Max Normalize Length"
+  camera.addParam(new RichDouble("Camera Near Distance", 0.6f));      //kinect 0.6 meter
+  camera.addParam(new RichDouble("Predicted Model Size", 37.0f));     //for kinect useless
+  camera.addParam(new RichDouble("Camera Horizon Dist", 1.89506f));   //kinect far
+  camera.addParam(new RichDouble("Camera Vertical Dist", 1.57564f));  //kinect far
+  camera.addParam(new RichDouble("Camera Dist To Model", 1.3f));      //(far + near) / 2.0f
+
+  //camera.addParam(new RichDouble("Camera Far Distance", 24.8f));    //cm
+  //camera.addParam(new RichDouble("Camera Near Distance", 19.6f));   //cm
+  //camera.addParam(new RichDouble("Camera Far Distance", 22.2f));    //cm
+  //camera.addParam(new RichDouble("Camera Near Distance", 17.0f));   //cm
+  //camera.addParam(new RichDouble("Camera Far Distance", 23.2f));    //cm
+  //camera.addParam(new RichDouble("Camera Near Distance", 19.0f));   //cm
+
+  camera.addParam(new RichDouble("Optimal Plane Width", 4.0f));       //cm
+  camera.addParam(new RichDouble("Camera FOV Angle", 28.07));         // tan-1(Vert_dist/2 / far_dist)
   //20 for sphere test, 30 for dancing children
 
   camera.addParam(new RichDouble("Camera Resolution",1.0f / 50.0f));
