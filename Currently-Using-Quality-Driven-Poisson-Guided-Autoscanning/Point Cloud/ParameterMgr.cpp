@@ -50,7 +50,7 @@ void ParameterMgr::initDataMgrParameter()
 	data.addParam(new RichDouble("CGrid Radius", grid_r));
   data.addParam(new RichDouble("Outlier Percentage", 0.01));
   data.addParam(new RichDouble("H Gaussian Para", 4));
-  data.addParam(new RichDouble("Max Normalize Length", -1.0f));
+  data.addParam(new RichDouble("Max Normalize Length", 3.2f));
 }
 
 void ParameterMgr::initGlareaParameter()

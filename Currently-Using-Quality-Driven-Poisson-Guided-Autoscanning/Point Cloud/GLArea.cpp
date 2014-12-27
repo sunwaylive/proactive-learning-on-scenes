@@ -380,14 +380,14 @@ void GLArea::paintGL()
     if (para->getBool("Show Scan Candidates"))
     {
       vcc::Camera current_camera;
-      double predict_size = global_paraMgr.camera.getDouble("Predicted Model Size");
-      double h_dist = global_paraMgr.camera.getDouble("Camera Horizon Dist") / predict_size;
-        
-      double v_dist = global_paraMgr.camera.getDouble("Camera Vertical Dist") / predict_size;
-      double far_dist = global_paraMgr.camera.getDouble("Camera Far Distance") / predict_size;
-      double near_dist = global_paraMgr.camera.getDouble("Camera Near Distance") / predict_size; 
+      //double predict_size = global_paraMgr.camera.getDouble("Predicted Model Size");
+      double h_dist = global_paraMgr.camera.getDouble("Camera Horizon Dist") / global_paraMgr.data.getDouble("Max Normalize Length");        
+      double v_dist = global_paraMgr.camera.getDouble("Camera Vertical Dist") / global_paraMgr.data.getDouble("Max Normalize Length");
+
+      double far_dist = global_paraMgr.camera.getDouble("Camera Far Distance") / global_paraMgr.data.getDouble("Max Normalize Length");
+      double near_dist = global_paraMgr.camera.getDouble("Camera Near Distance") / global_paraMgr.data.getDouble("Max Normalize Length"); 
       //double dist_to_model = global_paraMgr.camera.getDouble("Camera Dist To Model");
-      double dist_to_model = global_paraMgr.camera.getDouble("Camera Dist To Model") / predict_size;
+      double dist_to_model = global_paraMgr.camera.getDouble("Camera Dist To Model") / global_paraMgr.data.getDouble("Max Normalize Length");
       
       current_camera.far_horizon_dist = h_dist;
       current_camera.far_vertical_dist = v_dist;
@@ -417,8 +417,8 @@ void GLArea::paintGL()
     if (para->getBool("Show Scan History"))
     {
       vector<ScanCandidate> *history = dataMgr.getScanHistory();
-      double far_dist = global_paraMgr.camera.getDouble("Camera Far Distance") / 
-                             global_paraMgr.camera.getDouble("Predicted Model Size");
+      double far_dist = global_paraMgr.camera.getDouble("Camera Far Distance") 
+        / global_paraMgr.data.getDouble("Max Normalize Length");
       if (!history->empty())
       {
         vector<ScanCandidate>::iterator it = history->begin();

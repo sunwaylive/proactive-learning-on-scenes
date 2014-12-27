@@ -323,6 +323,7 @@ void CameraParaDlg::loadToOriginal()
   area->initView();
   area->initAfterOpenFile();
   area->updateGL();
+  std::cout<<"max normalize length: " <<global_paraMgr.data.getDouble("Max Normalize Length") <<endl;
 }
 
 void CameraParaDlg::loadToModel()

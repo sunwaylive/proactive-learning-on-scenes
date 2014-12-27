@@ -84,8 +84,10 @@ void DataMgr::transformToGroundAxis()
 void DataMgr::initDefaultScanCamera()
 {
   double predict_size = global_paraMgr.camera.getDouble("Predicted Model Size");
-  double far_dist = global_paraMgr.camera.getDouble("Camera Far Distance") / predict_size;
-  double camera_dist_to_model = global_paraMgr.camera.getDouble("Camera Dist To Model") / predict_size;
+  double far_dist = global_paraMgr.camera.getDouble("Camera Far Distance") 
+    / global_paraMgr.data.getDouble("Max Normalize Length");
+  double camera_dist_to_model = global_paraMgr.camera.getDouble("Camera Dist To Model") 
+    / global_paraMgr.data.getDouble("Max Normalize Length");
   //default cameras for initial scanning, pair<pos, direction>
   //x axis
   init_scan_candidates.push_back(make_pair(Point3f(1.0f * camera_dist_to_model, 0.0f, 0.0f), Point3f(-1.0f, 0.0f, 0.0f)));
@@ -105,9 +107,9 @@ void DataMgr::initDefaultScanCamera()
 
   //this should be deleted, for UI debug
   //for test
-  scan_candidates.push_back(make_pair(Point3f(0.0f, 0.0f, 1.0f * far_dist), Point3f(0.0f, 0.0f, -1.0f)));
+  scan_candidates.push_back(make_pair(Point3f(0.0f, 0.0f, 1.0f * camera_dist_to_model), Point3f(0.0f, 0.0f, -1.0f)));
   //x axis
-  scan_candidates.push_back(make_pair(Point3f(1.0f * far_dist, 0.0f, 0.0f), Point3f(-1.0f, 0.0f, 0.0f)));
+  scan_candidates.push_back(make_pair(Point3f(1.0f * camera_dist_to_model, 0.0f, 0.0f), Point3f(-1.0f, 0.0f, 0.0f)));
   //scan_candidates.push_back(make_pair(Point3f(-1.0f, 0.0f, 0.0f), Point3f(1.0f, 0.0f, 0.0f)));
   ////y axis
   //scan_candidates.push_back(make_pair(Point3f(0.0f, 1.0f, 0.0f), Point3f(0.0f, -1.0f, 0.0f)));
@@ -634,8 +636,8 @@ void DataMgr::recomputeBox()
     sdf_voxels.bbox.Add(vi->P());
   }
 
-  double camera_max_dist = global_paraMgr.camera.getDouble("Camera Far Distance") /
-    global_paraMgr.camera.getDouble("Predicted Model Size"); 
+  double camera_max_dist = global_paraMgr.camera.getDouble("Camera Far Distance") 
+    / global_paraMgr.data.getDouble("Max Normalize Length"); 
   float scan_box_size = camera_max_dist + 0.5;
 
   Point3f whole_space_box_min = Point3f(-scan_box_size, -scan_box_size, -scan_box_size);
