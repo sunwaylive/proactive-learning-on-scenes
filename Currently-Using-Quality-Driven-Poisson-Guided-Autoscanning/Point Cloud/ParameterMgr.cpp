@@ -156,7 +156,7 @@ void ParameterMgr::initDrawerParameter()
 	drawer.addParam(new RichColor("Sample Point Color", QColor(255, 0, 0) ));
 	drawer.addParam(new RichColor("Original Point Color", QColor(48, 48, 48) ));
 	drawer.addParam(new RichColor("Feature Color", QColor(0, 0, 255) ));
-	drawer.addParam(new RichColor("Pick Point Color", QColor(128, 128, 0) ));
+	drawer.addParam(new RichColor("Pick Point Color", QColor(255, 0, 0) ));
 	drawer.addParam(new RichColor("Pick Point DNN Color", QColor(0, 0, 155) ));
 
 	drawer.addParam(new RichColor("Skeleton Bone Color", QColor(200, 0, 0) ));

@@ -2385,22 +2385,16 @@ void GLArea::removePickPoint()
       CVertex &v = samples->vert[pickList[i]]; 
       samples->vert.erase(samples->vert.begin() + v.m_index);
     }
+    samples->vn = samples->vert.size();
   }
   else
-  {		
-    double prob = global_paraMgr.nbv.getDouble("View Prune Confidence Threshold");
-
-    for (int i = 0; i < pickList.size(); i++)
-    {
-      if (1.0f * rand() / (RAND_MAX+1.0) > (1 - prob))
-        continue;
-
+  {
+    for (int i = 0; i < pickList.size(); i++) {
       samples->vert[pickList[i]].is_ignore = true;
     }
 
     vector<CVertex> save_sample_vert;
-    for (int i = 0; i < samples->vert.size(); i++)
-    {
+    for (int i = 0; i < samples->vert.size(); i++) {
       CVertex& v = samples->vert[i];
       if (!v.is_ignore)
       {
@@ -2409,16 +2403,14 @@ void GLArea::removePickPoint()
     }
 
     samples->vert.clear();
-    for (int i = 0; i < save_sample_vert.size(); i++)
-    {
+    for (int i = 0; i < save_sample_vert.size(); i++) {
       samples->vert.push_back(save_sample_vert[i]);
     }
+    samples->vn = samples->vert.size();
   }
-  samples->vn = samples->vert.size();
 
-  j = 0;
-  for(vi = samples->vert.begin(); vi != samples->vert.end(); ++vi, ++j)
-  {
+  //update sample index
+  for(j = 0, vi = samples->vert.begin(); vi != samples->vert.end(); ++vi, ++j) {
     vi->m_index = j;
   }
 
