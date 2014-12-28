@@ -162,13 +162,13 @@ void GLArea::paintGL()
     lpos[1] = lightPos[1];
     lpos[2] = lightPos[2];
     lpos[3] = 0;
-    glLightfv(GL_LIGHT0, GL_POSITION, lpos);       
+    glLightfv(GL_LIGHT0, GL_POSITION, lpos);
     lpos[0] = -lightPos[0];
     lpos[1] = -lightPos[1];
     lpos[2] = -lightPos[2];
     lpos[3] = 0;
     glLightfv(GL_LIGHT1, GL_POSITION, lpos);       
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);   
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
     double SnapResolutionScale = global_paraMgr.glarea.getDouble("Snapshot Resolution");
     if (takeSnapTile)

@@ -58,7 +58,7 @@ void ParameterMgr::initGlareaParameter()
 	glarea.addParam(new RichString("Running Algorithm Name", "") );
 	glarea.addParam(new RichBool("Light On or Off", true) );
 	glarea.addParam(new RichBool("Show Normal", false) );
-	glarea.addParam(new RichBool("Show Samples", true) );
+	glarea.addParam(new RichBool("Show Samples", false) );
 	glarea.addParam(new RichBool("Show Samples Quad", false) );
 	glarea.addParam(new RichBool("Show Samples Dot", true) );
 	glarea.addParam(new RichBool("Show Samples Circle", false) );

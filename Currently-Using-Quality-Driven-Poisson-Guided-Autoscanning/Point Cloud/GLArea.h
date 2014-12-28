@@ -46,7 +46,7 @@ public:
 	void initializeGL();
 	void resizeGL(int w, int h);
 	void paintGL(); 
-	void updateUI(){emit needUpdateStatus();}
+	void updateUI(){ emit needUpdateStatus(); }
 
 	void loadDefaultModel();
 	void openByDrop(QString fileName);

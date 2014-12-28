@@ -403,7 +403,6 @@ void CameraParaDlg::usePickOriginal(bool _val)
 {
   global_paraMgr.drawer.setValue("Use Pick Original", BoolValue(_val));
   area->updateGL();
-  std::cout<<global_paraMgr.drawer.getBool("Use Pick Original") <<endl;
 }
 
 void CameraParaDlg::useOtherInsideSegment(bool _val)
