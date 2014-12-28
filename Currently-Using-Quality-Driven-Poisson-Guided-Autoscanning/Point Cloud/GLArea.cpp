@@ -1129,29 +1129,31 @@ void GLArea::changeColor(QString paraName)
 
 int GLArea::pickPoint(int x, int y, vector<int> &result, int width, int height,bool only_one)
 {
-  if(dataMgr.isSamplesEmpty())
+  if((dataMgr.isSamplesEmpty() && !global_paraMgr.drawer.getBool("Use Pick Original"))
+    && (dataMgr.isOriginalEmpty() && global_paraMgr.drawer.getBool("Use Pick Original")))
     return -1;
 
+  if(width == 0 || height == 0) 
+    return 0; 
+  
   result.clear();
-
-  if(width==0 ||height==0) return 0; 
-  long hits;	
-  CMesh* samples = dataMgr.getCurrentSamples();
-
-  if (global_paraMgr.drawer.getBool("Use Pick Original"))
-  {
-    samples = dataMgr.getCurrentOriginal();
+  long hits = 0;
+  CMesh* target = NULL;
+  if (global_paraMgr.drawer.getBool("Use Pick Original")){
+    target = dataMgr.getCurrentOriginal();
+  }else{
+    target = dataMgr.getCurrentSamples();
   }
 
-  int sz= samples->vert.size();
+  int sz = target->vert.size();
 
-  GLuint *selectBuf =new GLuint[sz*5];
+  GLuint *selectBuf = new GLuint[sz * 5];
 
   //  static unsigned int selectBuf[16384];
   glSelectBuffer(sz * 5, selectBuf);
   glRenderMode(GL_SELECT);
-  glInitNames();
 
+  glInitNames();
   /* Because LoadName() won't work with no names on the stack */
   glPushName(-1);
 
@@ -1161,6 +1163,7 @@ int GLArea::pickPoint(int x, int y, vector<int> &result, int width, int height,b
   glGetIntegerv(GL_VIEWPORT,viewport);
   glMatrixMode(GL_PROJECTION);
   glGetDoublev(GL_PROJECTION_MATRIX ,mp);
+  //save former projection matrix
   glPushMatrix();
   glLoadIdentity();
   gluPickMatrix(x, y, width, height, viewport);
@@ -1171,8 +1174,6 @@ int GLArea::pickPoint(int x, int y, vector<int> &result, int width, int height,b
 
   //doPick = true;
   global_paraMgr.drawer.setValue("Doing Pick", BoolValue(true));
-
-
   //if (global_paraMgr.drawer.getBool("Use Pick Skeleton"))
   //{
   //	just_draw_skel_for_pick = true;
@@ -1197,10 +1198,10 @@ int GLArea::pickPoint(int x, int y, vector<int> &result, int width, int height,b
     hits--;
   }
 
-  for(long ii=0;ii<hits;ii++)
+  for(long ii = 0;ii < hits; ii++)
   {
     //H.push_back( std::pair<double,unsigned int>(selectBuf[ii*4+1]/4294967295.0,selectBuf[ii*4+3]));
-    H.push_back(selectBuf[ii*4+3]);
+    H.push_back(selectBuf[ii * 4 + 3]);
   }
   sort(H.begin(),H.end());
 
@@ -1225,9 +1226,7 @@ int GLArea::pickPoint(int x, int y, vector<int> &result, int width, int height,b
     if(result.empty())
       return -1;
     else
-    {
       return result[0];
-    }
   }
 
   return result.size();
@@ -2308,9 +2307,23 @@ void GLArea::mouseReleaseEvent(QMouseEvent *e)
       RGBPickList.assign(3, -1);
       RGB_counter = 0;
 
-      if (!dataMgr.isSamplesEmpty() && !pickList.empty())
+      if (!global_paraMgr.drawer.getBool("Use Pick Original") && !dataMgr.isSamplesEmpty() && !pickList.empty())
       {
         CMesh* samples = dataMgr.getCurrentSamples();
+        int index = pickList[0];
+        CVertex v = samples->vert.at(index);
+        //cout << "iso value: " << v.eigen_confidence << endl;
+        cout << "Index: " << v.m_index << endl;
+
+        cout << "Pos: " << v.P()[0] << ", " 
+          << v.P()[1] << ", " << v.P()[2] << ", "<<endl;
+
+        cout << "Confidence: " <<v.eigen_confidence <<endl;
+      }
+
+      if (global_paraMgr.drawer.getBool("Use Pick Original") && !dataMgr.isOriginalEmpty() && !pickList.empty())
+      {
+        CMesh* samples = dataMgr.getCurrentOriginal();
         int index = pickList[0];
         CVertex v = samples->vert.at(index);
         //cout << "iso value: " << v.eigen_confidence << endl;
@@ -2365,11 +2378,16 @@ void
 
 void GLArea::removePickPoint()
 {
-  CMesh* samples = dataMgr.getCurrentSamples();
+  CMesh* target;
+  if (global_paraMgr.drawer.getBool("Use Pick Original")){
+    target = dataMgr.getCurrentOriginal();
+  }else{
+    target = dataMgr.getCurrentSamples();
+  }
 
   CMesh::VertexIterator vi;
   int j = 0;
-  for(vi = samples->vert.begin(); vi != samples->vert.end(); ++vi, ++j)
+  for(vi = target->vert.begin(); vi != target->vert.end(); ++vi, ++j)
   {
     vi->m_index = j;
     vi->neighbors.clear();
@@ -2379,38 +2397,38 @@ void GLArea::removePickPoint()
   {
     for(int i = 0; i < pickList.size(); i++) 
     {
-      if(pickList[i] < 0 || pickList[i] >= samples->vert.size())
+      if(pickList[i] < 0 || pickList[i] >= target->vert.size())
         continue;
 
-      CVertex &v = samples->vert[pickList[i]]; 
-      samples->vert.erase(samples->vert.begin() + v.m_index);
+      CVertex &v = target->vert[pickList[i]]; 
+      target->vert.erase(target->vert.begin() + v.m_index);
     }
-    samples->vn = samples->vert.size();
+    target->vn = target->vert.size();
   }
   else
   {
     for (int i = 0; i < pickList.size(); i++) {
-      samples->vert[pickList[i]].is_ignore = true;
+      target->vert[pickList[i]].is_ignore = true;
     }
 
     vector<CVertex> save_sample_vert;
-    for (int i = 0; i < samples->vert.size(); i++) {
-      CVertex& v = samples->vert[i];
+    for (int i = 0; i < target->vert.size(); i++) {
+      CVertex& v = target->vert[i];
       if (!v.is_ignore)
       {
         save_sample_vert.push_back(v);
       }
     }
 
-    samples->vert.clear();
+    target->vert.clear();
     for (int i = 0; i < save_sample_vert.size(); i++) {
-      samples->vert.push_back(save_sample_vert[i]);
+      target->vert.push_back(save_sample_vert[i]);
     }
-    samples->vn = samples->vert.size();
+    target->vn = target->vert.size();
   }
 
   //update sample index
-  for(j = 0, vi = samples->vert.begin(); vi != samples->vert.end(); ++vi, ++j) {
+  for(j = 0, vi = target->vert.begin(); vi != target->vert.end(); ++vi, ++j) {
     vi->m_index = j;
   }
 

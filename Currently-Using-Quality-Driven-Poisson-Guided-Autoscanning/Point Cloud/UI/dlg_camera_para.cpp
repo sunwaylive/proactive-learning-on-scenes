@@ -82,6 +82,7 @@ void CameraParaDlg::initConnects()
   //auto scene related
   connect(ui->pushButton_load_scene, SIGNAL(clicked()), this, SLOT(loadScene()));
   connect(ui->pushButton_detect_plane, SIGNAL(clicked()), this, SLOT(detectPlane()));
+  connect(ui->checkBox_pick_original, SIGNAL(clicked(bool)), this, SLOT(usePickOriginal(bool)));
   connect(ui->pushButton_compute_scene_nbv, SIGNAL(clicked()), this, SLOT(computeSceneNBV()));
 }
 
@@ -396,6 +397,13 @@ void CameraParaDlg::showSDFSliceZ(bool _val)
 {
   global_paraMgr.nbv.setValue("Show SDF Slice Z", BoolValue(_val));
   area->updateGL();
+}
+
+void CameraParaDlg::usePickOriginal(bool _val)
+{
+  global_paraMgr.drawer.setValue("Use Pick Original", BoolValue(_val));
+  area->updateGL();
+  std::cout<<global_paraMgr.drawer.getBool("Use Pick Original") <<endl;
 }
 
 void CameraParaDlg::useOtherInsideSegment(bool _val)

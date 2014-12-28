@@ -134,8 +134,8 @@ void ParameterMgr::initGlareaParameter()
 void ParameterMgr::initDrawerParameter()
 {
 	drawer.addParam(new RichBool("Doing Pick", false));
-	drawer.addParam(new RichBool("Need Cull Points", false) );
-	drawer.addParam(new RichBool("Use Pick Original", false));
+	drawer.addParam(new RichBool("Need Cull Points", false));
+	drawer.addParam(new RichBool("Use Pick Original", true));
 	drawer.addParam(new RichBool("Use Pick Mode2", true) );
 	drawer.addParam(new RichBool("Skeleton Light", true));
 	drawer.addParam(new RichBool("Show Individual Color", true));
