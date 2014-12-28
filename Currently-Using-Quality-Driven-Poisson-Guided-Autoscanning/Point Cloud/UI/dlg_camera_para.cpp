@@ -82,6 +82,7 @@ void CameraParaDlg::initConnects()
   //auto scene related
   connect(ui->pushButton_load_scene, SIGNAL(clicked()), this, SLOT(loadScene()));
   connect(ui->pushButton_detect_plane, SIGNAL(clicked()), this, SLOT(detectPlane()));
+  connect(ui->pushButton_compute_scene_nbv, SIGNAL(clicked()), this, SLOT(computeSceneNBV()));
 }
 
 bool CameraParaDlg::initWidgets()
@@ -1296,4 +1297,9 @@ void CameraParaDlg::detectPlane()
     std::cout<< "coefficients:" <<  *coefficients <<std::endl;
   }
   return;
+}
+
+void CameraParaDlg::computeSceneNBV()
+{
+
 }

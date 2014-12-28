@@ -106,7 +106,7 @@ void NBV::runOneKeyNBV()
   timer.start("build grid");
   buildGrid();
   timer.end();
-
+   
   timer.start("propagate");
   propagate();
   timer.end();

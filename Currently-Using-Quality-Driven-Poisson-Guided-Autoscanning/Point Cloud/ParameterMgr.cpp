@@ -127,8 +127,8 @@ void ParameterMgr::initGlareaParameter()
 	glarea.addParam(new RichBool("All Octree Nodes", false));
   glarea.addParam(new RichBool("Show Poisson Surface", false));
   //sdf related
-  glarea.addParam(new RichBool("Show SDF Slices",true));
-  glarea.addParam(new RichBool("Show SDF Voxels", true));
+  glarea.addParam(new RichBool("Show SDF Slices",false));
+  glarea.addParam(new RichBool("Show SDF Voxels", false));
 }
 
 void ParameterMgr::initDrawerParameter()

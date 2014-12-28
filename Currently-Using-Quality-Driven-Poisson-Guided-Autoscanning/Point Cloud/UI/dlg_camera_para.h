@@ -113,6 +113,7 @@ signals:
     //auto scene related
     void loadScene();
     void detectPlane();
+    void computeSceneNBV();
 
 private:
   Ui::camera_paras * ui;
