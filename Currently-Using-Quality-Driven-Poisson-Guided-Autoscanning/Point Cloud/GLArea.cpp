@@ -2307,32 +2307,12 @@ void GLArea::mouseReleaseEvent(QMouseEvent *e)
       RGBPickList.assign(3, -1);
       RGB_counter = 0;
 
-      if (!global_paraMgr.drawer.getBool("Use Pick Original") && !dataMgr.isSamplesEmpty() && !pickList.empty())
-      {
-        CMesh* samples = dataMgr.getCurrentSamples();
-        int index = pickList[0];
-        CVertex v = samples->vert.at(index);
-        //cout << "iso value: " << v.eigen_confidence << endl;
-        cout << "Index: " << v.m_index << endl;
-
-        cout << "Pos: " << v.P()[0] << ", " 
-          << v.P()[1] << ", " << v.P()[2] << ", "<<endl;
-
-        cout << "Confidence: " <<v.eigen_confidence <<endl;
+      if (!global_paraMgr.drawer.getBool("Use Pick Original") && !dataMgr.isSamplesEmpty() && !pickList.empty()){
+        std::cout<<"pick SAMPLE points number: " <<pickList.size() <<std::endl;
       }
 
-      if (global_paraMgr.drawer.getBool("Use Pick Original") && !dataMgr.isOriginalEmpty() && !pickList.empty())
-      {
-        CMesh* samples = dataMgr.getCurrentOriginal();
-        int index = pickList[0];
-        CVertex v = samples->vert.at(index);
-        //cout << "iso value: " << v.eigen_confidence << endl;
-        cout << "Index: " << v.m_index << endl;
-
-        cout << "Pos: " << v.P()[0] << ", " 
-          << v.P()[1] << ", " << v.P()[2] << ", "<<endl;
-
-        cout << "Confidence: " <<v.eigen_confidence <<endl;
+      if (global_paraMgr.drawer.getBool("Use Pick Original") && !dataMgr.isOriginalEmpty() && !pickList.empty()){
+        std::cout<<"pick ORIGINAL points number: " <<pickList.size() <<std::endl;        
       }
     }
   }
@@ -2382,16 +2362,15 @@ void GLArea::savePickPointToSample()
   GlobalFun::clearCMesh(*sample);
 
   for(int i = 0; i < pickList.size(); ++i){
-    CVertex &v = target->vert[pickList[i]];
+    CVertex v = target->vert[pickList[i]];
+    v.is_original = false;
+    v.is_fixed_sample = true;
+    v.m_index = i;
     sample->vert.push_back(v);
     sample->bbox.Add(v.P());
   }
   sample->vn = sample->vert.size();
-
-  //update index
-  for (int i = 0, index = 0; i < sample->vert.size(); ++i){
-    sample->vert[i].m_index = index++;
-  }
+  updateUI();
 }
 
 void GLArea::removePickPoint()

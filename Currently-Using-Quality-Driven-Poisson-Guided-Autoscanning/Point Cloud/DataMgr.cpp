@@ -645,7 +645,6 @@ void DataMgr::recomputeBox()
   whole_space_box.SetNull();
   whole_space_box.Add(whole_space_box_min);
   whole_space_box.Add(whole_space_box_max);
-
 }
 
 
