@@ -2404,7 +2404,23 @@ void Poisson::runComputeSceneConfidence()
 {
   std::cout<<"compute scene confidence" <<std::endl;
   assert(iso_points != NULL);
+  double radius = para->getDouble("CGrid Radius"); 
+  GlobalFun::computeBallNeighbors(iso_points, NULL, radius, iso_points->bbox);
 
+  for (int i = 0; i < iso_points->vert.size(); ++i){
+    CVertex &v = iso_points->vert[i];
+    if(v.neighbors.size() == 0)
+      continue;
+
+    double conf = 0.0f;
+    for(int j = 0; j < v.neighbors.size(); ++j){
+      CVertex &n = iso_points->vert[v.neighbors[j]];
+      double d = GlobalFun::computeEulerDistSquare(v.P(), n.P());
+      conf += 1.0 / exp(d);
+    }
+    v.eigen_confidence = conf;
+  }
+  GlobalFun::normalizeConfidence(iso_points->vert, 0.0f);
 }
 
 void Poisson::runBallPivotingReconstruction()
