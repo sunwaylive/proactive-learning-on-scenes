@@ -4,6 +4,8 @@
 #include "scene_seg.h"
 #include "graph.h"
 #include "BinarySeg.h"
+#include "Clustering.h"
+#include "MultiSeg.h"
 
 
 int main (int argc, char *argv[])
@@ -20,7 +22,10 @@ int main (int argc, char *argv[])
   PointCloudPtr_RGB_NORMAL cloud_mark(new PointCloud_RGB_NORMAL);
   pcl::copyPointCloud(*cloud,*cloud_mark);
 
-  CBinarySeg cBinarySeg;   //Binary Segmetation
+  CBinarySeg cBinarySeg;
+  CClustering cClustering; 
+  CMultiSeg cMultiSeg;
+
 
   /******************detect table************************/
   PointCloudPtr_RGB_NORMAL tabletopCloud(new PointCloud_RGB_NORMAL());
@@ -298,43 +303,65 @@ int main (int argc, char *argv[])
 cBinarySeg.AddPatchNormal(vecPatcNormal);
 cBinarySeg.MainStep();
 
+/******************Clustering************************/
+cClustering.vecvecObjectPool = cBinarySeg.vecvecObjectPool;
+cClustering.vecPatchPoint = cBinarySeg.vecPatchPoint;
+cClustering.MainStep();
+
+
+/******************Multi Segmentation************************/
+
+cMultiSeg.vecvecObjectPoolClustering = cClustering.vecvecObjectPoolClustering;
+cMultiSeg.vecObjectPoolClusteringCount = cClustering.vecObjectPoolClusteringCount;
+
+cMultiSeg.vecPatchPoint = cBinarySeg.vecPatchPoint;
+cMultiSeg.vecpairPatchConnection = cBinarySeg.vecpairPatchConnection;
+cMultiSeg.vecSmoothValue = cBinarySeg.vecSmoothValue;
+cMultiSeg.vecPatchCenPoint = cBinarySeg.vecPatchCenPoint;
+cMultiSeg.vecPatchColor = cBinarySeg.vecPatchColor;
+cMultiSeg.boundingBoxSize = cBinarySeg.boundingBoxSize;
+cMultiSeg.clusterPatchNum = cBinarySeg.clusterPatchNum;
+
+cMultiSeg.MainStep();
+
+
 /******************Show Segmetation************************/
-int countFore = 0;
-for(int i = 0; i < cBinarySeg.vecFore.size();i++)
-{
-	std::stringstream str;
-	str<<"cube"<<countFore<<i;
-	std::string id_pc=str.str();
-	countFore++;
-
-	int index = cBinarySeg.vecFore[i];
-	vs.viewer->addCube(cBinarySeg.vecPatchCenPoint[index].x - cBinarySeg.boundingBoxSize/50, 
-		cBinarySeg.vecPatchCenPoint[index].x + cBinarySeg.boundingBoxSize/50,
-		cBinarySeg.vecPatchCenPoint[index].y - cBinarySeg.boundingBoxSize/50,
-		cBinarySeg.vecPatchCenPoint[index].y + cBinarySeg.boundingBoxSize/50,
-		cBinarySeg.vecPatchCenPoint[index].z - cBinarySeg.boundingBoxSize/50, 
-		cBinarySeg.vecPatchCenPoint[index].z + cBinarySeg.boundingBoxSize/50,
-		0,0,1,id_pc);
-}
-
-
-for(int i = 0;i < cBinarySeg.vecpairPatchConnection.size();i++)
-{
-	pcl::PointXYZ point0,point1;
-	int index0,index1;
-	index0 = cBinarySeg.vecpairPatchConnection[i].first;
-	index1 = cBinarySeg.vecpairPatchConnection[i].second;
-	point0.x = cBinarySeg.vecPatchCenPoint[index0].x;
-	point0.y = cBinarySeg.vecPatchCenPoint[index0].y;
-	point0.z = cBinarySeg.vecPatchCenPoint[index0].z;
-	point1.x = cBinarySeg.vecPatchCenPoint[index1].x;
-	point1.y = cBinarySeg.vecPatchCenPoint[index1].y;
-	point1.z = cBinarySeg.vecPatchCenPoint[index1].z;
-	std::stringstream st0;
-	st0<<"a"<<i<<"0";
-	std::string id_line0=st0.str();
-	vs.viewer->addLine(point0,point1,1,0,0,id_line0);
-}
+// int countFore = 0;
+// for(int i = 0; i < cBinarySeg.vecFore.size();i++)
+// {
+// 	std::stringstream str;
+// 	str<<"cube"<<countFore<<i;
+// 	std::string id_pc=str.str();
+// 	countFore++;
+// 
+// 	int index = cBinarySeg.vecFore[i];
+// 	vs.viewer->addCube(cBinarySeg.vecPatchCenPoint[index].x - cBinarySeg.boundingBoxSize/50, 
+// 		cBinarySeg.vecPatchCenPoint[index].x + cBinarySeg.boundingBoxSize/50,
+// 		cBinarySeg.vecPatchCenPoint[index].y - cBinarySeg.boundingBoxSize/50,
+// 		cBinarySeg.vecPatchCenPoint[index].y + cBinarySeg.boundingBoxSize/50,
+// 		cBinarySeg.vecPatchCenPoint[index].z - cBinarySeg.boundingBoxSize/50, 
+// 		cBinarySeg.vecPatchCenPoint[index].z + cBinarySeg.boundingBoxSize/50,
+// 		0,0,1,id_pc);
+// }
+// 
+// 
+// for(int i = 0;i < cBinarySeg.vecpairPatchConnection.size();i++)
+// {
+// 	pcl::PointXYZ point0,point1;
+// 	int index0,index1;
+// 	index0 = cBinarySeg.vecpairPatchConnection[i].first;
+// 	index1 = cBinarySeg.vecpairPatchConnection[i].second;
+// 	point0.x = cBinarySeg.vecPatchCenPoint[index0].x;
+// 	point0.y = cBinarySeg.vecPatchCenPoint[index0].y;
+// 	point0.z = cBinarySeg.vecPatchCenPoint[index0].z;
+// 	point1.x = cBinarySeg.vecPatchCenPoint[index1].x;
+// 	point1.y = cBinarySeg.vecPatchCenPoint[index1].y;
+// 	point1.z = cBinarySeg.vecPatchCenPoint[index1].z;
+// 	std::stringstream st0;
+// 	st0<<"a"<<i<<"0";
+// 	std::string id_line0=st0.str();
+// 	vs.viewer->addLine(point0,point1,1,0,0,id_line0);
+// }
 
 // for(int i = 0;i < cBinarySeg.vecIfConnectTable.size();i++)
 // {
