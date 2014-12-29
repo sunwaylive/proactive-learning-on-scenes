@@ -2356,12 +2356,19 @@ void GLArea::savePickPointToIso()
 {
   cout<<"save pick point to Iso" <<std::endl;
 
-  CMesh *target =  dataMgr.getCurrentOriginal();
+  CMesh* target;
+  if (global_paraMgr.drawer.getBool("Use Pick Original")){
+    target = dataMgr.getCurrentOriginal();
+  }else{
+    target = dataMgr.getCurrentSamples();
+  }
+
   CMesh *iso_points = dataMgr.getCurrentIsoPoints();
   GlobalFun::clearCMesh(*iso_points);
 
   for(int i = 0; i < pickList.size(); ++i){
     CVertex v = target->vert[pickList[i]];
+    v.is_fixed_sample = false;
     v.is_original = false;
     v.is_iso = true;
     v.m_index = i;

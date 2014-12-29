@@ -327,10 +327,10 @@
       <string>Pick Original Points</string>
      </property>
      <property name="checked">
-      <bool>true</bool>
+      <bool>false</bool>
      </property>
     </widget>
-    <widget class="QPushButton" name="pushButton_save_selected_to_original">
+    <widget class="QPushButton" name="pushButton_save_pickpoint_to_iso">
      <property name="geometry">
       <rect>
        <x>40</x>
@@ -340,7 +340,7 @@
       </rect>
      </property>
      <property name="text">
-      <string>Use Selected Original Points</string>
+      <string>Use PickPoints</string>
      </property>
      <property name="shortcut">
       <string>Alt+E</string>
