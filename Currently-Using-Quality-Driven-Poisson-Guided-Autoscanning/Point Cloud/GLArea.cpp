@@ -1752,10 +1752,10 @@ void GLArea::wheelEvent(QWheelEvent *e)
 {
   const int WHEEL_STEP = 120;
   double change_rate = 0.05;
-  double change = (e->delta() < 0) ? (1 + change_rate) : (1 - change_rate);
+  double change = (e->delta() > 0) ? (1 + change_rate) : (1 - change_rate);
 
   double change_rate2 = 0.015;
-  double change2 = (e->delta() < 0) ? (1 + change_rate2) : (1 - change_rate2);
+  double change2 = (e->delta() > 0) ? (1 + change_rate2) : (1 - change_rate2);
 
   double size_temp = 0.0;
 
@@ -2102,8 +2102,7 @@ void GLArea::wheelEvent(QWheelEvent *e)
         &&para->getBool("Show Original") && para->getBool("Show Original Dot") )
       {
         size_temp = global_paraMgr.drawer.getDouble("Sample Dot Size") * change;
-        if(size_temp < 1)
-        {
+        if(size_temp < 1){
           size_temp = 1;
         }
         global_paraMgr.drawer.setValue("Sample Dot Size", DoubleValue(size_temp));

@@ -2398,11 +2398,12 @@ void Poisson::runComputeIsoHoleConfidence()
     iso_points->vert[i].eigen_confidence = 1 - iso_points->vert[i].eigen_confidence;
   }
   //runIsoSmooth();
-}
+} 
 
 void Poisson::runComputeSceneConfidence()
 {
   std::cout<<"compute scene confidence" <<std::endl;
+  assert(iso_points != NULL);
 
 }
 
