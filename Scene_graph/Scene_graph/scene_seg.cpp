@@ -1,40 +1,6 @@
-#include <iostream>
-#include <pcl/sample_consensus/method_types.h>
-#include <pcl/sample_consensus/model_types.h>
-
-#include <pcl/segmentation/sac_segmentation.h>
-#include <pcl/visualization/cloud_viewer.h>
-#include "pcl/filters/extract_indices.h"
-
-#include <pcl/io/pcd_io.h>
-#include <pcl/filters/extract_indices.h>
-#include <pcl/filters/voxel_grid.h>
-#include <pcl/features/normal_3d.h>
-#include <pcl/kdtree/kdtree.h>
-#include <pcl/segmentation/extract_clusters.h>
-
-#include <pcl/filters/passthrough.h>
-#include <pcl/filters/project_inliers.h>
-
-#include <pcl/common/transforms.h>
-#include <math.h>
-
 #include "scene_seg.h"
-#include "Wm5IntrTriangle3Triangle3.h"
-#include "Wm5IntrTriangle3Sphere3.h"
-#include "Wm5IntrTriangle3Cylinder3.h"
-
-#include <Eigen/Dense>
-#include <Eigen/Eigenvalues>
-
 #include "supervoxel_clustering.h"
-
 #include <pcl/octree/octree.h>
-
-#define PI 3.1415926535
-
-using namespace std;
-using namespace Wm5;
 
 //for least square
 bool getPlaneByLeastSquare(PointCloudPtr_RGB_NORMAL cloud_all_in_plane, pcl::ModelCoefficients::Ptr coefficients)

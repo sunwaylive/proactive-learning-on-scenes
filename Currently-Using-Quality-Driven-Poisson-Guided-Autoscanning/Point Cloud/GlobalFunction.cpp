@@ -1575,3 +1575,44 @@ void GlobalFun::computePCANormal(CMesh *mesh, int knn)
       samples->vert[i].N() *= -1;
   }
 }
+
+void GlobalFun::CMesh2PclPointCloud(const CMesh * const src, PclPointCloudPtr dst)
+{
+  if(src == NULL || dst == NULL){
+    std::cerr<<"CMesh to Pcl PonitCloud, NULL Pointer!" <<std::endl;
+    return;
+  }
+
+  for(int i = 0; i < src->vert.size(); ++i){
+    const CVertex &v = src->vert[i];
+    PclPoint pt;
+    pt.x = v.P()[0];
+    pt.y = v.P()[1];
+    pt.z = v.P()[2];
+    pt.r = 0;
+    pt.g = 0;
+    pt.b = 0;
+    dst->push_back(pt);
+  }
+
+  return;
+}
+
+void GlobalFun::PclPointCloud2CMesh(PclPointCloudPtr src, CMesh * const dst)
+{
+  if(src == NULL || dst == NULL){
+    cout<<"PclPointCloud to CMesh, NULL Pointer!" <<endl;
+    return;
+  }
+
+  for (int i = 0; i < src->points.size(); ++i){
+    const PclPoint &pt = src->points[i];
+    CVertex v;
+    v.P()[0] = pt.x;
+    v.P()[1] = pt.y;
+    v.P()[2] = pt.z;
+    dst->vert.push_back(v);
+    dst->bbox.Add(v.P());
+  }
+  dst->vn = dst->vert.size();
+}

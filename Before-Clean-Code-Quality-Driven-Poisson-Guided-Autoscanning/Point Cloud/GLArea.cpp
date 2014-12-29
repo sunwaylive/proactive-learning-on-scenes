@@ -1181,8 +1181,6 @@ void GLArea::changeColor(QString paraName)
     {
       global_paraMgr.glarea.setValue(paraName, ColorValue(qcolor));
     }
-
-
   } 
 }
 

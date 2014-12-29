@@ -44,6 +44,8 @@ private:
   static bool cmp(const CVertex &v1, const CVertex &v2);
   //sdf related
   void runSDFSlice();
+  //auto scene related
+  void viewPruneUsingPlane();
 
 private:
   int                   view_bin_each_axis;

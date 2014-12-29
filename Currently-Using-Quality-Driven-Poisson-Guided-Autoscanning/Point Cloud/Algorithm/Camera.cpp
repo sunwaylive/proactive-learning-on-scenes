@@ -22,17 +22,17 @@ void vcc::Camera::setInput(DataMgr* pData)
     nbv_candidates = pData->getNbvCandidates();
 
     far_horizon_dist = global_paraMgr.camera.getDouble("Camera Horizon Dist") 
-      / global_paraMgr.camera.getDouble("Predicted Model Size");
+      / global_paraMgr.data.getDouble("Max Normalize Length");
     far_vertical_dist = global_paraMgr.camera.getDouble("Camera Vertical Dist")
-      / global_paraMgr.camera.getDouble("Predicted Model Size");
+      / global_paraMgr.data.getDouble("Max Normalize Length");
 
     far_distance = global_paraMgr.camera.getDouble("Camera Far Distance") 
-      / global_paraMgr.camera.getDouble("Predicted Model Size");
+      / global_paraMgr.data.getDouble("Max Normalize Length");
     near_distance = global_paraMgr.camera.getDouble("Camera Near Distance")
-      / global_paraMgr.camera.getDouble("Predicted Model Size");
+      / global_paraMgr.data.getDouble("Max Normalize Length");
 
     dist_to_model = global_paraMgr.camera.getDouble("Camera Dist To Model")
-      / global_paraMgr.camera.getDouble("Predicted Model Size");
+      / global_paraMgr.data.getDouble("Max Normalize Length");
 
     resolution = global_paraMgr.camera.getDouble("Camera Resolution");
   }else

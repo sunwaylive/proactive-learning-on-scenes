@@ -106,7 +106,7 @@ void NBV::runOneKeyNBV()
   timer.start("build grid");
   buildGrid();
   timer.end();
-
+   
   timer.start("propagate");
   propagate();
   timer.end();
@@ -393,8 +393,8 @@ void NBV::propagate()
     nbv_candidates->vert.clear();
 
 
-  double camera_max_dist = global_paraMgr.camera.getDouble("Camera Far Distance") /
-    global_paraMgr.camera.getDouble("Predicted Model Size");
+  double camera_max_dist = global_paraMgr.camera.getDouble("Camera Far Distance")
+    / global_paraMgr.data.getDouble("Max Normalize Length");
 
   int max_steps = static_cast<int>(camera_max_dist / grid_step_size);
   max_steps *= para->getDouble("Max Ray Steps Para"); //wsh
@@ -766,9 +766,9 @@ void NBV::viewExtractionIntoBins(int view_bin_each_axis)
   //delete unqualified candidates
   double confidence_threshold = para->getDouble("Confidence Filter Threshold");
   double camera_far_dist = global_paraMgr.camera.getDouble("Camera Far Distance")
-    / global_paraMgr.camera.getDouble("Predicted Model Size");
+    / global_paraMgr.data.getDouble("Max Normalize Length");
   double camera_near_dist = global_paraMgr.camera.getDouble("Camera Near Distance") 
-    / global_paraMgr.camera.getDouble("Predicted Model Size");
+    / global_paraMgr.data.getDouble("Max Normalize Length");
 
   int nbv_candidate_num = 0;
   for (int i = 0; i < nbv_candidates->vert.size(); i++)
@@ -1195,10 +1195,10 @@ bool NBV::updateViewDirections()
   double radius = optimal_plane_width / 3.0;
   cout << "plane radius" << endl;
 
-  double camera_max_dist = global_paraMgr.camera.getDouble("Camera Far Distance") /
-    global_paraMgr.camera.getDouble("Predicted Model Size");
-  double camera_near_dist = global_paraMgr.camera.getDouble("Camera Near Distance") /
-    global_paraMgr.camera.getDouble("Predicted Model Size");
+  double camera_max_dist = global_paraMgr.camera.getDouble("Camera Far Distance") 
+    / global_paraMgr.data.getDouble("Max Normalize Length");
+  double camera_near_dist = global_paraMgr.camera.getDouble("Camera Near Distance") 
+    / global_paraMgr.data.getDouble("Max Normalize Length");
   double optimal_D = camera_max_dist / 2.0f;
   double half_D = camera_near_dist; //wsh    
   double half_D2 = half_D * half_D;
@@ -1413,8 +1413,8 @@ void NBV::runSmoothGridConfidence()
 void NBV::runComputeViewCandidateIndex()
 {
   //get the whole 3D space that a camera may exist
-  double camera_max_dist = global_paraMgr.camera.getDouble("Camera Far Distance") /
-    global_paraMgr.camera.getDouble("Predicted Model Size"); 
+  double camera_max_dist = global_paraMgr.camera.getDouble("Camera Far Distance") 
+    / global_paraMgr.data.getDouble("Max Normalize Length"); 
 
   float scan_box_size = camera_max_dist + 0.5;
   whole_space_box_min = Point3f(-scan_box_size, -scan_box_size, -scan_box_size);
@@ -1533,4 +1533,10 @@ void NBV::runSDFSlice()
       }
     }
   }
+}
+
+
+void NBV::viewPruneUsingPlane()
+{
+
 }

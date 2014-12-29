@@ -46,7 +46,7 @@ public:
 	void initializeGL();
 	void resizeGL(int w, int h);
 	void paintGL(); 
-	void updateUI(){emit needUpdateStatus();}
+	void updateUI(){ emit needUpdateStatus(); }
 
 	void loadDefaultModel();
 	void openByDrop(QString fileName);
@@ -68,6 +68,7 @@ public:
 	QColor inputColor(istream& in);
 	void readRGBNormal(QString fileName);
 
+  void savePickPointToIso();
 	void removePickPoint();
   void removeOutliers();
   void moveAllCandidates(bool is_forward);

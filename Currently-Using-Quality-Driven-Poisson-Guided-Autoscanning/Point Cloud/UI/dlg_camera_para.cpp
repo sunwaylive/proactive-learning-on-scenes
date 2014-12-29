@@ -65,8 +65,8 @@ void CameraParaDlg::initConnects()
   connect(ui->update_view_directions, SIGNAL(clicked()), this, SLOT(runUpdateViewDirections()));
 
   connect(ui->pushButton_setup_initial_scans, SIGNAL(clicked()), this, SLOT(runSetupInitialScanns()));
-  connect(ui->step2_run_Poisson_Confidence_original, SIGNAL(clicked()), this, SLOT(runStep2PoissonConfidenceViaOiginal()));
-  connect(ui->step2_run_Poisson_Confidence_original_2, SIGNAL(clicked()), this, SLOT(runStep2PoissonConfidenceViaOiginal()));
+  connect(ui->step2_run_Poisson_Confidence_original, SIGNAL(clicked()), this, SLOT(runStep2PoissonConfidenceViaOriginal()));
+  connect(ui->step2_run_Poisson_Confidence_original_2, SIGNAL(clicked()), this, SLOT(runStep2PoissonConfidenceViaOriginal()));
   connect(ui->step3_run_NBV, SIGNAL(clicked()), this, SLOT(runStep3NBVcandidates()));
   connect(ui->step3_run_NBV_2, SIGNAL(clicked()), this, SLOT(runStep3NBVcandidates()));
   connect(ui->step4_run_New_Scan, SIGNAL(clicked()), this, SLOT(runStep4NewScans()));
@@ -80,7 +80,11 @@ void CameraParaDlg::initConnects()
   connect(ui->checkBox_show_sdf_slice_Z,SIGNAL(clicked(bool)),this,SLOT(showSDFSliceZ(bool)));
 
   //auto scene related
+  connect(ui->pushButton_load_scene, SIGNAL(clicked()), this, SLOT(loadScene()));
   connect(ui->pushButton_detect_plane, SIGNAL(clicked()), this, SLOT(detectPlane()));
+  connect(ui->checkBox_pick_original, SIGNAL(clicked(bool)), this, SLOT(usePickOriginal(bool)));
+  connect(ui->pushButton_compute_scene_nbv, SIGNAL(clicked()), this, SLOT(computeSceneNBV()));
+  connect(ui->pushButton_save_selected_to_original, SIGNAL(clicked()), this, SLOT(savePickPointToIso()));
 }
 
 bool CameraParaDlg::initWidgets()
@@ -322,6 +326,7 @@ void CameraParaDlg::loadToOriginal()
   area->initView();
   area->initAfterOpenFile();
   area->updateGL();
+  std::cout<<"max normalize length: " <<global_paraMgr.data.getDouble("Max Normalize Length") <<endl;
 }
 
 void CameraParaDlg::loadToModel()
@@ -392,6 +397,12 @@ void CameraParaDlg::showSDFSliceY(bool _val)
 void CameraParaDlg::showSDFSliceZ(bool _val)
 {
   global_paraMgr.nbv.setValue("Show SDF Slice Z", BoolValue(_val));
+  area->updateGL();
+}
+
+void CameraParaDlg::usePickOriginal(bool _val)
+{
+  global_paraMgr.drawer.setValue("Use Pick Original", BoolValue(_val));
   area->updateGL();
 }
 
@@ -963,12 +974,30 @@ void CameraParaDlg::runStep2HolePoissonConfidence()
   global_paraMgr.poisson.setValue("Compute Hole Confidence", BoolValue(false));
 }
 
-void CameraParaDlg::runStep2PoissonConfidenceViaOiginal()
+void CameraParaDlg::runStep2PoissonConfidenceViaOriginal()
 {
   global_paraMgr.poisson.setValue("Run Poisson On Original", BoolValue(true));
   global_paraMgr.poisson.setValue("Run One Key PoissonConfidence", BoolValue(true));
   area->runPoisson();
   global_paraMgr.poisson.setValue("Run One Key PoissonConfidence", BoolValue(false));
+  global_paraMgr.poisson.setValue("Run Poisson On Original", BoolValue(false));
+}
+
+//default on sample points
+void CameraParaDlg::runSceneConfidence()
+{
+  global_paraMgr.poisson.setValue("Run Scene Confidence", BoolValue(true));
+  area->runPoisson();
+  global_paraMgr.poisson.setValue("Run Scene Confidence", BoolValue(false));
+}
+
+//force on original points
+void CameraParaDlg::runSceneConfidenceViaOriginal()
+{
+  global_paraMgr.poisson.setValue("Run Poisson On Original", BoolValue(true));
+  global_paraMgr.poisson.setValue("Run Scene Confidence", BoolValue(true));
+  area->runPoisson();
+  global_paraMgr.poisson.setValue("Run Scene Confidence", BoolValue(false));
   global_paraMgr.poisson.setValue("Run Poisson On Original", BoolValue(false));
 }
 
@@ -1255,6 +1284,13 @@ void CameraParaDlg::prepareSDFSlicePlane()
   cout<<"prepare sdf slice plane done!" <<endl;
 }
 
+
+void CameraParaDlg::loadScene()
+{
+  //load scene to original
+  loadToOriginal();
+}
+
 void CameraParaDlg::detectPlane()
 {
   std::cout<<"detect plane" <<endl;
@@ -1264,10 +1300,37 @@ void CameraParaDlg::detectPlane()
     return;
   }
 
-  pcl::SACSegmentation<Point_RGB_NORMAL> seg;
+  pcl::SACSegmentation<PclPoint> seg;
   seg.setOptimizeCoefficients(true);
-  seg.setMethodType(pcl::SACMODEL_PLANE);
+  seg.setModelType(pcl::SACMODEL_PLANE);
+  seg.setMethodType (pcl::SAC_RANSAC);
   seg.setMaxIterations(1000);
-  seg.setDistanceThreshold(0.015);
+  seg.setDistanceThreshold(0.02);
 
+  PclPointCloudPtr original_point_cloud(new PclPointCloud);
+
+  GlobalFun::CMesh2PclPointCloud(original, original_point_cloud);
+  seg.setInputCloud(original_point_cloud);
+  
+  pcl::ModelCoefficients::Ptr coefficients (new pcl::ModelCoefficients);
+  pcl::PointIndices::Ptr inliers (new pcl::PointIndices);
+  seg.segment(*inliers, *coefficients);
+
+  if (inliers->indices.size () == 0) {
+    std::cout << "Could not estimate a planar model for the given dataset." << std::endl;
+    return;
+  }else{
+    std::cout<< "coefficients:" <<  *coefficients <<std::endl;
+  }
+  return;
+}
+
+void CameraParaDlg::computeSceneNBV()
+{
+  runSceneConfidence();
+}
+
+void CameraParaDlg::savePickPointToIso()
+{
+  area->savePickPointToIso();
 }
