@@ -2353,23 +2353,23 @@ void  GLArea::removeOutliers()
   updateUI();
 }
 
-void GLArea::savePickPointToSample()
+void GLArea::savePickPointToIso()
 {
-  cout<<"save pick point to original" <<std::endl;
+  cout<<"save pick point to Iso" <<std::endl;
 
   CMesh *target =  dataMgr.getCurrentOriginal();
-  CMesh *sample = dataMgr.getCurrentSamples();
-  GlobalFun::clearCMesh(*sample);
+  CMesh *iso_points = dataMgr.getCurrentIsoPoints();
+  GlobalFun::clearCMesh(*iso_points);
 
   for(int i = 0; i < pickList.size(); ++i){
     CVertex v = target->vert[pickList[i]];
     v.is_original = false;
-    v.is_fixed_sample = true;
+    v.is_iso = true;
     v.m_index = i;
-    sample->vert.push_back(v);
-    sample->bbox.Add(v.P());
+    iso_points->vert.push_back(v);
+    iso_points->bbox.Add(v.P());
   }
-  sample->vn = sample->vert.size();
+  iso_points->vn = iso_points->vert.size();
   updateUI();
 }
 

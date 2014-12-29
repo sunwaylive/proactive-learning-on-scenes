@@ -177,6 +177,12 @@ void Poisson::run()
     return;
   }
 
+  if (para->getBool("Run Scene Confidence"))
+  {
+    runComputeSceneConfidence();
+    return;
+  }
+
   if (para->getBool("Run Clear Slice"))
   {
     slices->clear();
@@ -2392,6 +2398,12 @@ void Poisson::runComputeIsoHoleConfidence()
     iso_points->vert[i].eigen_confidence = 1 - iso_points->vert[i].eigen_confidence;
   }
   //runIsoSmooth();
+}
+
+void Poisson::runComputeSceneConfidence()
+{
+  std::cout<<"compute scene confidence" <<std::endl;
+
 }
 
 void Poisson::runBallPivotingReconstruction()

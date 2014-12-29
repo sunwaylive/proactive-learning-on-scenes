@@ -65,8 +65,8 @@ void CameraParaDlg::initConnects()
   connect(ui->update_view_directions, SIGNAL(clicked()), this, SLOT(runUpdateViewDirections()));
 
   connect(ui->pushButton_setup_initial_scans, SIGNAL(clicked()), this, SLOT(runSetupInitialScanns()));
-  connect(ui->step2_run_Poisson_Confidence_original, SIGNAL(clicked()), this, SLOT(runStep2PoissonConfidenceViaOiginal()));
-  connect(ui->step2_run_Poisson_Confidence_original_2, SIGNAL(clicked()), this, SLOT(runStep2PoissonConfidenceViaOiginal()));
+  connect(ui->step2_run_Poisson_Confidence_original, SIGNAL(clicked()), this, SLOT(runStep2PoissonConfidenceViaOriginal()));
+  connect(ui->step2_run_Poisson_Confidence_original_2, SIGNAL(clicked()), this, SLOT(runStep2PoissonConfidenceViaOriginal()));
   connect(ui->step3_run_NBV, SIGNAL(clicked()), this, SLOT(runStep3NBVcandidates()));
   connect(ui->step3_run_NBV_2, SIGNAL(clicked()), this, SLOT(runStep3NBVcandidates()));
   connect(ui->step4_run_New_Scan, SIGNAL(clicked()), this, SLOT(runStep4NewScans()));
@@ -84,7 +84,7 @@ void CameraParaDlg::initConnects()
   connect(ui->pushButton_detect_plane, SIGNAL(clicked()), this, SLOT(detectPlane()));
   connect(ui->checkBox_pick_original, SIGNAL(clicked(bool)), this, SLOT(usePickOriginal(bool)));
   connect(ui->pushButton_compute_scene_nbv, SIGNAL(clicked()), this, SLOT(computeSceneNBV()));
-  connect(ui->pushButton_save_selected_to_original, SIGNAL(clicked()), this, SLOT(savePickPointToOriginal()));
+  connect(ui->pushButton_save_selected_to_original, SIGNAL(clicked()), this, SLOT(savePickPointToIso()));
 }
 
 bool CameraParaDlg::initWidgets()
@@ -974,12 +974,30 @@ void CameraParaDlg::runStep2HolePoissonConfidence()
   global_paraMgr.poisson.setValue("Compute Hole Confidence", BoolValue(false));
 }
 
-void CameraParaDlg::runStep2PoissonConfidenceViaOiginal()
+void CameraParaDlg::runStep2PoissonConfidenceViaOriginal()
 {
   global_paraMgr.poisson.setValue("Run Poisson On Original", BoolValue(true));
   global_paraMgr.poisson.setValue("Run One Key PoissonConfidence", BoolValue(true));
   area->runPoisson();
   global_paraMgr.poisson.setValue("Run One Key PoissonConfidence", BoolValue(false));
+  global_paraMgr.poisson.setValue("Run Poisson On Original", BoolValue(false));
+}
+
+//default on sample points
+void CameraParaDlg::runSceneConfidence()
+{
+  global_paraMgr.poisson.setValue("Run Scene Confidence", BoolValue(true));
+  area->runPoisson();
+  global_paraMgr.poisson.setValue("Run Scene Confidence", BoolValue(false));
+}
+
+//force on original points
+void CameraParaDlg::runSceneConfidenceViaOriginal()
+{
+  global_paraMgr.poisson.setValue("Run Poisson On Original", BoolValue(true));
+  global_paraMgr.poisson.setValue("Run Scene Confidence", BoolValue(true));
+  area->runPoisson();
+  global_paraMgr.poisson.setValue("Run Scene Confidence", BoolValue(false));
   global_paraMgr.poisson.setValue("Run Poisson On Original", BoolValue(false));
 }
 
@@ -1309,10 +1327,10 @@ void CameraParaDlg::detectPlane()
 
 void CameraParaDlg::computeSceneNBV()
 {
-
+  runSceneConfidence();
 }
 
-void CameraParaDlg::savePickPointToOriginal()
+void CameraParaDlg::savePickPointToIso()
 {
-  area->savePickPointToSample();
+  area->savePickPointToIso();
 }

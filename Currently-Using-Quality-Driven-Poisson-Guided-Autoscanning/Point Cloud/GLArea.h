@@ -68,7 +68,7 @@ public:
 	QColor inputColor(istream& in);
 	void readRGBNormal(QString fileName);
 
-  void savePickPointToSample();
+  void savePickPointToIso();
 	void removePickPoint();
   void removeOutliers();
   void moveAllCandidates(bool is_forward);

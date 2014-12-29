@@ -93,7 +93,7 @@ signals:
     void runSetupInitialScanns();
     void runStep2CombinedPoissonConfidence();
     void runStep2HolePoissonConfidence();
-    void runStep2PoissonConfidenceViaOiginal();
+    void runStep2PoissonConfidenceViaOriginal();
     void runStep3NBVcandidates();
     void runStep4NewScans();
     void runOneKeyNbvIteration();
@@ -115,7 +115,9 @@ signals:
     void detectPlane();
     void computeSceneNBV();
     void usePickOriginal(bool _val);
-    void savePickPointToOriginal();
+    void savePickPointToIso();
+    void runSceneConfidence();
+    void runSceneConfidenceViaOriginal();
 
 private:
   Ui::camera_paras * ui;

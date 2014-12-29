@@ -45,6 +45,7 @@ private:
   void runComputeIsoSmoothnessConfidence();
   void runComputeIsoHoleConfidence();
   void runSmoothGridConfidence();
+  void runComputeSceneConfidence();
 
   void runSlicePoints();
 

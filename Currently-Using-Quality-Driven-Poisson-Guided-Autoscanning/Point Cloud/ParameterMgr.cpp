@@ -235,6 +235,8 @@ void ParameterMgr::initPoissonParameter()
   poisson.addParam(new RichBool("Run Ball Pivoting Reconstruction", false));
 
   poisson.addParam(new RichInt("Field Points Resolution", -1));
+  //scene related
+  poisson.addParam(new RichBool("Run Scene Confidence", false));
 }
 
 void ParameterMgr::initCameraParameter()
