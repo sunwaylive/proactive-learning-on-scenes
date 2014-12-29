@@ -115,6 +115,7 @@ signals:
     void detectPlane();
     void computeSceneNBV();
     void usePickOriginal(bool _val);
+    void savePickPointToOriginal();
 
 private:
   Ui::camera_paras * ui;

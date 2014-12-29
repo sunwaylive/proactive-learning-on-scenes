@@ -84,6 +84,7 @@ void CameraParaDlg::initConnects()
   connect(ui->pushButton_detect_plane, SIGNAL(clicked()), this, SLOT(detectPlane()));
   connect(ui->checkBox_pick_original, SIGNAL(clicked(bool)), this, SLOT(usePickOriginal(bool)));
   connect(ui->pushButton_compute_scene_nbv, SIGNAL(clicked()), this, SLOT(computeSceneNBV()));
+  connect(ui->pushButton_save_selected_to_original, SIGNAL(clicked()), this, SLOT(savePickPointToOriginal()));
 }
 
 bool CameraParaDlg::initWidgets()
@@ -1309,4 +1310,9 @@ void CameraParaDlg::detectPlane()
 void CameraParaDlg::computeSceneNBV()
 {
 
+}
+
+void CameraParaDlg::savePickPointToOriginal()
+{
+  area->savePickPointToSample();
 }

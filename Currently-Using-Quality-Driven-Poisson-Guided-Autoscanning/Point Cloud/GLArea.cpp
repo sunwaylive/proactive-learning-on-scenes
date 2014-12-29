@@ -2340,8 +2340,6 @@ void GLArea::mouseReleaseEvent(QMouseEvent *e)
   updateGL();
 }
 
-
-
 void GLArea::keyReleaseEvent ( QKeyEvent * e )
 {
   if(e->key()==Qt::Key_Control) trackball.MouseUp(0,0, QT2VCG(Qt::NoButton, Qt::ControlModifier ) );
@@ -2349,8 +2347,7 @@ void GLArea::keyReleaseEvent ( QKeyEvent * e )
   if(e->key()==Qt::Key_Alt) trackball.MouseUp(0,0, QT2VCG(Qt::NoButton, Qt::AltModifier ) );
 }
 
-void
-  GLArea::removeOutliers()
+void  GLArea::removeOutliers()
 {
   double outlier_percentage = global_paraMgr.data.getDouble("Outlier Percentage");
   int outlie_num = 20;
@@ -2374,6 +2371,27 @@ void
   }
 
   updateUI();
+}
+
+void GLArea::savePickPointToSample()
+{
+  cout<<"save pick point to original" <<std::endl;
+
+  CMesh *target =  dataMgr.getCurrentOriginal();
+  CMesh *sample = dataMgr.getCurrentSamples();
+  GlobalFun::clearCMesh(*sample);
+
+  for(int i = 0; i < pickList.size(); ++i){
+    CVertex &v = target->vert[pickList[i]];
+    sample->vert.push_back(v);
+    sample->bbox.Add(v.P());
+  }
+  sample->vn = sample->vert.size();
+
+  //update index
+  for (int i = 0, index = 0; i < sample->vert.size(); ++i){
+    sample->vert[i].m_index = index++;
+  }
 }
 
 void GLArea::removePickPoint()
