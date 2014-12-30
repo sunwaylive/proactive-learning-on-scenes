@@ -288,7 +288,7 @@ void ParameterMgr::initNBVParameter()
   nbv.addParam(new RichInt("NBV Iteration Count", 3));
   nbv.addParam(new RichBool("Run Build Grid", false));
   nbv.addParam(new RichBool("Run Propagate", false));
-  nbv.addParam(new RichBool("Run Propagate One Point", false));
+  nbv.addParam(new RichBool("Run Propagate One Point", true));
   nbv.addParam(new RichBool("Run Grid Segment", false));
   nbv.addParam(new RichDouble("Merge Probability Pow", 1));
   nbv.addParam(new RichBool("Run Viewing Clustering", false));

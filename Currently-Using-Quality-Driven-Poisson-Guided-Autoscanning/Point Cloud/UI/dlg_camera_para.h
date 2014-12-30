@@ -113,6 +113,7 @@ signals:
     //auto scene related
     void loadScene();
     void detectPlane();
+    void computeSceneConfidence();
     void computeSceneNBV();
     void usePickOriginal(bool _val);
     void savePickPointToIso();

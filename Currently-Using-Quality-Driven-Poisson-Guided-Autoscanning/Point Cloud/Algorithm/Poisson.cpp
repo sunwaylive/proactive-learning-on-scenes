@@ -91,7 +91,6 @@ void Poisson::setInput(DataMgr* pData)
   samples = pData->getCurrentSamples();
   iso_points = pData->getCurrentIsoPoints();
   slices = pData->getCurrentSlices();
-
   model = pData->getCurrentModel();
 
   if (global_paraMgr.glarea.getBool("Show View Grid Slice") && !pData->isViewGridsEmpty())
@@ -103,6 +102,7 @@ void Poisson::setInput(DataMgr* pData)
   {
     cout << "using real field point" << endl;
     field_points = pData->getCurrentFieldPoints();
+    std::cout<<"field points num: " <<field_points->vert.size() <<std::endl;
   }
 
 	//if(!pData->isSamplesEmpty())
@@ -967,6 +967,7 @@ void Poisson::runPoissonFieldAndExtractIsoPoints_ByEXE()
 
   Timer timer;
   timer.start("write ply file");
+  std::cout<<"sample point num: " << samples->vert.size() <<std::endl;
   int mask= tri::io::Mask::IOM_VERTNORMAL;// add vertcord will cause crash
   tri::io::ExporterPLY<CMesh>::Save(*target, "poisson_in.ply", mask, false);
   timer.end();
@@ -1421,6 +1422,7 @@ void Poisson::runSlice()
 {
   if (field_points->vert.empty())
   {
+    std::cout<<"Field point empty! No slices can be generated!" <<std::endl;
     return;
   }
   int iso_num = field_points->vert.size();
@@ -2402,7 +2404,7 @@ void Poisson::runComputeIsoHoleConfidence()
 
 void Poisson::runComputeSceneConfidence()
 {
-  std::cout<<"compute scene confidence" <<std::endl;
+  std::cout<<"run compute scene confidence" <<std::endl;
   assert(iso_points != NULL);
   double radius = para->getDouble("CGrid Radius"); 
   GlobalFun::computeBallNeighbors(iso_points, NULL, radius, iso_points->bbox);

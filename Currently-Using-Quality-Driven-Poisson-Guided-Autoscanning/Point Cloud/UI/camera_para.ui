@@ -301,7 +301,7 @@
       <string>Load Scene To Original</string>
      </property>
     </widget>
-    <widget class="QPushButton" name="pushButton_compute_scene_nbv">
+    <widget class="QPushButton" name="pushButton_compute_scene_confidence">
      <property name="geometry">
       <rect>
        <x>40</x>
@@ -311,7 +311,7 @@
       </rect>
      </property>
      <property name="text">
-      <string>Compute Scene NBV </string>
+      <string>Compute Scene Confidence</string>
      </property>
     </widget>
     <widget class="QCheckBox" name="checkBox_pick_original">
@@ -344,6 +344,19 @@
      </property>
      <property name="shortcut">
       <string>Alt+E</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pushButton_compute_scene_nbv">
+     <property name="geometry">
+      <rect>
+       <x>40</x>
+       <y>170</y>
+       <width>191</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Compute Scene NBV </string>
      </property>
     </widget>
    </widget>

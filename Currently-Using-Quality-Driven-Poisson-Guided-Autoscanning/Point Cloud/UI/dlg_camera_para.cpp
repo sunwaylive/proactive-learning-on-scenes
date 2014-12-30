@@ -83,6 +83,7 @@ void CameraParaDlg::initConnects()
   connect(ui->pushButton_load_scene, SIGNAL(clicked()), this, SLOT(loadScene()));
   connect(ui->pushButton_detect_plane, SIGNAL(clicked()), this, SLOT(detectPlane()));
   connect(ui->checkBox_pick_original, SIGNAL(clicked(bool)), this, SLOT(usePickOriginal(bool)));
+  connect(ui->pushButton_compute_scene_confidence, SIGNAL(clicked()), this, SLOT(computeSceneConfidence()));
   connect(ui->pushButton_compute_scene_nbv, SIGNAL(clicked()), this, SLOT(computeSceneNBV()));
   connect(ui->pushButton_save_pickpoint_to_iso, SIGNAL(clicked()), this, SLOT(savePickPointToIso()));
 }
@@ -983,7 +984,7 @@ void CameraParaDlg::runStep2PoissonConfidenceViaOriginal()
   global_paraMgr.poisson.setValue("Run Poisson On Original", BoolValue(false));
 }
 
-//default on sample points
+//confidence is computed always on iso points
 void CameraParaDlg::runSceneConfidence()
 {
   global_paraMgr.poisson.setValue("Run Scene Confidence", BoolValue(true));
@@ -991,7 +992,7 @@ void CameraParaDlg::runSceneConfidence()
   global_paraMgr.poisson.setValue("Run Scene Confidence", BoolValue(false));
 }
 
-//force on original points
+//force run poisson reconstruction on original points
 void CameraParaDlg::runSceneConfidenceViaOriginal()
 {
   global_paraMgr.poisson.setValue("Run Poisson On Original", BoolValue(true));
@@ -1325,13 +1326,27 @@ void CameraParaDlg::detectPlane()
   return;
 }
 
-void CameraParaDlg::computeSceneNBV()
+void CameraParaDlg::computeSceneConfidence()
 {
+  //only to generate field points
+  global_paraMgr.poisson.setValue("Run Poisson On Samples", BoolValue(true));
+  global_paraMgr.poisson.setValue("Run Generate Poisson Field", BoolValue(true));
+  area->runPoisson();
+  global_paraMgr.poisson.setValue("Run Poisson On Samples", BoolValue(false));
+  global_paraMgr.poisson.setValue("Run Generate Poisson Field", BoolValue(false));
+
+  //compute scene confidence on iso points default
   runSceneConfidence();
+
   area->updateUI();
   area->updateGL();
-  runStep3NBVcandidates();
 }
+
+void CameraParaDlg::computeSceneNBV()
+{
+  //调试一个点的nbv，传播
+  runStep3NBVcandidates();
+};
 
 void CameraParaDlg::savePickPointToIso()
 {

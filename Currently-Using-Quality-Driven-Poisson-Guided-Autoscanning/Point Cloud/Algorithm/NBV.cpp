@@ -20,8 +20,8 @@ NBV::~NBV()
 
 void NBV::run()
 {
-  double camera_max_dist = global_paraMgr.camera.getDouble("Camera Far Distance") /
-    global_paraMgr.camera.getDouble("Predicted Model Size");
+  double camera_max_dist = global_paraMgr.camera.getDouble("Camera Far Distance") 
+    / global_paraMgr.data.getDouble("Max Normalize Length");
 
   int grid_resolution = global_paraMgr.nbv.getDouble("View Grid Resolution");
   if (grid_resolution <= 2)
@@ -224,8 +224,8 @@ void NBV::buildGrid()
   Point3f bbox_max = iso_points->bbox.max;
   Point3f bbox_min = iso_points->bbox.min;
   //get the whole 3D space that a camera may exist
-  double camera_max_dist = global_paraMgr.camera.getDouble("Camera Far Distance") /
-    global_paraMgr.camera.getDouble("Predicted Model Size"); 
+  double camera_max_dist = global_paraMgr.camera.getDouble("Camera Far Distance") 
+    / global_paraMgr.data.getDouble("Max Normalize Length"); 
 
   float scan_box_size = camera_max_dist + 0.5;
   whole_space_box_min = Point3f(-scan_box_size, -scan_box_size, -scan_box_size);
@@ -372,12 +372,13 @@ void NBV::propagate()
   bool use_propagate_one_point = para->getBool("Run Propagate One Point");
   bool use_max_propagation = para->getBool("Use Max Propagation");
 
-  double predicted_model_length = global_paraMgr.camera.getDouble("Predicted Model Size");
+  //double predicted_model_length = global_paraMgr.camera.getDouble("Predicted Model Size");
+
   double n_dist = global_paraMgr.camera.getDouble("Camera Near Distance");
   double f_dist = global_paraMgr.camera.getDouble("Camera Far Distance");
   //normalize near and far dist to virtual environment
-  n_dist /= predicted_model_length;
-  f_dist /= predicted_model_length;
+  n_dist /= global_paraMgr.data.getDouble("Max Normalize Length");;
+  f_dist /= global_paraMgr.data.getDouble("Max Normalize Length");;
 
   if (view_grid_points)
   {
@@ -473,7 +474,7 @@ void NBV::propagate()
           deltaY = y / length;
           deltaZ = z / length;
 
-          for (int k = 0; k <= max_steps; ++k)     
+          for (int k = 0; k <= max_steps; ++k)
           {
             n_indexX = n_indexX + deltaX;
             n_indexY = n_indexY + deltaY;
@@ -888,9 +889,9 @@ void NBV::viewClustering()
   //  nbv_candidates->vert[i].m_index = i;
   //}
 
-  double predicted_model_length = global_paraMgr.camera.getDouble("Predicted Model Size");
+  //double predicted_model_length = global_paraMgr.camera.getDouble("Predicted Model Size");
   double optimal_plane_width = global_paraMgr.camera.getDouble("Optimal Plane Width");
-  optimal_plane_width /= predicted_model_length;
+  optimal_plane_width /= global_paraMgr.data.getDouble("Max Normalize Length");
 
   double cluster_radius_threshold = optimal_plane_width / 5.0;
   double cluster_radius_threshold2 = cluster_radius_threshold * cluster_radius_threshold;
