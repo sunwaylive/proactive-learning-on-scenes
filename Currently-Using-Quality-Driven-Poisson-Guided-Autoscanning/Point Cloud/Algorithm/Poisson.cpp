@@ -1596,16 +1596,11 @@ void Poisson::runSlice()
 void Poisson::runSlicePoints()
 {
   CMesh* source_points;
-  if (global_paraMgr.glarea.getBool("Show ISO Points"))
-  {
+  if (global_paraMgr.glarea.getBool("Show ISO Points")){
     source_points = iso_points;
-  }
-  else if (global_paraMgr.glarea.getBool("Show Original"))
-  {
+  }else if (global_paraMgr.glarea.getBool("Show Original")){
     source_points = original;
-  }
-  else
-  {
+  }else{
     source_points = samples;
   }
 
@@ -1614,10 +1609,8 @@ void Poisson::runSlicePoints()
   bool paraller_slice_mode = para->getBool("Parallel Slices Mode");
 
   int res = 0;
-  for (; res < iso_num; res++)
-  {
-    if (res * res * res >= iso_num)
-    {
+  for (; res < iso_num; res++){
+    if (res * res * res >= iso_num){
       break;
     }
   }

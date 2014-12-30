@@ -871,8 +871,7 @@ void CameraParaDlg::buildGrid()
   global_paraMgr.nbv.setValue("Run Build Grid", BoolValue(false));
 }
 
-void
-  CameraParaDlg::propagate()
+void CameraParaDlg::propagate()
 {
   global_paraMgr.nbv.setValue("Run Propagate", BoolValue(true));
   area->runNBV();
@@ -886,7 +885,6 @@ void CameraParaDlg::propagateOnePoint()
   area->runNBV();
   global_paraMgr.nbv.setValue("Run Propagate One Point", BoolValue(false));
   global_paraMgr.nbv.setValue("Run Propagate", BoolValue(false));
-
 }
 
 void CameraParaDlg::gridSegment()

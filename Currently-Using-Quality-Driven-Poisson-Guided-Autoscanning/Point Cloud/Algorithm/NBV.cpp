@@ -380,7 +380,7 @@ void NBV::propagate()
   n_dist /= global_paraMgr.data.getDouble("Max Normalize Length");;
   f_dist /= global_paraMgr.data.getDouble("Max Normalize Length");;
 
-  if (view_grid_points)
+  if (view_grid_points != NULL)
   {
     for (int i = 0; i < view_grid_points->vert.size(); i++)
     {
@@ -390,7 +390,7 @@ void NBV::propagate()
       t.weight_sum = 0.0;
     }
   }
-  if (nbv_candidates) 
+  if (nbv_candidates != NULL) 
     nbv_candidates->vert.clear();
 
 
@@ -403,6 +403,7 @@ void NBV::propagate()
   double ray_density_para = para->getDouble("Max Ray Steps Para");
 
   int target_index = 0;
+  //random choose one point to propagate
   if (use_propagate_one_point)
   {
     target_index = para->getDouble("Propagate One Point Index");
@@ -412,7 +413,6 @@ void NBV::propagate()
       srand(time(NULL)); 
       target_index = rand() % iso_points->vert.size();
     }
-
     cout << "propagate one point index: " << target_index << endl;
   }
 
@@ -459,11 +459,11 @@ void NBV::propagate()
       double length = 0.0f;
       double deltaX, deltaY, deltaZ;
       //1. for each point, propagate to all discrete directions
-      for (a = 0.0f; a < PI; a += angle_delta)
-      {
+      //for (a = 0.0f; a < PI; a += angle_delta)
+      //{
         l = sin(a); y = cos(a);
-        for (b = 0.0f; b < 2 * PI; b += angle_delta)
-        {
+        //for (b = 0.0f; b < 2 * PI; b += angle_delta)
+        //{
           //now the propagate direction is Point3f(x, y, z)
           x = l * cos(b); z = l * sin(b);
           //reset the next grid indexes
@@ -521,8 +521,8 @@ void NBV::propagate()
             // record hit_grid center index
             hit_grid_indexes.push_back(index);                        
           }//end for k
-        }// end for b
-      }//end for a
+        //}// end for b
+      //}//end for a
 
       if (hit_grid_indexes.size() > 0)
       {
