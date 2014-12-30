@@ -65,8 +65,8 @@ void CameraParaDlg::initConnects()
   connect(ui->update_view_directions, SIGNAL(clicked()), this, SLOT(runUpdateViewDirections()));
 
   connect(ui->pushButton_setup_initial_scans, SIGNAL(clicked()), this, SLOT(runSetupInitialScanns()));
-  connect(ui->step2_run_Poisson_Confidence_original, SIGNAL(clicked()), this, SLOT(runStep2PoissonConfidenceViaOiginal()));
-  connect(ui->step2_run_Poisson_Confidence_original_2, SIGNAL(clicked()), this, SLOT(runStep2PoissonConfidenceViaOiginal()));
+  connect(ui->step2_run_Poisson_Confidence_original, SIGNAL(clicked()), this, SLOT(runStep2PoissonConfidenceViaOriginal()));
+  connect(ui->step2_run_Poisson_Confidence_original_2, SIGNAL(clicked()), this, SLOT(runStep2PoissonConfidenceViaOriginal()));
   connect(ui->step3_run_NBV, SIGNAL(clicked()), this, SLOT(runStep3NBVcandidates()));
   connect(ui->step3_run_NBV_2, SIGNAL(clicked()), this, SLOT(runStep3NBVcandidates()));
   connect(ui->step4_run_New_Scan, SIGNAL(clicked()), this, SLOT(runStep4NewScans()));
@@ -80,7 +80,12 @@ void CameraParaDlg::initConnects()
   connect(ui->checkBox_show_sdf_slice_Z,SIGNAL(clicked(bool)),this,SLOT(showSDFSliceZ(bool)));
 
   //auto scene related
+  connect(ui->pushButton_load_scene, SIGNAL(clicked()), this, SLOT(loadScene()));
   connect(ui->pushButton_detect_plane, SIGNAL(clicked()), this, SLOT(detectPlane()));
+  connect(ui->checkBox_pick_original, SIGNAL(clicked(bool)), this, SLOT(usePickOriginal(bool)));
+  connect(ui->pushButton_compute_scene_confidence, SIGNAL(clicked()), this, SLOT(computeSceneConfidence()));
+  connect(ui->pushButton_compute_scene_nbv, SIGNAL(clicked()), this, SLOT(computeSceneNBV()));
+  connect(ui->pushButton_save_pickpoint_to_iso, SIGNAL(clicked()), this, SLOT(savePickPointToIso()));
 }
 
 bool CameraParaDlg::initWidgets()
@@ -322,6 +327,7 @@ void CameraParaDlg::loadToOriginal()
   area->initView();
   area->initAfterOpenFile();
   area->updateGL();
+  std::cout<<"max normalize length: " <<global_paraMgr.data.getDouble("Max Normalize Length") <<endl;
 }
 
 void CameraParaDlg::loadToModel()
@@ -392,6 +398,12 @@ void CameraParaDlg::showSDFSliceY(bool _val)
 void CameraParaDlg::showSDFSliceZ(bool _val)
 {
   global_paraMgr.nbv.setValue("Show SDF Slice Z", BoolValue(_val));
+  area->updateGL();
+}
+
+void CameraParaDlg::usePickOriginal(bool _val)
+{
+  global_paraMgr.drawer.setValue("Use Pick Original", BoolValue(_val));
   area->updateGL();
 }
 
@@ -859,8 +871,7 @@ void CameraParaDlg::buildGrid()
   global_paraMgr.nbv.setValue("Run Build Grid", BoolValue(false));
 }
 
-void
-  CameraParaDlg::propagate()
+void CameraParaDlg::propagate()
 {
   global_paraMgr.nbv.setValue("Run Propagate", BoolValue(true));
   area->runNBV();
@@ -874,7 +885,6 @@ void CameraParaDlg::propagateOnePoint()
   area->runNBV();
   global_paraMgr.nbv.setValue("Run Propagate One Point", BoolValue(false));
   global_paraMgr.nbv.setValue("Run Propagate", BoolValue(false));
-
 }
 
 void CameraParaDlg::gridSegment()
@@ -963,12 +973,30 @@ void CameraParaDlg::runStep2HolePoissonConfidence()
   global_paraMgr.poisson.setValue("Compute Hole Confidence", BoolValue(false));
 }
 
-void CameraParaDlg::runStep2PoissonConfidenceViaOiginal()
+void CameraParaDlg::runStep2PoissonConfidenceViaOriginal()
 {
   global_paraMgr.poisson.setValue("Run Poisson On Original", BoolValue(true));
   global_paraMgr.poisson.setValue("Run One Key PoissonConfidence", BoolValue(true));
   area->runPoisson();
   global_paraMgr.poisson.setValue("Run One Key PoissonConfidence", BoolValue(false));
+  global_paraMgr.poisson.setValue("Run Poisson On Original", BoolValue(false));
+}
+
+//confidence is computed always on iso points
+void CameraParaDlg::runSceneConfidence()
+{
+  global_paraMgr.poisson.setValue("Run Scene Confidence", BoolValue(true));
+  area->runPoisson();
+  global_paraMgr.poisson.setValue("Run Scene Confidence", BoolValue(false));
+}
+
+//force run poisson reconstruction on original points
+void CameraParaDlg::runSceneConfidenceViaOriginal()
+{
+  global_paraMgr.poisson.setValue("Run Poisson On Original", BoolValue(true));
+  global_paraMgr.poisson.setValue("Run Scene Confidence", BoolValue(true));
+  area->runPoisson();
+  global_paraMgr.poisson.setValue("Run Scene Confidence", BoolValue(false));
   global_paraMgr.poisson.setValue("Run Poisson On Original", BoolValue(false));
 }
 
@@ -1255,11 +1283,18 @@ void CameraParaDlg::prepareSDFSlicePlane()
   cout<<"prepare sdf slice plane done!" <<endl;
 }
 
+
+void CameraParaDlg::loadScene()
+{
+  //load scene to original
+  loadToOriginal();
+}
+
 void CameraParaDlg::detectPlane()
 {
   std::cout<<"detect plane" <<endl;
-  CMesh *sample = area->dataMgr.getCurrentSamples();
-  if (sample == NULL) {
+  CMesh *original = area->dataMgr.getCurrentOriginal();
+  if (original == NULL) {
     std::cout<<"original point NULL, No Plane Detected!" <<std::endl;
     return;
   }
@@ -1273,7 +1308,7 @@ void CameraParaDlg::detectPlane()
 
   PclPointCloudPtr original_point_cloud(new PclPointCloud);
 
-  GlobalFun::CMesh2PclPointCloud(sample, original_point_cloud);
+  GlobalFun::CMesh2PclPointCloud(original, original_point_cloud);
   seg.setInputCloud(original_point_cloud);
   
   pcl::ModelCoefficients::Ptr coefficients (new pcl::ModelCoefficients);
@@ -1287,4 +1322,31 @@ void CameraParaDlg::detectPlane()
     std::cout<< "coefficients:" <<  *coefficients <<std::endl;
   }
   return;
+}
+
+void CameraParaDlg::computeSceneConfidence()
+{
+  //only to generate field points
+  global_paraMgr.poisson.setValue("Run Poisson On Samples", BoolValue(true));
+  global_paraMgr.poisson.setValue("Run Generate Poisson Field", BoolValue(true));
+  area->runPoisson();
+  global_paraMgr.poisson.setValue("Run Poisson On Samples", BoolValue(false));
+  global_paraMgr.poisson.setValue("Run Generate Poisson Field", BoolValue(false));
+
+  //compute scene confidence on iso points default
+  runSceneConfidence();
+
+  area->updateUI();
+  area->updateGL();
+}
+
+void CameraParaDlg::computeSceneNBV()
+{
+  runStep3NBVcandidates();
+};
+
+void CameraParaDlg::savePickPointToIso()
+{
+  area->savePickPointToIso();
+  area->cleanPickPoints();
 }

@@ -57,6 +57,21 @@
     <ClInclude Include="common_func.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="Clustering.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="MultiSeg.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="GCoptimization.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="matrix.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="LinkedBlockList.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="color_op.cpp">
@@ -108,6 +123,18 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="common_func.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Clustering.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="MultiSeg.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="GCoptimization.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="LinkedBlockList.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

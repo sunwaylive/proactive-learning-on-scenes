@@ -58,7 +58,6 @@ public:
 	vector<double> vecSmoothValue;
 	vector<double> vecGeometryValue;
 	vector<double> vecAppearenceValue;
-	vector<pair<int,int>> verpairSmoothVertex;
 
 	int seedPatch; 
 
@@ -79,6 +78,10 @@ public:
 	vector<bool> vecIfConnectTable;
 	MyPoint tableCen;
 
+	vector<struct kdtree*> vecKDTree;
+
+	vector<vector<int>> vecvecObjectPool;
+
 public:
 	//	void AddTable(PointCloudPtr_RGB_NORMAL &table);
 	void AddClusterPoints(vector<MyPointCloud_RGB_NORMAL> &points);
@@ -86,15 +89,16 @@ public:
 	void MainStep();
 	void GetAdjacency(int patchBegin,int patchEnd);
 	void PointCloudPreprocess();
-	void GraphConstruct();
+	void ComputeDataValue();
 	void GraphCutSolve(vector<int> &vecObjectHypo, double &cutEnergy);
 	double GetMinDisBetPatch(int m,int n,bool &stable);
 	double GetCenDisBetPatch(int m,int n);
+	void ComputeSmoothValue();
 	double GetBinaryDataValue(double d);
 	double GetBinarySmoothValue(int m,int n);
 	bool IfConnectTable(vector<MyPt_RGB_NORMAL> points);
 	void NomalizeData();
+	void NomalizeAppearence();
 	void NomalizeSmooth();
-
 };
 

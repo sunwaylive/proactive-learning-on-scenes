@@ -50,7 +50,7 @@ void ParameterMgr::initDataMgrParameter()
 	data.addParam(new RichDouble("CGrid Radius", grid_r));
   data.addParam(new RichDouble("Outlier Percentage", 0.01));
   data.addParam(new RichDouble("H Gaussian Para", 4));
-  data.addParam(new RichDouble("Max Normalize Length", -1.0f));
+  data.addParam(new RichDouble("Max Normalize Length", 3.2f));
 }
 
 void ParameterMgr::initGlareaParameter()
@@ -73,7 +73,7 @@ void ParameterMgr::initGlareaParameter()
 	glarea.addParam(new RichBool("Show Scanned Mesh", true));
   
 	glarea.addParam(new RichBool("Show Model", false));
-	glarea.addParam(new RichBool("Show Original", true) );
+	glarea.addParam(new RichBool("Show Original", false) );
 	glarea.addParam(new RichBool("Show Original Quad", false) );
 	glarea.addParam(new RichBool("Show Original Dot", true) );
 	glarea.addParam(new RichBool("Show Original Circle", false) );
@@ -127,14 +127,14 @@ void ParameterMgr::initGlareaParameter()
 	glarea.addParam(new RichBool("All Octree Nodes", false));
   glarea.addParam(new RichBool("Show Poisson Surface", false));
   //sdf related
-  glarea.addParam(new RichBool("Show SDF Slices",true));
-  glarea.addParam(new RichBool("Show SDF Voxels", true));
+  glarea.addParam(new RichBool("Show SDF Slices",false));
+  glarea.addParam(new RichBool("Show SDF Voxels", false));
 }
 
 void ParameterMgr::initDrawerParameter()
 {
 	drawer.addParam(new RichBool("Doing Pick", false));
-	drawer.addParam(new RichBool("Need Cull Points", false) );
+	drawer.addParam(new RichBool("Need Cull Points", false));
 	drawer.addParam(new RichBool("Use Pick Original", false));
 	drawer.addParam(new RichBool("Use Pick Mode2", true) );
 	drawer.addParam(new RichBool("Skeleton Light", true));
@@ -147,7 +147,7 @@ void ParameterMgr::initDrawerParameter()
 	drawer.addParam(new RichDouble("Sample Draw Width", 0.005));
 	drawer.addParam(new RichDouble("Sample Dot Size", 6));
 	drawer.addParam(new RichDouble("ISO Dot Size", 4));
-	drawer.addParam(new RichDouble("Original Dot Size", 10));
+	drawer.addParam(new RichDouble("Original Dot Size", 2));
 	drawer.addParam(new RichDouble("Normal Line Width", 2));
 	drawer.addParam(new RichDouble("Normal Line Length", 0.25f));
 
@@ -213,9 +213,9 @@ void ParameterMgr::initPoissonParameter()
 	poisson.addParam(new RichBool("Show Y Slices", false));
 	poisson.addParam(new RichBool("Show Z Slices", false));
 	poisson.addParam(new RichBool("Show Transparent Slices", false));
-	poisson.addParam(new RichDouble("Current X Slice Position", 0.0f));
-	poisson.addParam(new RichDouble("Current Y Slice Position", 0.0f));
-	poisson.addParam(new RichDouble("Current Z Slice Position", 0.0f));
+	poisson.addParam(new RichDouble("Current X Slice Position", 0.5f));
+	poisson.addParam(new RichDouble("Current Y Slice Position", 0.5f));
+	poisson.addParam(new RichDouble("Current Z Slice Position", 0.5f));
 	poisson.addParam(new RichDouble("Show Slice Percentage", 0.75));
 	poisson.addParam(new RichDouble("Poisson Disk Sample Number", 3000));
   poisson.addParam(new RichDouble("Original KNN", 251));
@@ -235,6 +235,8 @@ void ParameterMgr::initPoissonParameter()
   poisson.addParam(new RichBool("Run Ball Pivoting Reconstruction", false));
 
   poisson.addParam(new RichInt("Field Points Resolution", -1));
+  //scene related
+  poisson.addParam(new RichBool("Run Scene Confidence", false));
 }
 
 void ParameterMgr::initCameraParameter()
@@ -249,21 +251,29 @@ void ParameterMgr::initCameraParameter()
   camera.addParam(new RichBool("Show Camera Border", true));
 
 
-  camera.addParam(new RichDouble("Camera Far Distance", 30.0f));   //cm anno 25
-  camera.addParam(new RichDouble("Camera Near Distance", 10.0f));  //cm anno: 10
-  camera.addParam(new RichDouble("Predicted Model Size", 37.0f));  //cm anno: 37 lion:20
-  camera.addParam(new RichDouble("Camera Horizon Dist", 20.0f));   //cm anno: 14
-  camera.addParam(new RichDouble("Camera Vertical Dist", 18.0f));  //cm anno: 18
-  camera.addParam(new RichDouble("Camera Dist To Model", 30.0f)); //cm  anno: 30 ((30.0f + 17.0f)/2 + 0.6 * 20.0f)
-  //camera.addParam(new RichDouble("Camera Far Distance", 24.8f));   //cm
-  //camera.addParam(new RichDouble("Camera Near Distance", 19.6f));  //cm
-  //camera.addParam(new RichDouble("Camera Far Distance", 22.2f));   //cm
-  //camera.addParam(new RichDouble("Camera Near Distance", 17.0f));  //cm
-  //camera.addParam(new RichDouble("Camera Far Distance", 23.2f));   //cm
-  //camera.addParam(new RichDouble("Camera Near Distance", 19.0f));  //cm
+  //camera.addParam(new RichDouble("Camera Far Distance", 30.0f));   //cm anno 25
+  //camera.addParam(new RichDouble("Camera Near Distance", 10.0f));  //cm anno: 10
+  //camera.addParam(new RichDouble("Predicted Model Size", 37.0f));  //cm anno: 37 lion:20
+  //camera.addParam(new RichDouble("Camera Horizon Dist", 20.0f));   //cm anno: 14
+  //camera.addParam(new RichDouble("Camera Vertical Dist", 18.0f));  //cm anno: 18
+  //camera.addParam(new RichDouble("Camera Dist To Model", 30.0f));  //cm  anno: 30 ((30.0f + 17.0f)/2 + 0.6 * 20.0f)
 
-  camera.addParam(new RichDouble("Optimal Plane Width", 4.0f));    //cm
-  camera.addParam(new RichDouble("Camera FOV Angle", 28.07)); // tan-1(Vert_dist/2 / far_dist)
+  camera.addParam(new RichDouble("Camera Far Distance", 2.0f));       //kinect 2.0 meter, use it with "Max Normalize Length"
+  camera.addParam(new RichDouble("Camera Near Distance", 0.6f));      //kinect 0.6 meter
+  camera.addParam(new RichDouble("Predicted Model Size", 37.0f));     //for kinect useless
+  camera.addParam(new RichDouble("Camera Horizon Dist", 1.89506f));   //kinect far
+  camera.addParam(new RichDouble("Camera Vertical Dist", 1.57564f));  //kinect far
+  camera.addParam(new RichDouble("Camera Dist To Model", 1.3f));      //(far + near) / 2.0f
+
+  //camera.addParam(new RichDouble("Camera Far Distance", 24.8f));    //cm
+  //camera.addParam(new RichDouble("Camera Near Distance", 19.6f));   //cm
+  //camera.addParam(new RichDouble("Camera Far Distance", 22.2f));    //cm
+  //camera.addParam(new RichDouble("Camera Near Distance", 17.0f));   //cm
+  //camera.addParam(new RichDouble("Camera Far Distance", 23.2f));    //cm
+  //camera.addParam(new RichDouble("Camera Near Distance", 19.0f));   //cm
+
+  camera.addParam(new RichDouble("Optimal Plane Width", 4.0f));       //cm
+  camera.addParam(new RichDouble("Camera FOV Angle", 28.07));         // tan-1(Vert_dist/2 / far_dist)
   //20 for sphere test, 30 for dancing children
 
   camera.addParam(new RichDouble("Camera Resolution",1.0f / 50.0f));
@@ -278,7 +288,7 @@ void ParameterMgr::initNBVParameter()
   nbv.addParam(new RichInt("NBV Iteration Count", 3));
   nbv.addParam(new RichBool("Run Build Grid", false));
   nbv.addParam(new RichBool("Run Propagate", false));
-  nbv.addParam(new RichBool("Run Propagate One Point", false));
+  nbv.addParam(new RichBool("Run Propagate One Point", true));
   nbv.addParam(new RichBool("Run Grid Segment", false));
   nbv.addParam(new RichDouble("Merge Probability Pow", 1));
   nbv.addParam(new RichBool("Run Viewing Clustering", false));

@@ -91,7 +91,6 @@ void Poisson::setInput(DataMgr* pData)
   samples = pData->getCurrentSamples();
   iso_points = pData->getCurrentIsoPoints();
   slices = pData->getCurrentSlices();
-
   model = pData->getCurrentModel();
 
   if (global_paraMgr.glarea.getBool("Show View Grid Slice") && !pData->isViewGridsEmpty())
@@ -103,6 +102,7 @@ void Poisson::setInput(DataMgr* pData)
   {
     cout << "using real field point" << endl;
     field_points = pData->getCurrentFieldPoints();
+    std::cout<<"field points num: " <<field_points->vert.size() <<std::endl;
   }
 
 	//if(!pData->isSamplesEmpty())
@@ -174,6 +174,12 @@ void Poisson::run()
   if(para->getBool("Compute Hole Confidence"))
   {
     runComputeIsoHoleConfidence();
+    return;
+  }
+
+  if (para->getBool("Run Scene Confidence"))
+  {
+    runComputeSceneConfidence();
     return;
   }
 
@@ -961,6 +967,7 @@ void Poisson::runPoissonFieldAndExtractIsoPoints_ByEXE()
 
   Timer timer;
   timer.start("write ply file");
+  std::cout<<"sample point num: " << samples->vert.size() <<std::endl;
   int mask= tri::io::Mask::IOM_VERTNORMAL;// add vertcord will cause crash
   tri::io::ExporterPLY<CMesh>::Save(*target, "poisson_in.ply", mask, false);
   timer.end();
@@ -1415,8 +1422,10 @@ void Poisson::runSlice()
 {
   if (field_points->vert.empty())
   {
+    std::cout<<"Field point empty! No slices can be generated!" <<std::endl;
     return;
   }
+
   int iso_num = field_points->vert.size();
   double show_percentage = para->getDouble("Show Slice Percentage");
   bool paraller_slice_mode = para->getBool("Parallel Slices Mode");
@@ -1487,6 +1496,7 @@ void Poisson::runSlice()
   if (para->getBool("Show Y Slices"))
   {
     double slice_j_position = para->getDouble("Current Y Slice Position");
+    std::cout<<"slice j position: " << slice_j_position <<endl;
 
     if (!paraller_slice_mode)
     {
@@ -1507,6 +1517,7 @@ void Poisson::runSlice()
     }
     else
     {
+      std::cout<<"sunwei  debug" <<endl;
       //int slice_k_num = res * slice_j_position;
       int slice_j_num = res * slice_j_position;
 
@@ -1585,16 +1596,11 @@ void Poisson::runSlice()
 void Poisson::runSlicePoints()
 {
   CMesh* source_points;
-  if (global_paraMgr.glarea.getBool("Show ISO Points"))
-  {
+  if (global_paraMgr.glarea.getBool("Show ISO Points")){
     source_points = iso_points;
-  }
-  else if (global_paraMgr.glarea.getBool("Show Original"))
-  {
+  }else if (global_paraMgr.glarea.getBool("Show Original")){
     source_points = original;
-  }
-  else
-  {
+  }else{
     source_points = samples;
   }
 
@@ -1603,10 +1609,8 @@ void Poisson::runSlicePoints()
   bool paraller_slice_mode = para->getBool("Parallel Slices Mode");
 
   int res = 0;
-  for (; res < iso_num; res++)
-  {
-    if (res * res * res >= iso_num)
-    {
+  for (; res < iso_num; res++){
+    if (res * res * res >= iso_num){
       break;
     }
   }
@@ -2392,6 +2396,29 @@ void Poisson::runComputeIsoHoleConfidence()
     iso_points->vert[i].eigen_confidence = 1 - iso_points->vert[i].eigen_confidence;
   }
   //runIsoSmooth();
+} 
+
+void Poisson::runComputeSceneConfidence()
+{
+  std::cout<<"run compute scene confidence" <<std::endl;
+  assert(iso_points != NULL);
+  double radius = para->getDouble("CGrid Radius"); 
+  GlobalFun::computeBallNeighbors(iso_points, NULL, radius, iso_points->bbox);
+
+  for (int i = 0; i < iso_points->vert.size(); ++i){
+    CVertex &v = iso_points->vert[i];
+    if(v.neighbors.size() == 0)
+      continue;
+
+    double conf = 0.0f;
+    for(int j = 0; j < v.neighbors.size(); ++j){
+      CVertex &n = iso_points->vert[v.neighbors[j]];
+      double d = GlobalFun::computeEulerDistSquare(v.P(), n.P());
+      conf += 1.0 / exp(d);
+    }
+    v.eigen_confidence = conf;
+  }
+  GlobalFun::normalizeConfidence(iso_points->vert, 0.0f);
 }
 
 void Poisson::runBallPivotingReconstruction()

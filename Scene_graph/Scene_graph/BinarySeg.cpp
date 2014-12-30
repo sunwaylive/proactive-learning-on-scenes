@@ -1,11 +1,10 @@
 #include "BinarySeg.h"
 
-vector<vector<int>> vecvecObjectPool;
 
 CBinarySeg::CBinarySeg()
 {
-	thresholdClose0 = 0.005;
-	thresholdClose1 = 0.05;
+	thresholdClose0 = 0.005;  //判断patch是否相连
+	thresholdClose1 = 0.05;	  //计算局部法向量
 
 	paraSmallK = 1;
 	paraSmallS = 0.02;
@@ -65,31 +64,40 @@ void CBinarySeg::AddPatchNormal(vector<Normal> &normal)
 
 void CBinarySeg::MainStep()
 {
+	clock_t time[10];
+
+	ofstream outFilet("Output\\Time.txt",ios::out|ios::app);
+
+	time[0] = clock();
 	PointCloudPreprocess();
 
+	time[1] = clock();
+	ComputeSmoothValue();
 
+	time[2] = clock();
 	vecvecObjectPool.clear();
 	for(int i =0; i <vecPatchPoint.size(); i ++)
 	{
+
 		ofstream outFile0("Output\\cutEnergy.txt",ios::out|ios::app);
 		seedPatch = i;
 		int flagStop = true;
-		paraLargeS = 0.02;
+		paraLargeS = 0.01;
 		outFile0 <<  "index:" << i <<  endl;
 		while(paraLargeS < 0.4 && flagStop)
 		{
 			vector<int> vecObjectHypo;
 			double cutEnergy;
 			vecObjectHypo.clear();
-			GraphConstruct();
+			ComputeDataValue();
 			GraphCutSolve(vecObjectHypo,cutEnergy);
 			if(vecObjectHypo.size() > paraMinPatchInObject && cutEnergy < paraMaxCutEnergy)
 			{
 				vecvecObjectPool.push_back(vecObjectHypo);
 				flagStop = false;
-				outFile0 <<  "cutEnergy:" <<cutEnergy<<  "  fore size:" << vecObjectHypo.size() <<  endl;
+				outFile0 <<  "cutEnergy:" <<cutEnergy << "paraLargeS:" <<paraLargeS << "  foreground size:" << vecObjectHypo.size() <<  endl;
 			}	
-			paraLargeS += (double)0.02;
+			paraLargeS += (double)0.01;
 		}
 		outFile0 <<  "  " <<  endl;
 
@@ -101,8 +109,20 @@ void CBinarySeg::MainStep()
 		outFile0.close();
 	}
 
+	time[3] = clock();
+
+	double duration0 = (double)(time[1] - time[0]) / CLOCKS_PER_SEC;
+	double duration1 = (double)(time[2] - time[1]) / CLOCKS_PER_SEC;
+	double duration2 = (double)(time[3] - time[2]) / CLOCKS_PER_SEC;
+	outFilet <<  "step1:" << duration0 <<  endl;
+	outFilet <<  "step2:" << duration1 <<  endl;
+	outFilet <<  "step2:" << duration2 <<  endl;
+	outFilet <<  "  " <<  endl;
+	outFilet.close();
+
+
 	//output
-	ofstream outFile1("Output\\ObjectPool.txt");
+	ofstream outFile1("Output\\ObjectPool1229.txt");
 	outFile1 <<  "thresholdClose0:" <<thresholdClose0
 		<<  "  thresholdClose1:" <<thresholdClose1
 		<<  "  paraSmallS:" <<paraSmallS
@@ -125,7 +145,6 @@ void CBinarySeg::MainStep()
 		outFile1 << "  " << endl;
 	}
 	outFile1.close();
-
 
 	//output
 	// 		ofstream outFile1("Output\\PatchPoint.txt");
@@ -167,9 +186,9 @@ void CBinarySeg::PointCloudPreprocess()
 
 		for(int j = 0;j < vecPatchPoint[i].mypoints.size();j++)
 		{
-			// 			color.mRed += vecPatchPoint[i].mypoints[j].r;
-			// 			color.mGreen += vecPatchPoint[i].mypoints[j].g;
-			// 			color.mBlue += vecPatchPoint[i].mypoints[j].b;
+			color.mRed += vecPatchPoint[i].mypoints[j].r;
+			color.mGreen += vecPatchPoint[i].mypoints[j].g;
+			color.mBlue += vecPatchPoint[i].mypoints[j].b;
 
 			vecColorDetial[(int)(vecPatchPoint[i].mypoints[j].r / 40) ] += 1;
 			vecColorDetial[(int)(vecPatchPoint[i].mypoints[j].g / 40)  + 7] += 1;
@@ -178,18 +197,18 @@ void CBinarySeg::PointCloudPreprocess()
 			point.x += vecPatchPoint[i].mypoints[j].x;
 			point.y += vecPatchPoint[i].mypoints[j].y;
 			point.z += vecPatchPoint[i].mypoints[j].z;
-			if(xMax < point.x) xMax = vecPatchPoint[i].mypoints[j].x;
-			if(yMax < point.y) yMax = vecPatchPoint[i].mypoints[j].y;
-			if(zMax < point.z) zMax = vecPatchPoint[i].mypoints[j].z;
-			if(xMin > point.x) xMin = vecPatchPoint[i].mypoints[j].x;
-			if(yMin > point.y) yMin = vecPatchPoint[i].mypoints[j].y;
-			if(zMin > point.z) zMin = vecPatchPoint[i].mypoints[j].z;
+			if(xMax < vecPatchPoint[i].mypoints[j].x) xMax = vecPatchPoint[i].mypoints[j].x;
+			if(yMax < vecPatchPoint[i].mypoints[j].y) yMax = vecPatchPoint[i].mypoints[j].y;
+			if(zMax < vecPatchPoint[i].mypoints[j].z) zMax = vecPatchPoint[i].mypoints[j].z;
+			if(xMin > vecPatchPoint[i].mypoints[j].x) xMin = vecPatchPoint[i].mypoints[j].x;
+			if(yMin > vecPatchPoint[i].mypoints[j].y) yMin = vecPatchPoint[i].mypoints[j].y;
+			if(zMin > vecPatchPoint[i].mypoints[j].z) zMin = vecPatchPoint[i].mypoints[j].z;
 		}
 		if(vecPatchPoint[i].mypoints.size() > 0)
 		{
-			// 			color.mRed /= vecPatchPoint[i].mypoints.size();
-			// 			color.mGreen /= vecPatchPoint[i].mypoints.size();
-			// 			color.mBlue /= vecPatchPoint[i].mypoints.size();
+			color.mRed /= vecPatchPoint[i].mypoints.size();
+			color.mGreen /= vecPatchPoint[i].mypoints.size();
+			color.mBlue /= vecPatchPoint[i].mypoints.size();
 			point.x/= vecPatchPoint[i].mypoints.size();
 			point.y /= vecPatchPoint[i].mypoints.size();
 			point.z /= vecPatchPoint[i].mypoints.size();
@@ -199,7 +218,10 @@ void CBinarySeg::PointCloudPreprocess()
 		vecvecPatchColorDetial.push_back(vecColorDetial);
 		vecPatchCenPoint.push_back(point);
 	}
-	boundingBoxSize = sqrt(pow(xMax-xMin,2) + pow(yMax-yMin,2) +pow(zMax-zMin,2));
+
+	boundingBoxSize = sqrt((xMax-xMin) * (xMax-xMin) + (yMax-yMin) * (yMax-yMin) + (zMax-zMin) * (zMax-zMin));
+
+
 
 	//distance between patches
 	vecvecPatchMinDis.resize(vecPatchPoint.size());
@@ -208,11 +230,24 @@ void CBinarySeg::PointCloudPreprocess()
 	//	vecvecPatctNearbyNormal.resize(vecPatchPoint.size());
 	for(int i = 0;i <vecPatchPoint.size();i++)
 	{
-		vecvecPatchMinDis[i].resize(vecPatchPoint.size());
-		vecvecPatchCenDis[i].resize(vecPatchPoint.size());
+		vecvecPatchMinDis[i].resize(vecPatchPoint.size(),LARGE_NUM);
+		vecvecPatchCenDis[i].resize(vecPatchPoint.size(),LARGE_NUM);
 		//		vecvecNearbyPoint[i].resize(vecPatchPoint.size());
 		//		vecvecPatctNearbyNormal[i].resize(vecPatchPoint.size());
 	}
+
+	// 	vecKDTree.resize(vecPatchPoint.size());
+	// 	for(int i = 0;i < vecKDTree.size(); i++)
+	// 	{
+	// 		vecKDTree[i] = kd_create( 3 );
+	// 	}
+	// 	for(int i = 0;i < vecKDTree.size(); i++)
+	// 	{
+	// 		for(int j = 0;j < vecPatchPoint[i].mypoints.size();j++)
+	// 		{
+	// 			kd_insert3( vecKDTree[i], vecPatchPoint[i].mypoints[j].x, vecPatchPoint[i].mypoints[j].y, vecPatchPoint[i].mypoints[j].z, "d" ) ;
+	// 		}
+	// 	}
 
 	int countPatch = 0;
 	int patchBegin,patchEnd;
@@ -224,12 +259,17 @@ void CBinarySeg::PointCloudPreprocess()
 		countPatch += clusterPatchNum[i];
 	}
 
+	// 	for(int i = 0;i < vecKDTree.size(); i++)
+	// 	{
+	// 		kd_free( vecKDTree[i] );
+	// 	}
+
 	//handle table
-	vecIfConnectTable.clear();
-	for(int i = 0;i <vecPatchPoint.size();i++)
-	{
-		vecIfConnectTable.push_back(IfConnectTable(vecPatchPoint[i].mypoints));
-	}
+	// 	vecIfConnectTable.clear();
+	// 	for(int i = 0;i <vecPatchPoint.size();i++)
+	// 	{
+	// 		vecIfConnectTable.push_back(IfConnectTable(vecPatchPoint[i].mypoints));
+	// 	}
 
 	//output
 	// 	ofstream outFile1("Output\\color.txt");
@@ -246,149 +286,125 @@ void CBinarySeg::PointCloudPreprocess()
 	// 	outFile1.close();
 
 	//output
-	ofstream outFile0("Output\\basicinfo.txt");
-	for(int i = 0;i <clusterPatchNum.size();i++)
-	{
-		outFile0 << "clusterPatchNum: " << clusterPatchNum[i] << " " ;
-	}
-	outFile0 << "   " << endl;
-
-	outFile0 << "vecPatchPoint: " << vecPatchPoint.size() << " " ;
-	outFile0 << "   " << endl;
-
-	outFile0 << "bounding box   xMax: " << xMax << " xMin: " << xMin 
-		<< " yMax: " << yMax << " yMin: " << yMin
-		<< " zMax: " << zMax << " zMin: " << zMin << endl;
-	// 	for(int i = 0;i <vecPatchColor.size();i++)
+	// 	ofstream outFile0("Output\\basicinfo.txt");
+	// 	for(int i = 0;i <clusterPatchNum.size();i++)
 	// 	{
-	// 		outFile0 << "color: " << vecPatchColor[i].mBlue << " " << vecPatchColor[i].mRed << " " << vecPatchColor[i].mGreen << endl;
+	// 		outFile0 << "clusterPatchNum: " << clusterPatchNum[i] << " " ;
 	// 	}
 	// 	outFile0 << "   " << endl;
-
-	for(int i = 0;i <vecPatchPoint.size();i++)
-	{
-		outFile0 << "patch size: " << vecPatchPoint[i].mypoints.size() << endl;
-	}
-	outFile0 << "   " << endl;
-
-	for(int i = 0;i <vecPatchCenPoint.size();i++)
-	{
-		outFile0 << "center point: " << vecPatchCenPoint[i].x << " " << vecPatchCenPoint[i].y << " " << vecPatchCenPoint[i].z << endl;
-	}
-	outFile0 << "   " << endl;
-
-	for(int i = 0;i <vecPatcNormal.size();i++)
-	{
-		outFile0 << "average normal: " << vecPatcNormal[i].normal_x << " "<< vecPatcNormal[i].normal_y << " " <<vecPatcNormal[i].normal_z << endl;
-	}
-	outFile0 << "   " << endl;
-	outFile0.close();
-
-	//output
-	ofstream outFile2("Output\\nearbyinfo.txt");
-	// 	for(int i = 0;i <vecIfConnectTable.size();i++)
+	// 	
+	// 	outFile0 << "vecPatchPoint: " << vecPatchPoint.size() << " " ;
+	// 	outFile0 << "   " << endl;
+	// 
+	// 	outFile0 << "bounding box   xMax: " << xMax << " xMin: " << xMin 
+	// 						  << " yMax: " << yMax << " yMin: " << yMin
+	// 						  << " zMax: " << zMax << " zMin: " << zMin << endl;
+	// // 	for(int i = 0;i <vecPatchColor.size();i++)
+	// // 	{
+	// // 		outFile0 << "color: " << vecPatchColor[i].mBlue << " " << vecPatchColor[i].mRed << " " << vecPatchColor[i].mGreen << endl;
+	// // 	}
+	// // 	outFile0 << "   " << endl;
+	// 
+	// 	for(int i = 0;i <vecPatchPoint.size();i++)
 	// 	{
-	// 		outFile2 << "connecttable " << vecIfConnectTable[i] <<  " "  ;
+	// 		outFile0 << "patch size: " << vecPatchPoint[i].mypoints.size() << endl;
+	// 	}
+	// 	outFile0 << "   " << endl;
+	// 
+	// 	for(int i = 0;i <vecPatchCenPoint.size();i++)
+	// 	{
+	// 		outFile0 << "center point: " << vecPatchCenPoint[i].x << " " << vecPatchCenPoint[i].y << " " << vecPatchCenPoint[i].z << endl;
+	// 	}
+	// 	outFile0 << "   " << endl;
+	// 
+	// 	for(int i = 0;i <vecPatcNormal.size();i++)
+	// 	{
+	// 		outFile0 << "average normal: " << vecPatcNormal[i].normal_x << " "<< vecPatcNormal[i].normal_y << " " <<vecPatcNormal[i].normal_z << endl;
+	// 	}
+	// 	outFile0 << "   " << endl;
+	// 	outFile0.close();
+	// 
+	// 	//output
+	// 	ofstream outFile2("Output\\nearbyinfo.txt");
+	// // 	for(int i = 0;i <vecIfConnectTable.size();i++)
+	// // 	{
+	// // 		outFile2 << "connecttable " << vecIfConnectTable[i] <<  " "  ;
+	// // 	}
+	// // 	outFile2 << "   " << endl;
+	// 
+	// 	for(int i = 0;i <vecpairPatchConnection.size();i++)
+	// 	{
+	// 		outFile2 << "patch " << vecpairPatchConnection[i].first << " "<< vecpairPatchConnection[i].second << " "  << endl;
 	// 	}
 	// 	outFile2 << "   " << endl;
-
-	for(int i = 0;i <vecpairPatchConnection.size();i++)
-	{
-		outFile2 << "patch " << vecpairPatchConnection[i].first << " "<< vecpairPatchConnection[i].second << " "  << endl;
-	}
-	outFile2 << "   " << endl;
-
-	// 	for(int i = 0;i <vecvecNearbyPoint.size();i++)
-	// 	{
-	// 		for(int j = 0;j <vecvecNearbyPoint[i].size();j++)
-	// 		{
-	// 			if(vecvecNearbyPoint[i][j].nearbyPoint.size()>0)
-	// 				for(int k = 0;k < vecvecNearbyPoint[i][j].nearbyPoint.size();k++)
-	// 					outFile2 << "nearby " << vecvecNearbyPoint[i][j].nearbyPoint[k].indexFirst << " "<< vecvecNearbyPoint[i][j].nearbyPoint[k].indexSecond << " patch " <<
-	// 					vecvecNearbyPoint[i][j].nearbyPoint[k].patchFirst << " "<< vecvecNearbyPoint[i][j].nearbyPoint[k].patchSecond << " " << endl;
-	// 		}
-	// 	}
-	outFile2 << "   " << endl;
-	outFile2.close();
-
-	// 	ofstream outFile3("Output\\nearbynormal.txt");
-	// 	for(int i = 0;i <vecvecPatctNearbyNormal.size();i++)
-	// 	{
-	// 		for(int j = 0;j <vecvecPatctNearbyNormal[i].size();j++)
-	// 		{
-	// 			if(vecvecNearbyPoint[i][j].nearbyPoint.size())
-	// 				outFile3 << "nearbynormal  i " << i << "  j  " << j << "   num  " << 
-	// 										   vecvecNearbyPoint[i][j].nearbyPoint.size() <<"  value  "<<
-	// 										   vecvecPatctNearbyNormal[i][j].normal0.normal_x << " "<< 
-	// 				                           vecvecPatctNearbyNormal[i][j].normal0.normal_y << " "<< 
-	// 										   vecvecPatctNearbyNormal[i][j].normal0.normal_z << " "<< 
-	// 										   vecvecPatctNearbyNormal[i][j].normal1.normal_x << " "<< 
-	// 										   vecvecPatctNearbyNormal[i][j].normal1.normal_y << " "<< 
-	// 										   vecvecPatctNearbyNormal[i][j].normal1.normal_z << endl;
-	// 		}
-	// 	}
-	// 	outFile3 << "   " << endl;
-	// 	outFile3.close();
+	// 
+	// // 	for(int i = 0;i <vecvecNearbyPoint.size();i++)
+	// // 	{
+	// // 		for(int j = 0;j <vecvecNearbyPoint[i].size();j++)
+	// // 		{
+	// // 			if(vecvecNearbyPoint[i][j].nearbyPoint.size()>0)
+	// // 				for(int k = 0;k < vecvecNearbyPoint[i][j].nearbyPoint.size();k++)
+	// // 					outFile2 << "nearby " << vecvecNearbyPoint[i][j].nearbyPoint[k].indexFirst << " "<< vecvecNearbyPoint[i][j].nearbyPoint[k].indexSecond << " patch " <<
+	// // 					vecvecNearbyPoint[i][j].nearbyPoint[k].patchFirst << " "<< vecvecNearbyPoint[i][j].nearbyPoint[k].patchSecond << " " << endl;
+	// // 		}
+	// // 	}
+	// 	outFile2 << "   " << endl;
+	// 	outFile2.close();
+	// 
+	// // 	ofstream outFile3("Output\\nearbynormal.txt");
+	// // 	for(int i = 0;i <vecvecPatctNearbyNormal.size();i++)
+	// // 	{
+	// // 		for(int j = 0;j <vecvecPatctNearbyNormal[i].size();j++)
+	// // 		{
+	// // 			if(vecvecNearbyPoint[i][j].nearbyPoint.size())
+	// // 				outFile3 << "nearbynormal  i " << i << "  j  " << j << "   num  " << 
+	// // 										   vecvecNearbyPoint[i][j].nearbyPoint.size() <<"  value  "<<
+	// // 										   vecvecPatctNearbyNormal[i][j].normal0.normal_x << " "<< 
+	// // 				                           vecvecPatctNearbyNormal[i][j].normal0.normal_y << " "<< 
+	// // 										   vecvecPatctNearbyNormal[i][j].normal0.normal_z << " "<< 
+	// // 										   vecvecPatctNearbyNormal[i][j].normal1.normal_x << " "<< 
+	// // 										   vecvecPatctNearbyNormal[i][j].normal1.normal_y << " "<< 
+	// // 										   vecvecPatctNearbyNormal[i][j].normal1.normal_z << endl;
+	// // 		}
+	// // 	}
+	// // 	outFile3 << "   " << endl;
+	// // 	outFile3.close();
 
 }
 
-void CBinarySeg::GraphConstruct()
+void CBinarySeg::ComputeSmoothValue()
 {
-	/******************Graph Preprocess One************************/
-	//graph value
-	pair<int,int> pairSmoothVertex;
-
-	vecDataValue.clear();
-	vecSmoothValue.clear();
-	vecGeometryValue.clear();
-	vecAppearenceValue.clear();
-
-	for(int i = 0;i <vecPatchPoint.size();i++)
-	{
-		vecDataValue.push_back(GetBinaryDataValue(vecvecPatchCenDis[seedPatch][i]));
-	}
-
 	for(int i = 0;i <vecpairPatchConnection.size();i++)
 	{
 		vecSmoothValue.push_back(GetBinarySmoothValue(vecpairPatchConnection[i].first,vecpairPatchConnection[i].second));
 	}
 
-	//color nomalization
-	double maxSV = SMALL_NUM;
-	for(int i = 0;i <vecpairPatchConnection.size();i++)
-	{
-		if(maxSV < vecAppearenceValue[i])
-			maxSV = vecAppearenceValue[i];
-	}
-	for(int i = 0;i <vecpairPatchConnection.size();i++)
-	{
-		vecAppearenceValue[i] = vecAppearenceValue[i] / maxSV;
-		vecAppearenceValue[i] = 1 - vecAppearenceValue[i];
-	}
-
-	for(int i = 0;i <vecpairPatchConnection.size();i++)
-	{
-		vecGeometryValue[i] = paraGeometry * vecGeometryValue[i];
-		vecAppearenceValue[i] = paraAppearence * vecAppearenceValue[i];
-		vecSmoothValue[i] = vecGeometryValue[i] + vecAppearenceValue[i];
-	}
-
-	// 	NomalizeData();
+	NomalizeAppearence();
 	NomalizeSmooth();
+}
+
+
+void CBinarySeg::ComputeDataValue()
+{
+	vecDataValue.clear();
+	for(int i = 0;i <vecPatchPoint.size();i++)
+	{
+		vecDataValue.push_back(GetBinaryDataValue(vecvecPatchCenDis[seedPatch][i]));
+	}
 
 	//output
-	ofstream outFile1("Output\\datasmooth.txt");
-	for(int i = 0;i <vecPatchColor.size();i++)
-	{
-		outFile1 << "data  " << vecDataValue[i] << endl;
-	}
-	for(int i = 0;i <vecpairPatchConnection.size();i++)
-	{
-		outFile1 << "GeometryValue  " << vecGeometryValue[i] << endl;
-		outFile1 << "AppearenceValue  " << vecAppearenceValue[i] << endl;
-		outFile1 << "smooth  " << vecSmoothValue[i] << endl;
-	}
-	outFile1.close();
+	// 	ofstream outFile1("Output\\datasmooth.txt");
+	// 	for(int i = 0;i <vecPatchColor.size();i++)
+	// 	{
+	// 		outFile1 << "data  " << vecDataValue[i] << endl;
+	// 	}
+	// 	for(int i = 0;i <vecpairPatchConnection.size();i++)
+	// 	{
+	// 		outFile1 << "GeometryValue  " << vecGeometryValue[i] << endl;
+	// 		outFile1 << "AppearenceValue  " << vecAppearenceValue[i] << endl;
+	// 		outFile1 << "smooth  " << vecSmoothValue[i] << endl;
+	// 	}
+	// 	outFile1.close();
 }
 
 void CBinarySeg::GraphCutSolve(vector<int>& vecObjectHypo, double &cutEnergy)
@@ -428,6 +444,7 @@ void CBinarySeg::GraphCutSolve(vector<int>& vecObjectHypo, double &cutEnergy)
 	vecBack.clear();
 
 	for(int i=0;i<vecPatchPoint.size();i++)
+	{
 		if (g->what_segment(i) == GraphType::SOURCE)
 		{
 			countSOURCE++;
@@ -439,51 +456,128 @@ void CBinarySeg::GraphCutSolve(vector<int>& vecObjectHypo, double &cutEnergy)
 			countSINK++;
 			vecBack.push_back(i);
 		}
+	}
 
-		delete g; 
+	delete g; 
 
-		printf("foreground: %d ,background: %d\n",countSOURCE,countSINK);
 }
 
 void CBinarySeg::GetAdjacency(int patchBegin,int patchEnd)
 {
 	pair<int,int> pairPatchConnection;
-	for(int i = patchBegin;i <patchEnd;i++)
-		for(int j = patchBegin;j <patchEnd;j++)
-			if(i != j)
+	for(int i = patchBegin;i < patchEnd;i++)
+	{
+		for(int j = patchBegin;j < patchEnd;j++)
+		{
+			if(i < j)
 			{
 				bool  stable;   // if connect stable
-				vecvecPatchMinDis[i][j] = vecvecPatchMinDis[j][i] = GetMinDisBetPatch(i,j,stable);
-				vecvecPatchCenDis[i][j] = vecvecPatchMinDis[j][i] = GetCenDisBetPatch(i,j);
-				pairPatchConnection.first = i;
-				pairPatchConnection.second = j;
-				if(vecvecPatchMinDis[i][j] < thresholdClose0 && stable)
-				{
-					vecpairPatchConnection.push_back(pairPatchConnection);
-				} 
-				pairPatchConnection.first = j;
-				pairPatchConnection.second = i;
-				if(vecvecPatchMinDis[i][j] < thresholdClose0 && stable)
-				{
-					vecpairPatchConnection.push_back(pairPatchConnection);
-				} 
-			}
-			else
-			{
-				vecvecPatchMinDis[i][j] = LARGE_NUM;
-				vecvecPatchCenDis[i][j] = LARGE_NUM;
-			}
 
+				vecvecPatchMinDis[i][j] = vecvecPatchMinDis[j][i] = GetMinDisBetPatch(i,j,stable);
+				vecvecPatchCenDis[i][j] = vecvecPatchCenDis[j][i] = GetCenDisBetPatch(i,j);
+
+				if(vecvecPatchMinDis[i][j] < thresholdClose0 && stable)
+				{
+					pairPatchConnection.first = i;
+					pairPatchConnection.second = j;
+					vecpairPatchConnection.push_back(pairPatchConnection);
+
+					pairPatchConnection.first = j;
+					pairPatchConnection.second = i;
+					vecpairPatchConnection.push_back(pairPatchConnection);
+				} 
+			}
+		}
+	}
+
+	//output
+	// 	ofstream outFile0("Output\\Yanzheng.txt",ios::app);
+	// 	outFile0 << " " << vecvecPatchMinDis[11][12] << endl;
+	// 	outFile0 << " " << vecvecPatchMinDis[111][112] << endl;
+	// 	outFile0 << " " << vecvecPatchMinDis[211][212] << endl;
+	// 	outFile0 << " " << vecvecPatchMinDis[311][312] << endl;
+	// 	outFile0.close();
 }
 
 double CBinarySeg::GetMinDisBetPatch(int m,int n,bool &stable)
 {
-	double minDis=LARGE_NUM;
-	// 	Normal normal0,normal1;
-	// 	normal0.normal_x = normal0.normal_y = normal0.normal_z = 0;
-	// 	normal1.normal_x = normal1.normal_y = normal1.normal_z = 0;
+	//////////////////////////////////kdtree
+	// 	double minDis = LARGE_NUM;
+	// 	vector<bool> vecPointClose0(vecPatchPoint[m].mypoints.size(),false);
+	// 	vector<bool> vecPointClose1(vecPatchPoint[n].mypoints.size(),false);
+	// 
+	// 	
+	// 	for(int i = 0;i < vecPatchPoint[n].mypoints.size();i++)
+	// 	{
+	// 		double pt[3];
+	// 		pt[0] = vecPatchPoint[n].mypoints[i].x;
+	// 		pt[1] = vecPatchPoint[n].mypoints[i].y;
+	// 		pt[2] = vecPatchPoint[n].mypoints[i].z;
+	// 
+	// 		struct kdres *presults0;
+	// 		presults0 = kd_nearest3( vecKDTree[m], pt[0], pt[1], pt[2]);
+	// 
+	// 		double dis;
+	// 		dis = sqrt((presults0->riter->item->pos[0] - pt[0]) * (presults0->riter->item->pos[0] - pt[0]) +
+	// 			  (presults0->riter->item->pos[1] - pt[1]) * (presults0->riter->item->pos[1] - pt[1]) +
+	// 		      (presults0->riter->item->pos[2] - pt[2]) * (presults0->riter->item->pos[2] - pt[2]));
+	// 
+	// 		if(dis < minDis)
+	// 			minDis = dis;
+	// 
+	// 		if(dis < thresholdClose0 * 3)
+	// 			vecPointClose1[i] = true;
+	// 
+	// 		kd_res_free( presults0 );
+	// 	}
+	// 
+	// 	for(int i = 0;i < vecPatchPoint[m].mypoints.size();i++)
+	// 	{
+	// 		double pt[3];
+	// 		pt[0] = vecPatchPoint[m].mypoints[i].x;
+	// 		pt[1] = vecPatchPoint[m].mypoints[i].y;
+	// 		pt[2] = vecPatchPoint[m].mypoints[i].z;
+	// 
+	// 		struct kdres *presults1;
+	// 		presults1 = kd_nearest3( vecKDTree[n], pt[0], pt[1], pt[2]);
+	// 
+	// 		double dis;
+	// 		dis = sqrt((presults1->riter->item->pos[0] - pt[0]) * (presults1->riter->item->pos[0] - pt[0]) +
+	// 			  (presults1->riter->item->pos[1] - pt[1]) * (presults1->riter->item->pos[1] - pt[1]) +
+	// 			  (presults1->riter->item->pos[2] - pt[2]) * (presults1->riter->item->pos[2] - pt[2]));
+	// 
+	// 		if(dis < minDis)
+	// 			minDis = dis;
+	// 		
+	// 		if(dis < thresholdClose0 * 3)
+	// 			vecPointClose0[i] = true;
+	// 
+	// 		kd_res_free( presults1 );
+	// 	}
+	// 
+	// 
+	// 	int count0=0;
+	// 	int count1=0;
+	// 	for(int i = 0; i < vecPointClose0.size();i++)
+	// 	{
+	// 		if(vecPointClose0[i] == true)
+	// 			count0++;
+	// 	}
+	// 	for(int i = 0; i < vecPointClose1.size();i++)
+	// 	{
+	// 		if(vecPointClose1[i] == true)
+	// 			count1++;
+	// 	}
+	// 	if(count0 > 5 && count1 >5)
+	// 		stable = true;
+	// 	else
+	// 		stable = false;
+	// 
+	// 	return minDis;
 
-	vector<double> vecDisQueue;
+
+	//////////////////////////////////蛮力法
+	double minDis = LARGE_NUM;
 	vector<bool> vecPointClose0(vecPatchPoint[m].mypoints.size(),false);
 	vector<bool> vecPointClose1(vecPatchPoint[n].mypoints.size(),false);
 
@@ -491,9 +585,9 @@ double CBinarySeg::GetMinDisBetPatch(int m,int n,bool &stable)
 	{
 		for(int j = 0;j < vecPatchPoint[n].mypoints.size();j++)
 		{
-			double dis = sqrt(pow(vecPatchPoint[m].mypoints[i].x-vecPatchPoint[n].mypoints[j].x,2)
-				+ pow(vecPatchPoint[m].mypoints[i].y-vecPatchPoint[n].mypoints[j].y,2)
-				+ pow(vecPatchPoint[m].mypoints[i].z-vecPatchPoint[n].mypoints[j].z,2));
+			double dis = sqrt((vecPatchPoint[m].mypoints[i].x-vecPatchPoint[n].mypoints[j].x) * (vecPatchPoint[m].mypoints[i].x-vecPatchPoint[n].mypoints[j].x)
+				+ (vecPatchPoint[m].mypoints[i].y-vecPatchPoint[n].mypoints[j].y) * (vecPatchPoint[m].mypoints[i].y-vecPatchPoint[n].mypoints[j].y)
+				+ (vecPatchPoint[m].mypoints[i].z-vecPatchPoint[n].mypoints[j].z) * (vecPatchPoint[m].mypoints[i].z-vecPatchPoint[n].mypoints[j].z));
 			if(minDis > dis)
 			{
 				minDis = dis;
@@ -504,53 +598,8 @@ double CBinarySeg::GetMinDisBetPatch(int m,int n,bool &stable)
 				vecPointClose0[i] = true;
 				vecPointClose1[j] = true;
 			}
-			// 			if(dis < thresholdClose1 * boundingBoxSize)
-			// 			{
-			// 				NEARBYPOINT nearbyPoint;
-			// 				nearbyPoint.patchFirst = m;
-			// 				nearbyPoint.patchFirst = n;
-			// 				nearbyPoint.indexFirst = i;
-			// 				nearbyPoint.indexSecond = j;
-			// 				vecvecNearbyPoint[m][n].nearbyPoint.push_back(nearbyPoint);
-			// 
-			// 				//计算相对normal
-			// 				normal0.normal_x += vecPatchPoint[m].mypoints[i].normal_x;
-			// 				normal0.normal_y += vecPatchPoint[m].mypoints[i].normal_y;
-			// 				normal0.normal_z += vecPatchPoint[m].mypoints[i].normal_z;
-			// 
-			// 				normal1.normal_x += vecPatchPoint[n].mypoints[j].normal_x;
-			// 				normal1.normal_y += vecPatchPoint[n].mypoints[j].normal_y;
-			// 				normal1.normal_z += vecPatchPoint[n].mypoints[j].normal_z;
-			// 			}
 		}
 	}
-
-	// 	if(vecvecNearbyPoint[m][n].nearbyPoint.size())
-	// 	{
-	// 		normal0.normal_x /=  vecvecNearbyPoint[m][n].nearbyPoint.size();
-	// 		normal0.normal_y /=  vecvecNearbyPoint[m][n].nearbyPoint.size();
-	// 		normal0.normal_z /=  vecvecNearbyPoint[m][n].nearbyPoint.size();
-	// 		normal1.normal_x /=  vecvecNearbyPoint[m][n].nearbyPoint.size();
-	// 		normal1.normal_y /=  vecvecNearbyPoint[m][n].nearbyPoint.size();
-	// 		normal1.normal_z /=  vecvecNearbyPoint[m][n].nearbyPoint.size();
-	// 
-	// 		double nomalizeValue;
-	// 		nomalizeValue = sqrt(normal0.normal_x * normal0.normal_x +
-	// 						 	 normal0.normal_y * normal0.normal_y +
-	// 							 normal0.normal_z * normal0.normal_z);
-	// 		vecvecPatctNearbyNormal[m][n].normal0.normal_x = normal0.normal_x / nomalizeValue;
-	// 		vecvecPatctNearbyNormal[m][n].normal0.normal_y = normal0.normal_y / nomalizeValue;
-	// 		vecvecPatctNearbyNormal[m][n].normal0.normal_z = normal0.normal_z / nomalizeValue;
-	// 
-	// 		nomalizeValue = sqrt(normal1.normal_x * normal1.normal_x +
-	// 			normal1.normal_y * normal1.normal_y +
-	// 			normal1.normal_z * normal1.normal_z);
-	// 		vecvecPatctNearbyNormal[m][n].normal1.normal_x = normal1.normal_x / nomalizeValue;
-	// 		vecvecPatctNearbyNormal[m][n].normal1.normal_y = normal1.normal_y / nomalizeValue;
-	// 		vecvecPatctNearbyNormal[m][n].normal1.normal_z = normal1.normal_z / nomalizeValue;
-	// 
-	// 		vecvecPatctNearbyNormal[n][m] = vecvecPatctNearbyNormal[m][n];
-	// 	}
 
 	int count0=0;
 	int count1=0;
@@ -565,7 +614,6 @@ double CBinarySeg::GetMinDisBetPatch(int m,int n,bool &stable)
 			count1++;
 	}
 
-
 	if(count0 > 5 && count1 >5)
 		stable = true;
 	else
@@ -576,9 +624,9 @@ double CBinarySeg::GetMinDisBetPatch(int m,int n,bool &stable)
 
 double CBinarySeg::GetCenDisBetPatch(int m,int n)
 {
-	double dis =  sqrt(pow(vecPatchCenPoint[m].x-vecPatchCenPoint[n].x,2)
-		+ pow(vecPatchCenPoint[m].y-vecPatchCenPoint[n].y,2)
-		+ pow(vecPatchCenPoint[m].z-vecPatchCenPoint[n].z,2));
+	double dis =  sqrt((vecPatchCenPoint[m].x-vecPatchCenPoint[n].x) * (vecPatchCenPoint[m].x-vecPatchCenPoint[n].x)
+		+ (vecPatchCenPoint[m].y-vecPatchCenPoint[n].y) * (vecPatchCenPoint[m].y-vecPatchCenPoint[n].y)
+		+ (vecPatchCenPoint[m].z-vecPatchCenPoint[n].z) * (vecPatchCenPoint[m].z-vecPatchCenPoint[n].z));
 	return dis;
 }
 
@@ -593,11 +641,11 @@ double CBinarySeg::GetBinaryDataValue(double d)
 		double penaltyValue, panaltySmallValue, penaltyLargeValue;
 		penaltyValue = 0;
 
-		panaltySmallValue =  paraSmallK * (d - boundingBoxSize* paraSmallS);
+		panaltySmallValue =  paraSmallK * (d - 0.813342* paraSmallS);
 		if(panaltySmallValue < 0)
 			panaltySmallValue =  0;
 
-		penaltyLargeValue =  paraLargeK * (d - boundingBoxSize* paraLargeS);
+		penaltyLargeValue =  paraLargeK * (d - 0.813342* paraLargeS);
 		if(penaltyLargeValue < 0)
 			penaltyLargeValue =  0;
 
@@ -618,17 +666,6 @@ double CBinarySeg::GetBinarySmoothValue(int m,int n)
 
 	cenM = vecPatchCenPoint[m];
 	cenN = vecPatchCenPoint[n];
-
-	// 	if(m < n)
-	// 	{
-	// 		norM = vecvecPatctNearbyNormal[m][n].normal0;
-	// 		norN = vecvecPatctNearbyNormal[m][n].normal1;
-	// 	}
-	// 	else
-	// 	{
-	// 		norM = vecvecPatctNearbyNormal[m][n].normal1;
-	// 		norN = vecvecPatctNearbyNormal[m][n].normal0;
-	// 	}
 
 	norM = vecPatcNormal[m];
 	norN = vecPatcNormal[n];
@@ -718,6 +755,28 @@ void CBinarySeg::NomalizeData()
 	}
 }
 
+void CBinarySeg::NomalizeAppearence()
+{
+	double maxSV = SMALL_NUM;
+	for(int i = 0;i <vecpairPatchConnection.size();i++)
+	{
+		if(maxSV < vecAppearenceValue[i])
+			maxSV = vecAppearenceValue[i];
+	}
+	for(int i = 0;i <vecpairPatchConnection.size();i++)
+	{
+		vecAppearenceValue[i] = vecAppearenceValue[i] / maxSV;
+		vecAppearenceValue[i] = 1 - vecAppearenceValue[i];
+	}
+
+	for(int i = 0;i <vecpairPatchConnection.size();i++)
+	{
+		vecGeometryValue[i] = paraGeometry * vecGeometryValue[i];
+		vecAppearenceValue[i] = paraAppearence * vecAppearenceValue[i];
+		vecSmoothValue[i] = vecGeometryValue[i] + vecAppearenceValue[i];
+	}
+}
+
 void CBinarySeg::NomalizeSmooth()
 {
 	double maxSV = SMALL_NUM;
@@ -736,12 +795,4 @@ void CBinarySeg::NomalizeSmooth()
 		vecSmoothValue[i] = pow(2.7183,- (1 - vecSmoothValue[i]) * (1 - vecSmoothValue[i]) / para /para);
 	}
 
-	// 	//output
-	// 	ofstream outFile1("Output\\smoothValue.txt");
-	// 	outFile1<<  "  " << maxSV << "  " << minSV << endl;	
-	// 	for(int i = 0;i <vecSmoothValue.size();i++)
-	// 	{
-	// 		outFile1<< vecSmoothValue[i] << "  " << endl;	
-	// 	}
-	// 	outFile1.close();
 }
