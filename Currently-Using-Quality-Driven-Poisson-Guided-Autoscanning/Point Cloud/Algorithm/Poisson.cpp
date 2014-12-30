@@ -1425,6 +1425,7 @@ void Poisson::runSlice()
     std::cout<<"Field point empty! No slices can be generated!" <<std::endl;
     return;
   }
+
   int iso_num = field_points->vert.size();
   double show_percentage = para->getDouble("Show Slice Percentage");
   bool paraller_slice_mode = para->getBool("Parallel Slices Mode");
@@ -1495,6 +1496,7 @@ void Poisson::runSlice()
   if (para->getBool("Show Y Slices"))
   {
     double slice_j_position = para->getDouble("Current Y Slice Position");
+    std::cout<<"slice j position: " << slice_j_position <<endl;
 
     if (!paraller_slice_mode)
     {
@@ -1515,6 +1517,7 @@ void Poisson::runSlice()
     }
     else
     {
+      std::cout<<"sunwei  debug" <<endl;
       //int slice_k_num = res * slice_j_position;
       int slice_j_num = res * slice_j_position;
 

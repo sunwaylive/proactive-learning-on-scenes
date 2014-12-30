@@ -213,9 +213,9 @@ void ParameterMgr::initPoissonParameter()
 	poisson.addParam(new RichBool("Show Y Slices", false));
 	poisson.addParam(new RichBool("Show Z Slices", false));
 	poisson.addParam(new RichBool("Show Transparent Slices", false));
-	poisson.addParam(new RichDouble("Current X Slice Position", 0.0f));
-	poisson.addParam(new RichDouble("Current Y Slice Position", 0.0f));
-	poisson.addParam(new RichDouble("Current Z Slice Position", 0.0f));
+	poisson.addParam(new RichDouble("Current X Slice Position", 0.5f));
+	poisson.addParam(new RichDouble("Current Y Slice Position", 0.5f));
+	poisson.addParam(new RichDouble("Current Z Slice Position", 0.5f));
 	poisson.addParam(new RichDouble("Show Slice Percentage", 0.75));
 	poisson.addParam(new RichDouble("Poisson Disk Sample Number", 3000));
   poisson.addParam(new RichDouble("Original KNN", 251));

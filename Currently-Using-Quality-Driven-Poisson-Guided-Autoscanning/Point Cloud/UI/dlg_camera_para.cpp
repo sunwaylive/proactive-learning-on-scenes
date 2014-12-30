@@ -1344,7 +1344,6 @@ void CameraParaDlg::computeSceneConfidence()
 
 void CameraParaDlg::computeSceneNBV()
 {
-  //调试一个点的nbv，传播
   runStep3NBVcandidates();
 };
 
