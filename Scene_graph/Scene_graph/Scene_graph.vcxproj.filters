@@ -48,6 +48,15 @@
     <ClInclude Include="BinarySeg.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="utility.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="PreSegmentation\bigScene_preSeg.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="common_func.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="color_op.cpp">
@@ -81,6 +90,24 @@
       <Filter>头文件</Filter>
     </ClCompile>
     <ClCompile Include="BinarySeg.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="PreSegmentation\bigScene_preSeg.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="main_pre_seg1.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="main_pre_seg2.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="utility.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="main_scene_seg.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="common_func.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
