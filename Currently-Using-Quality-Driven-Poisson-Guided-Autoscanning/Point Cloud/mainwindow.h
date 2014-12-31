@@ -70,6 +70,7 @@ private slots:
   void addSamplesToOriginal();
   void deleteIgnore();
   void recoverIgnore();
+  void SICPWithNormal();
 
 public slots:
 	void runPCA_Normal();

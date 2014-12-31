@@ -469,6 +469,7 @@
     <ClInclude Include="Algorithm\PointCloudAlgorithm.h" />
     <ClInclude Include="Algorithm\pointcloud_normal.h" />
     <ClInclude Include="Algorithm\Poisson.h" />
+    <ClInclude Include="Algorithm\SparseICP.h" />
     <ClInclude Include="common_type.h" />
     <ClInclude Include="Console.h" />
     <ClInclude Include="coordinateframe.h" />
