@@ -10,7 +10,7 @@ bool loadPointCloud_pcd(char* fileName, PointCloudPtr_RGB_NORMAL cloud){
   return true;
 }
 
-bool loadPointCloud_ply(char* fileName, PointCloudPtr_RGB_NORMAL cloud){
+bool loadPointCloud_ply(char* fileName, PointCloudPtr_RGB cloud){
 
   std::ifstream input(fileName) ;
   if(input.fail()) {
@@ -40,7 +40,7 @@ bool loadPointCloud_ply(char* fileName, PointCloudPtr_RGB_NORMAL cloud){
   std::cout<< "===========================" <<std::endl;
 
   for (int i=0; i<num_points; ++i) {
-    Point_RGB_NORMAL point_tem;
+    Point_RGB point_tem;
     int alpha=0;
     int r,g,b;
 

@@ -29,3 +29,27 @@ void Visualizer::show(){
     boost::this_thread::sleep (boost::posix_time::microseconds (100000));
   }
 }
+
+//show rgb cloud
+void showPointCloud (PointCloudPtr_RGB cloud,std::string name)
+{
+  pcl::visualization::CloudViewer viewer (name);
+
+  viewer.showCloud (cloud);
+  while (!viewer.wasStopped ())
+  {
+
+  }
+}
+
+//show cloud
+void showPointCloud2 (PointCloudPtr cloud,std::string name)
+{
+  pcl::visualization::CloudViewer viewer (name);
+
+  viewer.showCloud (cloud);
+  while (!viewer.wasStopped ())
+  {
+
+  }
+}
