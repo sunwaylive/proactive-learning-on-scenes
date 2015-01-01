@@ -111,7 +111,7 @@
     <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">IncludeLib\Boost\lib;IncludeLib\PCL\lib;IncludeLib\trimesh\lib;C:\Program Files\OpenNI2\Lib;IncludeLib\glut64\lib;IncludeLib\ann_1.1.2\MS_Win64\bin;IncludeLib\tbb\lib\intel64\vc10;IncludeLib\VTK\lib\vtk-5.8;$(LibraryPath)</LibraryPath>
     <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">IncludeLib\PCL\include\pcl-1.7;IncludeLib\vcglib\eigenlib;IncludeLib\Boost\include;IncludeLib\vcglib;IncludeLib\glut64\include;IncludeLib\ann_1.1.2\include;IncludeLib\tbb\include;IncludeLib\trimesh\include;IncludeLib\VTK\include\vtk-5.8;$(IncludePath)</IncludePath>
     <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release_debug|x64'">D:\IncludeLib\vcglib;D:\IncludeLib\glut64\include;D:\IncludeLib\ann_1.1.2\include;$(IncludePath)</IncludePath>
-    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">IncludeLib\PCL\lib;IncludeLib\glut64\lib;IncludeLib\tbb\lib\intel64\vc10;IncludeLib\openmesh\lib;IncludeLib\ann_1.1.2\MS_Win64\bin;$(LibraryPath);IncludeLib\Boost\lib;D:\cgal-gsoc\build2\lib;$(VCInstallDir)lib\amd64;$(VCInstallDir)atlmfc\lib\amd64;$(WindowsSdkDir)lib\x64;IncludeLib\trimesh\lib;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v6.5\lib\x64;IncludeLib\VTK\lib\vtk-5.8</LibraryPath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">IncludeLib\PCL\lib;IncludeLib\glut64\lib;IncludeLib\tbb\lib\intel64\vc10;IncludeLib\openmesh\lib;IncludeLib\ann_1.1.2\MS_Win64\bin;$(LibraryPath);IncludeLib\Boost\lib;D:\cgal-gsoc\build2\lib;$(VCInstallDir)lib\amd64;$(VCInstallDir)atlmfc\lib\amd64;$(WindowsSdkDir)lib\x64;IncludeLib\trimesh\lib;IncludeLib\VTK\lib\vtk-5.8</LibraryPath>
     <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release_debug|x64'">D:\IncludeLib\glut64\lib;D:\IncludeLib\ann_1.1.2\MS_Win64\bin;$(LibraryPath)</LibraryPath>
     <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Program Files\OpenNI2\Include;IncludeLib\PCL\include\pcl-1.7;IncludeLib\Boost\include;IncludeLib\vcglib\eigenlib;IncludeLib\glut64\include;IncludeLib\vcglib;IncludeLib\ann_1.1.2\include;IncludeLib\trimesh\include;IncludeLib\tbb\include;IncludeLib\VTK\include\vtk-5.8;$(IncludePath)</IncludePath>
     <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">IncludeLib\vcglib;IncludeLib\eigen-eigen-3.0.3;IncludeLib\ann_1.1.2\include;IncludeLib\glut;$(IncludePath)</IncludePath>
@@ -231,6 +231,7 @@
     </Link>
     <CudaCompile>
       <TargetMachinePlatform>64</TargetMachinePlatform>
+      <CudaRuntime>None</CudaRuntime>
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release_debug|x64'">

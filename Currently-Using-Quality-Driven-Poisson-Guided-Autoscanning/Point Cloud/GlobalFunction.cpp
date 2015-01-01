@@ -1671,7 +1671,7 @@ void GlobalFun::computeICPNoNormal(CMesh *moving_mesh, CMesh *static_mesh, doubl
   }
 
   SparseICP::SICP::Parameters pa;
-  pa.max_icp = 2000;
+  pa.max_icp = 30;
   pa.use_penalty = true;
   pa.max_inner = 2; //use ALM
   clock_t start, finish;
