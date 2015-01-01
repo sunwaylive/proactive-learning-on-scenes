@@ -40,7 +40,7 @@ public:
 	~CBinarySeg(void);
 
 public:
-	vector<MyPointCloud_RGB_NORMAL> vecPatchPoint;
+	vector<MyPointCloud_RGB_NORMAL> vecPatchPoint;//shiyifei
 	vector<int> clusterPatchNum;
 	MyPointCloud_RGB_NORMAL tablePoint;
 	vector<Normalt> vecPatcNormal;
