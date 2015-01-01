@@ -1,90 +1,20 @@
 #include "bigScene_preSeg.h"
 
 //Euclidean Cluster Extraction
-void big_object_seg_ECE(PointCloudPtr_RGB cloud, std::vector<PointCloudPtr_RGB> &cluster_points){
+void big_object_seg_ECE(PointCloudPtr_RGB cloud, vector<pcl::PointIndices>& cluster_indices){
+  cluster_indices.clear();
+
   // Creating the KdTree object for the search method of the extraction
   pcl::search::KdTree<Point_RGB>::Ptr tree (new pcl::search::KdTree<Point_RGB>);
   tree->setInputCloud (cloud);
 
-  std::vector<pcl::PointIndices> cluster_indices;
   pcl::EuclideanClusterExtraction<Point_RGB> ec;
-  ec.setClusterTolerance (0.015); // 1.5cm
+  ec.setClusterTolerance (0.02); // 2cm
   ec.setMinClusterSize (100);
-  ec.setMaxClusterSize (1500000);
+  ec.setMaxClusterSize (5000000);
   ec.setSearchMethod (tree);
   ec.setInputCloud (cloud);
   ec.extract (cluster_indices);
-
-  int j = 0;
-  for (std::vector<pcl::PointIndices>::const_iterator it = cluster_indices.begin (); it != cluster_indices.end (); ++it)
-  {
-    PointCloudPtr_RGB cloud_cluster (new PointCloud_RGB);
-    for (std::vector<int>::const_iterator pit = it->indices.begin (); pit != it->indices.end (); pit++){
-      cloud_cluster->points.push_back (cloud->points[*pit]); //*
-    }
-    cluster_points.push_back(cloud_cluster);
-
-    j++;
-  }
-}
-
-//Euclidean Cluster Extraction
-void object_seg_ECE2(PointCloudPtr cloud, std::vector<PointCloudPtr> &cluster_points){
-  // Creating the KdTree object for the search method of the extraction
-  pcl::search::KdTree<Point>::Ptr tree (new pcl::search::KdTree<Point>);
-  tree->setInputCloud (cloud);
-
-  std::vector<pcl::PointIndices> cluster_indices;
-  pcl::EuclideanClusterExtraction<Point> ec;
-  ec.setClusterTolerance (0.015); // 1.5cm
-  ec.setMinClusterSize (100);
-  ec.setMaxClusterSize (1500000);
-  ec.setSearchMethod (tree);
-  ec.setInputCloud (cloud);
-  ec.extract (cluster_indices);
-
-  int j = 0;
-  for (std::vector<pcl::PointIndices>::const_iterator it = cluster_indices.begin (); it != cluster_indices.end (); ++it)
-  {
-    PointCloudPtr cloud_cluster (new PointCloud);
-    for (std::vector<int>::const_iterator pit = it->indices.begin (); pit != it->indices.end (); pit++){
-      cloud_cluster->points.push_back (cloud->points[*pit]); //*
-    }
-    cluster_points.push_back(cloud_cluster);
-
-    j++;
-  }
-}
-
-//Euclidean Cluster Extraction
-void ECE_for_plane(PointCloudPtr_RGB cloud, std::vector<MyPointCloud_RGB> &cluster_points){
-  // Creating the KdTree object for the search method of the extraction
-  pcl::search::KdTree<Point_RGB>::Ptr tree (new pcl::search::KdTree<Point_RGB>);
-  tree->setInputCloud (cloud);
-
-  std::vector<pcl::PointIndices> cluster_indices;
-  pcl::EuclideanClusterExtraction<Point_RGB> ec;
-  ec.setClusterTolerance (0.015); // 1.5cm
-  ec.setMinClusterSize (100);
-  ec.setMaxClusterSize (1500000);
-  ec.setSearchMethod (tree);
-  ec.setInputCloud (cloud);
-  ec.extract (cluster_indices);
-
-  int j = 0;
-  for (std::vector<pcl::PointIndices>::const_iterator it = cluster_indices.begin (); it != cluster_indices.end (); ++it)
-  {
-    PointCloudPtr_RGB cloud_cluster (new PointCloud_RGB);
-    for (std::vector<int>::const_iterator pit = it->indices.begin (); pit != it->indices.end (); pit++){
-      cloud_cluster->points.push_back (cloud->points[*pit]); //*
-    }
-
-    MyPointCloud_RGB mc;
-    PointCloud_RGB2MyPointCloud_RGB(cloud_cluster, mc);
-    cluster_points.push_back(mc);
-
-    j++;
-  }
 }
 
 //get transform matrix between plane and x_y plane 
@@ -164,21 +94,21 @@ void remove_outliers(PointCloudPtr_RGB remained_cloud, MyPointCloud& floor_rect_
     normal_1 << p3_tem.x - p1_tem.x, p3_tem.y - p1_tem.y, p3_tem.z - p1_tem.z;
     normal_1.normalize();
 
-    wall_rect_clouds.at(i).mypoints.at(0).x += 0.1*normal_0[0];
-    wall_rect_clouds.at(i).mypoints.at(0).y += 0.1*normal_0[1];
-    wall_rect_clouds.at(i).mypoints.at(0).z += 0.1*normal_0[2];
+    wall_rect_clouds.at(i).mypoints.at(0).x += 0.2*normal_0[0];
+    wall_rect_clouds.at(i).mypoints.at(0).y += 0.2*normal_0[1];
+    wall_rect_clouds.at(i).mypoints.at(0).z += 0.2*normal_0[2];
 
-    wall_rect_clouds.at(i).mypoints.at(2).x -= 0.1*normal_0[0];
-    wall_rect_clouds.at(i).mypoints.at(2).y -= 0.1*normal_0[1];
-    wall_rect_clouds.at(i).mypoints.at(2).z -= 0.1*normal_0[2];
+    wall_rect_clouds.at(i).mypoints.at(2).x -= 0.2*normal_0[0];
+    wall_rect_clouds.at(i).mypoints.at(2).y -= 0.2*normal_0[1];
+    wall_rect_clouds.at(i).mypoints.at(2).z -= 0.2*normal_0[2];
 
-    wall_rect_clouds.at(i).mypoints.at(3).x += 0.1*normal_1[0];
-    wall_rect_clouds.at(i).mypoints.at(3).y += 0.1*normal_1[1];
-    wall_rect_clouds.at(i).mypoints.at(3).z += 0.1*normal_1[2];
+    wall_rect_clouds.at(i).mypoints.at(3).x += 0.2*normal_1[0];
+    wall_rect_clouds.at(i).mypoints.at(3).y += 0.2*normal_1[1];
+    wall_rect_clouds.at(i).mypoints.at(3).z += 0.2*normal_1[2];
 
-    wall_rect_clouds.at(i).mypoints.at(1).x -= 0.1*normal_1[0];
-    wall_rect_clouds.at(i).mypoints.at(1).y -= 0.1*normal_1[1];
-    wall_rect_clouds.at(i).mypoints.at(1).z -= 0.1*normal_1[2];
+    wall_rect_clouds.at(i).mypoints.at(1).x -= 0.2*normal_1[0];
+    wall_rect_clouds.at(i).mypoints.at(1).y -= 0.2*normal_1[1];
+    wall_rect_clouds.at(i).mypoints.at(1).z -= 0.2*normal_1[2];
 
     Point p0(wall_rect_clouds.at(i).mypoints.at(0).x, wall_rect_clouds.at(i).mypoints.at(0).y, wall_rect_clouds.at(i).mypoints.at(0).z);
     Point p1(wall_rect_clouds.at(i).mypoints.at(1).x, wall_rect_clouds.at(i).mypoints.at(1).y, wall_rect_clouds.at(i).mypoints.at(1).z);
@@ -232,7 +162,7 @@ void remove_outliers(PointCloudPtr_RGB remained_cloud, MyPointCloud& floor_rect_
 
     PointCloudPtr_RGB new_remained_cloud_t(new PointCloud_RGB);
     for(int j=0; j < new_remained_cloud->size(); j++ ){
-      if(new_remained_cloud->at(j).y <= rect_cl_t->at(0).y+0.02){
+      if(new_remained_cloud->at(j).y <= rect_cl_t->at(0).y+0.025){
         bool flag = true;
 
         for(int i=0; i<rect_cl_t->size(); i++){
@@ -293,71 +223,6 @@ void remove_outliers(PointCloudPtr_RGB remained_cloud, MyPointCloud& floor_rect_
     pcl::transformPointCloud (new_remained_cloud_temp_t, *new_remained_cloud_t1, matrix_transform_r_t);
     pcl::copyPointCloud(*new_remained_cloud_t1, *new_remained_cloud);
     }*/
-  }
-}
-
-//get points cloud on the table rect
-void getCloudOnTable(PointCloudPtr_RGB tableTopCloud, vector<MyPointCloud_RGB>& support_clouds, vector<MyPointCloud>& rect_clouds, vector<MyPointCloud>& resultClouds){
-  for(int m=0; m<rect_clouds.size(); m++){
-    MyPointCloud resultCloud;
-
-    MyPointCloud_RGB2MyPointCloud(support_clouds.at(m), resultCloud);
-
-    for(int i=0; i<resultCloud.mypoints.size(); i++){
-      resultCloud.mypoints.at(i).z = 0;
-    }
-
-    MyPointCloud rect_cloud = rect_clouds.at(m);
-
-    for(int k=0; k<tableTopCloud->size(); k++){
-      MyPt p;
-      p.x = tableTopCloud->at(k).x;
-      p.y = tableTopCloud->at(k).y;
-      p.z = 0;
-
-      if(tableTopCloud->at(k).z < rect_cloud.mypoints.at(0).z){
-        continue;
-      }
-
-      bool flag = true;
-
-      for(int i=0; i<rect_cloud.mypoints.size(); i++){
-        Eigen::Vector3f normal0;
-        normal0 << p.x-rect_cloud.mypoints.at(i).x, p.y-rect_cloud.mypoints.at(i).y, 0;
-        normal0.normalize();
-
-        Eigen::Vector3f normal1;
-        normal1 << rect_cloud.mypoints.at((i+1)%4).x-rect_cloud.mypoints.at(i).x, rect_cloud.mypoints.at((i+1)%4).y-rect_cloud.mypoints.at(i).y, 0;
-        normal1.normalize();
-
-        Eigen::Vector3f normal2;
-        normal2 << rect_cloud.mypoints.at((i+3)%4).x-rect_cloud.mypoints.at(i).x, rect_cloud.mypoints.at((i+3)%4).y-rect_cloud.mypoints.at(i).y, 0;
-        normal2.normalize();
-
-        if(normal0.dot(normal1)<0||normal0.dot(normal2)<0){
-          flag = false;
-          break;
-        }
-      }
-
-      if(flag){
-        resultCloud.mypoints.push_back(p);
-      }
-    }
-
-    PointCloudPtr cloud(new PointCloud);
-    MyPointCloud2PointCloud(resultCloud, cloud);
-
-    std::vector<PointCloudPtr> cluster_points;
-    object_seg_ECE2(cloud, cluster_points);
-
-    for(int k=0; k<cluster_points.size(); k++){
-      if(cluster_points.at(k)->size() > resultCloud.mypoints.size()/2){
-        MyPointCloud mc;
-        PointCloud2MyPointCloud(cluster_points.at(k),  mc);
-        resultClouds.push_back(mc);
-      }
-    }
   }
 }
 
@@ -927,474 +792,139 @@ void detect_floor_and_walls(PointCloudPtr_RGB cloud, MyPointCloud_RGB& floor_clo
   pcl::copyPointCloud(*cloud_remaining, *remained_cloud);
 }
 
-//detct support plane
-void detect_support_plane(PointCloudPtr_RGB cloud, vector<MyPointCloud_RGB> &support_clouds, std::vector<MyPointCloud> &support_rect_clouds, PointCloudPtr_RGB remained_cloud){
-  support_clouds.clear();
-  support_rect_clouds.clear();
-
-  std::vector<pcl::ModelCoefficients> support_plane_coefficients_vector;
-  vector<MyPointCloud_RGB> support_plane_clouds_tem;
-
-  PointCloudPtr_RGB cloud_tem (new PointCloud_RGB);
-  pcl::copyPointCloud(*cloud, *cloud_tem);
-
-  PointCloudPtr_RGB cloud_remaining(new PointCloud_RGB);
-
-  while(1){
-    PointCloudPtr_RGB remained_tem(new PointCloud_RGB);
-    MyPointCloud_RGB plane_cloud;
-    MyPointCloud plane_cloud_n;
-    MyPointCloud rect_cloud;
-
-    float result=0;
-
-    pcl::ModelCoefficients::Ptr plane_coefficients(new pcl::ModelCoefficients());
-    big_plane_fitting(cloud_tem, plane_cloud, rect_cloud, plane_coefficients, remained_tem);
-
-    /*PointCloudPtr_RGB test_cloud(new PointCloud_RGB);
-    MyPointCloud_RGB2PointCloud(plane_cloud, test_cloud);
-    showPointCloud (test_cloud,"test_cloud");*/
-
-    MyPointCloud_RGB2MyPointCloud(plane_cloud, plane_cloud_n);
-
-    if(plane_cloud.mypoints.size()<10000){
-      printf("Can't fit any more\n");
-      appendCloud_RGB(cloud_tem,cloud_remaining);
-      break;
-    }
-
-    float l=sqrt(pow(rect_cloud.mypoints.at(0).x-rect_cloud.mypoints.at(1).x, 2)+pow(rect_cloud.mypoints.at(0).y-rect_cloud.mypoints.at(1).y, 2)+pow(rect_cloud.mypoints.at(0).z-rect_cloud.mypoints.at(1).z, 2));
-    float w=sqrt(pow(rect_cloud.mypoints.at(0).x-rect_cloud.mypoints.at(3).x, 2)+pow(rect_cloud.mypoints.at(0).y-rect_cloud.mypoints.at(3).y, 2)+pow(rect_cloud.mypoints.at(0).z-rect_cloud.mypoints.at(3).z, 2));
-
-    cout<<"l=====================:"<<l<<endl;
-    cout<<"w=====================:"<<w<<endl;
-    cout<<"l*w:"<<l*w<<endl;
-
-    if(l*w<0.5){
-      cout<<"===========***==========="<<endl;
-      appendCloud_RGB(cloud_tem,cloud_remaining);
-      break;
-    }
-
-    computePlaneJaccardIndex(plane_cloud_n, rect_cloud, 0.002, 0.02, &result);
-
-    cout<<"result=====================:"<<result<<endl;
-
-    float thresdhold=0.12;
-
-    if(result>thresdhold){
-      Eigen::Vector3d plane_normal;
-      plane_normal << plane_coefficients->values[0], plane_coefficients->values[1], plane_coefficients->values[2];
-      plane_normal.normalize();
-
-      cout<<"std::abs(plane_normal.dot(Eigen::Vector3d(0,0,1))-1):"<<std::abs(plane_normal.dot(Eigen::Vector3d(0,0,1))-1)<<endl;
-      cout<<"std::abs(plane_normal.dot(Eigen::Vector3d(0,0,1))):"<<std::abs(plane_normal.dot(Eigen::Vector3d(0,0,1)))<<endl;
-      cout<<"std::abs(rect_cloud.mypoints.at(0).z):"<<std::abs(rect_cloud.mypoints.at(0).z)<<endl;
-      cout<<"std::abs(rect_cloud.mypoints.at(1).z):"<<std::abs(rect_cloud.mypoints.at(1).z)<<endl;
-      cout<<"std::abs(rect_cloud.mypoints.at(2).z):"<<std::abs(rect_cloud.mypoints.at(2).z)<<endl;
-      cout<<"std::abs(rect_cloud.mypoints.at(3).z):"<<std::abs(rect_cloud.mypoints.at(3).z)<<endl;
-
-      if(std::abs(plane_normal.dot(Eigen::Vector3d(0,0,1))-1)<0.045
-        &&std::abs(rect_cloud.mypoints.at(0).z)<1&&std::abs(rect_cloud.mypoints.at(1).z)<1
-        &&std::abs(rect_cloud.mypoints.at(2).z)<1&&std::abs(rect_cloud.mypoints.at(3).z)<1
-        &&std::abs(rect_cloud.mypoints.at(0).z)>=0.25&&std::abs(rect_cloud.mypoints.at(1).z)>=0.25
-        &&std::abs(rect_cloud.mypoints.at(2).z)>=0.25&&std::abs(rect_cloud.mypoints.at(3).z)>=0.25){
-          pcl::copyPointCloud(*remained_tem, *cloud_tem);
-
-          PointCloudPtr_RGB pc(new PointCloud_RGB);
-          MyPointCloud_RGB2PointCloud_RGB(plane_cloud, pc);
-          /*showPointCloud(pc, "new_remained_cloud");
-
-          PointCloudPtr rect_pc(new PointCloud);
-          MyPointCloud2PointCloud(rect_cloud, rect_pc);
-          showPointCloud2(rect_pc, "rect_pc");*/
-
-          std::vector<PointCloudPtr_RGB> cluster_points;
-          big_object_seg_ECE(pc, cluster_points);
-
-          PointCloudPtr_RGB new_plane_cloud(new PointCloud_RGB);
-          for(int k=0; k<cluster_points.size(); k++){
-            if(cluster_points.at(k)->size()>50){
-              appendCloud_RGB(cluster_points.at(k), new_plane_cloud);
-            }
-          }
-
-          MyPointCloud_RGB my_new_plane_cloud;
-          PointCloud_RGB2MyPointCloud_RGB(new_plane_cloud, my_new_plane_cloud);
-
-          //it is a support plane
-          support_plane_clouds_tem.push_back(my_new_plane_cloud);
-          support_plane_coefficients_vector.push_back(*plane_coefficients);
-      }
-      else{
-        pcl::copyPointCloud(*remained_tem, *cloud_tem);
-        PointCloudPtr_RGB plane_cloud_tem (new PointCloud_RGB);
-        MyPointCloud_RGB2PointCloud_RGB(plane_cloud, plane_cloud_tem);
-        appendCloud_RGB(plane_cloud_tem,cloud_remaining);
-      }
-    }
-    else{
-      /*appendCloud_RGB(cloud_tem,cloud_remaining);
-      printf("Can't fit any more\n");
-      break;*/
-      pcl::copyPointCloud(*remained_tem, *cloud_tem);
-      PointCloudPtr_RGB plane_cloud_tem (new PointCloud_RGB);
-      MyPointCloud_RGB2PointCloud_RGB(plane_cloud, plane_cloud_tem);
-      appendCloud_RGB(plane_cloud_tem,cloud_remaining);
-      //continue;
-    }
-  }
-
-  if(support_plane_clouds_tem.size()>0){
-    merge_Plane(support_plane_clouds_tem, support_plane_coefficients_vector, support_clouds, support_rect_clouds);
-  }
-
-  pcl::copyPointCloud(*cloud_remaining, *remained_cloud);
-}
-
-
-
-//detct separation plane
-void detect_separation_plane(PointCloudPtr_RGB cloud, vector<MyPointCloud_RGB> &separation_clouds, std::vector<MyPointCloud> &separation_rect_clouds, PointCloudPtr_RGB remained_cloud){
-  separation_clouds.clear();
-  separation_rect_clouds.clear();
-
-  std::vector<pcl::ModelCoefficients> separation_plane_coefficients_vector;
-  vector<MyPointCloud_RGB> separation_plane_clouds_tem;
-
-  PointCloudPtr_RGB cloud_tem (new PointCloud_RGB);
-  pcl::copyPointCloud(*cloud, *cloud_tem);
-
-  PointCloudPtr_RGB cloud_remaining(new PointCloud_RGB);
-
-  while(1){
-    PointCloudPtr_RGB remained_tem(new PointCloud_RGB);
-    MyPointCloud_RGB plane_cloud;
-    MyPointCloud plane_cloud_n;
-    MyPointCloud rect_cloud;
-
-    float result=0;
-
-    pcl::ModelCoefficients::Ptr plane_coefficients(new pcl::ModelCoefficients());
-    big_plane_fitting(cloud_tem, plane_cloud, rect_cloud, plane_coefficients, remained_tem);
-
-    /*PointCloudPtr_RGB test_cloud(new PointCloud_RGB);
-    MyPointCloud_RGB2PointCloud(plane_cloud, test_cloud);
-    showPointCloud (test_cloud,"test_cloud");*/
-
-    MyPointCloud_RGB2MyPointCloud(plane_cloud, plane_cloud_n);
-
-    if(plane_cloud.mypoints.size()<1000){
-      printf("Can't fit any more\n");
-      appendCloud_RGB(cloud_tem,cloud_remaining);
-      break;
-    }
-
-    float l=sqrt(pow(rect_cloud.mypoints.at(0).x-rect_cloud.mypoints.at(1).x, 2)+pow(rect_cloud.mypoints.at(0).y-rect_cloud.mypoints.at(1).y, 2)+pow(rect_cloud.mypoints.at(0).z-rect_cloud.mypoints.at(1).z, 2));
-    float w=sqrt(pow(rect_cloud.mypoints.at(0).x-rect_cloud.mypoints.at(3).x, 2)+pow(rect_cloud.mypoints.at(0).y-rect_cloud.mypoints.at(3).y, 2)+pow(rect_cloud.mypoints.at(0).z-rect_cloud.mypoints.at(3).z, 2));
-
-    cout<<"l=====================:"<<l<<endl;
-    cout<<"w=====================:"<<w<<endl;
-    cout<<"l*w:"<<l*w<<endl;
-
-    if(l<0.5&&w<0.5){
-      appendCloud_RGB(cloud_tem,cloud_remaining);
-      break;
-    }
-
-    if(l<0.7&&w<0.7){
-
-      pcl::copyPointCloud(*remained_tem, *cloud_tem);
-      PointCloudPtr_RGB plane_cloud_tem (new PointCloud_RGB);
-      MyPointCloud_RGB2PointCloud_RGB(plane_cloud, plane_cloud_tem);
-      appendCloud_RGB(plane_cloud_tem,cloud_remaining);
-      continue;
-
-      /*cout<<"===========***==========="<<endl;
-      appendCloud_RGB(cloud_tem,cloud_remaining);
-      break;*/
-    }
-
-    computePlaneJaccardIndex(plane_cloud_n, rect_cloud, 0.002, 0.025, &result);
-
-    cout<<"result=====================:"<<result<<endl;
-
-    float thresdhold=0.12;
-
-    if(result>thresdhold){
-      Eigen::Vector3d plane_normal;
-      plane_normal << plane_coefficients->values[0], plane_coefficients->values[1], plane_coefficients->values[2];
-      plane_normal.normalize();
-
-      cout<<"std::abs(plane_normal.dot(Eigen::Vector3d(0,0,1))):"<<std::abs(plane_normal.dot(Eigen::Vector3d(0,0,1)))<<endl;
-      cout<<"std::abs(rect_cloud.mypoints.at(0).z):"<<std::abs(rect_cloud.mypoints.at(0).z)<<endl;
-      cout<<"std::abs(rect_cloud.mypoints.at(1).z):"<<std::abs(rect_cloud.mypoints.at(1).z)<<endl;
-      cout<<"std::abs(rect_cloud.mypoints.at(2).z):"<<std::abs(rect_cloud.mypoints.at(2).z)<<endl;
-      cout<<"std::abs(rect_cloud.mypoints.at(3).z):"<<std::abs(rect_cloud.mypoints.at(3).z)<<endl;
-
-      if(std::abs(plane_normal.dot(Eigen::Vector3d(0,0,1)))<0.25){
-        //it is a separation plane
-        PointCloudPtr_RGB pc(new PointCloud_RGB);
-        MyPointCloud_RGB2PointCloud_RGB(plane_cloud, pc);
-        //showPointCloud(pc, "plane_cloud");
-
-        pcl::copyPointCloud(*remained_tem, *cloud_tem);
-        //showPointCloud(remained_tem, "test");
-
-        std::vector<PointCloudPtr_RGB> cluster_points;
-        big_object_seg_ECE(pc, cluster_points);
-
-        PointCloudPtr_RGB new_plane_cloud(new PointCloud_RGB);
-
-        for(int k=0; k<cluster_points.size(); k++){
-          if(cluster_points.at(k)->size()>10){
-            appendCloud_RGB(cluster_points.at(k), new_plane_cloud);
-          }
-        }
-
-        PointCloudPtr rect(new PointCloud);
-        getRectForPlaneCloud(new_plane_cloud, plane_coefficients, rect);
-
-        float ll=sqrt(pow(rect->at(0).x-rect->at(1).x, 2)+pow(rect->at(0).y-rect->at(1).y, 2)+pow(rect->at(0).z-rect->at(1).z, 2));
-        float ww=sqrt(pow(rect->at(0).x-rect->at(3).x, 2)+pow(rect->at(0).y-rect->at(3).y, 2)+pow(rect->at(0).z-rect->at(3).z, 2));
-
-        if(ll>0.7||ww>0.7){
-          MyPointCloud_RGB my_new_plane_cloud;
-          PointCloud_RGB2MyPointCloud_RGB(new_plane_cloud, my_new_plane_cloud);
-
-          separation_plane_clouds_tem.push_back(my_new_plane_cloud);
-          separation_plane_coefficients_vector.push_back(*plane_coefficients);
-        }
-        else{
-          PointCloudPtr_RGB plane_cloud_tem (new PointCloud_RGB);
-          MyPointCloud_RGB2PointCloud_RGB(plane_cloud, plane_cloud_tem);
-          appendCloud_RGB(plane_cloud_tem,cloud_remaining);
-          continue;
-        }
-      }
-      else{
-        pcl::copyPointCloud(*remained_tem, *cloud_tem);
-        PointCloudPtr_RGB plane_cloud_tem (new PointCloud_RGB);
-        MyPointCloud_RGB2PointCloud_RGB(plane_cloud, plane_cloud_tem);
-        appendCloud_RGB(plane_cloud_tem,cloud_remaining);
-      }
-    }
-    else{
-      /*appendCloud_RGB(cloud_tem,cloud_remaining);
-      printf("Can't fit any more\n");
-      break;*/
-      pcl::copyPointCloud(*remained_tem, *cloud_tem);
-      PointCloudPtr_RGB plane_cloud_tem (new PointCloud_RGB);
-      MyPointCloud_RGB2PointCloud_RGB(plane_cloud, plane_cloud_tem);
-      appendCloud_RGB(plane_cloud_tem,cloud_remaining);
-      //continue;
-    }
-  }
-
-  if(separation_plane_clouds_tem.size()>0){
-    merge_Plane(separation_plane_clouds_tem, separation_plane_coefficients_vector, separation_clouds, separation_rect_clouds);
-  }
-
-  pcl::copyPointCloud(*cloud_remaining, *remained_cloud);
-}
-
 //pre-segment scene
-void pre_segment_scene(PointCloudPtr_RGB transformed_cloud,  vector<MyPointCloud>& sum_support_clouds, vector<MyPointCloud>& sum_separation_rect_clouds){
+void pre_segment_scene(PointCloudPtr_RGB cloud, Eigen::Matrix4f& matrix_transform, Eigen::Matrix4f& matrix_translation_r, Eigen::Matrix4f& matrix_transform_r, vector<MyPointCloud_RGB>& cluster_projected_pcs, vector<MyPointCloud_RGB>& cluster_origin_pcs, PointCloudPtr_RGB colored_projected_pc, PointCloudPtr_RGB colored_origin_pc){
+  PointCloudPtr_RGB new_cloud(new PointCloud_RGB);
+  pcl::transformPointCloud (*cloud, *new_cloud, matrix_transform);
+
+  // All the objects needed
+  pcl::PassThrough<Point_RGB> pass;
+  // Datasets
+  PointCloudPtr_RGB cloud_filtered(new PointCloud_RGB);
+  PointCloudPtr_RGB cloud_tem(new PointCloud_RGB);
+
+  // Build a passthrough filter to remove spurious NaNs
+  pass.setInputCloud (new_cloud);
+  pass.setFilterFieldName ("z");
+  pass.setFilterLimits (0, 2.0);
+  pass.filter (*cloud_filtered);
+
   /******************Euclidean Cluster Extraction************************/
-  std::vector<PointCloudPtr_RGB> cluster_points;
-  big_object_seg_ECE(transformed_cloud, cluster_points);
+  vector<pcl::PointIndices> cluster_indices;
+  big_object_seg_ECE(cloud_filtered, cluster_indices);
 
-  for(int i=0;i<cluster_points.size();i++){
+  pcl::ExtractIndices<Point_RGB> extract;
+  extract.setInputCloud (cloud_filtered);
 
-    if(cluster_points.at(i)->size()>1000){
-      //detect support plane
-      vector<MyPointCloud_RGB> support_clouds;
-      std::vector<MyPointCloud> support_rect_clouds;
-      vector<MyPointCloud_RGB> separation_clouds;
-      std::vector<MyPointCloud> separation_rect_clouds;
-      PointCloudPtr_RGB cluster_remained_cloud(new PointCloud_RGB);
-      PointCloudPtr_RGB table_top_remained_cloud(new PointCloud_RGB);
+  PointCloudPtr_RGB cloud_filtered_tem(new PointCloud_RGB);
+  for(int i=0; i<cluster_indices.size(); i++){
+    extract.setIndices (boost::make_shared<pcl::PointIndices>(cluster_indices.at(i)));
+    extract.setNegative (false);
+    extract.filter(*cloud_tem);
 
-      //detct support plane
-      detect_support_plane(cluster_points.at(i), support_clouds, support_rect_clouds, cluster_remained_cloud);
+    float min_x,min_y,min_z, max_x, max_y, max_z;
+    com_bounding_box(cloud_tem, &min_x,&min_y,&min_z, &max_x, &max_y, &max_z);
 
-      if(support_rect_clouds.size()>0){
-        float min_z = 3.0;
-        for (int j = 0; j < support_rect_clouds.size(); j++){
-          for(int k = 0; k < support_rect_clouds.at(j).mypoints.size(); k++){
-            if(support_rect_clouds.at(j).mypoints[k].z < min_z){
-              min_z = support_rect_clouds.at(j).mypoints[k].z;
-            }
-          }
-        }
+    if(min_z < 1.5){
+      appendCloud_RGB(cloud_tem, cloud_filtered_tem);
+    } 
+  }
 
-        PointCloudPtr_RGB table_top_cloud(new PointCloud_RGB);
+  pcl::copyPointCloud(*cloud_filtered_tem, *cloud_filtered);
 
-        for (int j = 0; j < cluster_remained_cloud->size(); j++){
-          if(cluster_remained_cloud->at(j).z > min_z){
-            table_top_cloud->push_back(cluster_remained_cloud->at(j));
-          }
-        }
+  PointCloudPtr_RGB projected_cloud(new PointCloud_RGB);
+  pcl::copyPointCloud(*cloud_filtered, *projected_cloud);
 
-        std::vector<PointCloudPtr_RGB> tabletop_cluster_points;
-        big_object_seg_ECE(table_top_cloud, tabletop_cluster_points);
+  for(int i=0; i<projected_cloud->size(); i++){
+    projected_cloud->at(i).z = 0;
+  }
 
-        for(int m=0; m<tabletop_cluster_points.size(); m++){
-          detect_separation_plane(tabletop_cluster_points.at(m), separation_clouds, separation_rect_clouds, cluster_remained_cloud);
+  big_object_seg_ECE(projected_cloud, cluster_indices);
 
-          for(int j = 0; j < separation_rect_clouds.size(); j++){
-            sum_separation_rect_clouds.push_back(separation_rect_clouds.at(j));
-          }
+  extract.setInputCloud (projected_cloud);
 
-          appendCloud_RGB(cluster_remained_cloud, table_top_remained_cloud);
-        }
+  for(int i=0; i<cluster_indices.size(); i++){
+    if(cluster_indices.at(i).indices.size() > 500){
+      extract.setIndices (boost::make_shared<pcl::PointIndices>(cluster_indices.at(i)));
+      extract.setNegative (false);
+      extract.filter(*cloud_tem);
 
-        //get points cloud on the table
-        getCloudOnTable(table_top_remained_cloud, support_clouds, support_rect_clouds, sum_support_clouds);
+      MyPointCloud_RGB mc;
+      PointCloud_RGB2MyPointCloud_RGB(cloud_tem, mc);
+      cluster_projected_pcs.push_back(mc);
+
+      for(int j=0; j<cloud_tem->size(); j++){
+        cloud_tem->at(j).r=new_color_table[i%30][0];
+        cloud_tem->at(j).g=new_color_table[i%30][1];
+        cloud_tem->at(j).b=new_color_table[i%30][2];
       }
+
+      appendCloud_RGB(cloud_tem, colored_projected_pc);
     }
   }
 
-  //debug
-  /*for(int i=0; i<sum_support_clouds.size(); i++){
-    PointCloudPtr pc(new PointCloud);
-    MyPointCloud2PointCloud(sum_support_clouds.at(i), pc);
-    showPointCloud2(pc, "test");
-  }*/
+  extract.setInputCloud (cloud_filtered);
+
+  for(int i=0; i<cluster_indices.size(); i++){
+    if(cluster_indices.at(i).indices.size() > 500){
+      extract.setIndices (boost::make_shared<pcl::PointIndices>(cluster_indices.at(i)));
+      extract.setNegative (false);
+      extract.filter(*cloud_tem);
+
+      PointCloud_RGB c_temp;
+      pcl::transformPointCloud (*cloud_tem, c_temp, matrix_translation_r);
+      pcl::transformPointCloud (c_temp, *cloud_tem, matrix_transform_r);
+
+      MyPointCloud_RGB mc;
+      PointCloud_RGB2MyPointCloud_RGB(cloud_tem, mc);
+      cluster_origin_pcs.push_back(mc);
+
+      for(int j=0; j<cloud_tem->size(); j++){
+        cloud_tem->at(j).r=new_color_table[i%30][0];
+        cloud_tem->at(j).g=new_color_table[i%30][1];
+        cloud_tem->at(j).b=new_color_table[i%30][2];
+      }
+
+      appendCloud_RGB(cloud_tem, colored_origin_pc);
+    }
+  }
 }
 
 
-//mark remaining cloud by bounding box
-void mark_remaining_cloud(PointCloudPtr_RGB sourceCloud, PointCloudPtr cloud){
+//mark cloud by bounding box
+void mark_cloud(PointCloudPtr_RGB sourceCloud, Eigen::Matrix4f& matrix_transform, Eigen::Matrix4f& matrix_translation_r, Eigen::Matrix4f& matrix_transform_r, PointCloudPtr box_cloud){
+  PointCloudPtr_RGB new_cloud(new PointCloud_RGB);
+  pcl::transformPointCloud (*sourceCloud, *new_cloud, matrix_transform);
+
+
   cv::Point2f p0;
   cv::Point2f p1;
   cv::Point2f p2;
   cv::Point2f p3;
 
-  find_min_rect(sourceCloud, p0,p1,p2,p3);
+  find_min_rect(new_cloud, p0,p1,p2,p3);
 
   float min_x,min_y,min_z, max_x, max_y, max_z;
 
-  com_bounding_box(sourceCloud, &min_x,&min_y,&min_z, &max_x, &max_y, &max_z);
+  com_bounding_box(new_cloud, &min_x,&min_y,&min_z, &max_x, &max_y, &max_z);
 
-  cloud->push_back(Point(p0.x,p0.y,min_z));
-  cloud->push_back(Point(p1.x,p1.y,min_z));
-  cloud->push_back(Point(p2.x,p2.y,min_z));
-  cloud->push_back(Point(p3.x,p3.y,min_z));
+  box_cloud->push_back(Point(p0.x,p0.y,min_z));
+  box_cloud->push_back(Point(p1.x,p1.y,min_z));
+  box_cloud->push_back(Point(p2.x,p2.y,min_z));
+  box_cloud->push_back(Point(p3.x,p3.y,min_z));
 
-  cloud->push_back(Point(p0.x,p0.y,max_z));
-  cloud->push_back(Point(p1.x,p1.y,max_z));
-  cloud->push_back(Point(p2.x,p2.y,max_z));
-  cloud->push_back(Point(p3.x,p3.y,max_z));
-}
+  box_cloud->push_back(Point(p0.x,p0.y,max_z));
+  box_cloud->push_back(Point(p1.x,p1.y,max_z));
+  box_cloud->push_back(Point(p2.x,p2.y,max_z));
+  box_cloud->push_back(Point(p3.x,p3.y,max_z));
 
-void getColorByValue(float val, float min, float max, float *r, float *g, float *b)
-{
-  if(max>1.0){
-    max=1.0;
-  }
-
-  int tmp = static_cast<int>((val - min) / (max - min) * 255);
-  *r = g_color_table[tmp][0] * 255;
-  *g = g_color_table[tmp][1] * 255;
-  *b = g_color_table[tmp][2] * 255;
+  PointCloud box_cloud_temp;
+  pcl::transformPointCloud (*box_cloud, box_cloud_temp, matrix_translation_r);
+  pcl::transformPointCloud (box_cloud_temp, *box_cloud, matrix_transform_r);
 }
 
 
-//compute gaussian curvature
-void compute_gaussian_curvature(PointCloudPtr_RGB cloud, vector<Point_Cur_RGB>& curvatures, PointCloudPtr_RGB cloud_colored){
-  // Compute the normals
-  pcl::NormalEstimation<pcl::PointXYZRGB, pcl::Normal> normalEstimation;
-  normalEstimation.setInputCloud (cloud);
-
-  pcl::search::KdTree<pcl::PointXYZRGB>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZRGB>);
-  normalEstimation.setSearchMethod (tree);
-
-  pcl::PointCloud<pcl::Normal>::Ptr cloudWithNormals (new pcl::PointCloud<pcl::Normal>);
-
-  normalEstimation.setRadiusSearch (0.02);
-
-  normalEstimation.compute (*cloudWithNormals);
-
-  // Setup the principal curvatures computation
-  pcl::PrincipalCurvaturesEstimation<pcl::PointXYZRGB, pcl::Normal, pcl::PrincipalCurvatures> principalCurvaturesEstimation;
-
-  // Provide the original point cloud (without normals)
-  principalCurvaturesEstimation.setInputCloud (cloud);
-
-  // Provide the point cloud with normals
-  principalCurvaturesEstimation.setInputNormals(cloudWithNormals);
-
-  // Use the same KdTree from the normal estimation
-  principalCurvaturesEstimation.setSearchMethod (tree);
-  principalCurvaturesEstimation.setRadiusSearch(0.05);
-
-  // Actually compute the principal curvatures
-  pcl::PointCloud<pcl::PrincipalCurvatures>::Ptr pcs (new pcl::PointCloud<pcl::PrincipalCurvatures> ());
-  principalCurvaturesEstimation.compute (*pcs);
-
-  float min_curv_val = 10000;
-  float max_curv_val = -10000;
-
-  for (unsigned int i = 0; i < pcs->points.size(); i++) {
-    /* if (pcs.points[i].pc1 > max_curv_val){
-    max_curv_val = pcs.points[i].pc1;
-    }
-
-    if (pcs.points[i].pc2 < min_curv_val){
-    min_curv_val = pcs.points[i].pc2;
-    }*/
-    float curv_val=pcs->points[i].pc1*pcs->points[i].pc2;
-    if (curv_val > max_curv_val){
-      max_curv_val = curv_val;
-    }
-    if (curv_val < min_curv_val){
-      min_curv_val = curv_val;
-    }
-  }
-
-  cout<<"pcs->points.size():"<<pcs->points.size()<<endl;
-  cout<<"cloud->size():"<<cloud->size()<<endl;
-
-  for (unsigned int i = 0; i < pcs->points.size(); i++) {
-    float r=0;
-    float g=0;
-    float b=0;
-
-    Point_Cur_RGB cur;
-
-    if(!(_isnan(pcs->points[i].pc1)||_isnan(pcs->points[i].pc2))){
-      cur.curvature=pcs->points[i].pc1*pcs->points[i].pc2;
-      //cout<<"cur.curvature:"<<cur.curvature<<endl;
-      getColorByValue(cur.curvature, min_curv_val, max_curv_val, &r, &g, &b);
-    }
-
-    else{
-      cur.curvature=0;
-    }
-
-    cur.x=cloud->at(i).x;
-    cur.y=cloud->at(i).y;
-    cur.z=cloud->at(i).z;
-    cur.r=r;
-    cur.g=g;
-    cur.b=b;
-
-    curvatures.push_back(cur);
-
-    Point_RGB p;
-    p.x=cloud->at(i).x;
-    p.y=cloud->at(i).y;
-    p.z=cloud->at(i).z;
-    p.r=r;
-    p.g=g;
-    p.b=b;
-
-    cloud_colored->push_back(p);
-  }
-}
-
-//compute gaussian curvature
+//compute mean curvature
 void compute_mean_curvature(PointCloudPtr_RGB cloud, vector<Point_Cur_RGB>& curvatures, PointCloudPtr_RGB cloud_colored){
   // Compute the normals
   pcl::NormalEstimation<pcl::PointXYZRGB, pcl::Normal> normalEstimation;
@@ -1561,589 +1091,368 @@ void curvature_projected(PointCloudPtr_RGB cloud, vector<Point_Cur_RGB>& curvatu
   }
 }
 
-//normalize projected curvature
-void normalize_projected_curvature(PointCloudPtr_RGB cloud, vector<Point_Cur_RGB>& projected_curvatures, PointCloudPtr_RGB cloud_colored, vector<Point_Cur_RGB>& new_curvatures, int *rows, int *cols){
-  /*PointCloudPtr_RGB cloud_tem(new PointCloud_RGB);
-  for(int i=0;i<projected_curvatures.size();i++){
-  Point_RGB  
-  }*/
+//bubble Sort
+void bubbleSort(vector<int>& a, vector<int>& priority_vec)
+{
+  int temp;
+  int size=a.size();
+
+  for(int pass=0; pass<size; pass++)
+  {
+    priority_vec.push_back(pass);
+  }
+
+  for(int pass=1; pass<size; pass++)
+  {
+    for(int k=0;k<size-pass;k++){ 
+      if(a.at(k)>a.at(k+1))
+      {
+        //cout<<"============"<<endl;
+
+        temp=a.at(k);
+        a.at(k)=a.at(k+1);
+        a.at(k+1)=temp; 
+
+        temp=priority_vec.at(k);
+        priority_vec.at(k)=priority_vec.at(k+1);
+        priority_vec.at(k+1)=temp;
+      }
+    }
+  }
+}
+
+//Set Priority for Clusters
+void setPriorityforClusters(vector<MyPointCloud_RGB>& cluster_projected_pcs, vector<MyPointCloud_RGB>& cluster_origin_pcs ,vector<int>& priority_vec){
+  vector<int> num;
+
+  for(int i=0; i<cluster_origin_pcs.size(); i++){
+    PointCloudPtr_RGB pc(new PointCloud_RGB);
+    MyPointCloud_RGB2PointCloud_RGB(cluster_origin_pcs.at(i), pc);
+
+    vector<Point_Cur_RGB> curvatures;
+    PointCloudPtr_RGB cloud_colored(new PointCloud_RGB);
+    compute_mean_curvature(pc, curvatures, cloud_colored);
+
+    int count=0;
+    for(int j=0; j<curvatures.size(); j++){
+      if(curvatures.at(j).curvature > 0.1){
+        count++;
+      }
+    }
+
+    num.push_back(count);
+
+    //cout<<"count:"<<count<<endl;
+
+    //showPointCloud(pc, "test");
+  }
+
+  bubbleSort(num, priority_vec);
+}
+
+//get position that robot should go
+void getRobotPosition(PointCloudPtr_RGB sourceCloud, vector<MyPointCloud> &wall_rect_clouds, Eigen::Matrix4f& matrix_transform, Eigen::Matrix4f& matrix_translation_r, Eigen::Matrix4f& matrix_transform_r, Point& position, Visualizer& vs){
+  PointCloudPtr_RGB new_cloud(new PointCloud_RGB);
+  pcl::transformPointCloud (*sourceCloud, *new_cloud, matrix_transform);
 
   cv::Point2f p0;
   cv::Point2f p1;
   cv::Point2f p2;
   cv::Point2f p3;
 
-  find_min_rect(cloud, p0,p1,p2,p3);
+  find_min_rect(new_cloud, p0,p1,p2,p3);
 
-  MyPointCloud rect_mpt;
-  MyPointCloud sample_mpt;
+  float min_x,min_y,min_z, max_x, max_y, max_z;
 
-  MyPt pt0={p0.x,p0.y,0};
-  MyPt pt1={p1.x,p1.y,0};
-  MyPt pt2={p2.x,p2.y,0};
-  MyPt pt3={p3.x,p3.y,0};
-  rect_mpt.mypoints.push_back(pt0);
-  rect_mpt.mypoints.push_back(pt1);
-  rect_mpt.mypoints.push_back(pt2);
-  rect_mpt.mypoints.push_back(pt3);
+  com_bounding_box(new_cloud, &min_x,&min_y,&min_z, &max_x, &max_y, &max_z);
 
-  float grid_len=0.02;
+  PointCloudPtr box_cloud(new PointCloud);
 
-  samplePlane(rect_mpt, grid_len, sample_mpt, rows, cols);
+  box_cloud->push_back(Point(p0.x,p0.y,min_z));
+  box_cloud->push_back(Point(p1.x,p1.y,min_z));
+  box_cloud->push_back(Point(p2.x,p2.y,min_z));
+  box_cloud->push_back(Point(p3.x,p3.y,min_z));
 
-  cout<<"cloud.size():"<<cloud->size()<<endl;
-  cout<<"sample_mpt.mypoints.size():"<<sample_mpt.mypoints.size()<<endl;
+  box_cloud->push_back(Point(p0.x,p0.y,max_z));
+  box_cloud->push_back(Point(p1.x,p1.y,max_z));
+  box_cloud->push_back(Point(p2.x,p2.y,max_z));
+  box_cloud->push_back(Point(p3.x,p3.y,max_z));
 
-  pcl::KdTreeFLANN<Point_RGB> kdtree;
-  kdtree.setInputCloud (cloud);
+  PointCloud box_cloud_temp;
+  pcl::transformPointCloud (*box_cloud, box_cloud_temp, matrix_translation_r);
+  pcl::transformPointCloud (box_cloud_temp, *box_cloud, matrix_transform_r);
 
-  float min_curv_val = 10000;
-  float max_curv_val = -10000;
+  draw_box(box_cloud, vs, 0, 255, 255, "box");
 
-  for (unsigned int i = 0; i < sample_mpt.mypoints.size(); i++) {
-    float curvature=0;
+  Point p0_bottom = box_cloud->at(0);
+  Point p1_bottom = box_cloud->at(1);
+  Point p2_bottom = box_cloud->at(2);
+  Point p3_bottom = box_cloud->at(3);
+  Point p0_top = box_cloud->at(4);
+  Point p1_top = box_cloud->at(5);
+  Point p2_top = box_cloud->at(6);
+  Point p3_top = box_cloud->at(7);
 
-    Point_RGB searchPoint;
-    searchPoint.x=sample_mpt.mypoints.at(i).x;
-    searchPoint.y=sample_mpt.mypoints.at(i).y;
-    searchPoint.z=sample_mpt.mypoints.at(i).z;
+  int first_id=-1;
+  int second_id=-1;
+  float max=0;
+  float second_max=0;
 
-    // Neighbors within radius search
-    std::vector<int> pointIdxRadiusSearch;
-    std::vector<float> pointRadiusSquaredDistance;
-
-    float radius = grid_len/2;
-
-    if ( kdtree.radiusSearch (searchPoint, radius, pointIdxRadiusSearch, pointRadiusSquaredDistance) > 0 )
-    {
-      for (size_t j = 0; j < pointIdxRadiusSearch.size (); ++j){
-        curvature+=projected_curvatures.at(pointIdxRadiusSearch[j]).curvature;
-      }
-      curvature/=pointIdxRadiusSearch.size();
-    }
-
-    if (curvature > max_curv_val){
-      max_curv_val = curvature;
-    }
-    if (curvature < min_curv_val){
-      min_curv_val = curvature;
-    }
-
-    Point_Cur_RGB c;
-    c.x=sample_mpt.mypoints.at(i).x;
-    c.y=sample_mpt.mypoints.at(i).y;
-    c.z=0;
-    c.curvature=curvature;
-    new_curvatures.push_back(c);
-  }
-
-  cout<<"min_curv_val:"<<min_curv_val<<endl;
-  cout<<"max_curv_val:"<<max_curv_val<<endl;
-
-  for (unsigned int i = 0; i < new_curvatures.size(); i++) {
-    float r=0;
-    float g=0;
-    float b=0;
-    getColorByValue(new_curvatures.at(i).curvature, min_curv_val, max_curv_val, &r, &g, &b);
-
-    new_curvatures.at(i).r=r;
-    new_curvatures.at(i).g=g;
-    new_curvatures.at(i).b=b;
-
-    Point_RGB p;
-    p.x=new_curvatures.at(i).x;
-    p.y=new_curvatures.at(i).y;
-    p.z=new_curvatures.at(i).z;
-    p.r=r;
-    p.g=g;
-    p.b=b;
-
-    cloud_colored->push_back(p);
-  }
-
-}
-
-//Gaussian Blur
-void gaussian_blur(vector<Point_Cur_RGB>& curvatures, int rows, int cols, PointCloudPtr_RGB cloud_colored, vector<Point_Cur_RGB>& new_curvatures){
-  cv::Mat src(rows, cols, CV_32FC1);
-  cv::Mat dst; 
-
-  int index=0;
-  for(int i=0;i<rows;i++){
-    for(int j=0;j<cols;j++){
-      src.at<float>(i,j)=curvatures.at(index).curvature;
-      index++;
-    }
-  }
-
-  cv::GaussianBlur( src, dst, cv::Size(3, 3), 0, 0 );
-
-  float min_curv_val = 10000;
-  float max_curv_val = -10000;
-
-  for(int i=0;i<rows;i++){
-    for(int j=0;j<cols;j++){
-      if (dst.at<float>(i,j) > max_curv_val){
-        max_curv_val = dst.at<float>(i,j);
-      }
-      if (dst.at<float>(i,j) < min_curv_val){
-        min_curv_val = dst.at<float>(i,j);
-      }
-    }
-  }
-
-  index=0;
-  for(int i=0;i<rows;i++){
-    for(int j=0;j<cols;j++){
-      float r=0;
-      float g=0;
-      float b=0;
-
-      new_curvatures.push_back(curvatures.at(index));
-      new_curvatures.at(index).curvature=dst.at<float>(i,j);
-
-      getColorByValue(new_curvatures.at(index).curvature, min_curv_val, max_curv_val, &r, &g, &b);
-
-      new_curvatures.at(index).r=r;
-      new_curvatures.at(index).g=g;
-      new_curvatures.at(index).b=b;
-
-      index++;
-    }
-  }
-
-  for(int i=0;i<new_curvatures.size();i++){
-    Point_RGB p;
-    p.x=new_curvatures.at(i).x;
-    p.y=new_curvatures.at(i).y;
-    p.z=new_curvatures.at(i).z;
-    p.r=new_curvatures.at(i).r;
-    p.g=new_curvatures.at(i).g;
-    p.b=new_curvatures.at(i).b;
-
-    cloud_colored->push_back(p);
-  }
-}
-
-//gaussian kernel function
-float gauss(float x)  
-{  
-  return exp(-x);  
-}  
-
-//if a point in a rect
-bool isInRect(Point p, MyPointCloud& rect_cloud){
-
-  for(int i=0; i<rect_cloud.mypoints.size(); i++){
-    Eigen::Vector3f normal0;
-    normal0 << p.x-rect_cloud.mypoints.at(i).x, p.y-rect_cloud.mypoints.at(i).y, p.z-rect_cloud.mypoints.at(i).z;
+  for(int i=0; i<wall_rect_clouds.size(); i++){
+    Eigen::Vector3d normal0;
+    normal0 << wall_rect_clouds.at(i).mypoints.at(0).x - wall_rect_clouds.at(i).mypoints.at(1).x, wall_rect_clouds.at(i).mypoints.at(0).y - wall_rect_clouds.at(i).mypoints.at(1).y, wall_rect_clouds.at(i).mypoints.at(0).z - wall_rect_clouds.at(i).mypoints.at(1).z;
     normal0.normalize();
 
-    Eigen::Vector3f normal1;
-    normal1 << rect_cloud.mypoints.at((i+1)%4).x-rect_cloud.mypoints.at(i).x, rect_cloud.mypoints.at((i+1)%4).y-rect_cloud.mypoints.at(i).y, rect_cloud.mypoints.at((i+1)%4).z-rect_cloud.mypoints.at(i).z;
+    Eigen::Vector3d normal1;
+    normal1 << wall_rect_clouds.at(i).mypoints.at(0).x - wall_rect_clouds.at(i).mypoints.at(3).x, wall_rect_clouds.at(i).mypoints.at(0).y - wall_rect_clouds.at(i).mypoints.at(3).y, wall_rect_clouds.at(i).mypoints.at(0).z - wall_rect_clouds.at(i).mypoints.at(3).z;
     normal1.normalize();
 
-    Eigen::Vector3f normal2;
-    normal2 << rect_cloud.mypoints.at((i+3)%4).x-rect_cloud.mypoints.at(i).x, rect_cloud.mypoints.at((i+3)%4).y-rect_cloud.mypoints.at(i).y, rect_cloud.mypoints.at((i+3)%4).z-rect_cloud.mypoints.at(i).z;
-    normal2.normalize();
+    Eigen::Vector3d wall_normal = normal0.cross(normal1);
+    wall_normal.normalize();
 
-    if(normal0.dot(normal1)<0||normal0.dot(normal2)<0){
-      return false;
+    float A = wall_normal[0];
+    float B = wall_normal[1];
+    float C = wall_normal[2];
+    float D = -(A*wall_rect_clouds.at(i).mypoints.at(0).x+B*wall_rect_clouds.at(i).mypoints.at(0).y+C*wall_rect_clouds.at(i).mypoints.at(0).z);
+
+    cout<<"A=====:"<<A<<endl;
+    cout<<"B=====:"<<B<<endl;
+    cout<<"C=====:"<<C<<endl;
+    cout<<"D=====:"<<D<<endl;
+
+    cout<<"std::abs(A*p0_bottom.x+B*p0_bottom.y+C*p0_bottom.z+D):"<<std::abs(A*p0_bottom.x+B*p0_bottom.y+C*p0_bottom.z+D)<<endl;
+    cout<<"std::abs(A*p1_bottom.x+B*p1_bottom.y+C*p1_bottom.z+D):"<<std::abs(A*p1_bottom.x+B*p1_bottom.y+C*p1_bottom.z+D)<<endl;
+    cout<<"std::abs(A*p2_bottom.x+B*p2_bottom.y+C*p2_bottom.z+D):"<<std::abs(A*p2_bottom.x+B*p2_bottom.y+C*p2_bottom.z+D)<<endl;
+    cout<<"std::abs(A*p3_bottom.x+B*p3_bottom.y+C*p3_bottom.z+D):"<<std::abs(A*p3_bottom.x+B*p3_bottom.y+C*p3_bottom.z+D)<<endl;
+
+    if(max < std::abs(A*p0_bottom.x+B*p0_bottom.y+C*p0_bottom.z+D)){
+      second_max = max;
+      second_id = first_id;
+      
+      max = std::abs(A*p0_bottom.x+B*p0_bottom.y+C*p0_bottom.z+D);
+      first_id = 0;
     }
+    else if(second_max < std::abs(A*p0_bottom.x+B*p0_bottom.y+C*p0_bottom.z+D)){
+      second_max = std::abs(A*p0_bottom.x+B*p0_bottom.y+C*p0_bottom.z+D);
+      second_id = 0;
+    }
+
+    cout<<"max:"<<max<<endl;
+
+    if(max < std::abs(A*p1_bottom.x+B*p1_bottom.y+C*p1_bottom.z+D)){
+      second_max = max;
+      second_id = first_id;
+
+      max = std::abs(A*p1_bottom.x+B*p1_bottom.y+C*p1_bottom.z+D);
+      first_id = 1;
+    }
+    else if(second_max < std::abs(A*p1_bottom.x+B*p1_bottom.y+C*p1_bottom.z+D)){
+      second_max = std::abs(A*p1_bottom.x+B*p1_bottom.y+C*p1_bottom.z+D);
+      second_id = 1;
+    }
+
+    cout<<"max:"<<max<<endl;
+
+    if(max < std::abs(A*p2_bottom.x+B*p2_bottom.y+C*p2_bottom.z+D)){
+      second_max = max;
+      second_id = first_id;
+
+      max = std::abs(A*p2_bottom.x+B*p2_bottom.y+C*p2_bottom.z+D);
+      first_id = 2;
+    }
+    else if(second_max < std::abs(A*p2_bottom.x+B*p2_bottom.y+C*p2_bottom.z+D)){
+      second_max = std::abs(A*p2_bottom.x+B*p2_bottom.y+C*p2_bottom.z+D);
+      second_id = 2;
+    }
+
+    cout<<"max:"<<max<<endl;
+
+    if(max < std::abs(A*p3_bottom.x+B*p3_bottom.y+C*p3_bottom.z+D)){
+      second_max = max;
+      second_id = first_id;
+
+      max = std::abs(A*p3_bottom.x+B*p3_bottom.y+C*p3_bottom.z+D);
+      first_id = 3;
+    }
+    else if(second_max < std::abs(A*p3_bottom.x+B*p3_bottom.y+C*p3_bottom.z+D)){
+      second_max = std::abs(A*p3_bottom.x+B*p3_bottom.y+C*p3_bottom.z+D);
+      second_id = 3;
+    }
+
+    cout<<"max:"<<max<<endl;
   }
 
-  return true;
+  int first_id_r=0;
+  int second_id_r=0;
+
+  switch(first_id){
+  case 0:
+    switch(second_id){
+    case 1:
+      first_id_r=3;
+      second_id_r=2;
+      break;
+    case 3:
+      first_id_r=1;
+      second_id_r=2;
+      break;
+
+    }
+    break;
+  case 1:
+    switch(second_id){
+    case 0:
+      first_id_r=2;
+      second_id_r=3;
+      break;
+    case 2:
+      first_id_r=0;
+      second_id_r=3;
+      break;
+
+    }
+    break;
+  case 2:
+    switch(second_id){
+    case 1:
+      first_id_r=3;
+      second_id_r=0;
+      break;
+    case 3:
+      first_id_r=1;
+      second_id_r=0;
+      break;
+
+    }
+    break;
+  case 3:
+    switch(second_id){
+    case 0:
+      first_id_r=2;
+      second_id_r=1;
+      break;
+    case 2:
+      first_id_r=0;
+      second_id_r=1;
+      break;
+
+    }
+    break;
+  }
+
+
+  cout<<"first_id=============:"<<first_id<<endl;
+  cout<<"second_id=============:"<<second_id<<endl;
+  cout<<"first_id_r=============:"<<first_id_r<<endl;
+  cout<<"second_id_r=============:"<<second_id_r<<endl;
+
+  vs.viewer->addSphere(box_cloud->at(first_id), 0.025, "1");
+  vs.viewer->addSphere(box_cloud->at(second_id), 0.05, "2");
+
+  vs.viewer->addSphere(box_cloud->at(first_id_r), 0.1, "3");
+  vs.viewer->addSphere(box_cloud->at(second_id_r), 0.15, "4");
+
+  Eigen::Vector3d r_normal0;
+  r_normal0 << box_cloud->at(first_id).x - box_cloud->at(first_id_r).x, box_cloud->at(first_id).y - box_cloud->at(first_id_r).y, box_cloud->at(first_id).z - box_cloud->at(first_id_r).z;
+  r_normal0.normalize();
+
+  Point pos((box_cloud->at(first_id).x+box_cloud->at(second_id).x)/2, (box_cloud->at(first_id).y+box_cloud->at(second_id).y)/2, (box_cloud->at(first_id).z+box_cloud->at(second_id).z)/2);
+  
+  vs.viewer->addSphere(pos, 0.175, "5");
+
+  position.x = pos.x + 0.4*r_normal0[0];
+  position.y = pos.y + 0.4*r_normal0[1];
+  position.z = pos.z + 0.4*r_normal0[2];
+
+  vs.viewer->addSphere(position, 0.2, "6");
 }
 
+//get position that robot should go
+void getRobotPosition1(PointCloudPtr_RGB sourceCloud, vector<MyPointCloud> &wall_rect_clouds, Eigen::Matrix4f& matrix_transform, Eigen::Matrix4f& matrix_translation_r, Eigen::Matrix4f& matrix_transform_r, Point& position, Visualizer& vs){
+  PointCloudPtr_RGB new_cloud(new PointCloud_RGB);
+  pcl::transformPointCloud (*sourceCloud, *new_cloud, matrix_transform);
 
-//if two points in the same rect
-bool isInSameRect(Point p1, Point p2, vector<MyPointCloud>& rect_clouds){
-  for(int i=0; i<rect_clouds.size(); i++){
-    if(isInRect(p1, rect_clouds.at(i))&&isInRect(p2, rect_clouds.at(i))){
-      return true;
-    }
+  cv::Point2f p0;
+  cv::Point2f p1;
+  cv::Point2f p2;
+  cv::Point2f p3;
+
+  find_min_rect(new_cloud, p0,p1,p2,p3);
+
+  float min_x,min_y,min_z, max_x, max_y, max_z;
+
+  com_bounding_box(new_cloud, &min_x,&min_y,&min_z, &max_x, &max_y, &max_z);
+
+  PointCloudPtr box_cloud(new PointCloud);
+
+  box_cloud->push_back(Point(p0.x,p0.y,min_z));
+  box_cloud->push_back(Point(p1.x,p1.y,min_z));
+  box_cloud->push_back(Point(p2.x,p2.y,min_z));
+  box_cloud->push_back(Point(p3.x,p3.y,min_z));
+
+  box_cloud->push_back(Point(p0.x,p0.y,max_z));
+  box_cloud->push_back(Point(p1.x,p1.y,max_z));
+  box_cloud->push_back(Point(p2.x,p2.y,max_z));
+  box_cloud->push_back(Point(p3.x,p3.y,max_z));
+
+  PointCloud box_cloud_temp;
+  pcl::transformPointCloud (*box_cloud, box_cloud_temp, matrix_translation_r);
+  pcl::transformPointCloud (box_cloud_temp, *box_cloud, matrix_transform_r);
+
+  draw_box(box_cloud, vs, 0, 255, 255, "box");
+
+  int first_id0=-1;
+  int second_id0=-1;
+  int first_id1=-1;
+  int second_id1=-1;
+
+  float len0 = sqrt(pow(box_cloud->at(0).x-box_cloud->at(1).x, 2)+pow(box_cloud->at(0).y-box_cloud->at(1).y, 2)+pow(box_cloud->at(0).z-box_cloud->at(1).z, 2));
+  float len1 = sqrt(pow(box_cloud->at(0).x-box_cloud->at(3).x, 2)+pow(box_cloud->at(0).y-box_cloud->at(3).y, 2)+pow(box_cloud->at(0).z-box_cloud->at(3).z, 2));
+
+  if(len0 > len1){
+    first_id0 = 0;
+    second_id0 = 1;
+    first_id1 = 3;
+    second_id1 = 2;
   }
-
-  return false;
-}
-
-//if a point in a plane
-bool isInPlane(Point p, pcl::KdTreeFLANN<Point> tree){
-
-  // Neighbors containers  
-  vector<int> k_indices;  
-  vector<float> k_distances;  
-
-  tree.radiusSearch (p, 0.005, k_indices, k_distances);  
-
-  if(k_indices.size()>0){
-    return true;
-  }
-
-  return false;
-}
-
-
-//if two points in the same plane
-bool isInSamePlane(Point p1, Point p2, vector<pcl::KdTreeFLANN<Point>> trees){
-
-
-  for(int i=0; i<trees.size(); i++){
-    if(isInPlane(p1, trees.at(i))&&isInPlane(p2, trees.at(i))){
-      return true;
-    }
-  }
-
-  return false;
-}
-
-//Wm5IntrLine2Line2
-bool testIntrLine2Line2(Point p0, Point p1 , Point p2, Point p3){
-
-  //Triangle3<float> triangle(Vector3<float>(p0_0.x,p0_0.y,p0_0.z),Vector3<float>(p0_1.x,p0_1.y,p0_1.z),Vector3<float>(p0_2.x,p0_2.y,p0_2.z));
-  Segment2<float> segment0(Vector2<float>(p0.x, p0.y), Vector2<float>(p1.x, p1.y));
-  Segment2<float> segment1(Vector2<float>(p2.x, p2.y), Vector2<float>(p3.x, p3.y));
-
-  IntrSegment2Segment2<float> intrSegment2Segment2(segment0, segment1);
-
-  bool bo=intrSegment2Segment2.Test();
-
-  return bo;
-}
-
-//if two points are separated by separation plane 
-bool isSeparated(Point p0, Point p1, vector<MyLine>& lines){
-  for(int i=0; i<lines.size(); i++){
-    if(testIntrLine2Line2(p0, p1 , Point(lines.at(i).p0.x, lines.at(i).p0.y, 0), Point(lines.at(i).p1.x, lines.at(i).p1.y, 0))){
-      return true;
-    }
-  }
-
-  return false;
-}
-
-//execute Mean Shift For Each Point
-void execMeanShiftForEachPoint(PointCloudPtr in_cloud, vector<MyLine>& lines, float radius, float scene_scale, PointCloudPtr out_cloud)  
-{  
-  pcl::KdTreeFLANN<Point>::Ptr tree (new pcl::KdTreeFLANN<Point>);  
-  tree->setInputCloud (in_cloud);  
-
-  cout<<"in_cloud->size():"<<in_cloud->size()<<endl;
-
-  for (int i = 0; i < in_cloud->size(); i++)  
-  { 
-    //cout<<"i:"<<i<<endl;
-
-    if(i%500==0){
-      cout<<"execMeanShiftForEachPoint progress:"<<i*100.0/in_cloud->size()<<"%"<<endl;
-    }
-
-    //cout<<"i:"<<i<<endl;
-    Point pnt = in_cloud->at(i);  
-
-    for(int j = 0; j < 1000; j++)
-    {  
-      // Neighbors containers  
-      vector<int> k_indices;  
-      vector<float> k_distances;  
-
-      float sum_weigh = 0;  
-      float x = 0.0f, y = 0.0f, z = 0.0f;  
-      float dist_pnts = 0.0f;  
-
-      tree->radiusSearch (pnt, radius, k_indices, k_distances);  
-
-      for (int k = 0; k < k_indices.size(); ++k)  
-      {  
-        int index = k_indices[k];  
-        Point nbhd_pnt = in_cloud->points[index];  
-
-        float w=0;
-
-        if(isSeparated(pnt, nbhd_pnt, lines)){
-          w=0;
-        }
-        else{
-          float sqr_dist = k_distances[k];  
-          float gauss_param = sqr_dist / (0.0025*scene_scale*scene_scale);  
-          w= gauss(gauss_param);  
-        }
-
-        /* if(w==0){
-        cout<<"w:"<<w<<endl;
-        }*/
-
-
-        x += nbhd_pnt.x * w;  
-        y += nbhd_pnt.y * w;  
-        z += nbhd_pnt.z * w;  
-        sum_weigh += w;  
-      }  
-      x = x / sum_weigh;  
-      y = y / sum_weigh;  
-      z = z / sum_weigh;  
-
-      float diff_x = x - pnt.x, diff_y = y - pnt.y, diff_z = z - pnt.z;  
-
-      dist_pnts = sqrt(diff_x * diff_x + diff_y * diff_y + diff_z * diff_z);  
-
-      if (dist_pnts <= 0.002)  
-      {  
-        break;  
-      }  
-      pnt.x = x;  
-      pnt.y = y;  
-      pnt.z = z;  
-    }
-
-    out_cloud->push_back(pnt); 
-  }
-
-  cout<<"execMeanShiftForEachPoint progress:"<<100.0<<"%"<<endl;
-}  
-
-//mean shift cluster
-void mean_shift_cluster(PointCloudPtr in_cloud, vector<MyLine>& lines, float radius, float scene_scale, vector<MyPointCloud>& clustering_cloud){
-  PointCloudPtr out_cloud(new PointCloud);
-
-  execMeanShiftForEachPoint(in_cloud, lines, radius, scene_scale, out_cloud);
-
-  vector<bool> flags(out_cloud->size());
-  for(unsigned int i = 0; i < flags.size(); i++){
-    flags[i]=true;
-  }
-
-  cout<<"out_cloud->size():"<<out_cloud->size()<<endl;
-
-  for (int i = 0; i < out_cloud->size(); i++)  
-  {  
-    if(!flags[i]){
-      continue;
-    }
-
-    MyPointCloud mpc;
-
-    MyPt mp;
-    mp.x=in_cloud->at(i).x;
-    mp.y=in_cloud->at(i).y;
-    mp.z=in_cloud->at(i).z;
-
-    mpc.mypoints.push_back(mp);
-    flags[i]=false;
-
-    for (int j = i + 1; j < out_cloud->size(); j++)  
-    {  
-      if(!flags[j]){
-        continue;
-      }
-
-      Point mode1=out_cloud->at(i);
-      Point mode2=out_cloud->at(j);
-
-      float dis=sqrt(pow(mode1.x-mode2.x, 2)+pow(mode1.y-mode2.y, 2)+pow(mode1.z-mode2.z, 2));
-
-      if (dis <= 0.04)  
-      {  
-        MyPt mp;
-        mp.x=in_cloud->at(j).x;
-        mp.y=in_cloud->at(j).y;
-        mp.z=in_cloud->at(j).z;
-
-        mpc.mypoints.push_back(mp);
-        flags[j]=false;
-      }
-    }  //  for j  
-
-    clustering_cloud.push_back(mpc);
-  }  //  for i  
-}
-
-//segment scene
-void segment_scene(PointCloudPtr_RGB cloud, vector<MyPointCloud>& support_plane_clouds, vector<MyPointCloud>& separation_rect_clouds, vector<MyPointCloud>& clustering_cloud, Visualizer& vs){
-  vector<pcl::KdTreeFLANN<Point>> trees;  
-
-  for(int i=0; i<support_plane_clouds.size(); i++){
-    for(int j=0; j<support_plane_clouds.at(i).mypoints.size(); j++){
-      support_plane_clouds.at(i).mypoints.at(j).z=0;
-    }
-
-    PointCloudPtr cloud_p(new PointCloud);
-    MyPointCloud2PointCloud(support_plane_clouds.at(i), cloud_p);
-
-    //vs.viewer->addPointCloud(cloud_p, "121");
-
-    //showPointCloud2(cloud_p, "test");
-
-    pcl::KdTreeFLANN<Point> tree;
-    tree.setInputCloud (cloud_p);
-
-    trees.push_back(tree);
-  }
-
-  vector<MyLine> lines;
-
-  for(int i=0; i<separation_rect_clouds.size(); i++){
-    Point p0(separation_rect_clouds.at(i).mypoints[0].x, separation_rect_clouds.at(i).mypoints[0].y, 0);
-    Point p1(separation_rect_clouds.at(i).mypoints[1].x, separation_rect_clouds.at(i).mypoints[1].y, 0);
-    Point p2(separation_rect_clouds.at(i).mypoints[2].x, separation_rect_clouds.at(i).mypoints[2].y, 0);
-    Point p3(separation_rect_clouds.at(i).mypoints[3].x, separation_rect_clouds.at(i).mypoints[3].y, 0);
-
-    float dis0 = sqrt(pow(p0.x-p1.x, 2)+pow(p0.y-p1.y, 2));
-    float dis1 = sqrt(pow(p0.x-p3.x, 2)+pow(p0.y-p3.y, 2));
-
-    MyLine ml;
-
-    if(dis0 < dis1){
-
-      ml.p0.x = (p0.x + p1.x) / 2.0;
-      ml.p0.y = (p0.y + p1.y) / 2.0;
-      ml.p1.x = (p2.x + p3.x) / 2.0;
-      ml.p1.y = (p2.y + p3.y) / 2.0;
-    }
-    else{
-      ml.p0.x = (p0.x + p3.x) / 2.0;
-      ml.p0.y = (p0.y + p3.y) / 2.0;
-      ml.p1.x = (p1.x + p2.x) / 2.0;
-      ml.p1.y = (p1.y + p2.y) / 2.0;
-    }
-
-    float len = sqrt(pow(ml.p0.x-ml.p1.x, 2)+pow(ml.p0.y-ml.p1.y, 2));
-    float vct_x=(ml.p1.x-ml.p0.x)/len;
-    float vct_y=(ml.p1.y-ml.p0.y)/len;
-
-    ml.p0.x -= vct_x*0.05;
-    ml.p0.y -= vct_y*0.05;
-    ml.p1.x += vct_x*0.05;
-    ml.p1.y += vct_y*0.05;
-
-    lines.push_back(ml);
-
-    std::stringstream st;
-    st<<"line"<<i;
-    std::string id=st.str();
-
-    vs.viewer->addLine(Point(ml.p0.x, ml.p0.y, 0), Point(ml.p1.x, ml.p1.y, 0), 0, 255, 0, id);
-  }
-
-  //compute mean curvature
-  vector<Point_Cur_RGB> curvatures;
-  PointCloudPtr_RGB cloud_colored(new PointCloud_RGB);
-  compute_mean_curvature(cloud, curvatures, cloud_colored);
-
-  //projecte curvature to x_y plane
-  vector<Point_Cur_RGB> projected_curvatures;
-  curvature_projected(cloud, curvatures, cloud_colored, projected_curvatures);
-
-  PointCloudPtr_RGB new_cloud_colored(new PointCloud_RGB);
-  vector<Point_Cur_RGB> new_curvatures;
-  int rows=0;
-  int cols=0;
-  normalize_projected_curvature(cloud_colored, projected_curvatures, new_cloud_colored, new_curvatures, &rows, &cols);
-
-  PointCloudPtr_RGB cloud_blur(new PointCloud_RGB);
-  vector<Point_Cur_RGB> curvatures_blur;
-  gaussian_blur(new_curvatures, rows, cols, cloud_blur, curvatures_blur);
-
-  PointCloudPtr in_cloud(new PointCloud);
-  //float radius=0.9;
-  float radius=0.5;
-  float scene_scale=4.0;
-
-  for(int i=0; i < curvatures_blur.size(); i++){
-    if(curvatures_blur.at(i).curvature > 0.3){
-      in_cloud->push_back(Point(curvatures_blur.at(i).x, curvatures_blur.at(i).y, curvatures_blur.at(i).z));
-    }
-  }
-
-  showPointCloud(cloud_blur, "cloud_blur");
-
-  PointCloudPtr cloud_tem(new PointCloud);
-  vector<bool> flags(in_cloud->size());
-  for(unsigned int i = 0; i < flags.size(); i++){
-    flags[i]=true;
-  }
-
-  cout<<"in_cloud->size():"<<in_cloud->size()<<endl;
-
-  vector<int> labels(in_cloud->size());
-  for(unsigned int i = 0; i < labels.size(); i++){
-    labels[i]=-1;
-  }
-
-  for (int i = 0; i < in_cloud->size(); i++)  
-  { 
-    // Neighbors containers  
-    vector<int> k_indices;  
-    vector<float> k_distances;  
-
-    for(int j=0; j<trees.size(); j++){
-      trees.at(j).radiusSearch (in_cloud->at(i), 0.02, k_indices, k_distances);  
-
-      if(k_indices.size()>0){
-        labels[i]=j;
-      }
-    }
+  else{
+    first_id0 = 0;
+    second_id0 = 3;
+    first_id1 = 1;
+    second_id1 = 4;
   }
 
 
-  for (int i = 0; i < in_cloud->size(); i++)  
-  {  
-    if(i%500==0){
-      cout<<"progress:"<<i*100.0/in_cloud->size()<<"%"<<endl;
-    }
+  float sum_dis0 = sqrt(pow(box_cloud->at(first_id0).x, 2)+pow(box_cloud->at(first_id0).y, 2)+pow(box_cloud->at(first_id0).z, 2)) + sqrt(pow(box_cloud->at(second_id0).x, 2)+pow(box_cloud->at(second_id0).y, 2)+pow(box_cloud->at(second_id0).z, 2));
+  float sum_dis1 = sqrt(pow(box_cloud->at(first_id1).x, 2)+pow(box_cloud->at(first_id1).y, 2)+pow(box_cloud->at(first_id1).z, 2)) + sqrt(pow(box_cloud->at(second_id1).x, 2)+pow(box_cloud->at(second_id1).y, 2)+pow(box_cloud->at(second_id1).z, 2));
+  
+  Eigen::Vector3d r_normal0;
 
-    if(!flags[i]){
-      continue;
-    }
+  int first_id = -1;
+  int second_id = -1;
 
-    if(labels[i]==-1){
-      cloud_tem->push_back(in_cloud->at(i));
-      flags[i]=false;
-      continue;
-    }
+  if(sum_dis0 < sum_dis1){
+    first_id = first_id0;
+    second_id = second_id0;
 
-    MyPointCloud mpc;
+    r_normal0 << box_cloud->at(first_id0).x - box_cloud->at(first_id1).x, box_cloud->at(first_id0).y - box_cloud->at(first_id1).y, box_cloud->at(first_id0).z - box_cloud->at(first_id1).z;
+    r_normal0.normalize();
+  }
+  else{
+    first_id = first_id1;
+    second_id = second_id1;
 
-    MyPt mp;
-    mp.x=in_cloud->at(i).x;
-    mp.y=in_cloud->at(i).y;
-    mp.z=in_cloud->at(i).z;
+    r_normal0 << box_cloud->at(first_id1).x - box_cloud->at(first_id0).x, box_cloud->at(first_id1).y - box_cloud->at(first_id0).y, box_cloud->at(first_id1).z - box_cloud->at(first_id0).z;
+    r_normal0.normalize();
+  }
+  
+  Point pos((box_cloud->at(first_id).x+box_cloud->at(second_id).x)/2, (box_cloud->at(first_id).y+box_cloud->at(second_id).y)/2, (box_cloud->at(first_id).z+box_cloud->at(second_id).z)/2);
 
-    mpc.mypoints.push_back(mp);
-    flags[i]=false;
+  vs.viewer->addSphere(pos, 0.15, "0");
 
-    for (int j = i + 1; j < in_cloud->size(); j++)  
-    {  
-      if(!flags[j]){
-        continue;
-      }
+  position.x = pos.x + 0.4*r_normal0[0];
+  position.y = pos.y + 0.4*r_normal0[1];
+  position.z = pos.z + 0.4*r_normal0[2];
 
-      if(labels[j]==-1){
-        cloud_tem->push_back(in_cloud->at(j));
-        flags[j]=false;
-        continue;
-      }
-
-      if(labels[i]==labels[j]&&!isSeparated(in_cloud->at(i), in_cloud->at(j), lines)){
-        MyPt mp;
-        mp.x=in_cloud->at(j).x;
-        mp.y=in_cloud->at(j).y;
-        mp.z=in_cloud->at(j).z;
-
-        mpc.mypoints.push_back(mp);
-        flags[j]=false;
-      }
-    }  //  for j  
-
-    if(mpc.mypoints.size()>1){
-      clustering_cloud.push_back(mpc);
-    }
-    else{
-      cloud_tem->push_back(in_cloud->at(i));
-    }
-  }  //  for i  
-
-  pcl::copyPointCloud(*cloud_tem, *in_cloud);
-
-  mean_shift_cluster(in_cloud, lines, radius, scene_scale, clustering_cloud);
+  vs.viewer->addSphere(position, 0.15, "1");
 }

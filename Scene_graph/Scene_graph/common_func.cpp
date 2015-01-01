@@ -639,3 +639,103 @@ void pointCloud_RGB_NORMAPopUp(PointCloudPtr_RGB_NORMAL cloud){
 
   pcl::copyPointCloud(*pc,*cloud);
 }
+
+//if a point in a rect
+bool isInRect(Point p, MyPointCloud& rect_cloud){
+
+  for(int i=0; i<rect_cloud.mypoints.size(); i++){
+    Eigen::Vector3f normal0;
+    normal0 << p.x-rect_cloud.mypoints.at(i).x, p.y-rect_cloud.mypoints.at(i).y, p.z-rect_cloud.mypoints.at(i).z;
+    normal0.normalize();
+
+    Eigen::Vector3f normal1;
+    normal1 << rect_cloud.mypoints.at((i+1)%4).x-rect_cloud.mypoints.at(i).x, rect_cloud.mypoints.at((i+1)%4).y-rect_cloud.mypoints.at(i).y, rect_cloud.mypoints.at((i+1)%4).z-rect_cloud.mypoints.at(i).z;
+    normal1.normalize();
+
+    Eigen::Vector3f normal2;
+    normal2 << rect_cloud.mypoints.at((i+3)%4).x-rect_cloud.mypoints.at(i).x, rect_cloud.mypoints.at((i+3)%4).y-rect_cloud.mypoints.at(i).y, rect_cloud.mypoints.at((i+3)%4).z-rect_cloud.mypoints.at(i).z;
+    normal2.normalize();
+
+    if(normal0.dot(normal1)<0||normal0.dot(normal2)<0){
+      return false;
+    }
+  }
+
+  return true;
+}
+
+
+//if two points in the same rect
+bool isInSameRect(Point p1, Point p2, vector<MyPointCloud>& rect_clouds){
+  for(int i=0; i<rect_clouds.size(); i++){
+    if(isInRect(p1, rect_clouds.at(i))&&isInRect(p2, rect_clouds.at(i))){
+      return true;
+    }
+  }
+
+  return false;
+}
+
+//if a point in a plane
+bool isInPlane(Point p, pcl::KdTreeFLANN<Point> tree){
+
+  // Neighbors containers  
+  vector<int> k_indices;  
+  vector<float> k_distances;  
+
+  tree.radiusSearch (p, 0.005, k_indices, k_distances);  
+
+  if(k_indices.size()>0){
+    return true;
+  }
+
+  return false;
+}
+
+
+//if two points in the same plane
+bool isInSamePlane(Point p1, Point p2, vector<pcl::KdTreeFLANN<Point>> trees){
+
+
+  for(int i=0; i<trees.size(); i++){
+    if(isInPlane(p1, trees.at(i))&&isInPlane(p2, trees.at(i))){
+      return true;
+    }
+  }
+
+  return false;
+}
+
+//Wm5IntrLine2Line2
+bool testIntrLine2Line2(Point p0, Point p1 , Point p2, Point p3){
+
+  //Triangle3<float> triangle(Vector3<float>(p0_0.x,p0_0.y,p0_0.z),Vector3<float>(p0_1.x,p0_1.y,p0_1.z),Vector3<float>(p0_2.x,p0_2.y,p0_2.z));
+  Segment2<float> segment0(Vector2<float>(p0.x, p0.y), Vector2<float>(p1.x, p1.y));
+  Segment2<float> segment1(Vector2<float>(p2.x, p2.y), Vector2<float>(p3.x, p3.y));
+
+  IntrSegment2Segment2<float> intrSegment2Segment2(segment0, segment1);
+
+  bool bo=intrSegment2Segment2.Test();
+
+  return bo;
+}
+
+//if two points are separated by separation plane 
+bool isSeparated(Point p0, Point p1, vector<MyLine>& lines){
+  for(int i=0; i<lines.size(); i++){
+    if(testIntrLine2Line2(p0, p1 , Point(lines.at(i).p0.x, lines.at(i).p0.y, 0), Point(lines.at(i).p1.x, lines.at(i).p1.y, 0))){
+      return true;
+    }
+  }
+
+  return false;
+}
+
+//Get Color By Value
+void getColorByValue(float val, float min, float max, float *r, float *g, float *b)
+{
+  int tmp = static_cast<int>((val - min) / (max - min) * 255);
+  *r = g_color_table[tmp][0] * 255;
+  *g = g_color_table[tmp][1] * 255;
+  *b = g_color_table[tmp][2] * 255;
+}

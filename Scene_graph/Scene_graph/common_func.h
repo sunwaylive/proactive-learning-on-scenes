@@ -23,6 +23,7 @@
 #include <Wm5IntrTriangle3Triangle3.h>
 #include <Wm5IntrTriangle3Sphere3.h>
 #include <Wm5IntrTriangle3Cylinder3.h>
+#include <Wm5IntrSegment2Segment2.h>
 
 #include <Eigen/Dense>
 #include <Eigen/Eigenvalues>
@@ -35,6 +36,7 @@
 #include <math.h>
 
 #include "common_type.h"
+#include "utility.h"
 
 #define PI 3.1415926535
 
@@ -89,5 +91,18 @@ bool testIntrTriangle3Triangle3(MyPt p00,MyPt p01,MyPt p02, MyPt p10,MyPt p11,My
 bool testIntrRectangle3Rectangle3(MyPt p0_0, MyPt p0_1,MyPt p0_2,MyPt p0_3, MyPt p1_0,MyPt p1_1,MyPt p1_2,MyPt p1_3);
 //rotate a 2d point by a 2d point
 void rotatePoint2ByPoint2(float p_x,float p_y,float cen_x,float cen_y,float ang,float *new_x,float *new_y);
-
+//if a point in a rect
+bool isInRect(Point p, MyPointCloud& rect_cloud);
+//if two points in the same rect
+bool isInSameRect(Point p1, Point p2, vector<MyPointCloud>& rect_clouds);
+//if a point in a plane
+bool isInPlane(Point p, pcl::KdTreeFLANN<Point> tree);
+//if two points in the same plane
+bool isInSamePlane(Point p1, Point p2, vector<pcl::KdTreeFLANN<Point>> trees);
+//Wm5IntrLine2Line2
+bool testIntrLine2Line2(Point p0, Point p1 , Point p2, Point p3);
+//if two points are separated by separation plane 
+bool isSeparated(Point p0, Point p1, vector<MyLine>& lines);
+//Get Color By Value
+void getColorByValue(float val, float min, float max, float *r, float *g, float *b);
 #endif
