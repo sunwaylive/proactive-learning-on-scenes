@@ -88,12 +88,38 @@ public:
   vector<MyPt_RGB_NORMAL> mypoints;
 };
 
+class MyLine{
+public:
+  MyLine();
+  ~MyLine();
+
+public:
+  MyPt p0;
+  MyPt p1;
+};
+
+typedef struct Point_Curvature_RGB{
+  float x;
+  float y;
+  float z;
+  float curvature;
+  float r;
+  float g;
+  float b;
+}Point_Cur_RGB;
 
 void MyPointCloud2PointCloud(MyPointCloud& mc, PointCloudPtr pc);
 void PointCloud2MyPointCloud(PointCloudPtr pc, MyPointCloud& mc);
 
-void MyPointCloud_RGB2PointCloud(MyPointCloud_RGB& mc, PointCloudPtr_RGB_NORMAL pc);
-void PointCloud2MyPointCloud_RGB(PointCloudPtr_RGB_NORMAL pc, MyPointCloud_RGB& mc);
+void MyPointCloud_RGB2PointCloud_RGB(MyPointCloud_RGB& mc, PointCloudPtr_RGB pc);
+void PointCloud_RGB2MyPointCloud_RGB(PointCloudPtr_RGB pc, MyPointCloud_RGB& mc);
+
+void MyPointCloud_RGB_NORMAL2PointCloud_RGB_NORMAL(MyPointCloud_RGB_NORMAL& mc, PointCloudPtr_RGB_NORMAL pc);
+void PointCloud_RGB_NORMAL2MyPointCloud_RGB_NORMAL(PointCloudPtr_RGB_NORMAL pc, MyPointCloud_RGB_NORMAL& mc);
 
 void MyPointCloud_RGB2MyPointCloud(MyPointCloud_RGB& mc_rgb, MyPointCloud& mc);
+void MyPointCloud_RGB_NORMAL2MyPointCloud(MyPointCloud_RGB_NORMAL& mc_rgb, MyPointCloud& mc);
+
+void CopyMyPointCloud_RGB(MyPointCloud_RGB& source, MyPointCloud_RGB& target);
+void CopyMyPointCloud(MyPointCloud& source, MyPointCloud& target);
 #endif 

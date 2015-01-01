@@ -1,7 +1,9 @@
 #ifndef SCENE_SEG_H
 #define SCENE_SEG_H
 
+#include "common_func.h"
 #include "common_type.h"
+#include "visualizer.h"
 
 #include <iostream>
 
@@ -46,10 +48,6 @@ typedef struct TriFace{
 using namespace std;
 using namespace Wm5;
 
-//show rgb cloud
-void showPointCloud (PointCloudPtr_RGB cloud,std::string name);
-//show cloud
-void showPointCloud2 (PointCloudPtr cloud,std::string name);
 //detect table
 void detect_table(PointCloudPtr_RGB_NORMAL sourceCloud, pcl::ModelCoefficients::Ptr coefficients, pcl::PointIndices::Ptr inliers);
 //detect table plane
@@ -57,12 +55,12 @@ void detect_table_plane(PointCloudPtr_RGB_NORMAL sourceCloud, PointCloudPtr_RGB_
 //detect table plane
 void detect_table_plane_r(PointCloudPtr_RGB_NORMAL sourceCloud, PointCloudPtr_RGB_NORMAL planeCloud, PointCloudPtr_RGB_NORMAL remainCloud);
 //Euclidean Cluster Extraction
-void object_seg_ECE(PointCloudPtr_RGB_NORMAL clound, std::vector<PointCloudPtr_RGB_NORMAL> &cluster_points);
+void object_seg_ECE(PointCloudPtr_RGB_NORMAL clound, vector<PointCloudPtr_RGB_NORMAL> &cluster_points);
 //find a minimum bounding rect
 void find_min_rect(PointCloudPtr_RGB_NORMAL cloud, cv::Point2f &p0,cv::Point2f &p1,cv::Point2f &p2,cv::Point2f &p3);
 //VCCS over-segmentation
 void VCCS_over_segmentation(PointCloudPtr_RGB_NORMAL cloud, float voxel_resolution,float seed_resolution,float color_importance,float spatial_importance,float normal_importance,vector<MyPointCloud_RGB_NORMAL>& patch_clouds, PointCloudT::Ptr colored_cloud, PointNCloudT::Ptr normal_cloud);
 //object fitting
-void object_fitting(PointCloudPtr_RGB_NORMAL cloud, vector<MyPointCloud_RGB> &plane_clouds, std::vector<MyPointCloud> &rect_clouds, vector<MyPointCloud_RGB> &cylinder_clouds, vector<MyPointCloud_RGB> &sphere_clouds, PointCloudPtr_RGB_NORMAL remained_cloud);
+void object_fitting(PointCloudPtr_RGB_NORMAL cloud, vector<MyPointCloud_RGB_NORMAL> &plane_clouds, std::vector<MyPointCloud> &rect_clouds, vector<MyPointCloud_RGB_NORMAL> &cylinder_clouds, vector<MyPointCloud_RGB_NORMAL> &sphere_clouds, PointCloudPtr_RGB_NORMAL remained_cloud);
 
 #endif // SCENE_SEG_H

@@ -83,7 +83,7 @@ void DataMgr::transformToGroundAxis()
 
 void DataMgr::initDefaultScanCamera()
 {
-  double predict_size = global_paraMgr.camera.getDouble("Predicted Model Size");
+  //double predict_size = global_paraMgr.camera.getDouble("Predicted Model Size");
   double far_dist = global_paraMgr.camera.getDouble("Camera Far Distance") 
     / global_paraMgr.data.getDouble("Max Normalize Length");
   double camera_dist_to_model = global_paraMgr.camera.getDouble("Camera Dist To Model") 

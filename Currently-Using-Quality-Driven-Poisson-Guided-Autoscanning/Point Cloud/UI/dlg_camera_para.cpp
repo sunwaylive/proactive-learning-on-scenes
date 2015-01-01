@@ -83,8 +83,9 @@ void CameraParaDlg::initConnects()
   connect(ui->pushButton_load_scene, SIGNAL(clicked()), this, SLOT(loadScene()));
   connect(ui->pushButton_detect_plane, SIGNAL(clicked()), this, SLOT(detectPlane()));
   connect(ui->checkBox_pick_original, SIGNAL(clicked(bool)), this, SLOT(usePickOriginal(bool)));
+  connect(ui->pushButton_compute_scene_confidence, SIGNAL(clicked()), this, SLOT(computeSceneConfidence()));
   connect(ui->pushButton_compute_scene_nbv, SIGNAL(clicked()), this, SLOT(computeSceneNBV()));
-  connect(ui->pushButton_save_selected_to_original, SIGNAL(clicked()), this, SLOT(savePickPointToIso()));
+  connect(ui->pushButton_save_pickpoint_to_iso, SIGNAL(clicked()), this, SLOT(savePickPointToIso()));
 }
 
 bool CameraParaDlg::initWidgets()
@@ -870,8 +871,7 @@ void CameraParaDlg::buildGrid()
   global_paraMgr.nbv.setValue("Run Build Grid", BoolValue(false));
 }
 
-void
-  CameraParaDlg::propagate()
+void CameraParaDlg::propagate()
 {
   global_paraMgr.nbv.setValue("Run Propagate", BoolValue(true));
   area->runNBV();
@@ -885,7 +885,6 @@ void CameraParaDlg::propagateOnePoint()
   area->runNBV();
   global_paraMgr.nbv.setValue("Run Propagate One Point", BoolValue(false));
   global_paraMgr.nbv.setValue("Run Propagate", BoolValue(false));
-
 }
 
 void CameraParaDlg::gridSegment()
@@ -983,7 +982,7 @@ void CameraParaDlg::runStep2PoissonConfidenceViaOriginal()
   global_paraMgr.poisson.setValue("Run Poisson On Original", BoolValue(false));
 }
 
-//default on sample points
+//confidence is computed always on iso points
 void CameraParaDlg::runSceneConfidence()
 {
   global_paraMgr.poisson.setValue("Run Scene Confidence", BoolValue(true));
@@ -991,7 +990,7 @@ void CameraParaDlg::runSceneConfidence()
   global_paraMgr.poisson.setValue("Run Scene Confidence", BoolValue(false));
 }
 
-//force on original points
+//force run poisson reconstruction on original points
 void CameraParaDlg::runSceneConfidenceViaOriginal()
 {
   global_paraMgr.poisson.setValue("Run Poisson On Original", BoolValue(true));
@@ -1325,12 +1324,29 @@ void CameraParaDlg::detectPlane()
   return;
 }
 
+void CameraParaDlg::computeSceneConfidence()
+{
+  //only to generate field points
+  global_paraMgr.poisson.setValue("Run Poisson On Samples", BoolValue(true));
+  global_paraMgr.poisson.setValue("Run Generate Poisson Field", BoolValue(true));
+  area->runPoisson();
+  global_paraMgr.poisson.setValue("Run Poisson On Samples", BoolValue(false));
+  global_paraMgr.poisson.setValue("Run Generate Poisson Field", BoolValue(false));
+
+  //compute scene confidence on iso points default
+  runSceneConfidence();
+
+  area->updateUI();
+  area->updateGL();
+}
+
 void CameraParaDlg::computeSceneNBV()
 {
-  runSceneConfidence();
-}
+  runStep3NBVcandidates();
+};
 
 void CameraParaDlg::savePickPointToIso()
 {
   area->savePickPointToIso();
+  area->cleanPickPoints();
 }

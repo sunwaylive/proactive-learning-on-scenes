@@ -145,34 +145,42 @@
     <ClInclude Include="block.h" />
     <ClInclude Include="Clustering.h" />
     <ClInclude Include="color_op.h" />
+    <ClInclude Include="common_func.h" />
     <ClInclude Include="common_type.h" />
     <ClInclude Include="file_io.h" />
     <ClInclude Include="GCoptimization.h" />
     <ClInclude Include="graph.h" />
     <ClInclude Include="LinkedBlockList.h" />
-    <ClInclude Include="matrix.h" />
     <ClInclude Include="MultiSeg.h" />
+    <ClInclude Include="PreSegmentation\bigScene_preSeg.h" />
     <ClInclude Include="scene_graph.h" />
     <ClInclude Include="scene_seg.h" />
     <ClInclude Include="supervoxel_clustering.h" />
     <ClInclude Include="supervoxel_clustering.hpp" />
+    <ClInclude Include="utility.h" />
     <ClInclude Include="visualizer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BinarySeg.cpp" />
     <ClCompile Include="Clustering.cpp" />
     <ClCompile Include="color_op.cpp" />
+    <ClCompile Include="common_func.cpp" />
     <ClCompile Include="common_type.cpp" />
     <ClCompile Include="file_io.cpp" />
     <ClCompile Include="GCoptimization.cpp" />
     <ClCompile Include="graph.cpp" />
     <ClCompile Include="LinkedBlockList.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="main_pre_seg1.cpp" />
+    <ClCompile Include="main_pre_seg2.cpp" />
+    <ClCompile Include="main_scene_seg.cpp" />
     <ClCompile Include="maxflow.cpp" />
     <ClCompile Include="MultiSeg.cpp" />
+    <ClCompile Include="PreSegmentation\bigScene_preSeg.cpp" />
     <ClCompile Include="scene_graph.cpp" />
     <ClCompile Include="scene_seg.cpp" />
     <ClCompile Include="supervoxel_clustering.cpp" />
+    <ClCompile Include="utility.cpp" />
     <ClCompile Include="visualizer.cpp" />
   </ItemGroup>
   <ItemGroup>

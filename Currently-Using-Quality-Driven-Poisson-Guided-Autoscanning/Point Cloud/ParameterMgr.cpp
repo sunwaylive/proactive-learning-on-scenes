@@ -58,7 +58,7 @@ void ParameterMgr::initGlareaParameter()
 	glarea.addParam(new RichString("Running Algorithm Name", "") );
 	glarea.addParam(new RichBool("Light On or Off", true) );
 	glarea.addParam(new RichBool("Show Normal", false) );
-	glarea.addParam(new RichBool("Show Samples", false) );
+	glarea.addParam(new RichBool("Show Samples", true) );
 	glarea.addParam(new RichBool("Show Samples Quad", false) );
 	glarea.addParam(new RichBool("Show Samples Dot", true) );
 	glarea.addParam(new RichBool("Show Samples Circle", false) );
@@ -73,7 +73,7 @@ void ParameterMgr::initGlareaParameter()
 	glarea.addParam(new RichBool("Show Scanned Mesh", true));
   
 	glarea.addParam(new RichBool("Show Model", false));
-	glarea.addParam(new RichBool("Show Original", true) );
+	glarea.addParam(new RichBool("Show Original", false) );
 	glarea.addParam(new RichBool("Show Original Quad", false) );
 	glarea.addParam(new RichBool("Show Original Dot", true) );
 	glarea.addParam(new RichBool("Show Original Circle", false) );
@@ -135,7 +135,7 @@ void ParameterMgr::initDrawerParameter()
 {
 	drawer.addParam(new RichBool("Doing Pick", false));
 	drawer.addParam(new RichBool("Need Cull Points", false));
-	drawer.addParam(new RichBool("Use Pick Original", true));
+	drawer.addParam(new RichBool("Use Pick Original", false));
 	drawer.addParam(new RichBool("Use Pick Mode2", true) );
 	drawer.addParam(new RichBool("Skeleton Light", true));
 	drawer.addParam(new RichBool("Show Individual Color", true));
@@ -156,7 +156,7 @@ void ParameterMgr::initDrawerParameter()
 	drawer.addParam(new RichColor("Sample Point Color", QColor(255, 0, 0) ));
 	drawer.addParam(new RichColor("Original Point Color", QColor(48, 48, 48) ));
 	drawer.addParam(new RichColor("Feature Color", QColor(0, 0, 255) ));
-	drawer.addParam(new RichColor("Pick Point Color", QColor(255, 0, 0) ));
+	drawer.addParam(new RichColor("Pick Point Color", QColor(128, 128, 0) ));
 	drawer.addParam(new RichColor("Pick Point DNN Color", QColor(0, 0, 155) ));
 
 	drawer.addParam(new RichColor("Skeleton Bone Color", QColor(200, 0, 0) ));
@@ -213,9 +213,9 @@ void ParameterMgr::initPoissonParameter()
 	poisson.addParam(new RichBool("Show Y Slices", false));
 	poisson.addParam(new RichBool("Show Z Slices", false));
 	poisson.addParam(new RichBool("Show Transparent Slices", false));
-	poisson.addParam(new RichDouble("Current X Slice Position", 0.0f));
-	poisson.addParam(new RichDouble("Current Y Slice Position", 0.0f));
-	poisson.addParam(new RichDouble("Current Z Slice Position", 0.0f));
+	poisson.addParam(new RichDouble("Current X Slice Position", 0.5f));
+	poisson.addParam(new RichDouble("Current Y Slice Position", 0.5f));
+	poisson.addParam(new RichDouble("Current Z Slice Position", 0.5f));
 	poisson.addParam(new RichDouble("Show Slice Percentage", 0.75));
 	poisson.addParam(new RichDouble("Poisson Disk Sample Number", 3000));
   poisson.addParam(new RichDouble("Original KNN", 251));
@@ -288,7 +288,7 @@ void ParameterMgr::initNBVParameter()
   nbv.addParam(new RichInt("NBV Iteration Count", 3));
   nbv.addParam(new RichBool("Run Build Grid", false));
   nbv.addParam(new RichBool("Run Propagate", false));
-  nbv.addParam(new RichBool("Run Propagate One Point", false));
+  nbv.addParam(new RichBool("Run Propagate One Point", true));
   nbv.addParam(new RichBool("Run Grid Segment", false));
   nbv.addParam(new RichDouble("Merge Probability Pow", 1));
   nbv.addParam(new RichBool("Run Viewing Clustering", false));
