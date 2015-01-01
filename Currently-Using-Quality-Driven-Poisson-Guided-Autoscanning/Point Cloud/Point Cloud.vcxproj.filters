@@ -50,6 +50,9 @@
     <Filter Include="Poisson">
       <UniqueIdentifier>{1d280414-d4ea-4cae-b569-8a85e11ed8ad}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Algorithm\GraphCut">
+      <UniqueIdentifier>{afe704ca-c646-468e-8dc5-de9fed6ccdc3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -195,6 +198,45 @@
     </ClCompile>
     <ClCompile Include="common_type.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Algorithm\GraphCut\BinarySeg.cpp">
+      <Filter>Algorithm\GraphCut</Filter>
+    </ClCompile>
+    <ClCompile Include="Algorithm\GraphCut\Clustering.cpp">
+      <Filter>Algorithm\GraphCut</Filter>
+    </ClCompile>
+    <ClCompile Include="Algorithm\GraphCut\color_op.cpp">
+      <Filter>Algorithm\GraphCut</Filter>
+    </ClCompile>
+    <ClCompile Include="Algorithm\GraphCut\common_type.cpp">
+      <Filter>Algorithm\GraphCut</Filter>
+    </ClCompile>
+    <ClCompile Include="Algorithm\GraphCut\GCoptimization.cpp">
+      <Filter>Algorithm\GraphCut</Filter>
+    </ClCompile>
+    <ClCompile Include="Algorithm\GraphCut\graph.cpp">
+      <Filter>Algorithm\GraphCut</Filter>
+    </ClCompile>
+    <ClCompile Include="Algorithm\GraphCut\kdtree.cpp">
+      <Filter>Algorithm\GraphCut</Filter>
+    </ClCompile>
+    <ClCompile Include="Algorithm\GraphCut\LinkedBlockList.cpp">
+      <Filter>Algorithm\GraphCut</Filter>
+    </ClCompile>
+    <ClCompile Include="Algorithm\GraphCut\maxflow.cpp">
+      <Filter>Algorithm\GraphCut</Filter>
+    </ClCompile>
+    <ClCompile Include="Algorithm\GraphCut\MultiSeg.cpp">
+      <Filter>Algorithm\GraphCut</Filter>
+    </ClCompile>
+    <ClCompile Include="Algorithm\GraphCut\ScanEstimation.cpp">
+      <Filter>Algorithm\GraphCut</Filter>
+    </ClCompile>
+    <ClCompile Include="Algorithm\GraphCut\scene_seg.cpp">
+      <Filter>Algorithm\GraphCut</Filter>
+    </ClCompile>
+    <ClCompile Include="GraphCutMain.cpp">
+      <Filter>Algorithm\GraphCut</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -368,6 +410,60 @@
     <ClInclude Include="common_type.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Algorithm\SparseICP.h">
+      <Filter>Algorithm</Filter>
+    </ClInclude>
+    <ClInclude Include="Algorithm\GraphCut\BinarySeg.h">
+      <Filter>Algorithm\GraphCut</Filter>
+    </ClInclude>
+    <ClInclude Include="Algorithm\GraphCut\block.h">
+      <Filter>Algorithm\GraphCut</Filter>
+    </ClInclude>
+    <ClInclude Include="Algorithm\GraphCut\Clustering.h">
+      <Filter>Algorithm\GraphCut</Filter>
+    </ClInclude>
+    <ClInclude Include="Algorithm\GraphCut\color_op.h">
+      <Filter>Algorithm\GraphCut</Filter>
+    </ClInclude>
+    <ClInclude Include="Algorithm\GraphCut\common_type.h">
+      <Filter>Algorithm\GraphCut</Filter>
+    </ClInclude>
+    <ClInclude Include="Algorithm\GraphCut\energy.h">
+      <Filter>Algorithm\GraphCut</Filter>
+    </ClInclude>
+    <ClInclude Include="Algorithm\GraphCut\GCoptimization.h">
+      <Filter>Algorithm\GraphCut</Filter>
+    </ClInclude>
+    <ClInclude Include="Algorithm\GraphCut\graph.h">
+      <Filter>Algorithm\GraphCut</Filter>
+    </ClInclude>
+    <ClInclude Include="Algorithm\GraphCut\kdtree.h">
+      <Filter>Algorithm\GraphCut</Filter>
+    </ClInclude>
+    <ClInclude Include="Algorithm\GraphCut\LinkedBlockList.h">
+      <Filter>Algorithm\GraphCut</Filter>
+    </ClInclude>
+    <ClInclude Include="Algorithm\GraphCut\matrix.h">
+      <Filter>Algorithm\GraphCut</Filter>
+    </ClInclude>
+    <ClInclude Include="Algorithm\GraphCut\MultiSeg.h">
+      <Filter>Algorithm\GraphCut</Filter>
+    </ClInclude>
+    <ClInclude Include="Algorithm\GraphCut\MyClass.h">
+      <Filter>Algorithm\GraphCut</Filter>
+    </ClInclude>
+    <ClInclude Include="Algorithm\GraphCut\ScanEstimation.h">
+      <Filter>Algorithm\GraphCut</Filter>
+    </ClInclude>
+    <ClInclude Include="Algorithm\GraphCut\scene_seg.h">
+      <Filter>Algorithm\GraphCut</Filter>
+    </ClInclude>
+    <ClInclude Include="Algorithm\GraphCut\GraphCutGlobalHeader.h">
+      <Filter>Algorithm\GraphCut</Filter>
+    </ClInclude>
+    <ClInclude Include="GraphCutMain.h">
+      <Filter>Algorithm\GraphCut</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Poisson\FunctionData.inl">
@@ -405,6 +501,9 @@
     </None>
     <None Include="Poisson\Array.inl">
       <Filter>Poisson</Filter>
+    </None>
+    <None Include="Algorithm\GraphCut\instances.inc">
+      <Filter>Algorithm\GraphCut</Filter>
     </None>
   </ItemGroup>
 </Project>

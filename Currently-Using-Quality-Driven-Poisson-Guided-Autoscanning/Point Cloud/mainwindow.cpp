@@ -154,14 +154,12 @@ void MainWindow::initConnect()
   connect(ui.actionSwitch_Sample_Original,SIGNAL(triggered()),this,SLOT(switchSampleOriginal()));
   connect(ui.actionSwitch_Sample_with_ISO,SIGNAL(triggered()),this,SLOT(switchSampleISO()));
   connect(ui.actionSwitch_Sample_NBV,SIGNAL(triggered()),this,SLOT(switchSampleNBV()));
-  
   connect(ui.actionAdd_Sample_To_Original,SIGNAL(triggered()),this,SLOT(addSamplesToOriginal()));
-  
   connect(ui.actionRemove_Ignore,SIGNAL(triggered()),this,SLOT(deleteIgnore()));
   connect(ui.actionRecover_Ignore,SIGNAL(triggered()),this,SLOT(recoverIgnore()));
-
   connect(ui.actionSwitch_History_NBV,SIGNAL(triggered()),this,SLOT(switchHistoryNBV()));
   connect(ui.actionAdd_NBV_To_History,SIGNAL(triggered()),this,SLOT(addNBVtoHistory()));
+  connect(ui.actionSICP_With_Normal, SIGNAL(triggered()), this, SLOT(SICPWithNormal()));
 
   //connect(ui.actionPoisson_test,SIGNAL(triggered()),this,SLOT(poissonTest()));
   //connect(ui.actionPoisson_test_all,SIGNAL(triggered()),this,SLOT(poissonTestAll()));
@@ -1214,4 +1212,30 @@ void MainWindow::addNBVtoHistory()
     ScanCandidate s =  make_pair(candidates->vert[i].P(), candidates->vert[i].N());
     history->push_back(s);
   }
+}
+
+void MainWindow::SICPWithNormal()
+{
+  std::cout<<"SICP with normal." <<std::endl;
+  QString still_mesh_file = QFileDialog::getOpenFileName(this, "Choose a static mesh", "", "*.ply");
+  if(!still_mesh_file.size()) 
+    return;
+  area->dataMgr.loadPlyToOriginal(still_mesh_file);
+
+  QString moving_mesh_file = QFileDialog::getOpenFileName(this, "Choose a moving mesh", "", "*.ply");
+  if(!moving_mesh_file.size()) 
+    return;
+  area->dataMgr.loadPlyToSample(moving_mesh_file);
+
+  CMesh *moving_mesh = area->dataMgr.getCurrentOriginal();
+  CMesh *still_mesh = area->dataMgr.getCurrentSamples();
+  std::cout<<"original point num: " <<moving_mesh->vert.size() <<std::endl;
+  std::cout<<"sample point num: " <<still_mesh->vert.size() <<std::endl;
+
+  double error = -1.0f;
+  GlobalFun::computeICPNoNormal(moving_mesh, still_mesh, error);
+
+  std::cout<<"original point num: " <<moving_mesh->vert.size() <<std::endl;
+  std::cout<<"sample point num: " <<still_mesh->vert.size() <<std::endl;
+  std::cout<<"ICP Error: " <<error <<std::endl;
 }

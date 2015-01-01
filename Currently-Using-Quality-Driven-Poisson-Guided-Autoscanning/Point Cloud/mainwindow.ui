@@ -68,7 +68,16 @@
      </property>
      <addaction name="actionPoisson"/>
     </widget>
+    <widget class="QMenu" name="menuICP">
+     <property name="title">
+      <string>ICP</string>
+     </property>
+     <addaction name="actionSICP_With_Normal"/>
+     <addaction name="actionSICP_Without_Normal"/>
+     <addaction name="actionMeshLab_ICP"/>
+    </widget>
     <addaction name="menuPoisson"/>
+    <addaction name="menuICP"/>
    </widget>
    <widget class="QMenu" name="menuRender">
     <property name="title">
@@ -965,6 +974,21 @@
   <action name="actionTransformToGroundAxis">
    <property name="text">
     <string>Transform To Ground Axis</string>
+   </property>
+  </action>
+  <action name="actionSICP_With_Normal">
+   <property name="text">
+    <string>SICP With Normal</string>
+   </property>
+  </action>
+  <action name="actionSICP_Without_Normal">
+   <property name="text">
+    <string>SICP Without Normal</string>
+   </property>
+  </action>
+  <action name="actionMeshLab_ICP">
+   <property name="text">
+    <string>MeshLab ICP</string>
    </property>
   </action>
  </widget>

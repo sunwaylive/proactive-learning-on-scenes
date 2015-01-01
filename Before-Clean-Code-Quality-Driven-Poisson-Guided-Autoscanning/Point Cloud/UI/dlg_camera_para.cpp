@@ -1610,7 +1610,6 @@ void CameraParaDlg::getSnapShotIndex(double _val)
   area->updateGL();
 }
 
-
 void CameraParaDlg::runRemoveSampleOutliers()
 {
   //area->removeOutliers();
@@ -1848,7 +1847,7 @@ void CameraParaDlg::runICPWithNormalNoWlop()
     area->saveSnapshot();
     area->update();
 
-    GlobalFun::computerICPWithNormal(sample, original);
+    GlobalFun::computerICP(sample, original);
     GlobalFun::mergeMesh(sample, original);
     area->update();
     area->saveSnapshot();

@@ -127,6 +127,12 @@ namespace GlobalFun
   void convertCMeshO2CMesh(CMeshO &src, CMesh &dst);
   void convertCMesh2CMeshO(CMesh &src, CMeshO &dst);
 
+  //ICP
+  void computeICPNoNormal(CMesh *moving_mesh, CMesh *still_mesh, CMesh *noised = NULL);
+  void computeICPNoNormal(CMesh *moving_mesh, CMesh *still_mesh, double &error);
+  void computerICPWithNormal(CMesh *moving_mesh, CMesh *still_mesh);
+  void computeICPMeshlab(CMesh *moving_mesh, CMesh *still_mesh);
+
   //pcl related
   void CMesh2PclPointCloud(const CMesh * const src, PclPointCloudPtr dst);
   void PclPointCloud2CMesh(PclPointCloudPtr src, CMesh * const dst);

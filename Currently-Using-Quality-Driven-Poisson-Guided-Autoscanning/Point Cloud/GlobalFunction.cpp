@@ -7,6 +7,7 @@
 
 #include "grid.h"
 #include "GlobalFunction.h"
+#include "Algorithm/SparseICP.h"
 
 using namespace vcg;
 using namespace std;
@@ -1574,6 +1575,202 @@ void GlobalFun::computePCANormal(CMesh *mesh, int knn)
     if (before_normal[i] * samples->vert[i].N() < 0.0f)
       samples->vert[i].N() *= -1;
   }
+}
+
+//transform should be 3*4 matrix
+void GlobalFun::computeICPNoNormal( CMesh *moving_mesh, CMesh *static_mesh, CMesh *noised)
+{
+  cout<<"******************************Begin SICP***********************"<<endl;
+  Eigen::MatrixXd SrCloud;
+  Eigen::MatrixXd TgCloud;
+  Eigen::MatrixXd noisedSrcCloud;
+  Eigen::MatrixXd verterMap;//点之间的对应
+
+  const int srVerNum = moving_mesh->vert.size(); 
+  const int tgVerNum = static_mesh->vert.size();
+  SrCloud.resize(3,srVerNum);
+  TgCloud.resize(3,tgVerNum);
+  verterMap.resize(1,srVerNum);
+
+  for(int i = 0; i < srVerNum; i++){
+    CVertex &v = moving_mesh->vert[i];
+    SrCloud(0,i) = v.P()[0];
+    SrCloud(1,i) = v.P()[1];
+    SrCloud(2,i) = v.P()[2];
+  }
+
+  for(int i = 0; i < tgVerNum; i++){
+    CVertex &v = static_mesh->vert[i];
+    TgCloud(0,i) = v.P()[0];
+    TgCloud(1,i) = v.P()[1];
+    TgCloud(2,i) = v.P()[2];
+  }
+
+  int noiseVerNum = 0;
+  if(noised != NULL){
+    noiseVerNum = noised->vert.size();
+    noisedSrcCloud.resize(3, noiseVerNum);
+    for(int i = 0; i < noiseVerNum; ++i)
+    {
+      CVertex &v = noised->vert[i];
+      noisedSrcCloud(0, i) = v.P()[0];
+      noisedSrcCloud(1, i) = v.P()[1];
+      noisedSrcCloud(2, i) = v.P()[2];
+    }
+  }
+
+  double error;
+  SparseICP::SICP::Parameters pa;
+  SparseICP::SICP::point_to_point(SrCloud, TgCloud, verterMap, noisedSrcCloud, error, pa);
+  //update the moved points
+  for(int i = 0; i < srVerNum; i++)
+  {
+    CVertex& v = moving_mesh->vert[i];
+    v.P()[0] = SrCloud(0,i);
+    v.P()[1] = SrCloud(1,i);
+    v.P()[2] = SrCloud(2,i);
+  }
+
+  if(noised != NULL){
+    for(int i = 0; i < noiseVerNum; ++i){
+      CVertex &v = noised->vert[i];
+      v.P()[0] = noisedSrcCloud(0, i);
+      v.P()[1] = noisedSrcCloud(1, i);
+      v.P()[2] = noisedSrcCloud(2, i);
+    }
+  }
+  cout<<"******************************End SICP***********************"<<endl;
+}
+
+void GlobalFun::computeICPNoNormal(CMesh *moving_mesh, CMesh *static_mesh, double &error)
+{
+  cout<<"******************************Begin SICP GETTING ERROR******************"<<endl;
+  Eigen::MatrixXd SrCloud;
+  Eigen::MatrixXd TgCloud;
+  Eigen::MatrixXd noisedSrcCloud;
+  Eigen::MatrixXd verterMap;//点之间的对应
+
+  const int srVerNum = moving_mesh->vert.size(); 
+  const int tgVerNum = static_mesh->vert.size();
+  SrCloud.resize(3,srVerNum);
+  TgCloud.resize(3,tgVerNum);
+  verterMap.resize(1,srVerNum);
+
+  for(int i = 0; i < srVerNum; i++){
+    CVertex &v = moving_mesh->vert[i];
+    SrCloud(0,i) = v.P()[0];
+    SrCloud(1,i) = v.P()[1];
+    SrCloud(2,i) = v.P()[2];
+  }
+
+  for(int i = 0; i < tgVerNum; i++){
+    CVertex &v = static_mesh->vert[i];
+    TgCloud(0,i) = v.P()[0];
+    TgCloud(1,i) = v.P()[1];
+    TgCloud(2,i) = v.P()[2];
+  }
+
+  SparseICP::SICP::Parameters pa;
+  pa.max_icp = 30;
+  pa.use_penalty = true;
+  pa.max_inner = 2; //use ALM
+  clock_t start, finish;
+  start = clock();
+  SparseICP::SICP::point_to_point(SrCloud, TgCloud, verterMap, noisedSrcCloud, error, pa);
+  finish = clock();
+  double duration = double (finish - start) / CLOCKS_PER_SEC;
+  cout<<"Compute ICP used: "<<duration <<endl;
+  //update the moved points
+  for(int i = 0; i < srVerNum; i++)
+  {
+    CVertex& v = moving_mesh->vert[i];
+    v.P()[0] = SrCloud(0,i);
+    v.P()[1] = SrCloud(1,i);
+    v.P()[2] = SrCloud(2,i);
+  }
+  cout<<"pa.alpha: " <<pa.alpha<<endl;
+  cout<<"pa.max_icp: " <<pa.max_icp<<endl;
+  cout<<"pa.max_inner: " <<pa.max_inner<<endl;
+  cout<<"pa.max_mu: "<<pa.max_mu<<endl;
+  cout<<"pa.max_outer: " <<pa.max_outer<<endl;
+  cout<<"pa.p: " <<pa.p<<endl;
+  cout<<"pa.stop"<<pa.stop<<endl;
+  cout<<"pa.use_penalty: " <<pa.use_penalty<<endl;
+  cout<<"******************************End SICP GETTING ERROR******************"<<endl;
+}
+
+void GlobalFun::computerICPWithNormal( CMesh *moving_mesh, CMesh *static_mesh)
+{
+  cout<<"******************************Begin SICP USING NORMAL***********************"<<endl;
+  Eigen::Matrix3Xd SrCloud;
+  Eigen::Matrix3Xd TgCloud;
+  Eigen::Matrix3Xd NormCloud;//the normal of target cloud
+
+  const int srVerNum = moving_mesh->vert.size(); 
+  const int tgVerNum = static_mesh->vert.size();
+  SrCloud.resize(3,srVerNum);
+  TgCloud.resize(3,tgVerNum);
+  NormCloud.resize(3, tgVerNum);
+
+  for(int i = 0; i < srVerNum; i++){
+    CVertex &v = moving_mesh->vert[i];
+    SrCloud(0,i) = v.P()[0];
+    SrCloud(1,i) = v.P()[1];
+    SrCloud(2,i) = v.P()[2];
+  }
+
+  for(int i = 0; i < tgVerNum; i++){
+    CVertex &v = static_mesh->vert[i];
+    TgCloud(0,i) = v.P()[0];
+    TgCloud(1,i) = v.P()[1];
+    TgCloud(2,i) = v.P()[2];
+
+    NormCloud(0, i) = v.N()[0];
+    NormCloud(1, i) = v.N()[1];
+    NormCloud(2, i) = v.N()[2];
+  }
+
+  SparseICP::SICP::Parameters pa;
+  SparseICP::SICP::point_to_plane(SrCloud, TgCloud, NormCloud, pa);
+  //update the moved points
+  for(int i = 0; i < srVerNum; i++)
+  {
+    CVertex& v = moving_mesh->vert[i];
+    v.P()[0] = SrCloud(0,i);
+    v.P()[1] = SrCloud(1,i);
+    v.P()[2] = SrCloud(2,i);
+  }
+  cout<<"******************************End SICP USING NORMAL***********************"<<endl;
+}
+
+void GlobalFun::computeICPMeshlab( CMesh *moving_mesh, CMesh *static_mesh )
+{
+  CMeshO *first = new CMeshO;
+  CMeshO *second = new CMeshO;
+  GlobalFun::convertCMesh2CMeshO(*moving_mesh, *first);
+  GlobalFun::convertCMesh2CMeshO(*static_mesh, *second);
+
+  vcg::tri::FourPCS<CMeshO> *fpcs ;
+  fpcs = new vcg::tri::FourPCS<CMeshO>();
+  fpcs->prs.Default();
+
+  first->vert.EnableMark();
+  second->vert.EnableMark();
+  fpcs->Init(*first, *second);
+  bool res = fpcs->Align(0, first->Tr, NULL);
+  first->vert.DisableMark();
+  second->vert.DisableMark();
+
+  if(!res){
+    cout<<"MeshLab ICP failed!"<<endl;
+  }else{
+    cout<<"MeshLab ICP succeed!" <<endl;
+    GlobalFun::convertCMeshO2CMesh(*first, *moving_mesh);
+    GlobalFun::convertCMeshO2CMesh(*second, *static_mesh);
+  }
+
+  delete fpcs;
+  return;
 }
 
 void GlobalFun::CMesh2PclPointCloud(const CMesh * const src, PclPointCloudPtr dst)
