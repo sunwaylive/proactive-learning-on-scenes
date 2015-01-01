@@ -166,6 +166,12 @@
       </LinkTimeCodeGeneration>
       <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <CudaCompile>
+      <CudaRuntime>None</CudaRuntime>
+    </CudaCompile>
+    <CudaLink>
+      <PerformDeviceLink>false</PerformDeviceLink>
+    </CudaLink>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -233,6 +239,9 @@
       <TargetMachinePlatform>64</TargetMachinePlatform>
       <CudaRuntime>None</CudaRuntime>
     </CudaCompile>
+    <CudaLink>
+      <PerformDeviceLink>false</PerformDeviceLink>
+    </CudaLink>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release_debug|x64'">
     <ClCompile>
