@@ -822,9 +822,9 @@ void object_seg_ECE(PointCloudPtr_RGB_NORMAL cloud, std::vector<PointCloudPtr_RG
 
   std::vector<pcl::PointIndices> cluster_indices;
   pcl::EuclideanClusterExtraction<Point_RGB_NORMAL> ec;
-  ec.setClusterTolerance (0.015); // 2cm
+  ec.setClusterTolerance (0.010); // 2cm
   ec.setMinClusterSize (100);
-  ec.setMaxClusterSize (50000);
+  ec.setMaxClusterSize (500000);
   ec.setSearchMethod (tree);
   ec.setInputCloud (cloud);
   ec.extract (cluster_indices);

@@ -37,7 +37,7 @@ public:
 public:
 	vector<MyPointCloud_RGB_NORMAL> vecPatchPoint;
 	vector<int> clusterPatchNum;
-	//	PointCloudPtr_RGB_NORMAL tablePoint;
+	MyPointCloud_RGB_NORMAL tablePoint;
 	vector<Normal> vecPatcNormal;
 	vector<vector<NEARBYNORMAL>> vecvecPatctNearbyNormal;
 	vector<MyPoint> vecPatchCenPoint;
@@ -76,6 +76,7 @@ public:
 	int backSeedIndex;
 
 	vector<bool> vecIfConnectTable;
+	int ConnectTableNum;
 	MyPoint tableCen;
 
 	vector<struct kdtree*> vecKDTree;
@@ -83,7 +84,7 @@ public:
 	vector<vector<int>> vecvecObjectPool;
 
 public:
-	//	void AddTable(PointCloudPtr_RGB_NORMAL &table);
+	void AddTable(MyPointCloud_RGB_NORMAL &table);
 	void AddClusterPoints(vector<MyPointCloud_RGB_NORMAL> &points);
 	void AddPatchNormal(vector<Normal> &normal);
 	void MainStep();
@@ -96,7 +97,7 @@ public:
 	void ComputeSmoothValue();
 	double GetBinaryDataValue(double d);
 	double GetBinarySmoothValue(int m,int n);
-	bool IfConnectTable(vector<MyPt_RGB_NORMAL> points);
+	bool IfConnectTable(vector<MyPt_RGB_NORMAL> &points);
 	void NomalizeData();
 	void NomalizeAppearence();
 	void NomalizeSmooth();

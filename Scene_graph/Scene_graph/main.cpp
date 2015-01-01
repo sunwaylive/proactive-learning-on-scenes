@@ -16,8 +16,7 @@ int main (int argc, char *argv[])
   vs.viewer->setBackgroundColor(0,0,0);
 
   PointCloudPtr_RGB_NORMAL cloud(new PointCloud_RGB_NORMAL);
-  //loadPointCloud_normal_ply("data/big_table_normal.ply", cloud);
-  loadPointCloud_normal_ply("data/big_table_normal.ply", cloud);
+  loadPointCloud_normal_ply("data/table0.ply", cloud);
 
   PointCloudPtr_RGB_NORMAL cloud_mark(new PointCloud_RGB_NORMAL);
   pcl::copyPointCloud(*cloud,*cloud_mark);
@@ -67,7 +66,16 @@ int main (int argc, char *argv[])
 
   vs.viewer->addPointCloud (pc, "table_cloud");
 
-//  cBinarySeg.AddTable(table_cloud);
+  MyPointCloud_RGB_NORMAL tableCloud;
+  for(int i=0;i<table_cloud->size();i++){
+	  MyPt_RGB_NORMAL point;
+	  point.x = table_cloud->at(i).x;
+	  point.y = table_cloud->at(i).y;
+	  point.z = table_cloud->at(i).z;
+	  tableCloud.mypoints.push_back(point);
+  }
+
+  cBinarySeg.AddTable(tableCloud);
   
   //cv::Point2f p0;
   //cv::Point2f p1;
@@ -270,7 +278,7 @@ int main (int argc, char *argv[])
 
     str<<"supervoxel_normals"<<i;
     id_pc=str.str();
-//    vs.viewer->addPointCloudNormals<pcl::PointNormal> (normal_cloud,1,0.05f, id_pc);
+    vs.viewer->addPointCloudNormals<pcl::PointNormal> (normal_cloud,1,0.05f, id_pc);
 
 
 	// data transfer to Graph Cut`
@@ -345,23 +353,23 @@ cMultiSeg.MainStep();
 // }
 // 
 // 
-// for(int i = 0;i < cBinarySeg.vecpairPatchConnection.size();i++)
-// {
-// 	pcl::PointXYZ point0,point1;
-// 	int index0,index1;
-// 	index0 = cBinarySeg.vecpairPatchConnection[i].first;
-// 	index1 = cBinarySeg.vecpairPatchConnection[i].second;
-// 	point0.x = cBinarySeg.vecPatchCenPoint[index0].x;
-// 	point0.y = cBinarySeg.vecPatchCenPoint[index0].y;
-// 	point0.z = cBinarySeg.vecPatchCenPoint[index0].z;
-// 	point1.x = cBinarySeg.vecPatchCenPoint[index1].x;
-// 	point1.y = cBinarySeg.vecPatchCenPoint[index1].y;
-// 	point1.z = cBinarySeg.vecPatchCenPoint[index1].z;
-// 	std::stringstream st0;
-// 	st0<<"a"<<i<<"0";
-// 	std::string id_line0=st0.str();
-// 	vs.viewer->addLine(point0,point1,1,0,0,id_line0);
-// }
+for(int i = 0;i < cBinarySeg.vecpairPatchConnection.size();i++)
+{
+	pcl::PointXYZ point0,point1;
+	int index0,index1;
+	index0 = cBinarySeg.vecpairPatchConnection[i].first;
+	index1 = cBinarySeg.vecpairPatchConnection[i].second;
+	point0.x = cBinarySeg.vecPatchCenPoint[index0].x;
+	point0.y = cBinarySeg.vecPatchCenPoint[index0].y;
+	point0.z = cBinarySeg.vecPatchCenPoint[index0].z;
+	point1.x = cBinarySeg.vecPatchCenPoint[index1].x;
+	point1.y = cBinarySeg.vecPatchCenPoint[index1].y;
+	point1.z = cBinarySeg.vecPatchCenPoint[index1].z;
+	std::stringstream st0;
+	st0<<"a"<<i<<"0";
+	std::string id_line0=st0.str();
+	vs.viewer->addLine(point0,point1,1,0,0,id_line0);
+}
 
 // for(int i = 0;i < cBinarySeg.vecIfConnectTable.size();i++)
 // {

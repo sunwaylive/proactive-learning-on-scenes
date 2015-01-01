@@ -31,22 +31,20 @@ CBinarySeg::~CBinarySeg(void)
 
 }
 
-// void CBinarySeg::AddTable(PointCloudPtr_RGB_NORMAL &table)
-// {
-// 	tablePoint = table;
-//  	tableCen.x = tableCen.y = tableCen.z = 0;
-// 
-// 	//useless
-// // 	for(int i=0;i<tablePoint->size();i++)
-// // 	{
-// // 		tableCen.x += tablePoint->at(i).x;
-// // 		tableCen.y += tablePoint->at(i).y;
-// // 		tableCen.z += tablePoint->at(i).z;
-// // 	}
-// // 	tableCen.x /= tablePoint->size();
-// // 	tableCen.y /= tablePoint->size();
-// // 	tableCen.z /= tablePoint->size();
-// }
+void CBinarySeg::AddTable(MyPointCloud_RGB_NORMAL &table)
+{
+	tablePoint = table;
+
+	for(int i=0;i<tablePoint.mypoints.size();i++)
+	{
+		tableCen.x += tablePoint.mypoints[i].x;
+		tableCen.y += tablePoint.mypoints[i].y;
+		tableCen.z += tablePoint.mypoints[i].z;
+	}
+	tableCen.x /= tablePoint.mypoints.size();
+	tableCen.y /= tablePoint.mypoints.size();
+	tableCen.z /= tablePoint.mypoints.size();
+}
 
 void CBinarySeg::AddClusterPoints(vector<MyPointCloud_RGB_NORMAL> &points)
 {
@@ -122,47 +120,77 @@ void CBinarySeg::MainStep()
 
 
 	//output
-	ofstream outFile1("Output\\ObjectPool1229.txt");
-	outFile1 <<  "thresholdClose0:" <<thresholdClose0
-		<<  "  thresholdClose1:" <<thresholdClose1
-		<<  "  paraSmallS:" <<paraSmallS
-		<<  "  paraLargeK:" <<paraLargeK
-		<<  "  paraLargeS:" <<paraLargeS
-		<<  "  paraConvexK:" <<paraConvexK
-		<<  "  paraConvexT:" <<paraConvexT
-		<<  "  paraConcave:" <<paraConcave
-		<<  "  paraGeometry:" <<paraGeometry
-		<<  "  paraAppearence:" <<paraAppearence
-		<<  "  paraMinPatchInObject:" <<paraMinPatchInObject
-		<<  "  paraMaxCutEnergy:" <<paraMaxCutEnergy
-		<<  endl;
-	for(int i=0;i<vecvecObjectPool.size();i++)
-	{
-		for(int j=0;j<vecvecObjectPool[i].size();j++)
-		{
-			outFile1 << vecvecObjectPool[i][j] <<  "  ";
-		}
-		outFile1 << "  " << endl;
-	}
-	outFile1.close();
+// 	ofstream outFile1("Output\\ObjectPool1229.txt");
+// 	outFile1 <<  "thresholdClose0:" <<thresholdClose0
+// 		<<  "  thresholdClose1:" <<thresholdClose1
+// 		<<  "  paraSmallS:" <<paraSmallS
+// 		<<  "  paraLargeK:" <<paraLargeK
+// 		<<  "  paraLargeS:" <<paraLargeS
+// 		<<  "  paraConvexK:" <<paraConvexK
+// 		<<  "  paraConvexT:" <<paraConvexT
+// 		<<  "  paraConcave:" <<paraConcave
+// 		<<  "  paraGeometry:" <<paraGeometry
+// 		<<  "  paraAppearence:" <<paraAppearence
+// 		<<  "  paraMinPatchInObject:" <<paraMinPatchInObject
+// 		<<  "  paraMaxCutEnergy:" <<paraMaxCutEnergy
+// 		<<  endl;
+// 	for(int i=0;i<vecvecObjectPool.size();i++)
+// 	{
+// 		for(int j=0;j<vecvecObjectPool[i].size();j++)
+// 		{
+// 			outFile1 << vecvecObjectPool[i][j] <<  "  ";
+// 		}
+// 		outFile1 << "  " << endl;
+// 	}
+// 	outFile1.close();
+
+	ofstream outFilep("Output\\PatchPoint-table0.txt");
+	ofstream outFiles("Output\\ClusterSize-table0.txt");
+	ofstream outFilen("Output\\PatchNormal-table0.txt");
+	ofstream outFiletc("Output\\TableCloud-table0.txt");
 
 	//output
-	// 		ofstream outFile1("Output\\PatchPoint.txt");
-	// 		for(int i=0;i<vecPatchPoint.size();i++)
-	// 		{
-	// 			for(int j=0;j<vecPatchPoint[i].mypoints.size();j++)
-	// 			{
-	// 				outFile1<< vecPatchPoint[i].mypoints[j].x << "  " <<
-	// 					vecPatchPoint[i].mypoints[j].y << "  " <<
-	// 					vecPatchPoint[i].mypoints[j].z << "  " <<
-	// 					vecPatchPoint[i].mypoints[j].r << "  " <<
-	// 					vecPatchPoint[i].mypoints[j].g << "  " <<
-	// 					vecPatchPoint[i].mypoints[j].b << "  " ;
-	// 			}
-	// 			outFile1 <<  endl;
-	// 		}
-	// 		outFile1.close();
+	for(int i=0;i<vecPatchPoint.size();i++)
+	{
+		for(int j=0;j<vecPatchPoint[i].mypoints.size();j++)
+		{
+			outFilep<< vecPatchPoint[i].mypoints[j].x << "  " <<
+			vecPatchPoint[i].mypoints[j].y << "  " <<
+			vecPatchPoint[i].mypoints[j].z << "  " <<
+			vecPatchPoint[i].mypoints[j].normal_x << "  " <<
+			vecPatchPoint[i].mypoints[j].normal_y << "  " <<
+			vecPatchPoint[i].mypoints[j].normal_z << "  " <<
+			vecPatchPoint[i].mypoints[j].r << "  " <<
+			vecPatchPoint[i].mypoints[j].g << "  " <<
+			vecPatchPoint[i].mypoints[j].b << "  " ;
+		}
+		outFilep <<  endl;
+	}
+	outFilep.close();
 
+	//cluster size
+	for(int i=0;i<clusterPatchNum.size();i++)
+	{
+		outFiles<< clusterPatchNum[i] << "  ";
+	}
+	outFiles <<  endl;
+	outFiles.close();
+	
+	//normal
+	for(int i=0;i<vecPatcNormal.size();i++)
+	{
+		outFilen<< vecPatcNormal[i].normal_x << "  " <<
+				   vecPatcNormal[i].normal_y << "  " <<
+				   vecPatcNormal[i].normal_z <<  endl;
+	}
+	outFilen.close();
+
+	//table cloud
+	for(int i=0;i<tablePoint.mypoints.size();i++)
+	{
+		outFiletc<< tablePoint.mypoints[i].x << "  "<< tablePoint.mypoints[i].y << "  "<< tablePoint.mypoints[i].z <<  endl;
+	}
+	outFiletc.close();
 }
 
 void CBinarySeg::PointCloudPreprocess()
@@ -221,19 +249,14 @@ void CBinarySeg::PointCloudPreprocess()
 
 	boundingBoxSize = sqrt((xMax-xMin) * (xMax-xMin) + (yMax-yMin) * (yMax-yMin) + (zMax-zMin) * (zMax-zMin));
 
-
-
 	//distance between patches
 	vecvecPatchMinDis.resize(vecPatchPoint.size());
 	vecvecPatchCenDis.resize(vecPatchPoint.size());
-	//	vecvecNearbyPoint.resize(vecPatchPoint.size());
-	//	vecvecPatctNearbyNormal.resize(vecPatchPoint.size());
+
 	for(int i = 0;i <vecPatchPoint.size();i++)
 	{
 		vecvecPatchMinDis[i].resize(vecPatchPoint.size(),LARGE_NUM);
 		vecvecPatchCenDis[i].resize(vecPatchPoint.size(),LARGE_NUM);
-		//		vecvecNearbyPoint[i].resize(vecPatchPoint.size());
-		//		vecvecPatctNearbyNormal[i].resize(vecPatchPoint.size());
 	}
 
 	// 	vecKDTree.resize(vecPatchPoint.size());
@@ -265,11 +288,14 @@ void CBinarySeg::PointCloudPreprocess()
 	// 	}
 
 	//handle table
-	// 	vecIfConnectTable.clear();
-	// 	for(int i = 0;i <vecPatchPoint.size();i++)
-	// 	{
-	// 		vecIfConnectTable.push_back(IfConnectTable(vecPatchPoint[i].mypoints));
-	// 	}
+	vecIfConnectTable.clear();
+	ConnectTableNum = 0;
+	for(int i = 0;i <vecPatchPoint.size();i++)
+ 	{
+ 		vecIfConnectTable.push_back(IfConnectTable(vecPatchPoint[i].mypoints));
+		if(vecIfConnectTable[vecIfConnectTable.size() - 1])
+			ConnectTableNum++;
+ 	}
 
 	//output
 	// 	ofstream outFile1("Output\\color.txt");
@@ -411,7 +437,7 @@ void CBinarySeg::GraphCutSolve(vector<int>& vecObjectHypo, double &cutEnergy)
 {
 	typedef Graph<double,double,double> GraphType;
 	GraphType *g = new GraphType(/*estimated # of nodes*/ vecPatchPoint.size() + 1, 
-		/*estimated # of edges*/ vecpairPatchConnection.size() + vecIfConnectTable.size()); 
+		/*estimated # of edges*/ vecpairPatchConnection.size() + ConnectTableNum); 
 
 	g -> add_node(vecPatchPoint.size() + 1); 
 
@@ -715,25 +741,22 @@ double CBinarySeg::GetBinarySmoothValue(int m,int n)
 	return smoothValue;
 }  
 
-bool CBinarySeg::IfConnectTable(vector<MyPt_RGB_NORMAL> points)
+bool CBinarySeg::IfConnectTable(vector<MyPt_RGB_NORMAL> &points)
 {
-	//jerrysyf
-	// 	for(int i=0;i<points.size();i++)
-	// 	{
-	// 		for(int j=0;j<tablePoint->size();j++)
-	// 		{
-	// 			double dis = sqrt((points[i].x - tablePoint->at(j).x) * (points[i].x - tablePoint->at(j).x) +
-	// 							  (points[i].y - tablePoint->at(j).y) * (points[i].y - tablePoint->at(j).y) +
-	// 							  (points[i].z - tablePoint->at(j).z) * (points[i].z - tablePoint->at(j).z));
-	// 			if(dis < thresholdClose0)
-	// 			{
-	// 				return true;
-	// 			}
-	// 		}
-	// 	}
-	// 	return false;
-
-	return true;
+ 	for(int i=0;i<points.size();i++)
+ 	{
+ 		for(int j=0;j<tablePoint.mypoints.size();j++)
+ 		{
+ 			double dis = sqrt((points[i].x - tablePoint.mypoints[j].x) * (points[i].x - tablePoint.mypoints[j].x) +
+ 							  (points[i].y - tablePoint.mypoints[j].y) * (points[i].y - tablePoint.mypoints[j].y) +
+ 							  (points[i].z - tablePoint.mypoints[j].z) * (points[i].z - tablePoint.mypoints[j].z));
+ 			if(dis < thresholdClose0)
+ 			{
+ 				return true;
+ 			}
+ 		}
+ 	}
+ 	return false;
 }
 
 void CBinarySeg::NomalizeData()
