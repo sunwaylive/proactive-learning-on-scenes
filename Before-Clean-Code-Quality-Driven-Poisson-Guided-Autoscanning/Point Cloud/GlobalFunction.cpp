@@ -1323,6 +1323,7 @@ void GlobalFun::computeICPMeshlab( CMesh *src, CMesh *dst )
   delete fpcs;
   return;
 }
+
 //no face will be exist after the merge
 void GlobalFun::mergeMesh(CMesh *src, CMesh *target)
 {

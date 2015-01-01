@@ -253,6 +253,18 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Algorithm\Camera.cpp" />
+    <ClCompile Include="Algorithm\GraphCut\BinarySeg.cpp" />
+    <ClCompile Include="Algorithm\GraphCut\Clustering.cpp" />
+    <ClCompile Include="Algorithm\GraphCut\color_op.cpp" />
+    <ClCompile Include="Algorithm\GraphCut\common_type.cpp" />
+    <ClCompile Include="Algorithm\GraphCut\GCoptimization.cpp" />
+    <ClCompile Include="Algorithm\GraphCut\graph.cpp" />
+    <ClCompile Include="Algorithm\GraphCut\kdtree.cpp" />
+    <ClCompile Include="Algorithm\GraphCut\LinkedBlockList.cpp" />
+    <ClCompile Include="Algorithm\GraphCut\maxflow.cpp" />
+    <ClCompile Include="Algorithm\GraphCut\MultiSeg.cpp" />
+    <ClCompile Include="Algorithm\GraphCut\ScanEstimation.cpp" />
+    <ClCompile Include="Algorithm\GraphCut\scene_seg.cpp" />
     <ClCompile Include="Algorithm\NBV.cpp" />
     <ClCompile Include="Algorithm\NormalSmoother.cpp" />
     <ClCompile Include="Algorithm\Poisson.cpp" />
@@ -385,6 +397,7 @@
     <ClCompile Include="GLArea.cpp" />
     <ClCompile Include="GLDrawer.cpp" />
     <ClCompile Include="GlobalFunction.cpp" />
+    <ClCompile Include="GraphCutMain.cpp" />
     <ClCompile Include="grid.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="mainwindow.cpp" />
@@ -464,6 +477,22 @@
   <ItemGroup>
     <ClInclude Include="Algorithm\anistropicPCA_Normal.h" />
     <ClInclude Include="Algorithm\Camera.h" />
+    <ClInclude Include="Algorithm\GraphCut\BinarySeg.h" />
+    <ClInclude Include="Algorithm\GraphCut\block.h" />
+    <ClInclude Include="Algorithm\GraphCut\Clustering.h" />
+    <ClInclude Include="Algorithm\GraphCut\color_op.h" />
+    <ClInclude Include="Algorithm\GraphCut\common_type.h" />
+    <ClInclude Include="Algorithm\GraphCut\energy.h" />
+    <ClInclude Include="Algorithm\GraphCut\GCoptimization.h" />
+    <ClInclude Include="Algorithm\GraphCut\graph.h" />
+    <ClInclude Include="Algorithm\GraphCut\GraphCutGlobalHeader.h" />
+    <ClInclude Include="Algorithm\GraphCut\kdtree.h" />
+    <ClInclude Include="Algorithm\GraphCut\LinkedBlockList.h" />
+    <ClInclude Include="Algorithm\GraphCut\matrix.h" />
+    <ClInclude Include="Algorithm\GraphCut\MultiSeg.h" />
+    <ClInclude Include="Algorithm\GraphCut\MyClass.h" />
+    <ClInclude Include="Algorithm\GraphCut\ScanEstimation.h" />
+    <ClInclude Include="Algorithm\GraphCut\scene_seg.h" />
     <ClInclude Include="Algorithm\NBV.h" />
     <ClInclude Include="Algorithm\NormalSmoother.h" />
     <ClInclude Include="Algorithm\normal_extrapolation.h" />
@@ -502,6 +531,7 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_NO_DEBUG -DNDEBUG -DQT_DLL -D_MBCS "-I.\IncludeLib" "-I.\IncludeLib\Eigen" "-I.\IncludeLib\openmesh\include" "-I.\GeneratedFiles" "-I$(QTDIR)\include" "-I.\GeneratedFiles\$(ConfigurationName)\." "-I$(QTDIR)\include\qtmain" "-I." "-I.\Poisson" "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtTest" "-I$(QTDIR)\include\QtGui"</Command>
     </CustomBuild>
+    <ClInclude Include="GraphCutMain.h" />
     <ClInclude Include="plylib.h" />
     <ClInclude Include="plystuff.h" />
     <ClInclude Include="Poisson\Allocator.h" />
@@ -670,6 +700,7 @@
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
+    <None Include="Algorithm\GraphCut\instances.inc" />
     <None Include="Poisson\Array.inl" />
     <None Include="Poisson\BSplineData.inl" />
     <None Include="Poisson\FunctionData.inl" />
