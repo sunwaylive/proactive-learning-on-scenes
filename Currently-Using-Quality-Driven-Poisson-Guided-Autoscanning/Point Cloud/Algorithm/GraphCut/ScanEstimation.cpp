@@ -24,12 +24,12 @@ CScanEstimation::~CScanEstimation(void)
 }
 
 
-void CScanEstimation::MainStep()
+void CScanEstimation::MainStep(CMesh *original)
 {
 	//get vecvecIsoPoint
 	for(int i = 0;i < vecvecMultiResult.size();i++)
 	{
-		runPoissonFieldAndExtractIsoPoints_ByEXE(i);
+		saveMultiResultToOriginal(original, i);
 	}
 	
 
@@ -69,147 +69,32 @@ void CScanEstimation::MainStep()
 
 }
 
-void CScanEstimation::runPoissonFieldAndExtractIsoPoints_ByEXE(int m)
+void CScanEstimation::saveMultiResultToOriginal( CMesh *original, int m )
 {
-	PoissonParam Par;
-	Par.Depth = 7;
-//	Par.Depth = para->getDouble("Max Depth");
+  GlobalFun::clearCMesh(*original);
+  
+  for(int i = 0;i < vecvecMultiResult[m].size();i++)
+  {
+    for(int j = 0;j < vecPatchPoint[vecvecMultiResult[m][i]].mypoints.size();j++)
+    {
+      MyPoint_RGB_NORMAL point = vecPatchPoint[vecvecMultiResult[m][i]].mypoints[j];
+      CVertex new_point;
+      new_point.P()[0] = point.x;
+      new_point.P()[1] = point.y;
+      new_point.P()[2] = point.z;
+      new_point.N()[0] = point.normal_x;
+      new_point.N()[1] = point.normal_y;
+      new_point.N()[2] = point.normal_z;
 
-// 	CMesh* target = NULL;
-// 	if (para->getBool("Run Poisson On Original"))
-// 	{
-// 		target = original;
-// 	}
-// 	else if (para->getBool("Run Poisson On Samples"))
-// 	{
-// 		target = samples;
-// 	}
-// 	else
-// 	{
-// 		cout << "Run on original or sample?" << endl;
-// 		return;
-// 	}
-// 
-// 	Timer timer;
-// 	timer.start("write ply file");
-// 	std::cout<<"sample point num: " << samples->vert.size() <<std::endl;
-// 	int mask= tri::io::Mask::IOM_VERTNORMAL;// add vertcord will cause crash
-// 	tri::io::ExporterPLY<CMesh>::Save(*target, "poisson_in.ply", mask, false);
-// 	timer.end();
-// 
-// 	timer.start("run Poisson");
-
-	int pointNum = 0;
-	for(int i = 0;i < vecvecMultiResult[m].size();i++)
-	{
-		pointNum += vecPatchPoint[vecvecMultiResult[m][i]].mypoints.size();
-	}
-
-	std::ofstream outFile;
-	outFile.open("poisson_in.ply");
-	//save m_grid
-	outFile << "ply\n";
-	outFile << "format ascii 1.0\n";
-	outFile << "comment VCGLIB generated\n";
-	outFile << "element vertex " << pointNum << "\n";
-	outFile << "property float x\n";
-	outFile << "property float y\n";
-	outFile << "property float z\n";
-
-	outFile << "property float nx\n";
-	outFile << "property float ny\n";
-	outFile << "property float nz\n";
-
-	outFile << "element face " << 0 << "\n";
-	outFile << "property list uchar int vertex_indices\n";
-	outFile << "end_header\n";
-
-	for(int i = 0;i < vecvecMultiResult[m].size();i++)
-	{
-		for(int j = 0;j < vecPatchPoint[vecvecMultiResult[m][i]].mypoints.size();j++)
-		{
-			MyPoint_RGB_NORMAL point = vecPatchPoint[vecvecMultiResult[m][i]].mypoints[j];
-			outFile << point.x << " " << point.y << " " << point.z << " " << 
-				point.normal_x << " " << point.normal_y << " " << point.normal_z<<" " <<  endl;
-		}
-	}
-	outFile.close();
-
-	char mycmd[100];
-	sprintf(mycmd, "PoissonRecon.exe --in poisson_in.ply --out poisson_out.ply --voxel poisson_field.raw --depth %d --pointWeight 0", Par.Depth);
-	system(mycmd); 
-
-	CMesh tentative_mesh;
-	CMesh* iso_points;
-
- 	int mask= vcg::tri::io::Mask::IOM_VERTNORMAL ;
-	int err = vcg::tri::io::Importer<CMesh>::Open(tentative_mesh, "poisson_out.ply", mask);  
-	if(err) 
-	{
-		cout << "Failed reading mesh: " << err << "\n";
-		return;
-	}  
-
-	if (tentative_mesh.vert.empty())
-	{
-		cout << "tentative mesh empty" << endl;
-		return;
-	}
-
-	iso_points->vert.clear();    //??????????????????
-
-	samplePointsFromMesh(tentative_mesh, iso_points);
-
-	for (int i = 0; i < iso_points->vert.size(); i++)
-	{
-		CVertex& v = iso_points->vert[i];
-		v.is_iso = true;
-		v.m_index = i;
-		v.eigen_confidence = 0;
-		v.N().Normalize();
-		v.recompute_m_render();
-	}
-	iso_points->vn = iso_points->vert.size();
-
+      new_point.m_index = i;
+      new_point.is_original = true;
+      original->vert.push_back(new_point);
+      original->bbox.Add(new_point.P());
+    }
+  }
+  original->vn = original->vert.size();
+  return;
 }
-
-void CScanEstimation::samplePointsFromMesh(CMesh& mesh, CMesh* points)
-{
-	mesh.bbox.SetNull();
-	for (int i = 0; i < mesh.vert.size(); i++)
-	{
-		mesh.bbox.Add(mesh.vert[i]);
-	}
-	mesh.vn = mesh.vert.size();
-	mesh.fn = mesh.face.size();
-	vcg::tri::UpdateNormals<CMesh>::PerVertex(mesh);
-
-	float radius = 0;
-// 	int sampleNum = para->getDouble("Poisson Disk Sample Number");	//??????????????????
-// 	if (sampleNum <= 100)
-// 	{
-	int	sampleNum = 100;
-//	}
-	radius = vcg::tri::SurfaceSampling<CMesh,BaseSampler>::ComputePoissonDiskRadius(mesh, sampleNum);
-	// first of all generate montecarlo samples for fast lookup
-	CMesh *presampledMesh=&(mesh);
-	CMesh MontecarloMesh; // this mesh is used only if we need real poisson sampling (and therefore we need to choose points different from the starting mesh vertices)
-
-	BaseSampler sampler(&MontecarloMesh);
-	sampler.qualitySampling =true;
-	vcg::tri::SurfaceSampling<CMesh,BaseSampler>::Montecarlo(mesh, sampler, sampleNum*20);
-	MontecarloMesh.bbox = mesh.bbox; // we want the same bounding box
-	presampledMesh=&MontecarloMesh;
-
-	BaseSampler mps(points);
-	vcg::tri::SurfaceSampling<CMesh,BaseSampler>::PoissonDiskParam pp;
-	vcg::tri::SurfaceSampling<CMesh,BaseSampler>::PoissonDisk(mesh, mps, *presampledMesh, radius,pp);
-
-	
-	
-}
-
-
 
 void CScanEstimation::runComputeIsoGradientConfidence()
 {

@@ -17,7 +17,7 @@ void CPointCloudAnalysis::MainStep()
 	BinarySegmentation();
 	Clustering();
 	MultiSegmentation();
-	ScanEstimation();
+	//ScanEstimation();
 }
 
 
@@ -179,7 +179,7 @@ void CPointCloudAnalysis::MultiSegmentation()
 	cMultiSeg.MainStep();
 }
 
-void CPointCloudAnalysis::ScanEstimation()
+void CPointCloudAnalysis::ScanEstimation(CMesh *original)
 {
 	cScanEstimation.vecSmoothValue = cBinarySeg.vecSmoothValue;
 	cScanEstimation.vecGeometryConvex = cBinarySeg.vecGeometryConvex;
@@ -195,5 +195,5 @@ void CPointCloudAnalysis::ScanEstimation()
 	cScanEstimation.vecObjectness = cMultiSeg.vecObjectness;
 	cScanEstimation.vecSeparateness = cMultiSeg.vecSeparateness;
 
-	cScanEstimation.MainStep();
+	cScanEstimation.MainStep(original);
 }

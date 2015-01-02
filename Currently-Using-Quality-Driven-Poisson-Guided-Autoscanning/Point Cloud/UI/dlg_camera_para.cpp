@@ -1360,4 +1360,7 @@ void CameraParaDlg::runGraphCut()
 
 	CPointCloudAnalysis cPointCloudAnalysis;
 	cPointCloudAnalysis.MainStep();
+  //move ScanEstimation out of MainStep
+  CMesh *original = area->dataMgr.getCurrentOriginal();
+  cPointCloudAnalysis.ScanEstimation(original);
 }

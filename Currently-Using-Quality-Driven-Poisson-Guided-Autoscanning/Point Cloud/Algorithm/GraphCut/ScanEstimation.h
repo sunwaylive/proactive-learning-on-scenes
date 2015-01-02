@@ -46,7 +46,6 @@ public:
 
 public:
 	void runComputeIsoGradientConfidence();
-	void runPoissonFieldAndExtractIsoPoints_ByEXE(int m);
-	void MainStep();
-	void samplePointsFromMesh(CMesh& mesh, CMesh* points);
+  void saveMultiResultToOriginal(CMesh *original, int m);
+	void MainStep(CMesh *original);
 };

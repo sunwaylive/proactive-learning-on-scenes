@@ -8,6 +8,7 @@
 #include "Algorithm/GraphCut/MultiSeg.h"
 #include "Algorithm/GraphCut/ScanEstimation.h"
 
+
 class CPointCloudAnalysis
 {
 public:
@@ -24,6 +25,6 @@ public:
 	void BinarySegmentation();
 	void Clustering();
 	void MultiSegmentation();
-	void ScanEstimation();
+	void ScanEstimation(CMesh *original);
 };
 
