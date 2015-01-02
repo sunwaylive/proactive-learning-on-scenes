@@ -89,7 +89,7 @@ void CBinarySeg::MainStep()
 //			ofstream outFile0("Output\\cutEnergy.txt",ios::out|ios::app);
 			seedPatch = i;
 			int flagStop = true;
-			paraLargeS = 0.001;
+			paraLargeS = 0.01;
 //			outFile0 <<  "index:" << i <<  endl;
 			while(paraLargeS < 0.4 && flagStop)
 			{
@@ -104,7 +104,7 @@ void CBinarySeg::MainStep()
 					flagStop = false;
 //					outFile0 <<  "cutEnergy:" <<cutEnergy << "paraLargeS:" <<paraLargeS << "  foreground size:" << vecObjectHypo.size() <<  endl;
 				}	
-				paraLargeS += (double)0.001;
+				paraLargeS += (double)0.01;
 			}
 //			outFile0 <<  "  " <<  endl;
 
@@ -291,89 +291,89 @@ void CBinarySeg::PointCloudPreprocess()
 // 	outFile1.close();
 
 	//output
-// 	ofstream outFile0("Output\\basicinfo.txt");
-// 	for(int i = 0;i <clusterPatchNum.size();i++)
+	ofstream outFile0("Output\\basicinfo.txt");
+	for(int i = 0;i <clusterPatchNum.size();i++)
+	{
+		outFile0 << "clusterPatchNum: " << clusterPatchNum[i] << " " ;
+	}
+	outFile0 << "   " << endl;
+	
+	outFile0 << "vecPatchPoint: " << vecPatchPoint.size() << " " ;
+	outFile0 << "   " << endl;
+
+	outFile0 << "bounding box   xMax: " << xMax << " xMin: " << xMin 
+						  << " yMax: " << yMax << " yMin: " << yMin
+						  << " zMax: " << zMax << " zMin: " << zMin << endl;
+// 	for(int i = 0;i <vecPatchColor.size();i++)
 // 	{
-// 		outFile0 << "clusterPatchNum: " << clusterPatchNum[i] << " " ;
+// 		outFile0 << "color: " << vecPatchColor[i].mBlue << " " << vecPatchColor[i].mRed << " " << vecPatchColor[i].mGreen << endl;
 // 	}
 // 	outFile0 << "   " << endl;
-// 	
-// 	outFile0 << "vecPatchPoint: " << vecPatchPoint.size() << " " ;
-// 	outFile0 << "   " << endl;
-// 
-// 	outFile0 << "bounding box   xMax: " << xMax << " xMin: " << xMin 
-// 						  << " yMax: " << yMax << " yMin: " << yMin
-// 						  << " zMax: " << zMax << " zMin: " << zMin << endl;
-// // 	for(int i = 0;i <vecPatchColor.size();i++)
-// // 	{
-// // 		outFile0 << "color: " << vecPatchColor[i].mBlue << " " << vecPatchColor[i].mRed << " " << vecPatchColor[i].mGreen << endl;
-// // 	}
-// // 	outFile0 << "   " << endl;
-// 
-// 	for(int i = 0;i <vecPatchPoint.size();i++)
+
+	for(int i = 0;i <vecPatchPoint.size();i++)
+	{
+		outFile0 << "patch size: " << vecPatchPoint[i].mypoints.size() << endl;
+	}
+	outFile0 << "   " << endl;
+
+	for(int i = 0;i <vecPatchCenPoint.size();i++)
+	{
+		outFile0 << "center point: " << vecPatchCenPoint[i].x << " " << vecPatchCenPoint[i].y << " " << vecPatchCenPoint[i].z << endl;
+	}
+	outFile0 << "   " << endl;
+
+	for(int i = 0;i <vecPatcNormal.size();i++)
+	{
+		outFile0 << "average normal: " << vecPatcNormal[i].normal_x << " "<< vecPatcNormal[i].normal_y << " " <<vecPatcNormal[i].normal_z << endl;
+	}
+	outFile0 << "   " << endl;
+	outFile0.close();
+
+	//output
+	ofstream outFile2("Output\\nearbyinfo.txt");
+// 	for(int i = 0;i <vecIfConnectTable.size();i++)
 // 	{
-// 		outFile0 << "patch size: " << vecPatchPoint[i].mypoints.size() << endl;
-// 	}
-// 	outFile0 << "   " << endl;
-// 
-// 	for(int i = 0;i <vecPatchCenPoint.size();i++)
-// 	{
-// 		outFile0 << "center point: " << vecPatchCenPoint[i].x << " " << vecPatchCenPoint[i].y << " " << vecPatchCenPoint[i].z << endl;
-// 	}
-// 	outFile0 << "   " << endl;
-// 
-// 	for(int i = 0;i <vecPatcNormal.size();i++)
-// 	{
-// 		outFile0 << "average normal: " << vecPatcNormal[i].normal_x << " "<< vecPatcNormal[i].normal_y << " " <<vecPatcNormal[i].normal_z << endl;
-// 	}
-// 	outFile0 << "   " << endl;
-// 	outFile0.close();
-// 
-// 	//output
-// 	ofstream outFile2("Output\\nearbyinfo.txt");
-// // 	for(int i = 0;i <vecIfConnectTable.size();i++)
-// // 	{
-// // 		outFile2 << "connecttable " << vecIfConnectTable[i] <<  " "  ;
-// // 	}
-// // 	outFile2 << "   " << endl;
-// 
-// 	for(int i = 0;i <vecpairPatchConnection.size();i++)
-// 	{
-// 		outFile2 << "patch " << vecpairPatchConnection[i].first << " "<< vecpairPatchConnection[i].second << " "  << endl;
+// 		outFile2 << "connecttable " << vecIfConnectTable[i] <<  " "  ;
 // 	}
 // 	outFile2 << "   " << endl;
-// 
-// // 	for(int i = 0;i <vecvecNearbyPoint.size();i++)
-// // 	{
-// // 		for(int j = 0;j <vecvecNearbyPoint[i].size();j++)
-// // 		{
-// // 			if(vecvecNearbyPoint[i][j].nearbyPoint.size()>0)
-// // 				for(int k = 0;k < vecvecNearbyPoint[i][j].nearbyPoint.size();k++)
-// // 					outFile2 << "nearby " << vecvecNearbyPoint[i][j].nearbyPoint[k].indexFirst << " "<< vecvecNearbyPoint[i][j].nearbyPoint[k].indexSecond << " patch " <<
-// // 					vecvecNearbyPoint[i][j].nearbyPoint[k].patchFirst << " "<< vecvecNearbyPoint[i][j].nearbyPoint[k].patchSecond << " " << endl;
-// // 		}
-// // 	}
-// 	outFile2 << "   " << endl;
-// 	outFile2.close();
-// 
-// // 	ofstream outFile3("Output\\nearbynormal.txt");
-// // 	for(int i = 0;i <vecvecPatctNearbyNormal.size();i++)
-// // 	{
-// // 		for(int j = 0;j <vecvecPatctNearbyNormal[i].size();j++)
-// // 		{
-// // 			if(vecvecNearbyPoint[i][j].nearbyPoint.size())
-// // 				outFile3 << "nearbynormal  i " << i << "  j  " << j << "   num  " << 
-// // 										   vecvecNearbyPoint[i][j].nearbyPoint.size() <<"  value  "<<
-// // 										   vecvecPatctNearbyNormal[i][j].normal0.normal_x << " "<< 
-// // 				                           vecvecPatctNearbyNormal[i][j].normal0.normal_y << " "<< 
-// // 										   vecvecPatctNearbyNormal[i][j].normal0.normal_z << " "<< 
-// // 										   vecvecPatctNearbyNormal[i][j].normal1.normal_x << " "<< 
-// // 										   vecvecPatctNearbyNormal[i][j].normal1.normal_y << " "<< 
-// // 										   vecvecPatctNearbyNormal[i][j].normal1.normal_z << endl;
-// // 		}
-// // 	}
-// // 	outFile3 << "   " << endl;
-// // 	outFile3.close();
+
+	for(int i = 0;i <vecpairPatchConnection.size();i++)
+	{
+		outFile2 << "patch " << vecpairPatchConnection[i].first << " "<< vecpairPatchConnection[i].second << " "  << endl;
+	}
+	outFile2 << "   " << endl;
+
+// 	for(int i = 0;i <vecvecNearbyPoint.size();i++)
+// 	{
+// 		for(int j = 0;j <vecvecNearbyPoint[i].size();j++)
+// 		{
+// 			if(vecvecNearbyPoint[i][j].nearbyPoint.size()>0)
+// 				for(int k = 0;k < vecvecNearbyPoint[i][j].nearbyPoint.size();k++)
+// 					outFile2 << "nearby " << vecvecNearbyPoint[i][j].nearbyPoint[k].indexFirst << " "<< vecvecNearbyPoint[i][j].nearbyPoint[k].indexSecond << " patch " <<
+// 					vecvecNearbyPoint[i][j].nearbyPoint[k].patchFirst << " "<< vecvecNearbyPoint[i][j].nearbyPoint[k].patchSecond << " " << endl;
+// 		}
+// 	}
+	outFile2 << "   " << endl;
+	outFile2.close();
+
+// 	ofstream outFile3("Output\\nearbynormal.txt");
+// 	for(int i = 0;i <vecvecPatctNearbyNormal.size();i++)
+// 	{
+// 		for(int j = 0;j <vecvecPatctNearbyNormal[i].size();j++)
+// 		{
+// 			if(vecvecNearbyPoint[i][j].nearbyPoint.size())
+// 				outFile3 << "nearbynormal  i " << i << "  j  " << j << "   num  " << 
+// 										   vecvecNearbyPoint[i][j].nearbyPoint.size() <<"  value  "<<
+// 										   vecvecPatctNearbyNormal[i][j].normal0.normal_x << " "<< 
+// 				                           vecvecPatctNearbyNormal[i][j].normal0.normal_y << " "<< 
+// 										   vecvecPatctNearbyNormal[i][j].normal0.normal_z << " "<< 
+// 										   vecvecPatctNearbyNormal[i][j].normal1.normal_x << " "<< 
+// 										   vecvecPatctNearbyNormal[i][j].normal1.normal_y << " "<< 
+// 										   vecvecPatctNearbyNormal[i][j].normal1.normal_z << endl;
+// 		}
+// 	}
+// 	outFile3 << "   " << endl;
+// 	outFile3.close();
 
 }
 
@@ -497,12 +497,12 @@ void CBinarySeg::GetAdjacency(int patchBegin,int patchEnd)
 	}
 
 	//output
-// 	ofstream outFile0("Output\\Yanzheng.txt",ios::app);
-// 	outFile0 << " " << vecvecPatchMinDis[11][12] << endl;
-// 	outFile0 << " " << vecvecPatchMinDis[111][112] << endl;
-// 	outFile0 << " " << vecvecPatchMinDis[211][212] << endl;
-// 	outFile0 << " " << vecvecPatchMinDis[311][312] << endl;
-// 	outFile0.close();
+	ofstream outFile0("Output\\Yanzheng.txt",ios::app);
+	outFile0 << " " << vecvecPatchMinDis[11][12] << endl;
+	outFile0 << " " << vecvecPatchMinDis[111][112] << endl;
+	outFile0 << " " << vecvecPatchMinDis[211][212] << endl;
+	outFile0 << " " << vecvecPatchMinDis[311][312] << endl;
+	outFile0.close();
 }
 
 double CBinarySeg::GetMinDisBetPatch(int m,int n,bool &stable)

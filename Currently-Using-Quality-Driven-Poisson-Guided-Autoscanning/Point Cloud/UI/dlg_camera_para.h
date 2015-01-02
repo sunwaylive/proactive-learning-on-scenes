@@ -19,6 +19,8 @@
 #include <QtCore/QDebug> 
 #include <QThread>
 
+#include "Algorithm/GraphCut/PointCloudAnalysis.h"
+
 using namespace std;
 
 class CameraParaDlg : public QFrame

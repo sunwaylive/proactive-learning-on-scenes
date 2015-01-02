@@ -1352,8 +1352,12 @@ void CameraParaDlg::savePickPointToIso()
   area->cleanPickPoints();
 }
 
+
+
 void CameraParaDlg::runGraphCut()
 {
 	std::cout<<"test graph cut" <<std::endl;
 
+	CPointCloudAnalysis cPointCloudAnalysis;
+	cPointCloudAnalysis.MainStep();
 }

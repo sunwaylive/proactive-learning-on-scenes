@@ -153,19 +153,20 @@ void CScanEstimation::runPoissonFieldAndExtractIsoPoints_ByEXE(int m)
 		return;
 	}
 
-	iso_points->vert.clear();
+//	iso_points->vert.clear();
+
 	samplePointsFromMesh(tentative_mesh, iso_points);
 
-	for (int i = 0; i < iso_points->vert.size(); i++)
-	{
-		CVertex& v = iso_points->vert[i];
-		v.is_iso = true;
-		v.m_index = i;
-		v.eigen_confidence = 0;
-		v.N().Normalize();
-		v.recompute_m_render();
-	}
-	iso_points->vn = iso_points->vert.size();
+// 	for (int i = 0; i < iso_points->vert.size(); i++)
+// 	{
+// 		CVertex& v = iso_points->vert[i];
+// 		v.is_iso = true;
+// 		v.m_index = i;
+// 		v.eigen_confidence = 0;
+// 		v.N().Normalize();
+// 		v.recompute_m_render();
+// 	}
+// 	iso_points->vn = iso_points->vert.size();
 
 }
 
@@ -191,17 +192,16 @@ void CScanEstimation::samplePointsFromMesh(CMesh& mesh, CMesh* points)
 	CMesh *presampledMesh=&(mesh);
 	CMesh MontecarloMesh; // this mesh is used only if we need real poisson sampling (and therefore we need to choose points different from the starting mesh vertices)
 
-
 	BaseSampler sampler(&MontecarloMesh);
 	sampler.qualitySampling =true;
 	vcg::tri::SurfaceSampling<CMesh,BaseSampler>::Montecarlo(mesh, sampler, sampleNum*20);
 	MontecarloMesh.bbox = mesh.bbox; // we want the same bounding box
 	presampledMesh=&MontecarloMesh;
 
-
 	BaseSampler mps(points);
 	vcg::tri::SurfaceSampling<CMesh,BaseSampler>::PoissonDiskParam pp;
 	vcg::tri::SurfaceSampling<CMesh,BaseSampler>::PoissonDisk(mesh, mps, *presampledMesh, radius,pp);
+
 }
 
 
