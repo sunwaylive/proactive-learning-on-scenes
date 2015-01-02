@@ -121,6 +121,7 @@
     <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release_debug|Win32'">D:\IncludeLib\glut;D:\IncludeLib\ann_1.1.2\MS_Win32\MS_Win32\bin;$(LibraryPath)</LibraryPath>
     <RunCodeAnalysis Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</RunCodeAnalysis>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">IncludeLib\Boost\lib;IncludeLib\flann\lib;IncludeLib\GeometricTool\lib;IncludeLib\PCL\lib;IncludeLib\qhull\lib;IncludeLib\VTK\lib\vtk-5.8;IncludeLib\opencv\lib\x64\vc10\lib;IncludeLib\glut64\lib;IncludeLib\tbb\lib\intel64\vc10;IncludeLib\ann_1.1.2\MS_Win64\bin;IncludeLib\trimesh\lib;IncludeLib\openmesh\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -229,7 +230,7 @@
       <OutputFile>$(OutDir)\$(ProjectName).exe</OutputFile>
       <AdditionalLibraryDirectories>$(QTDIR)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>false</GenerateDebugInformation>
-      <AdditionalDependencies>libboost_system-vc100-mt-1_50.lib;libboost_filesystem-vc100-mt-1_50.lib;libboost_thread-vc100-mt-1_50.lib;libboost_date_time-vc100-mt-1_50.lib;libboost_iostreams-vc100-mt-1_50.lib;pcl_kdtree_release.lib;pcl_io_release.lib;pcl_search_release.lib;pcl_segmentation_release.lib;pcl_features_release.lib;pcl_filters_release.lib;pcl_visualization_release.lib;pcl_common_release.lib;cudart.lib;qtmain.lib;QtCore4.lib;QtGui4.lib;QtOpenGL4.lib;QtTest4.lib;tbb.lib;ANN.lib;glut64.lib;glew32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;advapi32.lib;trimesh.lib;OpenMeshCore.lib;OpenMeshCored.lib;OpenMeshTools.lib;OpenMeshToolsd.lib;opengl32.lib;glu32.lib;vtkalglib-gd.lib;vtkCharts-gd.lib;vtkCommon-gd.lib;vtkDICOMParser-gd.lib;vtkexoIIc-gd.lib;vtkexpat-gd.lib;vtkFiltering-gd.lib;vtkfreetype-gd.lib;vtkftgl-gd.lib;vtkGenericFiltering-gd.lib;vtkGeovis-gd.lib;vtkGraphics-gd.lib;vtkhdf5-gd.lib;vtkHybrid-gd.lib;vtkImaging-gd.lib;vtkInfovis-gd.lib;vtkIO-gd.lib;vtkjpeg-gd.lib;vtklibxml2-gd.lib;vtkmetaio-gd.lib;vtkNetCDF-gd.lib;vtkNetCDF_cxx-gd.lib;vtkpng-gd.lib;vtkproj4-gd.lib;vtkRendering-gd.lib;vtksqlite-gd.lib;vtksys-gd.lib;vtktiff-gd.lib;vtkverdict-gd.lib;vtkViews-gd.lib;vtkVolumeRendering-gd.lib;vtkWidgets-gd.lib;vtkzlib-gd.lib;opencv_calib3d246.lib;opencv_contrib246.lib;opencv_core246.lib;opencv_features2d246.lib;opencv_flann246.lib;opencv_highgui246.lib;opencv_imgproc246.lib;Wm5Core.lib;Wm5Mathematics.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libboost_system-vc100-mt-1_50.lib;libboost_filesystem-vc100-mt-1_50.lib;libboost_thread-vc100-mt-1_50.lib;libboost_date_time-vc100-mt-1_50.lib;libboost_iostreams-vc100-mt-1_50.lib;pcl_kdtree_release.lib;pcl_io_release.lib;pcl_search_release.lib;pcl_segmentation_release.lib;pcl_features_release.lib;pcl_filters_release.lib;pcl_visualization_release.lib;pcl_common_release.lib;pcl_octree_release.lib;cudart.lib;qtmain.lib;QtCore4.lib;QtGui4.lib;QtOpenGL4.lib;QtTest4.lib;tbb.lib;ANN.lib;glut64.lib;glew32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;advapi32.lib;trimesh.lib;OpenMeshCore.lib;OpenMeshCored.lib;OpenMeshTools.lib;OpenMeshToolsd.lib;opengl32.lib;glu32.lib;vtkalglib.lib;vtkCharts.lib;vtkCommon.lib;vtkDICOMParser.lib;vtkexoIIc.lib;vtkexpat.lib;vtkFiltering.lib;vtkfreetype.lib;vtkftgl.lib;vtkGenericFiltering.lib;vtkGeovis.lib;vtkGraphics.lib;vtkhdf5.lib;vtkHybrid.lib;vtkImaging.lib;vtkInfovis.lib;vtkIO.lib;vtkjpeg.lib;vtklibxml2.lib;vtkmetaio.lib;vtkNetCDF.lib;vtkNetCDF_cxx.lib;vtkpng.lib;vtkproj4.lib;vtkRendering.lib;vtksqlite.lib;vtksys.lib;vtktiff.lib;vtkverdict.lib;vtkViews.lib;vtkVolumeRendering.lib;vtkWidgets.lib;vtkzlib.lib;opencv_calib3d246.lib;opencv_contrib246.lib;opencv_core246.lib;opencv_features2d246.lib;opencv_flann246.lib;opencv_highgui246.lib;opencv_imgproc246.lib;Wm5Core.lib;Wm5Mathematics.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <Profile>true</Profile>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -269,8 +270,6 @@
     <ClCompile Include="Algorithm\Common\visualizer.cpp" />
     <ClCompile Include="Algorithm\GraphCut\BinarySeg.cpp" />
     <ClCompile Include="Algorithm\GraphCut\Clustering.cpp" />
-    <ClCompile Include="Algorithm\GraphCut\color_op.cpp" />
-    <ClCompile Include="Algorithm\GraphCut\common_type.cpp" />
     <ClCompile Include="Algorithm\GraphCut\GCoptimization.cpp" />
     <ClCompile Include="Algorithm\GraphCut\graph.cpp" />
     <ClCompile Include="Algorithm\GraphCut\kdtree.cpp" />
@@ -279,7 +278,6 @@
     <ClCompile Include="Algorithm\GraphCut\MultiSeg.cpp" />
     <ClCompile Include="Algorithm\GraphCut\PointCloudAnalysis.cpp" />
     <ClCompile Include="Algorithm\GraphCut\ScanEstimation.cpp" />
-    <ClCompile Include="Algorithm\GraphCut\scene_seg.cpp" />
     <ClCompile Include="Algorithm\NBV.cpp" />
     <ClCompile Include="Algorithm\NormalSmoother.cpp" />
     <ClCompile Include="Algorithm\ObjPreSegment\main.cpp" />
@@ -508,8 +506,6 @@
     <ClInclude Include="Algorithm\GraphCut\BinarySeg.h" />
     <ClInclude Include="Algorithm\GraphCut\block.h" />
     <ClInclude Include="Algorithm\GraphCut\Clustering.h" />
-    <ClInclude Include="Algorithm\GraphCut\color_op.h" />
-    <ClInclude Include="Algorithm\GraphCut\common_type.h" />
     <ClInclude Include="Algorithm\GraphCut\energy.h" />
     <ClInclude Include="Algorithm\GraphCut\GCoptimization.h" />
     <ClInclude Include="Algorithm\GraphCut\graph.h" />
@@ -521,7 +517,6 @@
     <ClInclude Include="Algorithm\GraphCut\MyClass.h" />
     <ClInclude Include="Algorithm\GraphCut\PointCloudAnalysis.h" />
     <ClInclude Include="Algorithm\GraphCut\ScanEstimation.h" />
-    <ClInclude Include="Algorithm\GraphCut\scene_seg.h" />
     <ClInclude Include="Algorithm\NBV.h" />
     <ClInclude Include="Algorithm\NormalSmoother.h" />
     <ClInclude Include="Algorithm\normal_extrapolation.h" />

@@ -1,7 +1,6 @@
 #pragma once
 
-#include "scene_seg.h"
-#include "color_op.h"
+//#include "scene_seg.h"
 #include "graph.h"
 #include "GCoptimization.h"
 #include "BinarySeg.h"

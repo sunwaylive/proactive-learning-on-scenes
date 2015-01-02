@@ -1,7 +1,8 @@
 #pragma once
 
-#include "scene_seg.h"
-#include "color_op.h"
+//#include "scene_seg.h"
+#include "Algorithm/Common/common_type.h"
+#include "Algorithm/Common/color_op.h"
 #include "graph.h"
 #include "kdtree.h"
 

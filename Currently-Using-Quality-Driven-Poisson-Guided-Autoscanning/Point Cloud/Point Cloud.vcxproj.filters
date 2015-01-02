@@ -214,12 +214,6 @@
     <ClCompile Include="Algorithm\GraphCut\Clustering.cpp">
       <Filter>Algorithm\GraphCut</Filter>
     </ClCompile>
-    <ClCompile Include="Algorithm\GraphCut\color_op.cpp">
-      <Filter>Algorithm\GraphCut</Filter>
-    </ClCompile>
-    <ClCompile Include="Algorithm\GraphCut\common_type.cpp">
-      <Filter>Algorithm\GraphCut</Filter>
-    </ClCompile>
     <ClCompile Include="Algorithm\GraphCut\GCoptimization.cpp">
       <Filter>Algorithm\GraphCut</Filter>
     </ClCompile>
@@ -239,9 +233,6 @@
       <Filter>Algorithm\GraphCut</Filter>
     </ClCompile>
     <ClCompile Include="Algorithm\GraphCut\ScanEstimation.cpp">
-      <Filter>Algorithm\GraphCut</Filter>
-    </ClCompile>
-    <ClCompile Include="Algorithm\GraphCut\scene_seg.cpp">
       <Filter>Algorithm\GraphCut</Filter>
     </ClCompile>
     <ClCompile Include="GraphCutMain.cpp">
@@ -473,12 +464,6 @@
     <ClInclude Include="Algorithm\GraphCut\Clustering.h">
       <Filter>Algorithm\GraphCut</Filter>
     </ClInclude>
-    <ClInclude Include="Algorithm\GraphCut\color_op.h">
-      <Filter>Algorithm\GraphCut</Filter>
-    </ClInclude>
-    <ClInclude Include="Algorithm\GraphCut\common_type.h">
-      <Filter>Algorithm\GraphCut</Filter>
-    </ClInclude>
     <ClInclude Include="Algorithm\GraphCut\energy.h">
       <Filter>Algorithm\GraphCut</Filter>
     </ClInclude>
@@ -504,9 +489,6 @@
       <Filter>Algorithm\GraphCut</Filter>
     </ClInclude>
     <ClInclude Include="Algorithm\GraphCut\ScanEstimation.h">
-      <Filter>Algorithm\GraphCut</Filter>
-    </ClInclude>
-    <ClInclude Include="Algorithm\GraphCut\scene_seg.h">
       <Filter>Algorithm\GraphCut</Filter>
     </ClInclude>
     <ClInclude Include="Algorithm\GraphCut\GraphCutGlobalHeader.h">

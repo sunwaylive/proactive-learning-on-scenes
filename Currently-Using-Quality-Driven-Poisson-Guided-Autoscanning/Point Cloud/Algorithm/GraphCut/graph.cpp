@@ -5,7 +5,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include "graph.h"
-#include "scene_seg.h"
+//#include "scene_seg.h"
+#include "Algorithm/Common/common_type.h"
 
 
 extern vector<MyPointCloud_RGB> patch_clouds;
