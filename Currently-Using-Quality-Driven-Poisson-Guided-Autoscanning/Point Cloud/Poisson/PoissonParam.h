@@ -1,4 +1,7 @@
 #pragma once
+#ifndef POISSON_PARAM_H
+#define POISSON_PARAM_H
+
 class PoissonParam
 {
 public:
@@ -67,14 +70,11 @@ public:
 //		&Binary,&SolverDivide,&IsoDivide,&Scale,&Verbose,
 //		&KernelDepth,&SamplesPerNode,&Confidence
 //	};
-}
-;
+};
 
 
 
 /*
-
-
 [--depth <reconstruction depth>] 
 This integer is the maximum depth of the tree that will be used for surface reconstruction. Running at depth d corresponds to solving on a voxel grid whose resolution is no larger than 2^d x 2^d x 2^d. Note that since the reconstructor adapts the octree to the sampling density, the specified reconstruction depth is only an upper bound.
 The default value for this parameter is 8. 
@@ -108,8 +108,6 @@ Enabling this flag tells the reconstructor to output a polygon mesh (rather than
 Enabling this flag tells the reconstructor to output the estimated depth values of the iso-surface vertices. 
 [--verbose] 
 Enabling this flag provides a more verbose description of the running times and memory usages of individual components of the surface reconstructor. 
-
-
-
-
 */
+
+#endif

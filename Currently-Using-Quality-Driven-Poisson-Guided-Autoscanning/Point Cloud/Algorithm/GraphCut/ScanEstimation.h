@@ -36,9 +36,8 @@ public:
 	CScanEstimation(void);
 	~CScanEstimation(void);
 	void runComputeIsoGradientConfidence();
-	void runPoissonFieldAndExtractIsoPoints_ByEXE(int m);
-	void MainStep();
-	void samplePointsFromMesh(CMesh& mesh, CMesh* points);
+  void saveMultiResultToOriginal(CMesh *original, int m);
+	void MainStep(CMesh *original);
 	void ComputeScore();
 	void ComputeObjectness(int m);
 	void ComputeSeparateness(int m,int n);
