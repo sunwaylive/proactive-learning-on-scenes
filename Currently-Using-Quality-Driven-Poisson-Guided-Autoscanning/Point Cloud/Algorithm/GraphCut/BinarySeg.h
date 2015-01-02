@@ -5,8 +5,7 @@
 #include "graph.h"
 #include "kdtree.h"
 
-#define LARGE_NUM 9999999
-#define SMALL_NUM -9999999
+
 
 struct GRAPHSHOW
 {
@@ -36,41 +35,24 @@ struct NEARBYNORMAL
 class CBinarySeg
 {
 public:
-	CBinarySeg();
-	~CBinarySeg(void);
-
-public:
-	vector<MyPointCloud_RGB_NORMAL> vecPatchPoint;//shiyifei
-	vector<int> clusterPatchNum;
-	MyPointCloud_RGB_NORMAL tablePoint;
-	vector<Normalt> vecPatcNormal;
 	vector<vector<NEARBYNORMAL>> vecvecPatctNearbyNormal;
-	vector<MyPoint> vecPatchCenPoint;
-	vector<ColorType> vecPatchColor;
 	vector<vector<int>> vecvecPatchColorDetial;
-	vector<pair<int,int>> vecpairPatchConnection;
 	vector<vector<NEARBYPOINTSUM>> vecvecNearbyPoint; 
-
-	double boundingBoxSize;
 	double thresholdClose0; 
 	double thresholdClose1; 
-	double xMin,xMax,yMin,yMax,zMin,zMax;
-
 	vector<vector<double>> vecvecPatchMinDis;
 	vector<vector<double>> vecvecPatchCenDis;
-	vector<vector<bool>> vecvecPatchConnectFlag;
-
 	vector<double> vecDataValue;
-	vector<double> vecSmoothValue;
 	vector<double> vecGeometryValue;
 	vector<double> vecAppearenceValue;
 	vector<bool> vecGeometryConvex;
-
 	int seedPatch; 
-
 	vector<int> vecFore,vecBack;
 	vector<double> vecFlow;
 	double m_flow;
+	int backSeedIndex;
+	vector<struct kdtree*> vecKDTree;
+	double maxSV,minSV;
 
 	//parameter
 	double paraSmallS,paraSmallK;
@@ -81,17 +63,9 @@ public:
 	double paraAlpha;
 	double paraSmoothAdjust;
 
-	int backSeedIndex;
-
-	vector<bool> vecIfConnectTable;
-	MyPoint tableCen;
-
-	vector<struct kdtree*> vecKDTree;
-
-	GRAPHSHOW graphInit;
-
-	double maxSV,minSV;
 public:
+	CBinarySeg();
+	~CBinarySeg(void);
 //	void AddTable(PointCloudPtr_RGB_NORMAL &table);
 	void AddClusterPoints(vector<MyPointCloud_RGB_NORMAL> &points);
 	void AddPatchNormal(vector<Normalt> &normal);

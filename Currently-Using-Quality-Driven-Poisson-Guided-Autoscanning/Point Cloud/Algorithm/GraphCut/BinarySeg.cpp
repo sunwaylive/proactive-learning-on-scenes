@@ -1,8 +1,21 @@
 #include "GraphCutGlobalHeader.h"
 #include "BinarySeg.h"
 
-
-vector<vector<int>> vecvecObjectPool;
+extern vector<MyPointCloud_RGB_NORMAL> vecPatchPoint;
+extern vector<int> clusterPatchNum;
+extern MyPointCloud_RGB_NORMAL tablePoint;
+extern MyPoint tableCen;
+extern vector<bool> vecIfConnectTable;
+extern vector<Normalt> vecPatcNormal;
+extern vector<MyPoint> vecPatchCenPoint;
+extern vector<pair<int,int>> vecpairPatchConnection;
+extern double boundingBoxSize;
+extern double xMin,xMax,yMin,yMax,zMin,zMax;
+extern vector<vector<bool>> vecvecPatchConnectFlag;
+extern vector<ColorType> vecPatchColor;
+extern vector<double> vecSmoothValue;
+extern vector<vector<int>> vecvecObjectPool;
+extern GRAPHSHOW graphInit;
 
 CBinarySeg::CBinarySeg()
 {
@@ -85,35 +98,29 @@ void CBinarySeg::MainStep()
 	vecvecObjectPool.clear();
 	for(int i =0; i <vecPatchPoint.size(); i ++)
 	{
-		
-//			ofstream outFile0("Output\\cutEnergy.txt",ios::out|ios::app);
-			seedPatch = i;
-			int flagStop = true;
-			paraLargeS = 0.01;
-//			outFile0 <<  "index:" << i <<  endl;
-			while(paraLargeS < 0.4 && flagStop)
-			{
-				vector<int> vecObjectHypo;
-				double cutEnergy;
-				vecObjectHypo.clear();
-				ComputeDataValue();
-				GraphCutSolve(vecObjectHypo,cutEnergy);
-				if(vecObjectHypo.size() > paraMinPatchInObject && cutEnergy < paraMaxCutEnergy)
-				{
-					vecvecObjectPool.push_back(vecObjectHypo);
-					flagStop = false;
-//					outFile0 <<  "cutEnergy:" <<cutEnergy << "paraLargeS:" <<paraLargeS << "  foreground size:" << vecObjectHypo.size() <<  endl;
-				}	
-				paraLargeS += (double)0.01;
-			}
-//			outFile0 <<  "  " <<  endl;
+		seedPatch = i;
+		int flagStop = true;
+		paraLargeS = 0.01;
 
-			if(flagStop)
+		while(paraLargeS < 0.4 && flagStop)
+		{
+			vector<int> vecObjectHypo;
+			double cutEnergy;
+			vecObjectHypo.clear();
+			ComputeDataValue();
+			GraphCutSolve(vecObjectHypo,cutEnergy);
+			if(vecObjectHypo.size() > paraMinPatchInObject && cutEnergy < paraMaxCutEnergy)
 			{
-				vector<int> vecObjectHypo;
 				vecvecObjectPool.push_back(vecObjectHypo);
-			}
-//			outFile0.close();
+				flagStop = false;
+			}	
+			paraLargeS += (double)0.05;
+		}
+		if(flagStop)
+		{
+			vector<int> vecObjectHypo;
+			vecvecObjectPool.push_back(vecObjectHypo);
+		}
 	}
 
 	time[3] = clock();
@@ -130,19 +137,6 @@ void CBinarySeg::MainStep()
 		
 	//output
  	ofstream outFile1("Output\\ObjectPool.txt");
-// 	outFile1 <<  "thresholdClose0:" <<thresholdClose0
-// 		<<  "  thresholdClose1:" <<thresholdClose1
-// 		<<  "  paraSmallS:" <<paraSmallS
-// 		<<  "  paraLargeK:" <<paraLargeK
-// 		<<  "  paraLargeS:" <<paraLargeS
-// 		<<  "  paraConvexK:" <<paraConvexK
-// 		<<  "  paraConvexT:" <<paraConvexT
-// 		<<  "  paraConcave:" <<paraConcave
-// 		<<  "  paraGeometry:" <<paraGeometry
-// 		<<  "  paraAppearence:" <<paraAppearence
-// 		<<  "  paraMinPatchInObject:" <<paraMinPatchInObject
-// 		<<  "  paraMaxCutEnergy:" <<paraMaxCutEnergy
-// 		<<  endl;
 	for(int i=0;i<vecvecObjectPool.size();i++)
 	{
 		for(int j=0;j<vecvecObjectPool[i].size();j++)
@@ -152,23 +146,6 @@ void CBinarySeg::MainStep()
 		outFile1 << "  " << endl;
 	}
 	outFile1.close();
-
-		//output
-// 		ofstream outFile1("Output\\PatchPoint.txt");
-// 		for(int i=0;i<vecPatchPoint.size();i++)
-// 		{
-// 			for(int j=0;j<vecPatchPoint[i].mypoints.size();j++)
-// 			{
-// 				outFile1<< vecPatchPoint[i].mypoints[j].x << "  " <<
-// 					vecPatchPoint[i].mypoints[j].y << "  " <<
-// 					vecPatchPoint[i].mypoints[j].z << "  " <<
-// 					vecPatchPoint[i].mypoints[j].r << "  " <<
-// 					vecPatchPoint[i].mypoints[j].g << "  " <<
-// 					vecPatchPoint[i].mypoints[j].b << "  " ;
-// 			}
-// 			outFile1 <<  endl;
-// 		}
-// 		outFile1.close();
 
 }
 

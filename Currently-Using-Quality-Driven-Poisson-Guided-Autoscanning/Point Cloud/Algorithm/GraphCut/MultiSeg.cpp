@@ -2,6 +2,23 @@
 #include "MultiSeg.h"
 
 
+extern vector<MyPointCloud_RGB_NORMAL> vecPatchPoint;
+extern vector<pair<int,int>> vecpairPatchConnection;
+extern vector<MyPoint> vecPatchCenPoint;
+extern double boundingBoxSize;
+extern vector<int> clusterPatchNum;
+extern vector<vector<bool>> vecvecPatchConnectFlag;
+extern vector<ColorType> vecPatchColor;
+extern vector<vector<int>> vecvecMultiResult;
+extern vector<double> vecSmoothValue;
+extern vector<double> vecObjectness;
+extern vector<double> vecSeparateness;
+extern vector<pair<int,int>> vecpairSeperatenessEdge;
+extern vector<vector<pair<int,int>>> vecvecpairSeperatenessSmallEdge;
+extern vector<vector<int>> vecvecObjectPoolClustering;
+extern GRAPHSHOW graphContract;
+
+
 CMultiSeg::CMultiSeg(void)
 {
 
@@ -151,7 +168,7 @@ double CMultiSeg::GetMultiDataValue(int SiteID,int LableID)
 		objectCount = 0;
 	else
 		objectCount = vecObjectPoolClusteringCount[LableID];
-	
+
 	int objectCountMax = -1;
 	for(int i = 0;i < vecObjectPoolClusteringCount.size();i++)
 	{
@@ -162,7 +179,6 @@ double CMultiSeg::GetMultiDataValue(int SiteID,int LableID)
 	objectCount = (7 - 10 * objectCount)/7;
 	if(objectCount < 0)
 		objectCount =0;
-
 
 	//color similarity
 	double colorSimilarity;
@@ -179,7 +195,7 @@ double CMultiSeg::GetMultiDataValue(int SiteID,int LableID)
 	dif(0,0) = difT(0,0) = vecPatchColor[SiteID].mRed - vecObjectColorModel[LableID].muRed;
 	dif(0,1) = difT(1,0) = vecPatchColor[SiteID].mGreen - vecObjectColorModel[LableID].muGreen;
 	dif(0,2) = difT(2,0) = vecPatchColor[SiteID].mBlue - vecObjectColorModel[LableID].muBlue;
-	
+
 	Matrix covarianceInv,difTCovarianceInv,result;
 	covarianceInv = covariance.Inv();
 	difTCovarianceInv = dif * covarianceInv;
@@ -205,7 +221,7 @@ double CMultiSeg::GetMultiDataValue(int SiteID,int LableID)
 }
 
 void CMultiSeg::GraphCutSolve()
-{
+{	
 	clusterPatchInterval.push_back(0);
 	for(int i = 0;i < clusterPatchNum.size();i++)
 	{
@@ -228,7 +244,6 @@ void CMultiSeg::GraphCutSolve()
 			}
 		}
 	}
-
 	int num_sites, num_labels;
 	num_sites = vecPatchPoint.size();
 	num_labels = vecvecObjectPoolClustering.size();
@@ -242,7 +257,7 @@ void CMultiSeg::GraphCutSolve()
 			gc->setSmoothCost(i,j,1);
 		}
 	}
-
+	
 	//smooth
 	for(int i = 0;i < vecpairPatchConnection.size();i++)
 	{
@@ -277,7 +292,6 @@ void CMultiSeg::GraphCutSolve()
 		}
 	}
 
-
 	gc->swap(2);
 
 	vector<int> vecResult(num_sites,-1);
@@ -301,17 +315,18 @@ void CMultiSeg::GraphCutSolve()
 	}
 	vecvecMultiResult = vecvecMultiResultClean;
 
+	
 
-	ofstream outFile1("Output\\MultiResult.txt");
+	ofstream outFile("Output\\MultiResult.txt");
 	for(int i=0;i<vecvecMultiResult.size();i++)
 	{
 		for(int j=0;j<vecvecMultiResult[i].size();j++)
 		{
-			outFile1 << vecvecMultiResult[i][j] <<  "  ";
+			outFile << vecvecMultiResult[i][j] <<  "  ";
 		}
-		outFile1 << "  " << endl;
+		outFile << "  " << endl;
 	}
-	outFile1.close();
+	outFile.close();
 }
 
 void CMultiSeg::ComputeScore()
@@ -437,8 +452,9 @@ void CMultiSeg::ComputeSeparateness(int m,int n)
 		vecpairSeperatenessEdge.push_back(edge);
 		vecSeparateness.push_back(separateness);
 		vecvecpairSeperatenessSmallEdge.push_back(vecpairSeperatenessSmallEdge);
+
 		ofstream outFile("Output\\Separateness.txt",ios::app);
-		outFile << "separateness:" << separateness<< endl;
+		outFile << separateness<< endl;
 		outFile.close();
 	}
 

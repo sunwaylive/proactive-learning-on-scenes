@@ -1,6 +1,37 @@
 #include "PointCloudAnalysis.h"
 
 
+vector<MyPointCloud_RGB_NORMAL> vecPatchPoint;
+vector<int> clusterPatchNum;
+vector<Normalt> vecPatcNormal;
+vector<MyPoint> vecPatchCenPoint;
+vector<ColorType> vecPatchColor;
+
+MyPointCloud_RGB_NORMAL tablePoint;
+MyPoint tableCen;
+vector<bool> vecIfConnectTable;
+
+double boundingBoxSize;
+double xMin,xMax,yMin,yMax,zMin,zMax;
+
+vector<pair<int,int>> vecpairPatchConnection;
+vector<vector<bool>> vecvecPatchConnectFlag;
+vector<double> vecSmoothValue;
+
+vector<vector<int>> vecvecObjectPool;
+vector<vector<int>> vecvecObjectPoolClustering;
+vector<int> vecObjectPoolClusteringCount;
+vector<vector<int>> vecvecMultiResult;
+
+vector<double> vecObjectness;
+vector<double> vecSeparateness;
+vector<pair<int,int>> vecpairSeperatenessEdge;
+vector<vector<pair<int,int>>> vecvecpairSeperatenessSmallEdge;
+
+GRAPHSHOW graphInit;
+GRAPHSHOW graphContract;
+
+
 CPointCloudAnalysis::CPointCloudAnalysis(void)
 {
 }
@@ -69,7 +100,6 @@ void CPointCloudAnalysis::DataIn()
 			line >> pointTemp.g;
 			line >> pointTemp.b;
 
-
 			if(pointTemp.x<100 && pointTemp.x>-100)
 				patchTemp.mypoints.push_back(pointTemp);
 			else
@@ -77,7 +107,7 @@ void CPointCloudAnalysis::DataIn()
 		}
 		while(flagStop == false);
 
-		cBinarySeg.vecPatchPoint.push_back(patchTemp);
+		vecPatchPoint.push_back(patchTemp);
 		count++;
 	}
 	inFile.close();
@@ -131,7 +161,7 @@ void CPointCloudAnalysis::DataIn()
 		line >> pointTemp.y;
 		line >> pointTemp.z;
 
-		cBinarySeg.tablePoint.mypoints.push_back(pointTemp);
+		tablePoint.mypoints.push_back(pointTemp);
 		count++;
 	}
 	inFile3.close();
@@ -146,7 +176,7 @@ void CPointCloudAnalysis::DataIn()
 		vector<MyPointCloud_RGB_NORMAL> vecPatchPointTemp;
 		for(int j = begin;j < end;j++)
 		{
-			vecPatchPointTemp.push_back(cBinarySeg.vecPatchPoint[j]);
+			vecPatchPointTemp.push_back(vecPatchPoint[j]);
 		}
 		cBinarySeg.AddClusterPoints(vecPatchPointTemp);
 	}
@@ -160,40 +190,22 @@ void CPointCloudAnalysis::BinarySegmentation()
 
 void CPointCloudAnalysis::Clustering()
 {
-	cClustering.vecPatchPoint = cBinarySeg.vecPatchPoint;
-
 	cClustering.MainStep();
 }
 
 void CPointCloudAnalysis::MultiSegmentation()
 {
-	cMultiSeg.vecPatchPoint = cBinarySeg.vecPatchPoint;
-	cMultiSeg.vecpairPatchConnection = cBinarySeg.vecpairPatchConnection;
-	cMultiSeg.vecSmoothValue = cBinarySeg.vecSmoothValue;
-	cMultiSeg.vecPatchCenPoint = cBinarySeg.vecPatchCenPoint;
-	cMultiSeg.vecPatchColor = cBinarySeg.vecPatchColor;
-	cMultiSeg.boundingBoxSize = cBinarySeg.boundingBoxSize;
-	cMultiSeg.clusterPatchNum = cBinarySeg.clusterPatchNum;
-	cMultiSeg.vecvecPatchConnectFlag = cBinarySeg.vecvecPatchConnectFlag;
-
 	cMultiSeg.MainStep();
 }
 
 void CPointCloudAnalysis::ScanEstimation()
 {
-	cScanEstimation.vecSmoothValue = cBinarySeg.vecSmoothValue;
 	cScanEstimation.vecGeometryConvex = cBinarySeg.vecGeometryConvex;
+	cScanEstimation.vecGeometryValue = cBinarySeg.vecGeometryValue;
+	cScanEstimation.vecAppearenceValue = cBinarySeg.vecAppearenceValue;
+
 	cScanEstimation.maxSV = cBinarySeg.maxSV;
 	cScanEstimation.minSV = cBinarySeg.minSV;
-
-	cScanEstimation.vecPatchPoint = cMultiSeg.vecPatchPoint;
-	cScanEstimation.vecvecMultiResult = cMultiSeg.vecvecMultiResult;
-	cScanEstimation.vecvecPatchConnectFlag = cMultiSeg.vecvecPatchConnectFlag;
-	cScanEstimation.vecpairSeperatenessEdge = cMultiSeg.vecpairSeperatenessEdge;
-	cScanEstimation.vecpairPatchConnection = cMultiSeg.vecpairPatchConnection;
-	cScanEstimation.vecvecpairSeperatenessSmallEdge = cMultiSeg.vecvecpairSeperatenessSmallEdge;
-	cScanEstimation.vecObjectness = cMultiSeg.vecObjectness;
-	cScanEstimation.vecSeparateness = cMultiSeg.vecSeparateness;
 
 	cScanEstimation.MainStep();
 }

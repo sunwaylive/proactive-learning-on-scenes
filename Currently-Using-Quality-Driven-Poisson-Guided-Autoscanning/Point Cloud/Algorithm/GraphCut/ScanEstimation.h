@@ -5,48 +5,42 @@
 #include "PoissonParam.h"
 #include "CMesh.h"
 
-#define LARGE_NUM 9999999
-#define SMALL_NUM -9999999
 
 struct ISOPOINT
 {
 	int objectIndex;
 	double x,y,z;
 	double fg,fs;
+	double f;
 };
 
+struct OBJECTISOPOINT
+{
+	vector<ISOPOINT> objectIsoPoint;
+};
 
 class CScanEstimation
 {
 public:
-	CScanEstimation(void);
-	~CScanEstimation(void);
-
-public:
-	vector<MyPointCloud_RGB_NORMAL> vecPatchPoint;
-	vector<vector<int>> vecvecMultiResult;
-	vector<vector<ISOPOINT>> vecvecIsoPoint;
-
+	vector<OBJECTISOPOINT> vecObjectIsoPoint;
 	vector<pair<int,int>> vecpairPatchConnection;
-	vector<vector<bool>> vecvecPatchConnectFlag;
-
-	vector<double> vecObjectness;
-	vector<double> vecSeparateness;
-
-	vector<pair<int,int>> vecpairSeperatenessEdge;
-	vector<vector<pair<int,int>>> vecvecpairSeperatenessSmallEdge;
-
+	vector<double> vecPatchConfidenceScore;
 	vector<double> vecGeometryValue;
 	vector<double> vecAppearenceValue;
-	vector<double> vecSmoothValue;
 	vector<bool> vecGeometryConvex;
 	double maxSV,minSV;
 	double paraConfidence;
 	double paraSmoothAdjust;
 
 public:
+	CScanEstimation(void);
+	~CScanEstimation(void);
 	void runComputeIsoGradientConfidence();
 	void runPoissonFieldAndExtractIsoPoints_ByEXE(int m);
 	void MainStep();
 	void samplePointsFromMesh(CMesh& mesh, CMesh* points);
+	void ComputeScore();
+	void ComputeObjectness(int m);
+	void ComputeSeparateness(int m,int n);
+	double GaussianFunction(double x);
 };

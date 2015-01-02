@@ -4,13 +4,20 @@
 #include "vcg/complex/trimesh/point_sampling.h"
 #include <wrap/io_trimesh/import.h>
 #include <wrap/io_trimesh/export.h>
-
-#include "Algorithm/Poisson.h"
-
 #include "Poisson/Geometry.h"
 #include "Poisson/PoissonParam.h"
 
-/*using namespace vcg;*/
+
+extern vector<MyPointCloud_RGB_NORMAL> vecPatchPoint;
+extern vector<MyPoint> vecPatchCenPoint;
+extern vector<vector<bool>> vecvecPatchConnectFlag;
+extern vector<vector<int>> vecvecMultiResult;
+extern vector<double> vecSmoothValue;
+extern vector<double> vecObjectness;
+extern vector<double> vecSeparateness;
+extern vector<pair<int,int>> vecpairSeperatenessEdge;
+extern vector<vector<pair<int,int>>> vecvecpairSeperatenessSmallEdge;
+
 
 CScanEstimation::CScanEstimation(void)
 {
@@ -29,43 +36,80 @@ void CScanEstimation::MainStep()
 	//get vecvecIsoPoint
 	for(int i = 0;i < vecvecMultiResult.size();i++)
 	{
-		runPoissonFieldAndExtractIsoPoints_ByEXE(i);
+//		runPoissonFieldAndExtractIsoPoints_ByEXE(i);
 	}
 	
+	//get confidence score for each patch
+	for(int i = 0;i < vecPatchPoint.size();i++)
+	{
+		double confidenceScore = 0;
+		for(int j = 0;j < vecObjectIsoPoint[i].objectIsoPoint.size();j++)
+		{
+			double distance;
+			distance = sqrt((vecObjectIsoPoint[i].objectIsoPoint[j].x - vecPatchCenPoint[i].x) * (vecObjectIsoPoint[i].objectIsoPoint[j].x - vecPatchCenPoint[i].x)
+				+ (vecObjectIsoPoint[i].objectIsoPoint[j].y - vecPatchCenPoint[i].y) * (vecObjectIsoPoint[i].objectIsoPoint[j].y - vecPatchCenPoint[i].y)
+				+ (vecObjectIsoPoint[i].objectIsoPoint[j].z - vecPatchCenPoint[i].z) * (vecObjectIsoPoint[i].objectIsoPoint[j].z - vecPatchCenPoint[i].z));
+			double weight;
+			weight = GaussianFunction(distance);
+			confidenceScore += weight* vecObjectIsoPoint[i].objectIsoPoint[j].f;
+		}
+		vecPatchConfidenceScore.push_back(confidenceScore);
+	}
+	
+	//update the smooth term
+	for(int i = 0;i < vecpairPatchConnection.size();i++)
+	{
+		double confidenceScore;
+		confidenceScore = vecPatchConfidenceScore[vecpairPatchConnection[i].first]*vecPatchConfidenceScore[vecpairPatchConnection[i].second];
+
+		if(vecGeometryConvex[i])
+			vecGeometryValue[i] *= confidenceScore;
+		else
+			vecGeometryValue[i] /= confidenceScore;
+
+		double valueBefore = vecSmoothValue[i];
+		vecSmoothValue[i] = vecGeometryValue[i] + vecAppearenceValue[i];
+
+		double para = 0.3;
+		vecSmoothValue[i] =  (vecSmoothValue[i] - minSV)/(maxSV - minSV);
+		vecSmoothValue[i] = paraSmoothAdjust * pow(2.7183,- (1 - vecSmoothValue[i]) * (1 - vecSmoothValue[i]) / para /para);
+	}
+
+	ComputeScore();
 
 
 	//for each seperatenessEdge
-	//for(int i = 0;i < vecvecpairSeperatenessSmallEdge.size();i++)
-	//{
-	//	double cutCostDiff = 0;
-	//	for(int j = 0;j < vecvecpairSeperatenessSmallEdge[i].size();j++)
-	//	{
-	//		double confidenceScore = ComputeConfidenceScore(vecvecpairSeperatenessSmallEdge[i][j].first,vecvecpairSeperatenessSmallEdge[i][j].second);  //0--largenum
-	//		for(int k = 0;k < vecpairPatchConnection.size();k++)
-	//		{
-	//			if(vecpairPatchConnection[k].first == vecvecpairSeperatenessSmallEdge[i][j].first && vecpairPatchConnection[k].second == vecvecpairSeperatenessSmallEdge[i][j].second)
-	//			{
-	//				if(vecGeometryConvex[k])
-	//					vecGeometryValue[k] *= confidenceScore;
-	//				else
-	//					vecGeometryValue[k] /= confidenceScore;
-
-	//				double valueBefore = vecSmoothValue[k];
-	//				vecSmoothValue[k] = vecGeometryValue[k] + vecAppearenceValue[k];
-
-	//				double para = 0.3;
-	//				vecSmoothValue[k] =  (vecSmoothValue[k] - minSV)/(maxSV - minSV);
-	//				vecSmoothValue[k] = paraSmoothAdjust * pow(2.7183,- (1 - vecSmoothValue[k]) * (1 - vecSmoothValue[k]) / para /para);
-
-	//				cutCostDiff += vecSmoothValue[k] - valueBefore;
-	//				break;
-	//			}	
-	//		}
-	//	}
-	//	vecSeparateness[i] += cutCostDiff;
-	//	vecObjectness[vecpairSeperatenessEdge[i].first] += cutCostDiff;
-	//	vecObjectness[vecpairSeperatenessEdge[i].second] += cutCostDiff;
-	//}
+// 	for(int i = 0;i < vecvecpairSeperatenessSmallEdge.size();i++)
+// 	{
+// 		double cutCostDiff = 0;
+// 		for(int j = 0;j < vecvecpairSeperatenessSmallEdge[i].size();j++)
+// 		{
+// 			double confidenceScore = ComputeConfidenceScore(vecvecpairSeperatenessSmallEdge[i][j].first,vecvecpairSeperatenessSmallEdge[i][j].second);  //0--largenum
+// 			for(int k = 0;k < vecpairPatchConnection.size();k++)
+// 			{
+// 				if(vecpairPatchConnection[k].first == vecvecpairSeperatenessSmallEdge[i][j].first && vecpairPatchConnection[k].second == vecvecpairSeperatenessSmallEdge[i][j].second)
+// 				{
+// 					if(vecGeometryConvex[k])
+// 						vecGeometryValue[k] *= confidenceScore;
+// 					else
+// 						vecGeometryValue[k] /= confidenceScore;
+// 
+// 					double valueBefore = vecSmoothValue[k];
+// 					vecSmoothValue[k] = vecGeometryValue[k] + vecAppearenceValue[k];
+// 
+// 					double para = 0.3;
+// 					vecSmoothValue[k] =  (vecSmoothValue[k] - minSV)/(maxSV - minSV);
+// 					vecSmoothValue[k] = paraSmoothAdjust * pow(2.7183,- (1 - vecSmoothValue[k]) * (1 - vecSmoothValue[k]) / para /para);
+// 
+// 					cutCostDiff += vecSmoothValue[k] - valueBefore;
+// 					break;
+// 				}	
+// 			}
+// 		}
+// 		vecSeparateness[i] += cutCostDiff;
+// 		vecObjectness[vecpairSeperatenessEdge[i].first] += cutCostDiff;
+// 		vecObjectness[vecpairSeperatenessEdge[i].second] += cutCostDiff;
+// 	}
 
 }
 
@@ -99,111 +143,111 @@ void CScanEstimation::runPoissonFieldAndExtractIsoPoints_ByEXE(int m)
 // 
 // 	timer.start("run Poisson");
 
-	int pointNum = 0;
-	for(int i = 0;i < vecvecMultiResult[m].size();i++)
-	{
-		pointNum += vecPatchPoint[vecvecMultiResult[m][i]].mypoints.size();
-	}
-
-	std::ofstream outFile;
-	outFile.open("poisson_in.ply");
-	//save m_grid
-	outFile << "ply\n";
-	outFile << "format ascii 1.0\n";
-	outFile << "comment VCGLIB generated\n";
-	outFile << "element vertex " << pointNum << "\n";
-	outFile << "property float x\n";
-	outFile << "property float y\n";
-	outFile << "property float z\n";
-
-	outFile << "property float nx\n";
-	outFile << "property float ny\n";
-	outFile << "property float nz\n";
-
-	outFile << "element face " << 0 << "\n";
-	outFile << "property list uchar int vertex_indices\n";
-	outFile << "end_header\n";
-
-	for(int i = 0;i < vecvecMultiResult[m].size();i++)
-	{
-		for(int j = 0;j < vecPatchPoint[vecvecMultiResult[m][i]].mypoints.size();j++)
-		{
-			MyPoint_RGB_NORMAL point = vecPatchPoint[vecvecMultiResult[m][i]].mypoints[j];
-			outFile << point.x << " " << point.y << " " << point.z << " " << 
-				point.normal_x << " " << point.normal_y << " " << point.normal_z<<" " <<  endl;
-		}
-	}
-	outFile.close();
-
-	char mycmd[100];
-	sprintf(mycmd, "PoissonRecon.exe --in poisson_in.ply --out poisson_out.ply --voxel poisson_field.raw --depth %d --pointWeight 0", Par.Depth);
-	system(mycmd); 
-
-	CMesh tentative_mesh;
-	CMesh* iso_points;
-
- 	int mask= vcg::tri::io::Mask::IOM_VERTNORMAL ;
-	int err = vcg::tri::io::Importer<CMesh>::Open(tentative_mesh, "poisson_out.ply", mask);  
-	if(err) 
-	{
-		cout << "Failed reading mesh: " << err << "\n";
-		return;
-	}  
-
-	if (tentative_mesh.vert.empty())
-	{
-		cout << "tentative mesh empty" << endl;
-		return;
-	}
-
-	iso_points->vert.clear();    //??????????????????
-
-	samplePointsFromMesh(tentative_mesh, iso_points);
-
-	for (int i = 0; i < iso_points->vert.size(); i++)
-	{
-		CVertex& v = iso_points->vert[i];
-		v.is_iso = true;
-		v.m_index = i;
-		v.eigen_confidence = 0;
-		v.N().Normalize();
-		v.recompute_m_render();
-	}
-	iso_points->vn = iso_points->vert.size();
+// 	int pointNum = 0;
+// 	for(int i = 0;i < vecvecMultiResult[m].size();i++)
+// 	{
+// 		pointNum += vecPatchPoint[vecvecMultiResult[m][i]].mypoints.size();
+// 	}
+// 
+// 	std::ofstream outFile;
+// 	outFile.open("poisson_in.ply");
+// 	//save m_grid
+// 	outFile << "ply\n";
+// 	outFile << "format ascii 1.0\n";
+// 	outFile << "comment VCGLIB generated\n";
+// 	outFile << "element vertex " << pointNum << "\n";
+// 	outFile << "property float x\n";
+// 	outFile << "property float y\n";
+// 	outFile << "property float z\n";
+// 
+// 	outFile << "property float nx\n";
+// 	outFile << "property float ny\n";
+// 	outFile << "property float nz\n";
+// 
+// 	outFile << "element face " << 0 << "\n";
+// 	outFile << "property list uchar int vertex_indices\n";
+// 	outFile << "end_header\n";
+// 
+// 	for(int i = 0;i < vecvecMultiResult[m].size();i++)
+// 	{
+// 		for(int j = 0;j < vecPatchPoint[vecvecMultiResult[m][i]].mypoints.size();j++)
+// 		{
+// 			MyPoint_RGB_NORMAL point = vecPatchPoint[vecvecMultiResult[m][i]].mypoints[j];
+// 			outFile << point.x << " " << point.y << " " << point.z << " " << 
+// 				point.normal_x << " " << point.normal_y << " " << point.normal_z<<" " <<  endl;
+// 		}
+// 	}
+// 	outFile.close();
+// 
+// 	char mycmd[100];
+// 	sprintf(mycmd, "PoissonRecon.exe --in poisson_in.ply --out poisson_out.ply --voxel poisson_field.raw --depth %d --pointWeight 0", Par.Depth);
+// 	system(mycmd); 
+// 
+// 	CMesh tentative_mesh;
+// 	CMesh* iso_points;
+// 
+//  	int mask= vcg::tri::io::Mask::IOM_VERTNORMAL ;
+// 	int err = vcg::tri::io::Importer<CMesh>::Open(tentative_mesh, "poisson_out.ply", mask);  
+// 	if(err) 
+// 	{
+// 		cout << "Failed reading mesh: " << err << "\n";
+// 		return;
+// 	}  
+// 
+// 	if (tentative_mesh.vert.empty())
+// 	{
+// 		cout << "tentative mesh empty" << endl;
+// 		return;
+// 	}
+// 
+// 	iso_points->vert.clear();    //??????????????????
+// 
+// 	samplePointsFromMesh(tentative_mesh, iso_points);
+// 
+// 	for (int i = 0; i < iso_points->vert.size(); i++)
+// 	{
+// 		CVertex& v = iso_points->vert[i];
+// 		v.is_iso = true;
+// 		v.m_index = i;
+// 		v.eigen_confidence = 0;
+// 		v.N().Normalize();
+// 		v.recompute_m_render();
+// 	}
+// 	iso_points->vn = iso_points->vert.size();
 
 }
 
 void CScanEstimation::samplePointsFromMesh(CMesh& mesh, CMesh* points)
 {
-	mesh.bbox.SetNull();
-	for (int i = 0; i < mesh.vert.size(); i++)
-	{
-		mesh.bbox.Add(mesh.vert[i]);
-	}
-	mesh.vn = mesh.vert.size();
-	mesh.fn = mesh.face.size();
-	vcg::tri::UpdateNormals<CMesh>::PerVertex(mesh);
-
-	float radius = 0;
-// 	int sampleNum = para->getDouble("Poisson Disk Sample Number");	//??????????????????
-// 	if (sampleNum <= 100)
+// 	mesh.bbox.SetNull();
+// 	for (int i = 0; i < mesh.vert.size(); i++)
 // 	{
-	int	sampleNum = 100;
-//	}
-	radius = vcg::tri::SurfaceSampling<CMesh,BaseSampler>::ComputePoissonDiskRadius(mesh, sampleNum);
-	// first of all generate montecarlo samples for fast lookup
-	CMesh *presampledMesh=&(mesh);
-	CMesh MontecarloMesh; // this mesh is used only if we need real poisson sampling (and therefore we need to choose points different from the starting mesh vertices)
-
-	BaseSampler sampler(&MontecarloMesh);
-	sampler.qualitySampling =true;
-	vcg::tri::SurfaceSampling<CMesh,BaseSampler>::Montecarlo(mesh, sampler, sampleNum*20);
-	MontecarloMesh.bbox = mesh.bbox; // we want the same bounding box
-	presampledMesh=&MontecarloMesh;
-
-	BaseSampler mps(points);
-	vcg::tri::SurfaceSampling<CMesh,BaseSampler>::PoissonDiskParam pp;
-	vcg::tri::SurfaceSampling<CMesh,BaseSampler>::PoissonDisk(mesh, mps, *presampledMesh, radius,pp);
+// 		mesh.bbox.Add(mesh.vert[i]);
+// 	}
+// 	mesh.vn = mesh.vert.size();
+// 	mesh.fn = mesh.face.size();
+// 	vcg::tri::UpdateNormals<CMesh>::PerVertex(mesh);
+// 
+// 	float radius = 0;
+// // 	int sampleNum = para->getDouble("Poisson Disk Sample Number");	//??????????????????
+// // 	if (sampleNum <= 100)
+// // 	{
+// 	int	sampleNum = 100;
+// //	}
+// 	radius = vcg::tri::SurfaceSampling<CMesh,BaseSampler>::ComputePoissonDiskRadius(mesh, sampleNum);
+// 	// first of all generate montecarlo samples for fast lookup
+// 	CMesh *presampledMesh=&(mesh);
+// 	CMesh MontecarloMesh; // this mesh is used only if we need real poisson sampling (and therefore we need to choose points different from the starting mesh vertices)
+// 
+// 	BaseSampler sampler(&MontecarloMesh);
+// 	sampler.qualitySampling =true;
+// 	vcg::tri::SurfaceSampling<CMesh,BaseSampler>::Montecarlo(mesh, sampler, sampleNum*20);
+// 	MontecarloMesh.bbox = mesh.bbox; // we want the same bounding box
+// 	presampledMesh=&MontecarloMesh;
+// 
+// 	BaseSampler mps(points);
+// 	vcg::tri::SurfaceSampling<CMesh,BaseSampler>::PoissonDiskParam pp;
+// 	vcg::tri::SurfaceSampling<CMesh,BaseSampler>::PoissonDisk(mesh, mps, *presampledMesh, radius,pp);
 
 	
 	
@@ -364,4 +408,143 @@ void CScanEstimation::runComputeIsoGradientConfidence()
 // 	//    //file3 << v.eigen_confidence << endl;
 // 	//  }
 // 	//}
+}
+
+
+void CScanEstimation::ComputeScore()
+{
+	for(int i = 0;i < vecvecMultiResult.size();i++)
+	{
+		ComputeObjectness(i);
+	}
+
+	for(int i = 0;i < vecvecMultiResult.size();i++)
+	{
+		for(int j = 0;j < vecvecMultiResult.size();j++)
+		{
+			if(i == j)	continue;
+			ComputeSeparateness(i,j);
+		}
+	}
+}
+
+void CScanEstimation::ComputeObjectness(int m)
+{
+	vecObjectness.clear();
+
+	double objectness = 0;
+	for(int i = 0;i < vecvecMultiResult[m].size();i++)
+	{
+		int patchIndex = vecvecMultiResult[m][i];
+
+		// connect before
+		vector<int> vecConnectPatchBefore;
+		for(int j = 0;j < vecvecPatchConnectFlag[patchIndex].size();j++)
+		{
+			if(vecvecPatchConnectFlag[patchIndex][j])
+			{
+				vecConnectPatchBefore.push_back(j);
+			}
+		}
+
+		// disconnnect after
+		vector<int> vecDisconnectPatchAfter;
+		for(int j = 0;j < vecConnectPatchBefore.size();j++)
+		{
+			int connectPatchIndex = vecConnectPatchBefore[j];
+			bool exsitFlag = false;
+			for(int k = 0;k < vecvecMultiResult[m].size();k++)
+			{
+				if(i == k)
+					continue;
+				if(connectPatchIndex == vecvecMultiResult[m][k])
+					exsitFlag = true;
+			}
+			if(!exsitFlag)
+				vecDisconnectPatchAfter.push_back(connectPatchIndex);
+		}
+
+		for(int j = 0;j < vecDisconnectPatchAfter.size();j++)
+		{
+			for(int k = 0;k < vecpairPatchConnection.size();k++)
+			{
+				if(vecpairPatchConnection[k].first == patchIndex && vecpairPatchConnection[k].second == vecDisconnectPatchAfter[j])
+				{
+					objectness += vecSmoothValue[k];
+				}	
+			}
+		}
+	}
+	vecObjectness.push_back(objectness);
+
+	ofstream outFile("Output\\Objectness1.txt",ios::app);
+	outFile << objectness <<  endl;
+	outFile.close();
+}
+
+void CScanEstimation::ComputeSeparateness(int m,int n)
+{
+	vecSeparateness.clear();
+
+	double separateness = 0;
+	vector<pair<int,int>> vecpairSeperatenessSmallEdge;
+	for(int i = 0;i < vecvecMultiResult[m].size();i++)
+	{
+		int patchIndex = vecvecMultiResult[m][i];
+
+		// connect before
+		vector<int> vecConnectPatchBefore;
+		for(int j = 0;j < vecvecPatchConnectFlag[patchIndex].size();j++)
+		{
+			if(vecvecPatchConnectFlag[patchIndex][j])
+			{
+				vecConnectPatchBefore.push_back(j);
+			}
+		}
+
+		// disconnnect after
+		vector<pair<int,int>> vecpairDisconnect;
+		pair<int,int> pairsDisconnect;
+		for(int j = 0;j < vecConnectPatchBefore.size();j++)
+		{
+			pairsDisconnect.first = patchIndex;
+			pairsDisconnect.second = vecConnectPatchBefore[j];
+
+			for(int k = 0;k < vecvecMultiResult[n].size();k++)
+			{
+				if(vecvecMultiResult[n][k] == vecConnectPatchBefore[j])
+					vecpairDisconnect.push_back(pairsDisconnect);
+			}
+		}
+
+		for(int j = 0;j < vecpairDisconnect.size();j++)
+		{
+			for(int k = 0;k < vecpairPatchConnection.size();k++)
+			{
+				if(vecpairPatchConnection[k].first == vecpairDisconnect[j].first && vecpairPatchConnection[k].second == vecpairDisconnect[j].second)
+				{
+					separateness += vecSmoothValue[k];
+					vecpairSeperatenessSmallEdge.push_back(vecpairDisconnect[j]);
+				}	
+			}
+		}
+	}
+
+	if(separateness > 0)
+	{
+		vecSeparateness.push_back(separateness);
+
+		ofstream outFile("Output\\Separateness1.txt",ios::app);
+		outFile << separateness<< endl;
+		outFile.close();
+	}
+
+}
+
+double CScanEstimation::GaussianFunction(double x)
+{
+	double para = 0.05;
+	double value = pow(2.7183,- x * x / para / para);
+
+	return value;
 }
