@@ -5,9 +5,12 @@
 #include <wrap/io_trimesh/import.h>
 #include <wrap/io_trimesh/export.h>
 
+#include "Algorithm/Poisson.h"
+
+#include "Poisson/Geometry.h"
+#include "Poisson/PoissonParam.h"
+
 /*using namespace vcg;*/
-
-
 
 CScanEstimation::CScanEstimation(void)
 {
@@ -153,20 +156,20 @@ void CScanEstimation::runPoissonFieldAndExtractIsoPoints_ByEXE(int m)
 		return;
 	}
 
-//	iso_points->vert.clear();
+	iso_points->vert.clear();    //??????????????????
 
 	samplePointsFromMesh(tentative_mesh, iso_points);
 
-// 	for (int i = 0; i < iso_points->vert.size(); i++)
-// 	{
-// 		CVertex& v = iso_points->vert[i];
-// 		v.is_iso = true;
-// 		v.m_index = i;
-// 		v.eigen_confidence = 0;
-// 		v.N().Normalize();
-// 		v.recompute_m_render();
-// 	}
-// 	iso_points->vn = iso_points->vert.size();
+	for (int i = 0; i < iso_points->vert.size(); i++)
+	{
+		CVertex& v = iso_points->vert[i];
+		v.is_iso = true;
+		v.m_index = i;
+		v.eigen_confidence = 0;
+		v.N().Normalize();
+		v.recompute_m_render();
+	}
+	iso_points->vn = iso_points->vert.size();
 
 }
 
@@ -182,7 +185,7 @@ void CScanEstimation::samplePointsFromMesh(CMesh& mesh, CMesh* points)
 	vcg::tri::UpdateNormals<CMesh>::PerVertex(mesh);
 
 	float radius = 0;
-// 	int sampleNum = para->getDouble("Poisson Disk Sample Number");
+// 	int sampleNum = para->getDouble("Poisson Disk Sample Number");	//??????????????????
 // 	if (sampleNum <= 100)
 // 	{
 	int	sampleNum = 100;
@@ -202,6 +205,8 @@ void CScanEstimation::samplePointsFromMesh(CMesh& mesh, CMesh* points)
 	vcg::tri::SurfaceSampling<CMesh,BaseSampler>::PoissonDiskParam pp;
 	vcg::tri::SurfaceSampling<CMesh,BaseSampler>::PoissonDisk(mesh, mps, *presampledMesh, radius,pp);
 
+	
+	
 }
 
 
