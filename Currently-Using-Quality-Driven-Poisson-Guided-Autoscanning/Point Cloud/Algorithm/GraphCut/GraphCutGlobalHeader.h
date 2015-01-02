@@ -1,3 +1,6 @@
+#ifndef GRAPH_CUT_GLOBAL_HEADER_H
+#define GRAPH_CUT_GLOBAL_HEADER_H
+
 #pragma once
 #include <omp.h>
 #pragma warning(disable: 4786)
@@ -23,3 +26,5 @@ const double RateOfNormalShift = 5e-3;
 const double ToleranceOfConvexAngle = 5e-2;
 
 using namespace std;
+
+#endif

@@ -50,8 +50,8 @@ public:
 
 class MyPointCloud_RGB{
 public:
-  MyPointCloud_RGB();
-  ~MyPointCloud_RGB();
+  MyPointCloud_RGB(){}
+  ~MyPointCloud_RGB(){}
 
 public:
   vector<MyPt_RGB> mypoints;
@@ -59,14 +59,11 @@ public:
 
 class MyPointCloud_RGB_NORMAL{
 public:
-  MyPointCloud_RGB_NORMAL();
-  ~MyPointCloud_RGB_NORMAL();
+  MyPointCloud_RGB_NORMAL(){}
+  ~MyPointCloud_RGB_NORMAL(){}
 
 public:
   vector<MyPt_RGB_NORMAL> mypoints;
 };
-
-
-
 
 #endif 

@@ -4,6 +4,7 @@
 #include <iostream>
 #include <math.h>
 #include "common_type.h"
+
 #include "GlobalFunction.h"
 
 #endif // SCENE_SEG_H
