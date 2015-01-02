@@ -109,9 +109,8 @@
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(SolutionDir)$(ConfigurationName)</OutDir>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release_debug|x64'">$(SolutionDir)$(ConfigurationName)</OutDir>
     <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">IncludeLib\Boost\lib;IncludeLib\PCL\lib;IncludeLib\trimesh\lib;C:\Program Files\OpenNI2\Lib;IncludeLib\glut64\lib;IncludeLib\ann_1.1.2\MS_Win64\bin;IncludeLib\tbb\lib\intel64\vc10;IncludeLib\VTK\lib\vtk-5.8;$(LibraryPath)</LibraryPath>
-    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">IncludeLib\PCL\include\pcl-1.7;IncludeLib\vcglib\eigenlib;IncludeLib\Boost\include;IncludeLib\vcglib;IncludeLib\glut64\include;IncludeLib\ann_1.1.2\include;IncludeLib\tbb\include;IncludeLib\trimesh\include;IncludeLib\VTK\include\vtk-5.8;$(IncludePath)</IncludePath>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">IncludeLib\PCL\include\pcl-1.7;IncludeLib\vcglib\eigenlib;IncludeLib\Boost\include;IncludeLib\vcglib;IncludeLib\glut64\include;IncludeLib\ann_1.1.2\include;IncludeLib\tbb\include;IncludeLib\trimesh\include;IncludeLib\VTK\include\vtk-5.8;IncludeLib\flann\include;IncludeLib\Eigen\include;IncludeLib\GeometricTool\include;IncludeLib\qhull\include;IncludeLib\opencv\include;$(IncludePath)</IncludePath>
     <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release_debug|x64'">D:\IncludeLib\vcglib;D:\IncludeLib\glut64\include;D:\IncludeLib\ann_1.1.2\include;$(IncludePath)</IncludePath>
-    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">IncludeLib\PCL\lib;IncludeLib\glut64\lib;IncludeLib\tbb\lib\intel64\vc10;IncludeLib\openmesh\lib;IncludeLib\ann_1.1.2\MS_Win64\bin;$(LibraryPath);IncludeLib\Boost\lib;D:\cgal-gsoc\build2\lib;$(VCInstallDir)lib\amd64;$(VCInstallDir)atlmfc\lib\amd64;$(WindowsSdkDir)lib\x64;IncludeLib\trimesh\lib;IncludeLib\VTK\lib\vtk-5.8</LibraryPath>
     <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release_debug|x64'">D:\IncludeLib\glut64\lib;D:\IncludeLib\ann_1.1.2\MS_Win64\bin;$(LibraryPath)</LibraryPath>
     <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Program Files\OpenNI2\Include;IncludeLib\PCL\include\pcl-1.7;IncludeLib\Boost\include;IncludeLib\vcglib\eigenlib;IncludeLib\glut64\include;IncludeLib\vcglib;IncludeLib\ann_1.1.2\include;IncludeLib\trimesh\include;IncludeLib\tbb\include;IncludeLib\VTK\include\vtk-5.8;IncludeLib;$(IncludePath)</IncludePath>
     <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">IncludeLib\vcglib;IncludeLib\eigen-eigen-3.0.3;IncludeLib\ann_1.1.2\include;IncludeLib\glut;$(IncludePath)</IncludePath>
@@ -230,7 +229,7 @@
       <OutputFile>$(OutDir)\$(ProjectName).exe</OutputFile>
       <AdditionalLibraryDirectories>$(QTDIR)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>false</GenerateDebugInformation>
-      <AdditionalDependencies>libboost_system-vc100-mt-1_50.lib;libboost_filesystem-vc100-mt-1_50.lib;libboost_thread-vc100-mt-1_50.lib;libboost_date_time-vc100-mt-1_50.lib;libboost_iostreams-vc100-mt-1_50.lib;pcl_kdtree_release.lib;pcl_io_release.lib;pcl_search_release.lib;pcl_segmentation_release.lib;pcl_features_release.lib;pcl_filters_release.lib;pcl_visualization_release.lib;pcl_common_release.lib;cudart.lib;qtmain.lib;QtCore4.lib;QtGui4.lib;QtOpenGL4.lib;QtTest4.lib;tbb.lib;ANN.lib;glut64.lib;glew32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;advapi32.lib;trimesh.lib;OpenMeshCore.lib;OpenMeshCored.lib;OpenMeshTools.lib;OpenMeshToolsd.lib;opengl32.lib;glu32.lib;vtkalglib-gd.lib;vtkCharts-gd.lib;vtkCommon-gd.lib;vtkDICOMParser-gd.lib;vtkexoIIc-gd.lib;vtkexpat-gd.lib;vtkFiltering-gd.lib;vtkfreetype-gd.lib;vtkftgl-gd.lib;vtkGenericFiltering-gd.lib;vtkGeovis-gd.lib;vtkGraphics-gd.lib;vtkhdf5-gd.lib;vtkHybrid-gd.lib;vtkImaging-gd.lib;vtkInfovis-gd.lib;vtkIO-gd.lib;vtkjpeg-gd.lib;vtklibxml2-gd.lib;vtkmetaio-gd.lib;vtkNetCDF-gd.lib;vtkNetCDF_cxx-gd.lib;vtkpng-gd.lib;vtkproj4-gd.lib;vtkRendering-gd.lib;vtksqlite-gd.lib;vtksys-gd.lib;vtktiff-gd.lib;vtkverdict-gd.lib;vtkViews-gd.lib;vtkVolumeRendering-gd.lib;vtkWidgets-gd.lib;vtkzlib-gd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libboost_system-vc100-mt-1_50.lib;libboost_filesystem-vc100-mt-1_50.lib;libboost_thread-vc100-mt-1_50.lib;libboost_date_time-vc100-mt-1_50.lib;libboost_iostreams-vc100-mt-1_50.lib;pcl_kdtree_release.lib;pcl_io_release.lib;pcl_search_release.lib;pcl_segmentation_release.lib;pcl_features_release.lib;pcl_filters_release.lib;pcl_visualization_release.lib;pcl_common_release.lib;cudart.lib;qtmain.lib;QtCore4.lib;QtGui4.lib;QtOpenGL4.lib;QtTest4.lib;tbb.lib;ANN.lib;glut64.lib;glew32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;advapi32.lib;trimesh.lib;OpenMeshCore.lib;OpenMeshCored.lib;OpenMeshTools.lib;OpenMeshToolsd.lib;opengl32.lib;glu32.lib;vtkalglib-gd.lib;vtkCharts-gd.lib;vtkCommon-gd.lib;vtkDICOMParser-gd.lib;vtkexoIIc-gd.lib;vtkexpat-gd.lib;vtkFiltering-gd.lib;vtkfreetype-gd.lib;vtkftgl-gd.lib;vtkGenericFiltering-gd.lib;vtkGeovis-gd.lib;vtkGraphics-gd.lib;vtkhdf5-gd.lib;vtkHybrid-gd.lib;vtkImaging-gd.lib;vtkInfovis-gd.lib;vtkIO-gd.lib;vtkjpeg-gd.lib;vtklibxml2-gd.lib;vtkmetaio-gd.lib;vtkNetCDF-gd.lib;vtkNetCDF_cxx-gd.lib;vtkpng-gd.lib;vtkproj4-gd.lib;vtkRendering-gd.lib;vtksqlite-gd.lib;vtksys-gd.lib;vtktiff-gd.lib;vtkverdict-gd.lib;vtkViews-gd.lib;vtkVolumeRendering-gd.lib;vtkWidgets-gd.lib;vtkzlib-gd.lib;opencv_calib3d246.lib;opencv_contrib246.lib;opencv_core246.lib;opencv_features2d246.lib;opencv_flann246.lib;opencv_highgui246.lib;opencv_imgproc246.lib;Wm5Core.lib;Wm5Mathematics.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <Profile>true</Profile>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -262,6 +261,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Algorithm\Camera.cpp" />
+    <ClCompile Include="Algorithm\Common\color_op.cpp" />
+    <ClCompile Include="Algorithm\Common\common_func.cpp" />
+    <ClCompile Include="Algorithm\Common\common_type.cpp" />
+    <ClCompile Include="Algorithm\Common\file_io.cpp" />
+    <ClCompile Include="Algorithm\Common\utility.cpp" />
+    <ClCompile Include="Algorithm\Common\visualizer.cpp" />
     <ClCompile Include="Algorithm\GraphCut\BinarySeg.cpp" />
     <ClCompile Include="Algorithm\GraphCut\Clustering.cpp" />
     <ClCompile Include="Algorithm\GraphCut\color_op.cpp" />
@@ -277,7 +282,14 @@
     <ClCompile Include="Algorithm\GraphCut\scene_seg.cpp" />
     <ClCompile Include="Algorithm\NBV.cpp" />
     <ClCompile Include="Algorithm\NormalSmoother.cpp" />
+    <ClCompile Include="Algorithm\ObjPreSegment\main.cpp" />
+    <ClCompile Include="Algorithm\ObjPreSegment\main_scene_seg.cpp" />
+    <ClCompile Include="Algorithm\ObjPreSegment\scene_graph.cpp" />
+    <ClCompile Include="Algorithm\ObjPreSegment\scene_seg.cpp" />
+    <ClCompile Include="Algorithm\ObjPreSegment\supervoxel_clustering.cpp" />
     <ClCompile Include="Algorithm\Poisson.cpp" />
+    <ClCompile Include="Algorithm\ScenePreSegment\bigScene_preSeg.cpp" />
+    <ClCompile Include="Algorithm\ScenePreSegment\main_pre_seg1.cpp" />
     <ClCompile Include="common_type.cpp" />
     <ClCompile Include="Console.cpp" />
     <ClCompile Include="coordinateframe.cpp" />
@@ -487,6 +499,12 @@
   <ItemGroup>
     <ClInclude Include="Algorithm\anistropicPCA_Normal.h" />
     <ClInclude Include="Algorithm\Camera.h" />
+    <ClInclude Include="Algorithm\Common\color_op.h" />
+    <ClInclude Include="Algorithm\Common\common_func.h" />
+    <ClInclude Include="Algorithm\Common\common_type.h" />
+    <ClInclude Include="Algorithm\Common\file_io.h" />
+    <ClInclude Include="Algorithm\Common\utility.h" />
+    <ClInclude Include="Algorithm\Common\visualizer.h" />
     <ClInclude Include="Algorithm\GraphCut\BinarySeg.h" />
     <ClInclude Include="Algorithm\GraphCut\block.h" />
     <ClInclude Include="Algorithm\GraphCut\Clustering.h" />
@@ -507,9 +525,15 @@
     <ClInclude Include="Algorithm\NBV.h" />
     <ClInclude Include="Algorithm\NormalSmoother.h" />
     <ClInclude Include="Algorithm\normal_extrapolation.h" />
+    <ClInclude Include="Algorithm\ObjPreSegment\scene_graph.h" />
+    <ClInclude Include="Algorithm\ObjPreSegment\scene_seg.h" />
+    <ClInclude Include="Algorithm\ObjPreSegment\supervoxel_clustering.h" />
+    <ClInclude Include="Algorithm\ObjPreSegment\supervoxel_clustering.hpp" />
     <ClInclude Include="Algorithm\PointCloudAlgorithm.h" />
     <ClInclude Include="Algorithm\pointcloud_normal.h" />
     <ClInclude Include="Algorithm\Poisson.h" />
+    <ClInclude Include="Algorithm\ScenePreSegment\bigScene_preSeg.h" />
+    <ClInclude Include="Algorithm\ScenePreSegment\visualizer.h" />
     <ClInclude Include="Algorithm\SparseICP.h" />
     <ClInclude Include="common_type.h" />
     <ClInclude Include="Console.h" />

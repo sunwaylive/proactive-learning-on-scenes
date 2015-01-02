@@ -59,6 +59,7 @@ public:
 
 class MyPointCloud_RGB_NORMAL{
 public:
+
   MyPointCloud_RGB_NORMAL(){}
   ~MyPointCloud_RGB_NORMAL(){}
 

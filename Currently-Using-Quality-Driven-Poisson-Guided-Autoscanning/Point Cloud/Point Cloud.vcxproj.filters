@@ -53,6 +53,15 @@
     <Filter Include="Algorithm\GraphCut">
       <UniqueIdentifier>{afe704ca-c646-468e-8dc5-de9fed6ccdc3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Algorithm\ScenePreSegment">
+      <UniqueIdentifier>{764e932d-949e-4a2e-95a3-192920544f84}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Algorithm\ObjPreSegment">
+      <UniqueIdentifier>{00fa89f8-04fe-47ae-8cd2-941582738bbf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Algorithm\Common">
+      <UniqueIdentifier>{c9a20b94-423c-4a32-9d71-85309324ee85}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -240,6 +249,45 @@
     </ClCompile>
     <ClCompile Include="Algorithm\GraphCut\PointCloudAnalysis.cpp">
       <Filter>Algorithm\GraphCut</Filter>
+    </ClCompile>
+    <ClCompile Include="Algorithm\ObjPreSegment\main.cpp">
+      <Filter>Algorithm\ObjPreSegment</Filter>
+    </ClCompile>
+    <ClCompile Include="Algorithm\ObjPreSegment\main_scene_seg.cpp">
+      <Filter>Algorithm\ObjPreSegment</Filter>
+    </ClCompile>
+    <ClCompile Include="Algorithm\ObjPreSegment\scene_graph.cpp">
+      <Filter>Algorithm\ObjPreSegment</Filter>
+    </ClCompile>
+    <ClCompile Include="Algorithm\ObjPreSegment\scene_seg.cpp">
+      <Filter>Algorithm\ObjPreSegment</Filter>
+    </ClCompile>
+    <ClCompile Include="Algorithm\ObjPreSegment\supervoxel_clustering.cpp">
+      <Filter>Algorithm\ObjPreSegment</Filter>
+    </ClCompile>
+    <ClCompile Include="Algorithm\ScenePreSegment\bigScene_preSeg.cpp">
+      <Filter>Algorithm\ScenePreSegment</Filter>
+    </ClCompile>
+    <ClCompile Include="Algorithm\ScenePreSegment\main_pre_seg1.cpp">
+      <Filter>Algorithm\ScenePreSegment</Filter>
+    </ClCompile>
+    <ClCompile Include="Algorithm\Common\color_op.cpp">
+      <Filter>Algorithm\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Algorithm\Common\common_func.cpp">
+      <Filter>Algorithm\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Algorithm\Common\common_type.cpp">
+      <Filter>Algorithm\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Algorithm\Common\file_io.cpp">
+      <Filter>Algorithm\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Algorithm\Common\utility.cpp">
+      <Filter>Algorithm\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Algorithm\Common\visualizer.cpp">
+      <Filter>Algorithm\Common</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -469,6 +517,42 @@
     </ClInclude>
     <ClInclude Include="Algorithm\GraphCut\PointCloudAnalysis.h">
       <Filter>Algorithm\GraphCut</Filter>
+    </ClInclude>
+    <ClInclude Include="Algorithm\ObjPreSegment\scene_graph.h">
+      <Filter>Algorithm\ObjPreSegment</Filter>
+    </ClInclude>
+    <ClInclude Include="Algorithm\ObjPreSegment\scene_seg.h">
+      <Filter>Algorithm\ObjPreSegment</Filter>
+    </ClInclude>
+    <ClInclude Include="Algorithm\ObjPreSegment\supervoxel_clustering.h">
+      <Filter>Algorithm\ObjPreSegment</Filter>
+    </ClInclude>
+    <ClInclude Include="Algorithm\ObjPreSegment\supervoxel_clustering.hpp">
+      <Filter>Algorithm\ObjPreSegment</Filter>
+    </ClInclude>
+    <ClInclude Include="Algorithm\ScenePreSegment\bigScene_preSeg.h">
+      <Filter>Algorithm\ScenePreSegment</Filter>
+    </ClInclude>
+    <ClInclude Include="Algorithm\ScenePreSegment\visualizer.h">
+      <Filter>Algorithm\ScenePreSegment</Filter>
+    </ClInclude>
+    <ClInclude Include="Algorithm\Common\color_op.h">
+      <Filter>Algorithm\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Algorithm\Common\common_func.h">
+      <Filter>Algorithm\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Algorithm\Common\common_type.h">
+      <Filter>Algorithm\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Algorithm\Common\file_io.h">
+      <Filter>Algorithm\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Algorithm\Common\utility.h">
+      <Filter>Algorithm\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Algorithm\Common\visualizer.h">
+      <Filter>Algorithm\Common</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
