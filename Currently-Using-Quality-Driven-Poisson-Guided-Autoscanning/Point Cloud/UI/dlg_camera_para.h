@@ -119,6 +119,7 @@ signals:
     void savePickPointToIso();
     void runSceneConfidence();
     void runSceneConfidenceViaOriginal();
+	void runGraphCut();
 
 private:
   Ui::camera_paras * ui;

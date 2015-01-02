@@ -154,7 +154,7 @@ void CScanEstimation::runPoissonFieldAndExtractIsoPoints_ByEXE(int m)
 	}
 
 	iso_points->vert.clear();
-//	samplePointsFromMesh(tentative_mesh, iso_points);
+	samplePointsFromMesh(tentative_mesh, iso_points);
 
 	for (int i = 0; i < iso_points->vert.size(); i++)
 	{

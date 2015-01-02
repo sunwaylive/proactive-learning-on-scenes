@@ -359,6 +359,19 @@
       <string>Compute Scene NBV </string>
      </property>
     </widget>
+    <widget class="QPushButton" name="pushButton_test_graphcut">
+     <property name="geometry">
+      <rect>
+       <x>40</x>
+       <y>590</y>
+       <width>191</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Test GraphCut</string>
+     </property>
+    </widget>
    </widget>
    <widget class="QWidget" name="tab">
     <attribute name="title">

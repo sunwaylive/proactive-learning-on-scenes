@@ -86,6 +86,7 @@ void CameraParaDlg::initConnects()
   connect(ui->pushButton_compute_scene_confidence, SIGNAL(clicked()), this, SLOT(computeSceneConfidence()));
   connect(ui->pushButton_compute_scene_nbv, SIGNAL(clicked()), this, SLOT(computeSceneNBV()));
   connect(ui->pushButton_save_pickpoint_to_iso, SIGNAL(clicked()), this, SLOT(savePickPointToIso()));
+  connect(ui->pushButton_test_graphcut, SIGNAL(clicked()), this, SLOT(runGraphCut()));
 }
 
 bool CameraParaDlg::initWidgets()
@@ -1349,4 +1350,10 @@ void CameraParaDlg::savePickPointToIso()
 {
   area->savePickPointToIso();
   area->cleanPickPoints();
+}
+
+void CameraParaDlg::runGraphCut()
+{
+	std::cout<<"test graph cut" <<std::endl;
+
 }

@@ -238,6 +238,9 @@
     <ClCompile Include="GraphCutMain.cpp">
       <Filter>Algorithm\GraphCut</Filter>
     </ClCompile>
+    <ClCompile Include="Algorithm\GraphCut\PointCloudAnalysis.cpp">
+      <Filter>Algorithm\GraphCut</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="mainwindow.h">
@@ -462,6 +465,9 @@
       <Filter>Algorithm\GraphCut</Filter>
     </ClInclude>
     <ClInclude Include="GraphCutMain.h">
+      <Filter>Algorithm\GraphCut</Filter>
+    </ClInclude>
+    <ClInclude Include="Algorithm\GraphCut\PointCloudAnalysis.h">
       <Filter>Algorithm\GraphCut</Filter>
     </ClInclude>
   </ItemGroup>

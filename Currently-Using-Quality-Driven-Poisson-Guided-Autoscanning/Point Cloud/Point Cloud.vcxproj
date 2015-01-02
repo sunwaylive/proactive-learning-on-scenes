@@ -113,7 +113,7 @@
     <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release_debug|x64'">D:\IncludeLib\vcglib;D:\IncludeLib\glut64\include;D:\IncludeLib\ann_1.1.2\include;$(IncludePath)</IncludePath>
     <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">IncludeLib\PCL\lib;IncludeLib\glut64\lib;IncludeLib\tbb\lib\intel64\vc10;IncludeLib\openmesh\lib;IncludeLib\ann_1.1.2\MS_Win64\bin;$(LibraryPath);IncludeLib\Boost\lib;D:\cgal-gsoc\build2\lib;$(VCInstallDir)lib\amd64;$(VCInstallDir)atlmfc\lib\amd64;$(WindowsSdkDir)lib\x64;IncludeLib\trimesh\lib;IncludeLib\VTK\lib\vtk-5.8</LibraryPath>
     <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release_debug|x64'">D:\IncludeLib\glut64\lib;D:\IncludeLib\ann_1.1.2\MS_Win64\bin;$(LibraryPath)</LibraryPath>
-    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Program Files\OpenNI2\Include;IncludeLib\PCL\include\pcl-1.7;IncludeLib\Boost\include;IncludeLib\vcglib\eigenlib;IncludeLib\glut64\include;IncludeLib\vcglib;IncludeLib\ann_1.1.2\include;IncludeLib\trimesh\include;IncludeLib\tbb\include;IncludeLib\VTK\include\vtk-5.8;$(IncludePath)</IncludePath>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Program Files\OpenNI2\Include;IncludeLib\PCL\include\pcl-1.7;IncludeLib\Boost\include;IncludeLib\vcglib\eigenlib;IncludeLib\glut64\include;IncludeLib\vcglib;IncludeLib\ann_1.1.2\include;IncludeLib\trimesh\include;IncludeLib\tbb\include;IncludeLib\VTK\include\vtk-5.8;IncludeLib;$(IncludePath)</IncludePath>
     <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">IncludeLib\vcglib;IncludeLib\eigen-eigen-3.0.3;IncludeLib\ann_1.1.2\include;IncludeLib\glut;$(IncludePath)</IncludePath>
     <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">IncludeLib\glut;IncludeLib\ann_1.1.2\MS_Win32\MS_Win32\bin;$(LibraryPath)</LibraryPath>
     <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">IncludeLib\vcglib;IncludeLib\ann_1.1.2\include;IncludeLib\glut;$(IncludePath)</IncludePath>
@@ -272,6 +272,7 @@
     <ClCompile Include="Algorithm\GraphCut\LinkedBlockList.cpp" />
     <ClCompile Include="Algorithm\GraphCut\maxflow.cpp" />
     <ClCompile Include="Algorithm\GraphCut\MultiSeg.cpp" />
+    <ClCompile Include="Algorithm\GraphCut\PointCloudAnalysis.cpp" />
     <ClCompile Include="Algorithm\GraphCut\ScanEstimation.cpp" />
     <ClCompile Include="Algorithm\GraphCut\scene_seg.cpp" />
     <ClCompile Include="Algorithm\NBV.cpp" />
@@ -500,6 +501,7 @@
     <ClInclude Include="Algorithm\GraphCut\matrix.h" />
     <ClInclude Include="Algorithm\GraphCut\MultiSeg.h" />
     <ClInclude Include="Algorithm\GraphCut\MyClass.h" />
+    <ClInclude Include="Algorithm\GraphCut\PointCloudAnalysis.h" />
     <ClInclude Include="Algorithm\GraphCut\ScanEstimation.h" />
     <ClInclude Include="Algorithm\GraphCut\scene_seg.h" />
     <ClInclude Include="Algorithm\NBV.h" />
@@ -783,7 +785,7 @@
   </ImportGroup>
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties UicDir=".\GeneratedFiles" MocDir=".\GeneratedFiles\$(ConfigurationName)" MocOptions="" RccDir=".\GeneratedFiles" lupdateOnBuild="0" lupdateOptions="" lreleaseOptions="" QtVersion_x0020_x64="QT-4.8.0" QtVersion_x0020_Win32="QT-32" Qt5Version_x0020_x64="QT-64" />
+      <UserProperties UicDir=".\GeneratedFiles" MocDir=".\GeneratedFiles\$(ConfigurationName)" MocOptions="" RccDir=".\GeneratedFiles" lupdateOnBuild="0" lupdateOptions="" lreleaseOptions="" QtVersion_x0020_x64="QT-4.8.0" QtVersion_x0020_Win32="QT-32" Qt5Version_x0020_x64="QT_4_8" />
     </VisualStudio>
   </ProjectExtensions>
 </Project>

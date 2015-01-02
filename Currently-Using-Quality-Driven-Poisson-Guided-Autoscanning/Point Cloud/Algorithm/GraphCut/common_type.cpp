@@ -17,6 +17,14 @@ MyPointCloud_RGB::~MyPointCloud_RGB(){
 
 }
 
+// MyPointCloud_RGB_NORMAL::MyPointCloud_RGB_NORMAL(){
+// 
+// }
+// 
+// MyPointCloud_RGB_NORMAL::~MyPointCloud_RGB_NORMAL(){
+// 
+// }
+
 MyPointCloud_RGB_NORMAL::MyPointCloud_RGB_NORMAL(){
 
 }
@@ -24,4 +32,3 @@ MyPointCloud_RGB_NORMAL::MyPointCloud_RGB_NORMAL(){
 MyPointCloud_RGB_NORMAL::~MyPointCloud_RGB_NORMAL(){
 
 }
-

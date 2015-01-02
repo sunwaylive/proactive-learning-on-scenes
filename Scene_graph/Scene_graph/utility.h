@@ -301,6 +301,15 @@ const float new_color_table[30][3] = {
 
 };
 
+const float color_table2[6][3] = {
+  255.0,     0,       0
+ ,0,     255.0,       0
+ ,0,         0,     255.0
+ ,0,     255.0,     255.0
+ ,255.0, 255.0,       0
+ ,255.0,     0,     255.0
+};
+
 void draw_box(PointCloudPtr box_cloud, Visualizer& vs, float r, float g, float b, const char* id);
 void draw_rect(PointCloudPtr rect_cloud, Visualizer& vs, float r, float g, float b, const char* id);
 
