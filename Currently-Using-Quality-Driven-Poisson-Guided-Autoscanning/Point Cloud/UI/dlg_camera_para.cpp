@@ -87,6 +87,8 @@ void CameraParaDlg::initConnects()
   connect(ui->pushButton_compute_scene_nbv, SIGNAL(clicked()), this, SLOT(computeSceneNBV()));
   connect(ui->pushButton_save_pickpoint_to_iso, SIGNAL(clicked()), this, SLOT(savePickPointToIso()));
   connect(ui->pushButton_test_graphcut, SIGNAL(clicked()), this, SLOT(runGraphCut()));
+  connect(ui->pushButton_over_segment, SIGNAL(clicked()), this, SLOT(runOverSegmentation()));
+  connect(ui->pushButton_segment_scene, SIGNAL(clicked()), this, SLOT(runSceneSegmentation()));
 }
 
 bool CameraParaDlg::initWidgets()
@@ -114,7 +116,7 @@ bool CameraParaDlg::initWidgets()
 
   state = m_paras->nbv.getBool("Need Update Direction With More Overlaps") ? (Qt::CheckState::Checked) : (Qt::CheckState::Unchecked);
   ui->need_more_overlaps->setCheckState(state);
-  
+
   state = m_paras->nbv.getBool("Use Max Propagation") ? (Qt::CheckState::Checked) : (Qt::CheckState::Unchecked);
   ui->use_max_propagation->setCheckState(state);
 
@@ -321,7 +323,7 @@ void CameraParaDlg::loadToOriginal()
 {
   QString file = QFileDialog::getOpenFileName(this, "Select a ply file", "", "*.ply");
   if(!file.size()) return;
-  
+
   area->dataMgr.loadPlyToOriginal(file);
 
   area->dataMgr.normalizeAllMesh();
@@ -484,120 +486,120 @@ void CameraParaDlg::mergeScannedMeshWithOriginal()
 {
   /*QModelIndexList sil = ui->tableView_scan_results->selectionModel()->selectedRows();
   if (sil.isEmpty()) return;*/
-    CMesh* original = area->dataMgr.getCurrentOriginal();
-    vector<CMesh* > *scanned_results = area->dataMgr.getScannedResults();
-    double merge_confidence_threshold = global_paraMgr.camera.getDouble("Merge Confidence Threshold");
-    int merge_pow = static_cast<int>(global_paraMgr.nbv.getDouble("Merge Probability Pow"));
-    double probability_add_by_user = 0.0;
+  CMesh* original = area->dataMgr.getCurrentOriginal();
+  vector<CMesh* > *scanned_results = area->dataMgr.getScannedResults();
+  double merge_confidence_threshold = global_paraMgr.camera.getDouble("Merge Confidence Threshold");
+  int merge_pow = static_cast<int>(global_paraMgr.nbv.getDouble("Merge Probability Pow"));
+  double probability_add_by_user = 0.0;
 
-    //wsh added 12-24
-    double radius_threshold = global_paraMgr.data.getDouble("CGrid Radius");
-    double radius2 = radius_threshold * radius_threshold;
-    double iradius16 = -4/radius2;
+  //wsh added 12-24
+  double radius_threshold = global_paraMgr.data.getDouble("CGrid Radius");
+  double radius2 = radius_threshold * radius_threshold;
+  double iradius16 = -4/radius2;
 
-    double sigma = global_paraMgr.norSmooth.getDouble("Sharpe Feature Bandwidth Sigma");
-    double sigma_threshold = pow(max(1e-8,1-cos(sigma/180.0*3.1415926)), 2);
-    CMesh* iso_points = area->dataMgr.getCurrentIsoPoints();
-    //end wsh added
+  double sigma = global_paraMgr.norSmooth.getDouble("Sharpe Feature Bandwidth Sigma");
+  double sigma_threshold = pow(max(1e-8,1-cos(sigma/180.0*3.1415926)), 2);
+  CMesh* iso_points = area->dataMgr.getCurrentIsoPoints();
+  //end wsh added
 
-    /*int row_of_mesh = 0;*/
-    for (vector<CMesh* >::iterator it = scanned_results->begin(); 
-      it != scanned_results->end(); ++it /*++row_of_mesh*/)
+  /*int row_of_mesh = 0;*/
+  for (vector<CMesh* >::iterator it = scanned_results->begin(); 
+    it != scanned_results->end(); ++it /*++row_of_mesh*/)
+  {
+    if ((*it)->vert.empty()) continue;
+
+    // for (int i = 0; i < sil.size(); ++i)
+    // {
+    //int row = sil[i].row();
+    //combine the selected mesh with original
+    // if (row == row_of_mesh) 
+    // {
+    //make the merged mesh invisible
+    (*it)->vert[0].is_scanned_visible = false;
+    //compute new scanned mesh's iso neighbors
+
+    //wsh updated 12-24
+    //GlobalFun::computeAnnNeigbhors(area->dataMgr.getCurrentIsoPoints()->vert, (*it)->vert, 1, false, "runNewScannedMeshNearestIsoPoint");
+    Timer time;
+    time.start("Sample ISOpoints Neighbor Tree!!");
+    GlobalFun::computeBallNeighbors((*it), area->dataMgr.getCurrentIsoPoints(), 
+      radius_threshold, (*it)->bbox);
+    time.end();
+    //end wsh updated
+
+    cout<<"Before merge with original: " << original->vert.size() <<endl;
+    cout<<"scanned mesh num: "<<(*it)->vert.size() <<endl;
+
+    vector<double> v_confidence;
+    double max_confidence = 0.0f;
+    double min_confidence = BIG;
+
+    for (int k = 0; k < (*it)->vert.size(); ++k)
     {
-      if ((*it)->vert.empty()) continue;
-
-      // for (int i = 0; i < sil.size(); ++i)
-      // {
-      //int row = sil[i].row();
-      //combine the selected mesh with original
-      // if (row == row_of_mesh) 
-      // {
-      //make the merged mesh invisible
-      (*it)->vert[0].is_scanned_visible = false;
-      //compute new scanned mesh's iso neighbors
-
       //wsh updated 12-24
-      //GlobalFun::computeAnnNeigbhors(area->dataMgr.getCurrentIsoPoints()->vert, (*it)->vert, 1, false, "runNewScannedMeshNearestIsoPoint");
-      Timer time;
-      time.start("Sample ISOpoints Neighbor Tree!!");
-      GlobalFun::computeBallNeighbors((*it), area->dataMgr.getCurrentIsoPoints(), 
-        radius_threshold, (*it)->bbox);
-      time.end();
-      //end wsh updated
+      CVertex& v = (*it)->vert[k];
+      //add or not
+      //CVertex &nearest = area->dataMgr.getCurrentIsoPoints()->vert[v.neighbors[0]];
+      double sum_confidence = 0.0;
+      double sum_w = 0.0;
 
-      cout<<"Before merge with original: " << original->vert.size() <<endl;
-      cout<<"scanned mesh num: "<<(*it)->vert.size() <<endl;
-      
-      vector<double> v_confidence;
-      double max_confidence = 0.0f;
-      double min_confidence = BIG;
-
-      for (int k = 0; k < (*it)->vert.size(); ++k)
+      for(int ni = 0; ni < v.original_neighbors.size(); ni++)
       {
-        //wsh updated 12-24
-        CVertex& v = (*it)->vert[k];
-        //add or not
-        //CVertex &nearest = area->dataMgr.getCurrentIsoPoints()->vert[v.neighbors[0]];
-        double sum_confidence = 0.0;
-        double sum_w = 0.0;
+        CVertex& t = iso_points->vert[v.original_neighbors[ni]];
 
-        for(int ni = 0; ni < v.original_neighbors.size(); ni++)
-        {
-          CVertex& t = iso_points->vert[v.original_neighbors[ni]];
-
-          double dist2 = GlobalFun::computeEulerDistSquare(v.P(), t.P());
-          double dist_diff = exp(dist2 * iradius16);
-          //double normal_diff = exp(-pow(1-v.N()*t.N(), 2)/sigma_threshold);
-          double normal_diff = 1.0;
-          double w = dist_diff * normal_diff;
-          //double w = 1.0f;
-          sum_confidence += w * t.eigen_confidence;
-          sum_w += 1;
-        }
-
-        if (v.original_neighbors.size() > 0 )
-          sum_confidence /= sum_w;
-
-        v_confidence.push_back(sum_confidence);
-
-        max_confidence = sum_confidence > max_confidence ? sum_confidence : max_confidence;
-        min_confidence = sum_confidence < min_confidence ? sum_confidence : min_confidence;
+        double dist2 = GlobalFun::computeEulerDistSquare(v.P(), t.P());
+        double dist_diff = exp(dist2 * iradius16);
+        //double normal_diff = exp(-pow(1-v.N()*t.N(), 2)/sigma_threshold);
+        double normal_diff = 1.0;
+        double w = dist_diff * normal_diff;
+        //double w = 1.0f;
+        sum_confidence += w * t.eigen_confidence;
+        sum_w += 1;
       }
 
-      //normalize the confidence
-      for (vector<double>::iterator it = v_confidence.begin(); it != v_confidence.end(); ++it)
-        *it = (*it - min_confidence) / (max_confidence - min_confidence);
+      if (v.original_neighbors.size() > 0 )
+        sum_confidence /= sum_w;
 
-      int skip_num = 0;
-      int index = original->vert.empty() ? 0 : (original->vert.back().m_index + 1);
-      for (int k = 0;  k < (*it)->vert.size(); ++k)
-      {
-        CVertex& v = (*it)->vert[k];
-        if (/*v_confidence[k] > merge_confidence_threshold || */ 
-          (1.0f * rand() / (RAND_MAX+1.0) > (pow((1.0 - v_confidence[k]), merge_pow) + probability_add_by_user))) //pow((1 - v_confidence[k]), merge_pow)
-        {
-          v.is_ignore = true;
-          skip_num++; 
-          continue;
-        }
+      v_confidence.push_back(sum_confidence);
 
-        CVertex new_v;
-        new_v.m_index = index++;
-        new_v.is_original = true;
-        new_v.P() = v.P();
-        new_v.N() = v.N();
-        original->vert.push_back(new_v);
-        original->bbox.Add(new_v.P());
-      } 
-      original->vn = original->vert.size();
-      cout<<"skip points num:" <<skip_num <<endl;
-      cout<<"After merge with original: " << original->vert.size() <<endl <<endl;
-      //set combined row unable to be chosen
-      //ui->tableView_scan_candidates->setRowHidden(row, true);
-      //ui->tableView_scan_results->setRowHidden(row, true);
-      //}
-      // }//end for sil
+      max_confidence = sum_confidence > max_confidence ? sum_confidence : max_confidence;
+      min_confidence = sum_confidence < min_confidence ? sum_confidence : min_confidence;
     }
+
+    //normalize the confidence
+    for (vector<double>::iterator it = v_confidence.begin(); it != v_confidence.end(); ++it)
+      *it = (*it - min_confidence) / (max_confidence - min_confidence);
+
+    int skip_num = 0;
+    int index = original->vert.empty() ? 0 : (original->vert.back().m_index + 1);
+    for (int k = 0;  k < (*it)->vert.size(); ++k)
+    {
+      CVertex& v = (*it)->vert[k];
+      if (/*v_confidence[k] > merge_confidence_threshold || */ 
+        (1.0f * rand() / (RAND_MAX+1.0) > (pow((1.0 - v_confidence[k]), merge_pow) + probability_add_by_user))) //pow((1 - v_confidence[k]), merge_pow)
+      {
+        v.is_ignore = true;
+        skip_num++; 
+        continue;
+      }
+
+      CVertex new_v;
+      new_v.m_index = index++;
+      new_v.is_original = true;
+      new_v.P() = v.P();
+      new_v.N() = v.N();
+      original->vert.push_back(new_v);
+      original->bbox.Add(new_v.P());
+    } 
+    original->vn = original->vert.size();
+    cout<<"skip points num:" <<skip_num <<endl;
+    cout<<"After merge with original: " << original->vert.size() <<endl <<endl;
+    //set combined row unable to be chosen
+    //ui->tableView_scan_candidates->setRowHidden(row, true);
+    //ui->tableView_scan_results->setRowHidden(row, true);
+    //}
+    // }//end for sil
+  }
 }
 
 void CameraParaDlg::mergeScannedMeshWithOriginalUsingHoleConfidence()
@@ -1311,7 +1313,7 @@ void CameraParaDlg::detectPlane()
 
   GlobalFun::CMesh2PclPointCloud(original, original_point_cloud);
   seg.setInputCloud(original_point_cloud);
-  
+
   pcl::ModelCoefficients::Ptr coefficients (new pcl::ModelCoefficients);
   pcl::PointIndices::Ptr inliers (new pcl::PointIndices);
   seg.segment(*inliers, *coefficients);
@@ -1352,15 +1354,173 @@ void CameraParaDlg::savePickPointToIso()
   area->cleanPickPoints();
 }
 
-
-
 void CameraParaDlg::runGraphCut()
 {
-	std::cout<<"test graph cut" <<std::endl;
+  std::cout<<"test graph cut" <<std::endl;
 
-	CPointCloudAnalysis cPointCloudAnalysis;
-	cPointCloudAnalysis.MainStep();
+  CPointCloudAnalysis cPointCloudAnalysis;
+  cPointCloudAnalysis.MainStep();
   //move ScanEstimation out of MainStep
   CMesh *original = area->dataMgr.getCurrentOriginal();
   cPointCloudAnalysis.ScanEstimation(original);
+}
+
+void CameraParaDlg::runOverSegmentation(){
+  Visualizer vs;
+  vs.viewer->removeAllPointClouds();
+  vs.viewer->removeCoordinateSystem();
+  vs.viewer->setBackgroundColor(0,0,0);
+
+  PointCloudPtr_RGB_NORMAL cloud(new PointCloud_RGB_NORMAL);
+  //loadPointCloud_normal_ply("data/big_table_normal.ply", cloud);
+  loadPointCloud_normal_ply("data/big_table_normal.ply", cloud);
+
+  PointCloudPtr_RGB_NORMAL cloud_mark(new PointCloud_RGB_NORMAL);
+  pcl::copyPointCloud(*cloud,*cloud_mark);
+
+  CBinarySeg cBinarySeg;
+  CClustering cClustering; 
+  CMultiSeg cMultiSeg;
+
+
+  /******************detect table************************/
+  PointCloudPtr_RGB_NORMAL tabletopCloud(new PointCloud_RGB_NORMAL());
+  PointCloudPtr_RGB_NORMAL planeCloud(new PointCloud_RGB_NORMAL());
+  //detect_table_plane_r(cloud, planeCloud, tabletopCloud);
+  detect_table_plane(cloud, planeCloud, tabletopCloud);
+  //showPointClound(planeCloud,"planeCloud");
+
+  pcl::ModelCoefficients::Ptr coefficients_plane(new pcl::ModelCoefficients);
+  pcl::PointIndices::Ptr inliers_plane(new pcl::PointIndices);
+  detect_table(cloud, coefficients_plane, inliers_plane);
+
+  PointCloudPtr_RGB_NORMAL table_cloud(new PointCloud_RGB_NORMAL());
+
+  pcl::ExtractIndices<Point_RGB_NORMAL> extract0;// Create the filtering object
+  // Extract the inliers
+  extract0.setInputCloud (cloud);
+  extract0.setIndices (inliers_plane);
+  extract0.setNegative (false);
+  extract0.filter (*table_cloud);
+
+  PointCloudPtr_RGB pc(new PointCloud_RGB);
+  
+  for(int i=0;i<table_cloud->size();i++){
+    Point_RGB pr;
+    pr.x=table_cloud->at(i).x;
+    pr.y=table_cloud->at(i).y;
+    pr.z=table_cloud->at(i).z;
+    pr.r=table_cloud->at(i).r;
+    pr.g=table_cloud->at(i).g;
+    pr.b=table_cloud->at(i).b;
+    pc->push_back(pr);
+  }
+
+  vs.viewer->addPointCloud (pc, "table_cloud");
+
+  float voxel_resolution = 0.004f;
+  float seed_resolution = 0.06f;
+  float color_importance = 0.2f;
+  float spatial_importance = 0.4f;
+  float normal_importance = 1.0f;
+
+  /******************Euclidean Cluster Extraction************************/
+  std::vector<PointCloudPtr_RGB_NORMAL> cluster_points;
+
+  vector<MyPointCloud_RGB_NORMAL> vecPatchPoint;
+  vector<pcl::Normal> vecPatcNormal;
+
+  
+
+  object_seg_ECE(tabletopCloud, cluster_points);
+
+  for(int i=0;i<cluster_points.size();i++){
+
+    PointCloudT::Ptr colored_cloud(new PointCloudT);
+    vector<MyPointCloud_RGB_NORMAL> patch_clouds;
+    PointNCloudT::Ptr normal_cloud(new PointNCloudT);
+    VCCS_over_segmentation(cluster_points.at(i),voxel_resolution,seed_resolution,color_importance,spatial_importance,normal_importance,patch_clouds,colored_cloud,normal_cloud);
+	
+    std::stringstream str;
+    str<<"colored_voxel_cloud"<<i;
+    std::string id_pc=str.str();
+
+    vs.viewer->addPointCloud (colored_cloud, id_pc);
+  }
+
+  vs.show();
+
+}
+
+void CameraParaDlg::runSceneSegmentation(){
+  Visualizer vs;
+  vs.viewer->removeAllPointClouds();
+  vs.viewer->removeCoordinateSystem();
+  vs.viewer->setBackgroundColor(0,0,0);
+
+  PointCloudPtr_RGB cloud(new PointCloud_RGB);
+
+  //loadPointCloud_ply("data/scene0.ply", cloud);
+  //loadPointCloud_ply("data/scene1.ply", cloud);
+  //loadPointCloud_ply("data/big_table_after.ply", cloud);
+  loadPointCloud_ply("data/two_tables.ply", cloud);
+  //loadPointCloud_ply("data/big_room.ply", cloud);
+
+  /******************detect floor and wall************************/
+  MyPointCloud_RGB floor_cloud;
+  pcl::ModelCoefficients floor_coefficients;
+  MyPointCloud floor_rect_cloud;
+  vector<MyPointCloud_RGB> wall_clouds;
+  std::vector<MyPointCloud> wall_rect_clouds;
+  PointCloudPtr_RGB remained_cloud(new PointCloud_RGB);
+
+  detect_floor_and_walls(cloud, floor_cloud, floor_coefficients, floor_rect_cloud, wall_clouds, wall_rect_clouds, remained_cloud);
+
+  if(floor_cloud.mypoints.size()>0){
+    Eigen::Matrix4f matrix_transform;
+    Eigen::Matrix4f matrix_translation_r;
+    Eigen::Matrix4f matrix_transform_r;
+    getTemTransformMatrix(floor_coefficients, floor_rect_cloud, matrix_transform, matrix_translation_r, matrix_transform_r);
+
+    PointCloudPtr_RGB filter_remained_cloud(new PointCloud_RGB);
+    remove_outliers(remained_cloud, floor_rect_cloud, wall_rect_clouds, matrix_transform, matrix_translation_r, matrix_transform_r, filter_remained_cloud, vs);
+
+    /******************pre-segment scene************************/
+    vector<MyPointCloud_RGB> cluster_projected_pcs;
+    vector<MyPointCloud_RGB> cluster_origin_pcs;
+    PointCloudPtr_RGB colored_projected_pc(new PointCloud_RGB);
+    PointCloudPtr_RGB colored_origin_pc(new PointCloud_RGB);
+    pre_segment_scene(filter_remained_cloud, matrix_transform, matrix_translation_r, matrix_transform_r, cluster_projected_pcs, cluster_origin_pcs, colored_projected_pc, colored_origin_pc);
+
+    /******************Set Priority for Clusters************************/
+    vector<int> priority_vec;
+    setPriorityforClusters(cluster_projected_pcs, cluster_origin_pcs ,priority_vec);
+
+    PointCloudPtr_RGB colored_pc(new PointCloud_RGB);
+    for(int i=priority_vec.size()-1; i>=0; i--){
+
+      cout<<"priority_vec.at(i):"<<priority_vec.at(i)<<endl;
+      PointCloudPtr_RGB cloud_tem(new PointCloud_RGB);
+
+      MyPointCloud_RGB2PointCloud_RGB(cluster_origin_pcs.at(priority_vec.at(i)), cloud_tem);
+      float r, g, b;
+      getColorByValue(i*1.0, 0, (cluster_origin_pcs.size()-1)*1.0, &r, &g, &b);
+      for(int j=0; j<cloud_tem->size(); j++){
+        cloud_tem->at(j).r=r;
+        cloud_tem->at(j).g=g;
+        cloud_tem->at(j).b=b;
+      }
+
+      appendCloud_RGB(cloud_tem, colored_pc);
+    }
+
+    vs.viewer->addPointCloud(colored_pc, "c1");
+
+    Point position;
+    PointCloudPtr_RGB cl(new PointCloud_RGB);
+    MyPointCloud_RGB2PointCloud_RGB(cluster_origin_pcs.at(priority_vec.at(priority_vec.size()-1)), cl);
+    getRobotPosition1(cl, wall_rect_clouds, matrix_transform, matrix_translation_r, matrix_transform_r, position, vs);
+
+    vs.show();
+  }
 }
