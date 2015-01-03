@@ -5,7 +5,7 @@
 #include "Algorithm/Common/color_op.h"
 #include "graph.h"
 #include "kdtree.h"
-
+#include "Algorithm/Common/common_type.h"
 
 
 struct GRAPHSHOW

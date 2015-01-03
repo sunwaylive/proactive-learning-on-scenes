@@ -1,6 +1,6 @@
 #pragma once
 #include "graph.h"
-
+#include "Algorithm/Common/common_type.h"
 
 class CClustering
 {

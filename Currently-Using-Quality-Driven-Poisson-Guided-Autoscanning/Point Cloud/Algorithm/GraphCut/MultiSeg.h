@@ -4,6 +4,7 @@
 #include "graph.h"
 #include "GCoptimization.h"
 #include "BinarySeg.h"
+#include "Algorithm/Common/common_type.h"
 
 extern vector<vector<int>> vecvecObjectPoolClustering;
 extern vector<int> vecObjectPoolClusteringCount;

@@ -8,7 +8,6 @@
 #include "Algorithm/GraphCut/MultiSeg.h"
 #include "Algorithm/GraphCut/ScanEstimation.h"
 
-
 class CPointCloudAnalysis
 {
 public:

@@ -6,7 +6,7 @@
 #include <wrap/io_trimesh/export.h>
 #include "Poisson/Geometry.h"
 #include "Poisson/PoissonParam.h"
-
+#include "GlobalFunction.h"
 
 extern vector<MyPointCloud_RGB_NORMAL> vecPatchPoint;
 extern vector<MyPoint> vecPatchCenPoint;

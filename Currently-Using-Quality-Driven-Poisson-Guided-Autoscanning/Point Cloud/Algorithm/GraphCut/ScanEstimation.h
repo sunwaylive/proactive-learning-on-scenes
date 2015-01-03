@@ -5,6 +5,7 @@
 #include "Algorithm/Common/color_op.h"
 #include "PoissonParam.h"
 #include "CMesh.h"
+#include "Algorithm/Common/common_type.h"
 
 
 struct ISOPOINT
