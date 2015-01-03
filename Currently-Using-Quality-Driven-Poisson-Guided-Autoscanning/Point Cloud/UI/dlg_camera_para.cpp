@@ -1,5 +1,7 @@
 #include "UI/dlg_camera_para.h"
 
+extern vector<vector<int>> vecvecMultiResult;
+
 CameraParaDlg::CameraParaDlg(QWidget *p, ParameterMgr * _paras, GLArea * _area) : QFrame(p)
 {
   ui = new Ui::camera_paras;
@@ -1358,7 +1360,58 @@ void CameraParaDlg::runGraphCut()
 
 	CPointCloudAnalysis cPointCloudAnalysis;
 	cPointCloudAnalysis.MainStep();
+
   //move ScanEstimation out of MainStep
-  CMesh *original = area->dataMgr.getCurrentOriginal();
-  cPointCloudAnalysis.ScanEstimation(original);
+    CMesh *original = area->dataMgr.getCurrentOriginal();
+	for(int i = 0;i < vecvecMultiResult.size();i++)
+	{
+		if(i != 16) continue;
+		ofstream outFile4("Output\\Check.txt",ios::app);
+		outFile4 << i <<endl;
+		outFile4 << " step1 " << endl;
+
+		cPointCloudAnalysis.cScanEstimation.saveMultiResultToOriginal(original, i);
+		outFile4 << " step1-1 " << endl;
+		outFile4 << " vert.size(): " << original->vert.size()<< endl;
+
+		area->dataMgr.downSamplesByNum();
+		outFile4<<"!!radius: " << global_paraMgr.data.getDouble("CGrid Radius") <<std::endl;
+		global_paraMgr.data.setValue("CGrid Radius", DoubleValue(0.036));
+		outFile4 << " step1-2 " << endl;
+
+		runStep2CombinedPoissonConfidence();
+		outFile4 << " step1-3 " << endl;
+
+		//after poisson
+		CMesh *iso_point = area->dataMgr.getCurrentIsoPoints();
+		std::cout<< iso_point->vert[0].eigen_confidence;
+
+		outFile4 << " step2 " << endl;
+
+		OBJECTISOPOINT objectIsoPointTemp;
+		for(int i = 0;i < iso_point->vert.size();i++)
+		{
+			ISOPOINT isoPointTemp;
+			isoPointTemp.f = iso_point->vert[i].eigen_confidence;
+			isoPointTemp.objectIndex = i;
+			isoPointTemp.x = iso_point->vert[i].P()[0];
+			isoPointTemp.y = iso_point->vert[i].P()[1];
+			isoPointTemp.z = iso_point->vert[i].P()[2];
+			objectIsoPointTemp.objectIsoPoint.push_back(isoPointTemp);
+		}
+		cPointCloudAnalysis.cScanEstimation.vecObjectIsoPoint.push_back(objectIsoPointTemp);
+
+		outFile4 << " suanwanle :" << objectIsoPointTemp.objectIsoPoint.size() <<endl;
+		outFile4.close();
+	}
+
+	ofstream outFile4("Output\\duima.txt");
+	outFile4 << " duima :( " <<endl;
+	outFile4.close();
+
+	cPointCloudAnalysis.cScanEstimation.ScoreUpdate();
+
+	ofstream outFile3("Output\\duima.txt");
+	outFile3 << " duile :) " <<endl;
+	outFile3.close();
 }

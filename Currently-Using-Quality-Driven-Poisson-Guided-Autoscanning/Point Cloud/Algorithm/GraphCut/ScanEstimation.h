@@ -23,7 +23,6 @@ class CScanEstimation
 {
 public:
 	vector<OBJECTISOPOINT> vecObjectIsoPoint;
-	vector<pair<int,int>> vecpairPatchConnection;
 	vector<double> vecPatchConfidenceScore;
 	vector<double> vecGeometryValue;
 	vector<double> vecAppearenceValue;
@@ -36,8 +35,8 @@ public:
 	CScanEstimation(void);
 	~CScanEstimation(void);
 	void runComputeIsoGradientConfidence();
-  void saveMultiResultToOriginal(CMesh *original, int m);
-	void MainStep(CMesh *original);
+	void saveMultiResultToOriginal(CMesh *original, int m);
+	void ScoreUpdate();
 	void ComputeScore();
 	void ComputeObjectness(int m);
 	void ComputeSeparateness(int m,int n);

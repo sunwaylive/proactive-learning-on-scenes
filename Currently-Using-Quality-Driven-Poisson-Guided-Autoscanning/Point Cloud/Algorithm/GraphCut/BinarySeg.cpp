@@ -69,7 +69,7 @@ void CBinarySeg::AddClusterPoints(vector<MyPointCloud_RGB_NORMAL> &points)
 {
 	for(int i=0;i<points.size();i++)
 	{
-		vecPatchPoint.push_back(points[i]);
+//		vecPatchPoint.push_back(points[i]);
 	}
 	clusterPatchNum.push_back(points.size());
 }
@@ -100,7 +100,7 @@ void CBinarySeg::MainStep()
 	{
 		seedPatch = i;
 		int flagStop = true;
-		paraLargeS = 0.01;
+		paraLargeS = 0.001;
 
 		while(paraLargeS < 0.4 && flagStop)
 		{
@@ -114,7 +114,7 @@ void CBinarySeg::MainStep()
 				vecvecObjectPool.push_back(vecObjectHypo);
 				flagStop = false;
 			}	
-			paraLargeS += (double)0.05;
+			paraLargeS += (double)0.001;
 		}
 		if(flagStop)
 		{
@@ -136,7 +136,7 @@ void CBinarySeg::MainStep()
 		
 		
 	//output
- 	ofstream outFile1("Output\\ObjectPool.txt");
+	ofstream outFile1("Output\\ObjectPool.txt");
 	for(int i=0;i<vecvecObjectPool.size();i++)
 	{
 		for(int j=0;j<vecvecObjectPool[i].size();j++)
@@ -692,10 +692,9 @@ double CBinarySeg::GetBinarySmoothValue(int m,int n)
 		geometryValue = 0;
 
 	if(convexValue0 * convexValue1 < 0)
-		geometryValue = 0.6;
+		geometryValue = 0.9;
 
 	
-
 	//color
 	appearenceValue = 0;
 	for(int i = 0;i < 21;i++)

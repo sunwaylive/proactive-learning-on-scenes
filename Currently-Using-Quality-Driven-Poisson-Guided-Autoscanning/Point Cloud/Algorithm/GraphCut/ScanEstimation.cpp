@@ -17,7 +17,7 @@ extern vector<double> vecObjectness;
 extern vector<double> vecSeparateness;
 extern vector<pair<int,int>> vecpairSeperatenessEdge;
 extern vector<vector<pair<int,int>>> vecvecpairSeperatenessSmallEdge;
-
+extern vector<pair<int,int>> vecpairPatchConnection;
 
 CScanEstimation::CScanEstimation(void)
 {
@@ -31,114 +31,95 @@ CScanEstimation::~CScanEstimation(void)
 }
 
 
-void CScanEstimation::MainStep(CMesh *original)
-{
-	//get vecvecIsoPoint
-	for(int i = 0;i < vecvecMultiResult.size();i++)
-	{
-		saveMultiResultToOriginal(original, i);
-	}
-	
-// 	//get confidence score for each patch
-// 	for(int i = 0;i < vecPatchPoint.size();i++)
-// 	{
-// 		double confidenceScore = 0;
-// 		for(int j = 0;j < vecObjectIsoPoint[i].objectIsoPoint.size();j++)
-// 		{
-// 			double distance;
-// 			distance = sqrt((vecObjectIsoPoint[i].objectIsoPoint[j].x - vecPatchCenPoint[i].x) * (vecObjectIsoPoint[i].objectIsoPoint[j].x - vecPatchCenPoint[i].x)
-// 				+ (vecObjectIsoPoint[i].objectIsoPoint[j].y - vecPatchCenPoint[i].y) * (vecObjectIsoPoint[i].objectIsoPoint[j].y - vecPatchCenPoint[i].y)
-// 				+ (vecObjectIsoPoint[i].objectIsoPoint[j].z - vecPatchCenPoint[i].z) * (vecObjectIsoPoint[i].objectIsoPoint[j].z - vecPatchCenPoint[i].z));
-// 			double weight;
-// 			weight = GaussianFunction(distance);
-// 			confidenceScore += weight* vecObjectIsoPoint[i].objectIsoPoint[j].f;
-// 		}
-// 		vecPatchConfidenceScore.push_back(confidenceScore);
-// 	}
-// 	
-// 	//update the smooth term
-// 	for(int i = 0;i < vecpairPatchConnection.size();i++)
-// 	{
-// 		double confidenceScore;
-// 		confidenceScore = vecPatchConfidenceScore[vecpairPatchConnection[i].first]*vecPatchConfidenceScore[vecpairPatchConnection[i].second];
-// 
-// 		if(vecGeometryConvex[i])
-// 			vecGeometryValue[i] *= confidenceScore;
-// 		else
-// 			vecGeometryValue[i] /= confidenceScore;
-// 
-// 		double valueBefore = vecSmoothValue[i];
-// 		vecSmoothValue[i] = vecGeometryValue[i] + vecAppearenceValue[i];
-// 
-// 		double para = 0.3;
-// 		vecSmoothValue[i] =  (vecSmoothValue[i] - minSV)/(maxSV - minSV);
-// 		vecSmoothValue[i] = paraSmoothAdjust * pow(2.7183,- (1 - vecSmoothValue[i]) * (1 - vecSmoothValue[i]) / para /para);
-// 	}
-// 
-// 	ComputeScore();
-
-
-	//for each seperatenessEdge
-// 	for(int i = 0;i < vecvecpairSeperatenessSmallEdge.size();i++)
-// 	{
-// 		double cutCostDiff = 0;
-// 		for(int j = 0;j < vecvecpairSeperatenessSmallEdge[i].size();j++)
-// 		{
-// 			double confidenceScore = ComputeConfidenceScore(vecvecpairSeperatenessSmallEdge[i][j].first,vecvecpairSeperatenessSmallEdge[i][j].second);  //0--largenum
-// 			for(int k = 0;k < vecpairPatchConnection.size();k++)
-// 			{
-// 				if(vecpairPatchConnection[k].first == vecvecpairSeperatenessSmallEdge[i][j].first && vecpairPatchConnection[k].second == vecvecpairSeperatenessSmallEdge[i][j].second)
-// 				{
-// 					if(vecGeometryConvex[k])
-// 						vecGeometryValue[k] *= confidenceScore;
-// 					else
-// 						vecGeometryValue[k] /= confidenceScore;
-// 
-// 					double valueBefore = vecSmoothValue[k];
-// 					vecSmoothValue[k] = vecGeometryValue[k] + vecAppearenceValue[k];
-// 
-// 					double para = 0.3;
-// 					vecSmoothValue[k] =  (vecSmoothValue[k] - minSV)/(maxSV - minSV);
-// 					vecSmoothValue[k] = paraSmoothAdjust * pow(2.7183,- (1 - vecSmoothValue[k]) * (1 - vecSmoothValue[k]) / para /para);
-// 
-// 					cutCostDiff += vecSmoothValue[k] - valueBefore;
-// 					break;
-// 				}	
-// 			}
-// 		}
-// 		vecSeparateness[i] += cutCostDiff;
-// 		vecObjectness[vecpairSeperatenessEdge[i].first] += cutCostDiff;
-// 		vecObjectness[vecpairSeperatenessEdge[i].second] += cutCostDiff;
-// 	}
-
-}
-
 void CScanEstimation::saveMultiResultToOriginal( CMesh *original, int m )
 {
-  GlobalFun::clearCMesh(*original);
-  
-  for(int i = 0;i < vecvecMultiResult[m].size();i++)
-  {
-    for(int j = 0;j < vecPatchPoint[vecvecMultiResult[m][i]].mypoints.size();j++)
-    {
-      MyPoint_RGB_NORMAL point = vecPatchPoint[vecvecMultiResult[m][i]].mypoints[j];
-      CVertex new_point;
-      new_point.P()[0] = point.x;
-      new_point.P()[1] = point.y;
-      new_point.P()[2] = point.z;
-      new_point.N()[0] = point.normal_x;
-      new_point.N()[1] = point.normal_y;
-      new_point.N()[2] = point.normal_z;
+	GlobalFun::clearCMesh(*original);
 
-      new_point.m_index = i;
-      new_point.is_original = true;
-      original->vert.push_back(new_point);
-      original->bbox.Add(new_point.P());
-    }
-  }
-  original->vn = original->vert.size();
-  return;
+	for(int i = 0;i < vecvecMultiResult[m].size();i++)
+	{
+		for(int j = 0;j < vecPatchPoint[vecvecMultiResult[m][i]].mypoints.size();j++)
+		{
+			MyPoint_RGB_NORMAL point = vecPatchPoint[vecvecMultiResult[m][i]].mypoints[j];
+			CVertex new_point;
+			new_point.P()[0] = point.x;
+			new_point.P()[1] = point.y;
+			new_point.P()[2] = point.z;
+			new_point.N()[0] = point.normal_x;
+			new_point.N()[1] = point.normal_y;
+			new_point.N()[2] = point.normal_z;
+
+			new_point.m_index = i;
+			new_point.is_original = true;
+			original->vert.push_back(new_point);
+			original->bbox.Add(new_point.P());
+		}
+	}
+	original->vn = original->vert.size();
+	return;
 }
+
+
+void CScanEstimation::ScoreUpdate()
+{
+	//get confidence score for each patch
+	vecPatchConfidenceScore.resize(vecPatchPoint.size(),0);
+	for(int i = 0;i < vecvecMultiResult.size();i++)
+	{
+		for(int j = 0;j < vecvecMultiResult[i].size();j++)
+		{
+			double confidenceScore = 0;
+			int patchIndex = vecvecMultiResult[i][j];
+			for(int k = 0;k < vecObjectIsoPoint[i].objectIsoPoint.size();k++)
+			{
+				double distance;
+				distance = sqrt((vecObjectIsoPoint[i].objectIsoPoint[k].x - vecPatchCenPoint[patchIndex].x) * (vecObjectIsoPoint[i].objectIsoPoint[k].x - vecPatchCenPoint[patchIndex].x)
+					+ (vecObjectIsoPoint[i].objectIsoPoint[k].y - vecPatchCenPoint[patchIndex].y) * (vecObjectIsoPoint[i].objectIsoPoint[k].y - vecPatchCenPoint[patchIndex].y)
+					+ (vecObjectIsoPoint[i].objectIsoPoint[k].z - vecPatchCenPoint[patchIndex].z) * (vecObjectIsoPoint[i].objectIsoPoint[k].z - vecPatchCenPoint[patchIndex].z));
+				double weight;
+				weight = GaussianFunction(distance);
+				confidenceScore += weight* vecObjectIsoPoint[i].objectIsoPoint[k].f;
+			}
+			vecPatchConfidenceScore[patchIndex] = confidenceScore;
+		}
+	}
+
+	
+	fstream outFile2("Output\\duima.txt",ios::app);
+	for(int i = 0;i < vecPatchConfidenceScore.size();i++)
+	{
+		outFile2 << " score:" << vecPatchConfidenceScore[i] <<endl;
+	}
+	
+	outFile2 << " half " <<endl;
+	outFile2.close();
+
+	//update the smooth term
+	for(int i = 0;i < vecpairPatchConnection.size();i++)
+	{
+		double confidenceScore;
+		confidenceScore = vecPatchConfidenceScore[vecpairPatchConnection[i].first] * vecPatchConfidenceScore[vecpairPatchConnection[i].second];
+
+		if(vecGeometryConvex[i])
+			vecGeometryValue[i] *= confidenceScore;
+		else
+			vecGeometryValue[i] /= confidenceScore;
+
+		double valueBefore = vecSmoothValue[i];
+		vecSmoothValue[i] = vecGeometryValue[i] + vecAppearenceValue[i];
+
+		double para = 0.3;
+		vecSmoothValue[i] =  (vecSmoothValue[i] - minSV)/(maxSV - minSV);
+		vecSmoothValue[i] = paraSmoothAdjust * pow(2.7183,- (1 - vecSmoothValue[i]) * (1 - vecSmoothValue[i]) / para /para);
+	}
+
+	fstream outFile3("Output\\duima.txt",ios::app);
+	outFile3 << " 33 " <<endl;
+	outFile3.close();
+
+	ComputeScore();
+}
+
+
 
 void CScanEstimation::runComputeIsoGradientConfidence()
 {

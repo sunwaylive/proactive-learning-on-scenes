@@ -48,7 +48,7 @@ void CPointCloudAnalysis::MainStep()
 	BinarySegmentation();
 	Clustering();
 	MultiSegmentation();
-	//ScanEstimation();
+	ScanEstimation();
 }
 
 
@@ -113,7 +113,6 @@ void CPointCloudAnalysis::DataIn()
 	inFile.close();
 
 	//¶Ácluster size
-	vector<int> clusterPatchNum;
 	flagStop = false;
 	while (inFile1.getline(buf, sizeof buf))
 	{
@@ -136,7 +135,7 @@ void CPointCloudAnalysis::DataIn()
 	inFile1.close();
 
 	//¶Ánormal
-	vector<Normalt> vecPatchNormal;
+//	vector<Normalt> vecPatchNormal;
 	while (inFile2.getline(buf, sizeof buf))
 	{
 		istringstream line(buf);
@@ -144,7 +143,7 @@ void CPointCloudAnalysis::DataIn()
 		line >> nor.normal_x;
 		line >> nor.normal_y;
 		line >> nor.normal_z;
-		vecPatchNormal.push_back(nor);
+		vecPatcNormal.push_back(nor);
 	}
 	inFile2.close();
 
@@ -166,21 +165,6 @@ void CPointCloudAnalysis::DataIn()
 	}
 	inFile3.close();
 
-
-	int begin = 0;
-	int end = 0;
-	for(int i = 0;i < clusterPatchNum.size();i++)
-	{
-		begin = end ;
-		end = begin + clusterPatchNum[i];
-		vector<MyPointCloud_RGB_NORMAL> vecPatchPointTemp;
-		for(int j = begin;j < end;j++)
-		{
-			vecPatchPointTemp.push_back(vecPatchPoint[j]);
-		}
-		cBinarySeg.AddClusterPoints(vecPatchPointTemp);
-	}
-	cBinarySeg.AddPatchNormal(vecPatchNormal);
 }
 
 void CPointCloudAnalysis::BinarySegmentation()
@@ -198,7 +182,7 @@ void CPointCloudAnalysis::MultiSegmentation()
 	cMultiSeg.MainStep();
 }
 
-void CPointCloudAnalysis::ScanEstimation(CMesh *original)
+void CPointCloudAnalysis::ScanEstimation()
 {
 	cScanEstimation.vecGeometryConvex = cBinarySeg.vecGeometryConvex;
 	cScanEstimation.vecGeometryValue = cBinarySeg.vecGeometryValue;
@@ -207,5 +191,4 @@ void CPointCloudAnalysis::ScanEstimation(CMesh *original)
 	cScanEstimation.maxSV = cBinarySeg.maxSV;
 	cScanEstimation.minSV = cBinarySeg.minSV;
 
-	cScanEstimation.MainStep(original);
 }

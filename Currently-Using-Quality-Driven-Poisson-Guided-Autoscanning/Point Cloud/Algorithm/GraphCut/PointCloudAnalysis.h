@@ -25,6 +25,6 @@ public:
 	void BinarySegmentation();
 	void Clustering();
 	void MultiSegmentation();
-	void ScanEstimation(CMesh *original);
+	void ScanEstimation();
 };
 
