@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Algorithm/GraphCut/color_op.h"
-#include "Algorithm/GraphCut/scene_seg.h"
+#include "Algorithm/Common/color_op.h"
+//#include "Algorithm/GraphCut/scene_seg.h"
 #include "Algorithm/GraphCut/graph.h"
 #include "Algorithm/GraphCut/BinarySeg.h"
 #include "Algorithm/GraphCut/Clustering.h"

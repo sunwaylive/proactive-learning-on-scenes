@@ -1,6 +1,4 @@
 #pragma once
-#include "scene_seg.h"
-#include "color_op.h"
 #include "graph.h"
 
 

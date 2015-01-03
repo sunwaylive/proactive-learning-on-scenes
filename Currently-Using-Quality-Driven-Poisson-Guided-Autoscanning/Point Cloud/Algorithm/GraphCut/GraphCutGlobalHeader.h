@@ -1,3 +1,6 @@
+#ifndef GRAPH_CUT_GLOBAL_HEADER_H
+#define GRAPH_CUT_GLOBAL_HEADER_H
+
 #pragma once
 #include <omp.h>
 #pragma warning(disable: 4786)
@@ -21,3 +24,5 @@
 #define SMALL_NUM -9999999
 
 using namespace std;
+
+#endif

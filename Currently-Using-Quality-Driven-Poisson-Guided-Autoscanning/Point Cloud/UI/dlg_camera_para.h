@@ -20,6 +20,13 @@
 #include <QThread>
 
 #include "Algorithm/GraphCut/PointCloudAnalysis.h"
+#include "Algorithm/ObjPreSegment/scene_seg.h"
+#include "Algorithm/ScenePreSegment/bigScene_preSeg.h"
+#include "Algorithm/Common/visualizer.h"
+#include "Algorithm/Common/file_io.h"
+#include "Algorithm//Common/common_func.h"
+#include "Algorithm//Common/common_type.h"
+#include "Algorithm/Common/utility.h"
 
 using namespace std;
 
@@ -121,7 +128,9 @@ signals:
     void savePickPointToIso();
     void runSceneConfidence();
     void runSceneConfidenceViaOriginal();
-	void runGraphCut();
+	  void runGraphCut();
+    void runOverSegmentation();
+    void runSceneSegmentation();
 
 private:
   Ui::camera_paras * ui;

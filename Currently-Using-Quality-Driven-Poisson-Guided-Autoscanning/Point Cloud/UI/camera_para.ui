@@ -372,6 +372,32 @@
       <string>Test GraphCut</string>
      </property>
     </widget>
+    <widget class="QPushButton" name="pushButton_over_segment">
+     <property name="geometry">
+      <rect>
+       <x>40</x>
+       <y>630</y>
+       <width>191</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Over-Segment</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pushButton_segment_scene">
+     <property name="geometry">
+      <rect>
+       <x>40</x>
+       <y>670</y>
+       <width>191</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Segment Scene</string>
+     </property>
+    </widget>
    </widget>
    <widget class="QWidget" name="tab">
     <attribute name="title">
