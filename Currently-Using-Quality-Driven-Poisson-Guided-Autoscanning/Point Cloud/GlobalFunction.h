@@ -8,6 +8,12 @@
 //pcl related
 #include "common_type.h"
 #include <pcl/visualization/cloud_viewer.h>
+#include <pcl/point_types.h>
+#include <pcl/io/pcd_io.h>
+
+typedef pcl::PointXYZRGBNormal PclPoint;
+typedef pcl::PointCloud<PclPoint> PclPointCloud;
+typedef PclPointCloud::Ptr PclPointCloudPtr;
 
 #include "TriMesh.h"
 #include "TriMesh_algo.h"

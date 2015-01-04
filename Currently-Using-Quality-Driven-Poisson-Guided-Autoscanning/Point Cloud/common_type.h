@@ -1,8 +1,6 @@
 //#ifndef COMMON_TYPE_H
 //#define COMMON_TYPE_H
 
-#include <pcl/point_types.h>
-#include <pcl/io/pcd_io.h>
 
 //typedef pcl::PointXYZ Point;
 //typedef pcl::PointCloud<Point> PointCloud;
@@ -96,6 +94,3 @@
 
 
 //wei
-typedef pcl::PointXYZRGBNormal PclPoint;
-typedef pcl::PointCloud<PclPoint> PclPointCloud;
-typedef PclPointCloud::Ptr PclPointCloudPtr;
