@@ -1,5 +1,9 @@
 #include "GLArea.h"
 
+//shiyifei
+extern GRAPHSHOW graphInit;
+extern GRAPHSHOW graphContract;
+
 //#include "Poisson/MultiGridOctreeData.h"
 #define PI 3.1415926535897932384
 
@@ -506,6 +510,7 @@ void GLArea::paintGL()
     //shiyifei, show graph cut related
     if (para->getBool("Show GraphCut Related"))
     {
+      //1. show graph cut result
       if(!dataMgr.isGraphCutResultEmpty())
       {
         if(para->getBool("Show Samples Quad"))
@@ -517,6 +522,13 @@ void GLArea::paintGL()
         if (para->getBool("Show Samples Sphere"))
           glDrawer.draw(GLDrawer::SPHERE, dataMgr.getCurrentGraphCutResult());	
       }
+
+      //2. show contraction graph
+
+
+      //3. show patch graph
+
+
     }
 
     if (para->getBool("Show Bounding Box") && para->getBool("Show View Grid Slice"))

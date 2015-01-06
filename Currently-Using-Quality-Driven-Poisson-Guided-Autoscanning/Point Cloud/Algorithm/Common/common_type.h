@@ -127,4 +127,31 @@ void MyPointCloud_RGB_NORMAL2MyPointCloud(MyPointCloud_RGB_NORMAL& mc_rgb, MyPoi
 
 void CopyMyPointCloud_RGB(MyPointCloud_RGB& source, MyPointCloud_RGB& target);
 void CopyMyPointCloud(MyPointCloud& source, MyPointCloud& target);
+
+//shiyifei types
+struct GRAPHSHOW
+{
+  vector<MyPt_RGB_NORMAL> vecNodes;
+  vector<pair<int,int> > vecEdges;
+  vector<float> vecEdgeColor; 
+};
+
+struct NEARBYPOINT
+{
+  int patchFirst;
+  int patchSecond;
+
+  int indexFirst;
+  int indexSecond;
+};
+
+struct NEARBYPOINTSUM
+{
+  vector<NEARBYPOINT> nearbyPoint;
+};
+
+struct NEARBYNORMAL
+{
+  Normalt normal0,normal1;
+};
 #endif 

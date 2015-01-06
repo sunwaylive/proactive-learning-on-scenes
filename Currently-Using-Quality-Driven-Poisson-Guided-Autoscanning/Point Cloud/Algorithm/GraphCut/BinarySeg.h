@@ -5,33 +5,6 @@
 #include "Algorithm/Common/color_op.h"
 #include "graph.h"
 #include "kdtree.h"
-#include "Algorithm/Common/common_type.h"
-
-
-struct GRAPHSHOW
-{
-	vector<MyPt_RGB_NORMAL> vecNodes;
-	vector<pair<int,int>> vecEdges;
-};
-
-struct NEARBYPOINT
-{
-	int patchFirst;
-	int patchSecond;
-
-	int indexFirst;
-	int indexSecond;
-};
-
-struct NEARBYPOINTSUM
-{
-	vector<NEARBYPOINT> nearbyPoint;
-};
-
-struct NEARBYNORMAL
-{
-	Normalt normal0,normal1;
-};
 
 class CBinarySeg
 {

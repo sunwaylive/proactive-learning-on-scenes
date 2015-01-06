@@ -136,7 +136,7 @@ bool DataMgr::isOriginalEmpty()
 
 bool DataMgr::isGraphCutResultEmpty()
 {
-  return graph_cut_result.vert.empty();
+  return graphcut_result.vert.empty();
 }
 
 bool DataMgr::isIsoPointsEmpty()
@@ -448,8 +448,8 @@ void DataMgr::setCurrentTemperalSample(CMesh *mesh)
 
 CMesh* DataMgr::getCurrentGraphCutResult()
 {
-  if (&graph_cut_result == NULL) return NULL;
-  return &graph_cut_result;
+  if (&graphcut_result == NULL) return NULL;
+  return &graphcut_result;
 }
 
 CMesh* DataMgr::getCurrentIsoPoints()
