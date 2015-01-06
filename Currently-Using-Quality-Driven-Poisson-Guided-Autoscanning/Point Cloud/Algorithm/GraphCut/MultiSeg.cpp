@@ -2,22 +2,6 @@
 #include "MultiSeg.h"
 
 
-extern vector<MyPointCloud_RGB_NORMAL> vecPatchPoint;
-extern vector<pair<int,int>> vecpairPatchConnection;
-extern vector<MyPoint> vecPatchCenPoint;
-extern double boundingBoxSize;
-extern vector<int> clusterPatchNum;
-extern vector<vector<bool>> vecvecPatchConnectFlag;
-extern vector<ColorType> vecPatchColor;
-extern vector<vector<int>> vecvecMultiResult;
-extern vector<double> vecSmoothValue;
-extern vector<double> vecObjectness;
-extern vector<double> vecSeparateness;
-extern vector<pair<int,int>> vecpairSeperatenessEdge;
-extern vector<vector<pair<int,int>>> vecvecpairSeperatenessSmallEdge;
-extern vector<vector<int>> vecvecObjectPoolClustering;
-extern GRAPHSHOW graphContract;
-
 
 CMultiSeg::CMultiSeg(void)
 {
@@ -208,14 +192,7 @@ double CMultiSeg::GetMultiDataValue(int SiteID,int LableID)
 	para0 = 0;
 	para1 = 10;
 	para2 = 0;
-
 	dataValue = (para0 * centerDistance + para1 * objectCount + para2 * colorSimilarity) / (para0 + para1 + para2) * 3;
-
-	//output
-// 	ofstream outFile2("Output\\MultiData.txt",ios::app);
-// 	outFile2 <<  "centerDistance:" << centerDistance <<  "  objectCount:" << objectCount <<  "  colorSimilarity:" << colorSimilarity <<  "  dataValue:" << dataValue << endl;
-// 	outFile2 << "  " << endl;
-// 	outFile2.close();
 
 	return dataValue; 
 }
@@ -349,53 +326,50 @@ void CMultiSeg::ComputeScore()
 void CMultiSeg::ComputeObjectness(int m)
 {
 	double objectness = 0;
-	for(int i = 0;i < vecvecMultiResult[m].size();i++)
-	{
-		int patchIndex = vecvecMultiResult[m][i];
+// 	for(int i = 0;i < vecvecMultiResult[m].size();i++)
+// 	{
+// 		int patchIndex = vecvecMultiResult[m][i];
+// 
+// 		// connect before
+// 		vector<int> vecConnectPatchBefore;
+// 		for(int j = 0;j < vecvecPatchConnectFlag[patchIndex].size();j++)
+// 		{
+// 			if(vecvecPatchConnectFlag[patchIndex][j])
+// 			{
+// 				vecConnectPatchBefore.push_back(j);
+// 			}
+// 		}
+// 
+// 		// disconnnect after
+// 		vector<int> vecDisconnectPatchAfter;
+// 		for(int j = 0;j < vecConnectPatchBefore.size();j++)
+// 		{
+// 			int connectPatchIndex = vecConnectPatchBefore[j];
+// 			bool exsitFlag = false;
+// 			for(int k = 0;k < vecvecMultiResult[m].size();k++)
+// 			{
+// 				if(i == k)
+// 					continue;
+// 				if(connectPatchIndex == vecvecMultiResult[m][k])
+// 					exsitFlag = true;
+// 			}
+// 			if(!exsitFlag)
+// 				vecDisconnectPatchAfter.push_back(connectPatchIndex);
+// 		}
+// 
+// 		for(int j = 0;j < vecDisconnectPatchAfter.size();j++)
+// 		{
+// 			for(int k = 0;k < vecpairPatchConnection.size();k++)
+// 			{
+// 				if(vecpairPatchConnection[k].first == patchIndex && vecpairPatchConnection[k].second == vecDisconnectPatchAfter[j])
+// 				{
+// 					objectness += vecSmoothValue[k];
+// 				}	
+// 			}
+// 		}
+// 	}
 
-		// connect before
-		vector<int> vecConnectPatchBefore;
-		for(int j = 0;j < vecvecPatchConnectFlag[patchIndex].size();j++)
-		{
-			if(vecvecPatchConnectFlag[patchIndex][j])
-			{
-				vecConnectPatchBefore.push_back(j);
-			}
-		}
-
-		// disconnnect after
-		vector<int> vecDisconnectPatchAfter;
-		for(int j = 0;j < vecConnectPatchBefore.size();j++)
-		{
-			int connectPatchIndex = vecConnectPatchBefore[j];
-			bool exsitFlag = false;
-			for(int k = 0;k < vecvecMultiResult[m].size();k++)
-			{
-				if(i == k)
-					continue;
-				if(connectPatchIndex == vecvecMultiResult[m][k])
-					exsitFlag = true;
-			}
-			if(!exsitFlag)
-				vecDisconnectPatchAfter.push_back(connectPatchIndex);
-		}
-
-		for(int j = 0;j < vecDisconnectPatchAfter.size();j++)
-		{
-			for(int k = 0;k < vecpairPatchConnection.size();k++)
-			{
-				if(vecpairPatchConnection[k].first == patchIndex && vecpairPatchConnection[k].second == vecDisconnectPatchAfter[j])
-				{
-					objectness += vecSmoothValue[k];
-				}	
-			}
-		}
-	}
 	vecObjectness.push_back(objectness);
-
-	ofstream outFile("Output\\Objectness.txt",ios::app);
-	outFile << objectness <<  endl;
-	outFile.close();
 }
 
 void CMultiSeg::ComputeSeparateness(int m,int n)
@@ -452,10 +426,6 @@ void CMultiSeg::ComputeSeparateness(int m,int n)
 		vecpairSeperatenessEdge.push_back(edge);
 		vecSeparateness.push_back(separateness);
 		vecvecpairSeperatenessSmallEdge.push_back(vecpairSeperatenessSmallEdge);
-
-		ofstream outFile("Output\\Separateness.txt",ios::app);
-		outFile << separateness<< endl;
-		outFile.close();
 	}
 
 }

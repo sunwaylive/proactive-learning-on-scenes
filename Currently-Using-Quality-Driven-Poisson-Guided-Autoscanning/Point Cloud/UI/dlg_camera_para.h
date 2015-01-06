@@ -19,7 +19,7 @@
 #include <QtCore/QDebug> 
 #include <QThread>
 
-#include "Algorithm/GraphCut/PointCloudAnalysis.h"
+
 #include "Algorithm/ObjPreSegment/scene_seg.h"
 #include "Algorithm/ScenePreSegment/bigScene_preSeg.h"
 #include "Algorithm/Common/visualizer.h"
@@ -27,6 +27,9 @@
 #include "Algorithm//Common/common_func.h"
 #include "Algorithm//Common/common_type.h"
 #include "Algorithm/Common/utility.h"
+
+#include "Algorithm/GraphCut/PointCloudAnalysis.h"
+#include "Algorithm/GraphCut/GraphCutBasicStruct.h"
 
 using namespace std;
 
@@ -128,7 +131,8 @@ signals:
     void savePickPointToIso();
     void runSceneConfidence();
     void runSceneConfidenceViaOriginal();
-	  void runGraphCut();
+	void runGraphCut();
+	void getUpdateData();
     void runOverSegmentation();
     void runSceneSegmentation();
 
@@ -138,4 +142,5 @@ private:
   GLArea * area;
   OneKeyNBVBack m_nbv;
   QReadWriteLock nbv_mutex;
+  CPointCloudAnalysis cPointCloudAnalysis;
 };

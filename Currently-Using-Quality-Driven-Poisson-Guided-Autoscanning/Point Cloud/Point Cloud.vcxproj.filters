@@ -274,6 +274,9 @@
     <ClCompile Include="Algorithm\Common\visualizer.cpp">
       <Filter>Algorithm\Common</Filter>
     </ClCompile>
+    <ClCompile Include="Algorithm\GraphCut\GraphCutBasicStruct.cpp">
+      <Filter>Algorithm\GraphCut</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="mainwindow.h">
@@ -526,6 +529,9 @@
     </ClInclude>
     <ClInclude Include="Algorithm\Common\visualizer.h">
       <Filter>Algorithm\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Algorithm\GraphCut\GraphCutBasicStruct.h">
+      <Filter>Algorithm\GraphCut</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

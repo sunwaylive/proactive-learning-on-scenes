@@ -132,20 +132,20 @@ private:
   void initDefaultScanCamera();
 
 public:
-  CMesh                  model;
-  CMesh                  original;
-  CMesh                  poisson_surface;
-  CMesh                 *temperal_original;
-  Point3f                original_center_point;
-  CMesh                  samples;
-  CMesh                 *temperal_sample;
-  CMesh                  iso_points;
-  CMesh                  field_points;
-  CMesh                  camera_model;
-  CMesh                  view_grid_points;
-  CMesh                  nbv_candidates;
-  Point3f                camera_pos;
-  Point3f                camera_direction;
+	CMesh                  model;
+	CMesh                  original;
+	CMesh                  poisson_surface;
+	CMesh                 *temperal_original;
+	Point3f                original_center_point;
+	CMesh                  samples;
+	CMesh                 *temperal_sample;
+	CMesh                  iso_points;
+	CMesh                  field_points;
+	CMesh                  camera_model;
+	CMesh                  view_grid_points;
+	CMesh                  nbv_candidates;
+	Point3f                camera_pos;
+	Point3f                camera_direction;
   double                 camera_horizon_dist;
   double                 camera_vertical_dist;
   double                 camera_resolution;
@@ -176,6 +176,7 @@ public:
   CMesh                  y_sdf_slice_plane;
   CMesh                  z_sdf_slice_plane;
   vector<CMesh*>         sdf_slices;
+
 
   void                   loadPlyToSDFVoxel(QString fileName);
   void                   loadOwnToSDFVoxel(QString fileName);
