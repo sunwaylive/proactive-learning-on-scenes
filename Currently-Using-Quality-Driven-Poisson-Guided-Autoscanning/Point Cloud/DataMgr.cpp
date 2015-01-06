@@ -134,6 +134,11 @@ bool DataMgr::isOriginalEmpty()
   return original.vert.empty();
 }
 
+bool DataMgr::isGraphCutResultEmpty()
+{
+  return graph_cut_result.vert.empty();
+}
+
 bool DataMgr::isIsoPointsEmpty()
 {
   return iso_points.vert.empty();
@@ -439,6 +444,12 @@ void DataMgr::loadCameraModel(QString fileName)
 void DataMgr::setCurrentTemperalSample(CMesh *mesh)
 {
   this->temperal_sample = mesh;
+}
+
+CMesh* DataMgr::getCurrentGraphCutResult()
+{
+  if (&graph_cut_result == NULL) return NULL;
+  return &graph_cut_result;
 }
 
 CMesh* DataMgr::getCurrentIsoPoints()

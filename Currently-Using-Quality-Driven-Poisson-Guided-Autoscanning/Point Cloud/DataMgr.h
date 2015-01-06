@@ -55,6 +55,7 @@ public:
   bool      isModelEmpty();
   bool      isSamplesEmpty();
   bool      isOriginalEmpty();
+  bool      isGraphCutResultEmpty();
   bool      isIsoPointsEmpty();
   bool      isFieldPointsEmpty();
   bool      isViewCandidatesEmpty();
@@ -71,6 +72,7 @@ public:
   CMesh*                  getCurrentPoissonSurface();
   CMesh*                  getCurrentOriginal();
   CMesh*                  getCurrentTemperalOriginal();
+  CMesh*                  getCurrentGraphCutResult();
   CMesh*                  getCurrentIsoPoints();
   CMesh*                  getCurrentFieldPoints();
   Slices*                 getCurrentSlices();
@@ -134,6 +136,7 @@ private:
 public:
   CMesh                  model;
   CMesh                  original;
+  CMesh                  graphcut_result;
   CMesh                  poisson_surface;
   CMesh                 *temperal_original;
   Point3f                original_center_point;

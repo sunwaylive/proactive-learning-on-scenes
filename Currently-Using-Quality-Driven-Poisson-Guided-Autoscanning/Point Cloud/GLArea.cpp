@@ -503,6 +503,21 @@ void GLArea::paintGL()
       }
     }
 
+    //shiyifei, show graph cut related
+    if (para->getBool("Show GraphCut Related"))
+    {
+      if(!dataMgr.isGraphCutResultEmpty())
+      {
+        if(para->getBool("Show Samples Quad"))
+          glDrawer.draw(GLDrawer::QUADE, dataMgr.getCurrentGraphCutResult());
+        if(para->getBool("Show Samples Dot"))
+          glDrawer.draw(GLDrawer::DOT, dataMgr.getCurrentGraphCutResult());
+        if(para->getBool("Show Samples Circle"))
+          glDrawer.draw(GLDrawer::CIRCLE, dataMgr.getCurrentGraphCutResult());
+        if (para->getBool("Show Samples Sphere"))
+          glDrawer.draw(GLDrawer::SPHERE, dataMgr.getCurrentGraphCutResult());	
+      }
+    }
 
     if (para->getBool("Show Bounding Box") && para->getBool("Show View Grid Slice"))
     {
@@ -1764,7 +1779,7 @@ void GLArea::wheelEvent(QWheelEvent *e)
     && (e->modifiers() & Qt::AltModifier)
     && (e->modifiers() & Qt::ShiftModifier)
     && !global_paraMgr.poisson.getBool("Show Slices Mode")
-    && !global_paraMgr.nbv.getBool("Show SDF Slices"))
+    && !global_paraMgr.glarea.getBool("Show SDF Slices"))
   {
     size_temp = global_paraMgr.nbv.getDouble("Confidence Separation Value");
     size_temp *= change2;

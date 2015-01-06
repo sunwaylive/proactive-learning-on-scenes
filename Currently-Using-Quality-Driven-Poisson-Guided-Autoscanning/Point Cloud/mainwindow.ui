@@ -173,6 +173,7 @@
     <addaction name="separator"/>
     <addaction name="actionShow_SDF_Voxels"/>
     <addaction name="actionShow_SDF_Slices"/>
+    <addaction name="actionShow_GraphCut_Related"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuAlgorithom"/>
@@ -235,6 +236,7 @@
    <addaction name="actionShow_View_Grids"/>
    <addaction name="separator"/>
    <addaction name="separator"/>
+   <addaction name="actionShow_GraphCut_Related"/>
    <addaction name="actionShow_SDF_Voxels"/>
    <addaction name="actionShow_SDF_Slices"/>
   </widget>
@@ -989,6 +991,14 @@
   <action name="actionMeshLab_ICP">
    <property name="text">
     <string>MeshLab ICP</string>
+   </property>
+  </action>
+  <action name="actionShow_GraphCut_Related">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show GraphCut Related</string>
    </property>
   </action>
  </widget>

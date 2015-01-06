@@ -305,7 +305,7 @@
      <property name="geometry">
       <rect>
        <x>40</x>
-       <y>130</y>
+       <y>170</y>
        <width>191</width>
        <height>31</height>
       </rect>
@@ -350,7 +350,7 @@
      <property name="geometry">
       <rect>
        <x>40</x>
-       <y>170</y>
+       <y>210</y>
        <width>191</width>
        <height>31</height>
       </rect>
@@ -396,6 +396,22 @@
      </property>
      <property name="text">
       <string>Segment Scene</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pushButton_detect_changed_points">
+     <property name="geometry">
+      <rect>
+       <x>40</x>
+       <y>130</y>
+       <width>191</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Detect Changed Points</string>
+     </property>
+     <property name="shortcut">
+      <string>Alt+E</string>
      </property>
     </widget>
    </widget>

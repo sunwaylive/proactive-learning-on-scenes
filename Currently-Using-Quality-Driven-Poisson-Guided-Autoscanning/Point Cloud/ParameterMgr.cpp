@@ -129,6 +129,7 @@ void ParameterMgr::initGlareaParameter()
   //sdf related
   glarea.addParam(new RichBool("Show SDF Slices",false));
   glarea.addParam(new RichBool("Show SDF Voxels", false));
+  glarea.addParam(new RichBool("Show GraphCut Related", false));
 }
 
 void ParameterMgr::initDrawerParameter()

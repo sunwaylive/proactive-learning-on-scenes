@@ -126,6 +126,7 @@ signals:
     void computeSceneNBV();
     void usePickOriginal(bool _val);
     void savePickPointToIso();
+    void detectChangedPoints();
     void runSceneConfidence();
     void runSceneConfidenceViaOriginal();
 	  void runGraphCut();

@@ -63,7 +63,7 @@ void GLDrawer::updateDrawer(vector<int>& pickList)
 
 void GLDrawer::draw(DrawType type, CMesh* _mesh)
 {
-	if (!_mesh)
+	if (_mesh == NULL)
 		return;
 
 	bool doPick = para->getBool("Doing Pick");
@@ -211,6 +211,11 @@ GLColor GLDrawer::getColorByType(CVertex& v)
 {
 	if (v.is_model)
 		return cBlack;
+
+  //shiyifei show graph point color
+  if (v.is_graphcut_related){
+    return GLColor(v.C()[0], v.C()[1], v.C()[2]);
+  }
 
   if (v.is_original)
   {
