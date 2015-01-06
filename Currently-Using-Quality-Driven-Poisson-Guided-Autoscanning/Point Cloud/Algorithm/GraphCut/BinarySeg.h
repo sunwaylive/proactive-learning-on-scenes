@@ -5,7 +5,6 @@
 #include "Algorithm/Common/color_op.h"
 #include "Algorithm/GraphCut/graph.h"
 #include "kdtree.h"
-#include "Algorithm/Common/common_type.h"
 #include "Algorithm/GraphCut/GraphCutBasicStruct.h"
 
 class CBinarySeg

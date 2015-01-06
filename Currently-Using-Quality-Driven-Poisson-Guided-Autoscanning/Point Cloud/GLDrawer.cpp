@@ -63,7 +63,7 @@ void GLDrawer::updateDrawer(vector<int>& pickList)
 
 void GLDrawer::draw(DrawType type, CMesh* _mesh)
 {
-	if (!_mesh)
+	if (_mesh == NULL)
 		return;
 
 	bool doPick = para->getBool("Doing Pick");
@@ -211,6 +211,11 @@ GLColor GLDrawer::getColorByType(CVertex& v)
 {
 	if (v.is_model)
 		return cBlack;
+
+  //shiyifei show graph point color
+  if (v.is_graphcut_related){
+    return GLColor(v.C()[0], v.C()[1], v.C()[2]);
+  }
 
   if (v.is_original)
   {
@@ -804,13 +809,48 @@ void GLDrawer::drawSDFSliceDot(CMesh *sdf_slice)
   }
 }
 
+//shiyifei
+void GLDrawer::drawGraphShow(GRAPHSHOW *graphcut, GraphType graphType)
+{
+  if(graphcut == NULL) return;
+
+  double sphere_radius = 0.0f;
+  double line_thickness = 0.0f;
+
+  if (graphType == PATCH_GRAPH){
+    sphere_radius = 0.2;
+    line_thickness = 0.2;
+  }else if(graphType == CONTRACTION_GRAPH){
+    sphere_radius = 0.5;
+    line_thickness = 0.5;
+  }
+
+  //draw sphere
+  for (int i = 0; i < graphcut->vecNodes.size(); ++i){
+    MyPt_RGB_NORMAL &pt = graphcut->vecNodes[i];
+    glDrawSphere(Point3f(pt.x, pt.y, pt.z), GLColor(pt.r, pt.g, pt.b), sphere_radius, 0);
+  }
+
+  //draw edges
+  for(int i = 0; i < graphcut->vecEdges.size(); ++i){
+    int s_idx = graphcut->vecEdges[i].first;
+    int e_idx = graphcut->vecEdges[i].second;
+    MyPt_RGB_NORMAL &s_pt = graphcut->vecNodes[s_idx];
+    MyPt_RGB_NORMAL &e_pt = graphcut->vecNodes[e_idx];
+
+    float r = graphcut->vecEdgeColor[3 * i];
+    float g = graphcut->vecEdgeColor[3 * i + 1];
+    float b = graphcut->vecEdgeColor[3 * i + 2];
+    glDrawLine(Point3f(s_pt.x, s_pt.y, s_pt.z), Point3f(e_pt.x, e_pt.y, e_pt.z), GLColor(r, g, b), line_thickness);
+  }
+}
+
 void GLDrawer::drawMeshLables(CMesh *mesh, QPainter *painter)
 {
   for (int i = 0; i < mesh->vert.size(); i++)
   {
     CVertex& v = mesh->vert[i];
-
-
+    
     glPushAttrib(GL_ALL_ATTRIB_BITS);
     glDepthFunc(GL_ALWAYS);
     glDisable(GL_LIGHTING);

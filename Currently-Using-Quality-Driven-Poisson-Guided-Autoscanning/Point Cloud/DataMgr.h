@@ -17,7 +17,6 @@
 #include <set>
 #include <utility>
 
-
 using namespace vcg;
 using namespace std;
 using namespace tri;
@@ -55,6 +54,7 @@ public:
   bool      isModelEmpty();
   bool      isSamplesEmpty();
   bool      isOriginalEmpty();
+  bool      isGraphCutResultEmpty();
   bool      isIsoPointsEmpty();
   bool      isFieldPointsEmpty();
   bool      isViewCandidatesEmpty();
@@ -71,6 +71,7 @@ public:
   CMesh*                  getCurrentPoissonSurface();
   CMesh*                  getCurrentOriginal();
   CMesh*                  getCurrentTemperalOriginal();
+  CMesh*                  getCurrentGraphCutResult();
   CMesh*                  getCurrentIsoPoints();
   CMesh*                  getCurrentFieldPoints();
   Slices*                 getCurrentSlices();
@@ -132,20 +133,21 @@ private:
   void initDefaultScanCamera();
 
 public:
-	CMesh                  model;
-	CMesh                  original;
-	CMesh                  poisson_surface;
-	CMesh                 *temperal_original;
-	Point3f                original_center_point;
-	CMesh                  samples;
-	CMesh                 *temperal_sample;
-	CMesh                  iso_points;
-	CMesh                  field_points;
-	CMesh                  camera_model;
-	CMesh                  view_grid_points;
-	CMesh                  nbv_candidates;
-	Point3f                camera_pos;
-	Point3f                camera_direction;
+  CMesh                  model;
+  CMesh                  original;
+  CMesh                  graphcut_result;
+  CMesh                  poisson_surface;
+  CMesh                 *temperal_original;
+  Point3f                original_center_point;
+  CMesh                  samples;
+  CMesh                 *temperal_sample;
+  CMesh                  iso_points;
+  CMesh                  field_points;
+  CMesh                  camera_model;
+  CMesh                  view_grid_points;
+  CMesh                  nbv_candidates;
+  Point3f                camera_pos;
+  Point3f                camera_direction;
   double                 camera_horizon_dist;
   double                 camera_vertical_dist;
   double                 camera_resolution;
