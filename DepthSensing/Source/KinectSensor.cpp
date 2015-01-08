@@ -119,7 +119,7 @@ HRESULT KinectSensor::createFirstConnected()
 		2,
 		m_hNextColorFrameEvent,
 		&m_pColorStreamHandle );
-	if (FAILED(hr) ) { return hr; }
+	if (FAILED(hr) ) { return hr; } 
 
 	INuiColorCameraSettings* colorCameraSettings;
 	HRESULT hrFlag = m_pNuiSensor->NuiGetColorCameraSettings(&colorCameraSettings);
@@ -169,10 +169,12 @@ HRESULT KinectSensor::processDepth()
 	hr = m_pNuiSensor->NuiImageStreamGetNextFrame(m_pDepthStreamHandle, 0, &imageFrame);
 	hr = m_pNuiSensor->NuiImageFrameGetDepthImagePixelFrameTexture(m_pDepthStreamHandle, &imageFrame, &bNearMode, &pTexture);
 
+	//use depth image 
 	NUI_LOCKED_RECT LockedRect;
 	hr = pTexture->LockRect(0, &LockedRect, NULL, 0);
 	if ( FAILED(hr) ) { return hr; }
 
+	//pBuffer是一个指向数组的指针
 	NUI_DEPTH_IMAGE_PIXEL * pBuffer =  (NUI_DEPTH_IMAGE_PIXEL *) LockedRect.pBits;
 
 	USHORT* test = new USHORT[getDepthWidth()*getDepthHeight()];
@@ -181,14 +183,16 @@ HRESULT KinectSensor::processDepth()
 	//for (int j = 0; j < (int)getDepthWidth()*(int)getDepthHeight(); j++)	{
 	//	m_depthD16[j] = pBuffer[j].depth;
 	//}
+	
+	//将深度值放到m_depthD16中去， 这里有个左右交换的过程
 	for (unsigned int j = 0; j < getDepthHeight(); j++) {
 		for (unsigned int i = 0; i < getDepthWidth(); i++) {
 			unsigned int srcIdx = j*getDepthWidth() + (getDepthWidth() - 1 - i);
 			unsigned int desIdx = j*getDepthWidth() + i;
 
-			const USHORT& d = pBuffer[srcIdx].depth;
-			m_depthD16[desIdx] = d;
-			test[srcIdx] = d * 8;
+			const USHORT& d = pBuffer[srcIdx].depth;//拿到数组中srcIdx位置上的元素的深度值
+			m_depthD16[desIdx] = d;                 //wei， 终于TM理解深度数据获取了
+			test[srcIdx] = d * 8;                   //应该是用来测试的
 		}
 	}
 	 
@@ -199,15 +203,19 @@ HRESULT KinectSensor::processDepth()
 
 	hr = m_pNuiSensor->NuiImageStreamReleaseFrame(m_pDepthStreamHandle, &imageFrame);
 
+	//这里应该是要映射深度数据到立体空间上了
+
 	// Get offset x, y coordinates for color in depth space
 	// This will allow us to later compensate for the differences in location, angle, etc between the depth and color cameras
+	//http://msdn.microsoft.com/en-us/library/jj663856.aspx
+	//因为这个两个sensor在kinect的不同位置， fov可能不一样，所以需要矫正一下数据
 	m_pNuiSensor->NuiImageGetColorPixelCoordinateFrameFromDepthPixelFrameAtResolution(
 		cColorResolution,
 		cDepthResolution,
-		getDepthWidth()*getDepthHeight(),
-		test,
-		getDepthWidth()*getDepthHeight()*2,
-		m_colorCoordinates
+		getDepthWidth()*getDepthHeight(),  //对应的深度数据的个数
+		test,                              //深度数据的指针
+		getDepthWidth()*getDepthHeight()*2,//因为一个点有两个坐标， x, y
+		m_colorCoordinates                 //这个是指向color frame中数据的起始指针
 		);
 
 	SAFE_DELETE_ARRAY(test);
@@ -226,6 +234,7 @@ HRESULT KinectSensor::processColor()
 	if ( FAILED(hr) ) { return hr; }
 
 	NUI_LOCKED_RECT LockedRect;
+	//lock之后就可以通过LockedRect.pBit来访问它的数据了
 	hr = imageFrame.pFrameTexture->LockRect(0, &LockedRect, NULL, 0);
 	if ( FAILED(hr) ) { return hr; }
 
@@ -233,18 +242,23 @@ HRESULT KinectSensor::processColor()
 #pragma omp parallel for
 	for (int yi = 0; yi < (int)getColorHeight(); ++yi) {
 		LONG y = yi;
-
+		
+		//找到每一行的起始位置
 		LONG* pDest = ((LONG*)m_colorRGBX) + (int)getColorWidth() * y;
+
 		for (LONG x = 0; x < (int)getColorWidth(); ++x) {
 			// calculate index into depth array
 			//int depthIndex = x/m_colorToDepthDivisor + y/m_colorToDepthDivisor * getDepthWidth();
+
+			//通过简单的线性化，获取对应的depthIndex， 跟上一句注释的代码，是左右相反的
 			int depthIndex = (getDepthWidth() - 1 - x/m_colorToDepthDivisor) + y/m_colorToDepthDivisor * getDepthWidth();
 
 			// retrieve the depth to color mapping for the current depth pixel
+			//这就找到了depth和color frame的对应关系
 			LONG colorInDepthX = m_colorCoordinates[depthIndex * 2];
 			LONG colorInDepthY = m_colorCoordinates[depthIndex * 2 + 1];
 
-			// make sure the depth pixel maps to a valid point in color space
+			// make sure the depth pixel maps to a valid point in color space			
 			if ( colorInDepthX >= 0 && colorInDepthX < (int)getColorWidth() && colorInDepthY >= 0 && colorInDepthY < (int)getColorHeight() ) {
 				// calculate index into color array
 				LONG colorIndex = colorInDepthX + colorInDepthY * (int)getColorWidth();
@@ -253,15 +267,18 @@ HRESULT KinectSensor::processColor()
 				LONG* pSrc = ((LONG *)LockedRect.pBits) + colorIndex;					
 				LONG tmp = *pSrc;
 
-				tmp|=0xFF000000; // Flag for is valid
+				tmp|=0xFF000000; // Flag for is valid，把高位的(4 + 4) bits置成1
 
 				*pDest = tmp;
 			} else {
 				*pDest = 0x00000000;
 			}
-			pDest++;
-		}
-	}
+
+			pDest++; //在某一行，处理完了，在改行下移一个位置
+		}//end for x
+		//行循环结束，pDest重置为下一行的起始位置
+	}//end for y
+	//上面这个循环将color 信息存放在了m_colorRGBX中。
 
 	m_bColorReceived = true;
 

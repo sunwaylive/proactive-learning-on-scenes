@@ -106,13 +106,14 @@ void DX11RayCastingHashSDF::OnD3D11DestroyDevice()
 	destroy();
 }
 
+//这个函数的作用是用扫描数据，填充它的成员变量：s_pPositionsSRV， s_pColorsUAV， s_pNormalsSRV等等，为后面显示在界面上用。因为这个几个变量都是最后被绘制在窗口中的
 HRESULT DX11RayCastingHashSDF::Render( ID3D11DeviceContext* context, ID3D11ShaderResourceView* hash, ID3D11ShaderResourceView* hashCompact, ID3D11ShaderResourceView* sdfBlocksSDF, ID3D11ShaderResourceView* sdfBlocksRGBW, unsigned int hashNumValidBuckets, unsigned int renderTargetWidth, unsigned int renderTargetHeight, const mat4f* lastRigidTransform, ID3D11Buffer* CBsceneRepSDF )
 {
 	return RenderToTexture( context, hash, hashCompact, sdfBlocksSDF, sdfBlocksRGBW, hashNumValidBuckets, renderTargetWidth, renderTargetHeight, lastRigidTransform, CBsceneRepSDF,
 		s_pDepthStencilSplattingMinSRV, s_pDepthStencilSplattingMaxSRV,
 		s_pDepthStencilSplattingMinDSV, s_pDepthStencilSplattingMaxDSV,
 		m_pOutputImage2DSRV, m_pOutputImage2DUAV,
-		s_pPositionsSRV, s_pPositionsUAV,
+		s_pPositionsSRV, s_pPositionsUAV,//这几个变量就是后面要用的
 		s_pColorsUAV,
 		s_pNormalsSRV, s_pNormalsUAV,
 		m_pSSAOMapSRV, m_pSSAOMapUAV, m_pSSAOMapFilteredUAV);
@@ -225,7 +226,7 @@ HRESULT DX11RayCastingHashSDF::RenderStereo( ID3D11DeviceContext* context, ID3D1
 	return hr;
 }
 
-
+//这个函数决定了如何把三维的东西映射到2D的纹理上去，然后在界面上显示出来
 HRESULT DX11RayCastingHashSDF::RenderToTexture( ID3D11DeviceContext* context, ID3D11ShaderResourceView* hash, ID3D11ShaderResourceView* hashCompact, ID3D11ShaderResourceView* sdfBlocksSDF, ID3D11ShaderResourceView* sdfBlocksRGBW, unsigned int hashNumValidBuckets, unsigned int renderTargetWidth, unsigned int renderTargetHeight, const mat4f* lastRigidTransform, ID3D11Buffer* CBsceneRepSDF, ID3D11ShaderResourceView* pDepthStencilSplattingMinSRV, ID3D11ShaderResourceView* pDepthStencilSplattingMaxSRV, ID3D11DepthStencilView* pDepthStencilSplattingMinDSV, ID3D11DepthStencilView* pDepthStencilSplattingMaxDSV, ID3D11ShaderResourceView* pOutputImage2DSRV, ID3D11UnorderedAccessView* pOutputImage2DUAV, ID3D11ShaderResourceView* pPositionsSRV, ID3D11UnorderedAccessView* pPositionsUAV, ID3D11UnorderedAccessView* pColorsUAV, ID3D11ShaderResourceView* pNormalsSRV, ID3D11UnorderedAccessView* pNormalsUAV, ID3D11ShaderResourceView* pSSAOMapSRV, ID3D11UnorderedAccessView* pSSAOMapUAV, ID3D11UnorderedAccessView* pSSAOMapFilteredUAV )
 {
 	HRESULT hr = S_OK;
@@ -427,6 +428,9 @@ HRESULT DX11RayCastingHashSDF::initialize( ID3D11Device* pd3dDevice )
 
 	// Position
 	V_RETURN(pd3dDevice->CreateTexture2D(&descTex, NULL, &s_pPositions));
+	//第一个参数是input
+	//第二个: NULL to create a view that accesses the entire resource (using the format the resource was created with)
+	//第三个：返回的指针
 	V_RETURN(pd3dDevice->CreateShaderResourceView(s_pPositions, NULL, &s_pPositionsSRV));
 	V_RETURN(pd3dDevice->CreateUnorderedAccessView(s_pPositions, NULL, &s_pPositionsUAV));
 
@@ -733,6 +737,7 @@ HRESULT DX11RayCastingHashSDF::rayIntervalSplattingRenderToTexture( ID3D11Device
 	context->OMSetDepthStencilState(s_pDepthStencilStateSplattingMin, 0); // Min is also default state
 	context->OMSetBlendState(s_pBlendStateDefault, NULL, 0xffffffff);
 
+	//release resources
 	ID3D11ShaderResourceView* nullSRV[] = { NULL };
 	ID3D11UnorderedAccessView* nullUAV[] = { NULL };
 	ID3D11Buffer* nullCB[] = { NULL, NULL };

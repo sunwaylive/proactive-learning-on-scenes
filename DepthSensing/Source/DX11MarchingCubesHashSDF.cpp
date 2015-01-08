@@ -131,12 +131,20 @@ HRESULT DX11MarchingCubesHashSDF::extractIsoSurface( ID3D11DeviceContext* contex
 		context->CopyResource(s_pOutputFloatCPU, s_pTriangles);
 		V_RETURN(context->Map(s_pOutputFloatCPU, 0, D3D11_MAP_READ, 0, &mappedResource));
 
+		//baseIdx is the points size that already in the mesh
 		unsigned int baseIdx = (unsigned int)s_meshData.m_Vertices.size();
+		//plus new points size
 		s_meshData.m_Vertices.resize(baseIdx + 3*nTriangles);
 		s_meshData.m_Colors.resize(baseIdx + 3*nTriangles);
 
+		//get the new points data
 		vec3f* vc = (vec3f*)mappedResource.pData;
+		//every triangle has 3 vertex, loop over all vertexes, get all points' positions and colors in ml::point3d<float> format
 		for (unsigned int i = 0; i < 3*nTriangles; i++) {
+			if(i < 10){
+				std::cout<<"sunwei debug: " <<vc[2*i] <<std::endl;
+			}
+
 			s_meshData.m_Vertices[baseIdx + i] = vc[2*i+0];
 			s_meshData.m_Colors[baseIdx + i] = vc[2*i+1];
 		}

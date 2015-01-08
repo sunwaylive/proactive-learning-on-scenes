@@ -281,7 +281,7 @@ Eigen::Matrix4f DX11CameraTrackingMultiRes::computeBestRigidAlignment(ID3D11Devi
 	return deltaTransform;
 }
 
-
+//CT£ºcamera tracking
 mat4f DX11CameraTrackingMultiRes::applyCT(ID3D11DeviceContext* context, ID3D11ShaderResourceView* inputSRV, ID3D11ShaderResourceView* inputNormalsSRV, ID3D11ShaderResourceView* inputColorsSRV, ID3D11ShaderResourceView* modelSRV, ID3D11ShaderResourceView* modelNormalsSRV, ID3D11ShaderResourceView* modelColorsSRV, const mat4f& lastTransform, const std::vector<unsigned int>& maxInnerIter, const std::vector<unsigned int>& maxOuterIter, const std::vector<float>& distThres, const std::vector<float>& normalThres, float condThres, float angleThres, const mat4f& deltaTransformEstimate, const std::vector<float>& earlyOutResidual, ICPErrorLog* errorLog)
 {		
 	// Input

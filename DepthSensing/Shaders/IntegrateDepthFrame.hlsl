@@ -26,6 +26,7 @@ RWBuffer<int> g_voxelBuffer : register(u0);
 #include "RayCastingUtil.h.hlsl"
 
 // Merges two voxels (v0 is the input voxel, v1 the currently stored voxel)
+// 加权更新旧的
 Voxel combineVoxel(in Voxel v0, in Voxel v1)
 {
 	Voxel v;

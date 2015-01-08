@@ -529,7 +529,6 @@ void GLArea::paintGL()
 //		  glDrawer.drawGraphShow(dataMgr.getContractionGraph(),1);
 	  }
 
-
       //3. show patch graph
 	  if(!dataMgr.isPatchGraphEmpty())
 	  {
