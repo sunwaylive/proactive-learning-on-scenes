@@ -101,11 +101,13 @@ void DX11PhongLighting::render(ID3D11DeviceContext* pd3dDeviceContext, ID3D11Sha
 	ID3D11Buffer* CBGlobalAppState = GlobalAppState::getInstance().MapAndGetConstantBuffer(pd3dDeviceContext);
 	pd3dDeviceContext->PSSetConstantBuffers(8, 1, &CBGlobalAppState);
 
-	ID3D11ShaderResourceView* srvs[] = {positions, normals, colors, ssaoMap};
+	//wei add， ID
+	ID3D11ShaderResourceView* srvs[] = {positions, normals, colors, IDs, ssaoMap};
 
 	//用Pixel shader 去绘制模型
 	//pixel shader在渲染管线的位置如下： http://msdn.microsoft.com/en-us/library/windows/desktop/bb205123(v=vs.85).aspx
-	DX11QuadDrawer::RenderQuad(pd3dDeviceContext, s_PixelShaderPhong, srvs, 4); //srvs has 4 elements
+	//wei add 4->5
+	DX11QuadDrawer::RenderQuad(pd3dDeviceContext, s_PixelShaderPhong, srvs, 5); //srvs has 4-->5 elements
 
 	//下面是release过程
 	ID3D11Buffer* nullCB[] = { NULL };
