@@ -134,7 +134,7 @@ HRESULT DX11RayCastingHashSDF::Render( ID3D11DeviceContext* context, ID3D11Shade
 HRESULT DX11RayCastingHashSDF::RenderStereo( ID3D11DeviceContext* context, ID3D11ShaderResourceView* hash, ID3D11ShaderResourceView* hashCompact, ID3D11ShaderResourceView* sdfBlocksSDF, ID3D11ShaderResourceView* sdfBlocksRGBW, unsigned int hashNumValidBuckets, unsigned int renderTargetWidth, unsigned int renderTargetHeight, const mat4f* lastRigidTransform, ID3D11Buffer* CBsceneRepSDF )
 {
 	HRESULT hr = S_OK;
-
+	//默认为false
 	if(GlobalAppState::getInstance().s_stereoEnabled)
 	{
 		GlobalAppState::getInstance().s_currentlyInStereoMode = true;
@@ -177,6 +177,7 @@ HRESULT DX11RayCastingHashSDF::RenderStereo( ID3D11DeviceContext* context, ID3D1
 				s_pIDsStereoUAV,//wei add
 				m_pSSAOMapStereoSRV, m_pSSAOMapStereoUAV, m_pSSAOMapFilteredStereoUAV));
 
+			//得到数据后用PhonLighting显示出来
 			DX11PhongLighting::renderStereo(context, s_pPositionsStereoSRV, s_pNormalsStereoSRV, s_pColorsStereoSRV, m_pSSAOMapStereoSRV, useColor, false);
 
 			std::stringstream toNumber; toNumber << whichShot;
@@ -234,7 +235,7 @@ HRESULT DX11RayCastingHashSDF::RenderStereo( ID3D11DeviceContext* context, ID3D1
 		context->RSSetViewports( 1, &vp );
 
 		GlobalAppState::getInstance().s_currentlyInStereoMode = false;
-	}
+	}//end if 默认这个函数是不执行的
 
 	return hr;
 }
@@ -457,6 +458,7 @@ HRESULT DX11RayCastingHashSDF::initialize( ID3D11Device* pd3dDevice )
 
 	//wei add
 	D3D11_TEXTURE2D_DESC descID;
+	ZeroMemory(&descID, sizeof(D3D11_TEXTURE2D_DESC));
 	descID.Width = GlobalAppState::getInstance().s_windowWidth;
 	descID.Height = GlobalAppState::getInstance().s_windowHeight;
 	descID.MipLevels = 1;
@@ -634,6 +636,30 @@ HRESULT DX11RayCastingHashSDF::initialize( ID3D11Device* pd3dDevice )
 			V_RETURN(pd3dDevice->CreateShaderResourceView(s_pNormalsStereo, NULL, &s_pNormalsStereoSRV));
 			V_RETURN(pd3dDevice->CreateUnorderedAccessView(s_pNormalsStereo, NULL, &s_pNormalsStereoUAV));
 			
+			//wei add, 不过配置文件中默认是关闭Stereo的，由s_stereoEnabled开关控制
+			D3D11_TEXTURE2D_DESC descStereoID;
+			ZeroMemory(&descTex, sizeof(D3D11_TEXTURE2D_DESC));
+			descStereoID.Width = GlobalAppState::getInstance().s_windowWidth;
+			descStereoID.Height = GlobalAppState::getInstance().s_windowHeight;
+			descStereoID.MipLevels = 1;
+			descStereoID.ArraySize = 1;
+			descStereoID.Format = DXGI_FORMAT_R32_UINT;//DXGI_FORMAT_R32_FLOAT;
+			descStereoID.SampleDesc.Count = 1;
+			descStereoID.SampleDesc.Quality = 0;
+			descStereoID.Usage = D3D11_USAGE_DEFAULT;
+			descStereoID.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS;
+			descStereoID.CPUAccessFlags = 0;
+			descStereoID.MiscFlags = 0;
+
+			V_RETURN(pd3dDevice->CreateTexture2D(&descStereoID, NULL, &s_pIDsStereo));
+			V_RETURN(pd3dDevice->CreateShaderResourceView(s_pIDsStereo, NULL, &s_pIDsStereoSRV));
+			V_RETURN(pd3dDevice->CreateUnorderedAccessView(s_pIDsStereo, NULL, &s_pIDsStereoUAV));
+			D3D11_TEXTURE2D_DESC tmpStereo;
+			s_pIDsStereo->GetDesc(&tmpStereo);
+			std::cout << tmpStereo.Width << " " << tmpStereo.Height << std::endl;
+			std::cout << "wei add: Stereo  Successfully create ID SRV and UAV." << std::endl;
+			//wei add end
+
 			//for first pass
 			ZeroMemory(&descTex, sizeof(D3D11_TEXTURE2D_DESC));
 			descTex.Usage = D3D11_USAGE_DEFAULT;
@@ -875,6 +901,11 @@ void DX11RayCastingHashSDF::destroy()
 	SAFE_RELEASE(s_pNormalsStereo);
 	SAFE_RELEASE(s_pNormalsStereoSRV);
 	SAFE_RELEASE(s_pNormalsStereoUAV);
+
+	//wei add
+	SAFE_RELEASE(s_pIDsStereo);
+	SAFE_RELEASE(s_pIDsStereoSRV);
+	SAFE_RELEASE(s_pIDsStereoUAV);
 
 	SAFE_RELEASE(s_pDepthStencilSplattingMinStereo);
 	SAFE_RELEASE(s_pDepthStencilSplattingMinDSVStereo);

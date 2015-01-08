@@ -685,7 +685,8 @@ void DumpAllRendering( ID3D11DeviceContext* pd3dImmediateContext )
 		ID3D11DepthStencilView* pDSV = DXUTGetD3D11DepthStencilView();
 		pd3dImmediateContext->ClearRenderTargetView(pRTV, ClearColor);
 		pd3dImmediateContext->ClearDepthStencilView(pDSV, D3D11_CLEAR_DEPTH, 1.0f, 0);
-		DX11PhongLighting::render(pd3dImmediateContext, DX11RayCastingHashSDF::getPositonsImageSRV(), DX11RayCastingHashSDF::getNormalsImageSRV(), DX11RayCastingHashSDF::getColorsImageSRV(), DX11RayCastingHashSDF::getSSAOMapFilteredSRV(), false, false);
+		//wei add, 添加了IDImageSrv参数
+		DX11PhongLighting::render(pd3dImmediateContext, DX11RayCastingHashSDF::getPositonsImageSRV(), DX11RayCastingHashSDF::getNormalsImageSRV(), DX11RayCastingHashSDF::getColorsImageSRV(), DX11RayCastingHashSDF::getIDsImageSRV(), DX11RayCastingHashSDF::getSSAOMapFilteredSRV(), false, false);
 
 		std::string fileName = baseFolder + "reconstruction\\" + ssFrameNumber.str() + ".png";
 		std::wstring fileNameW(fileName.begin(), fileName.end());
@@ -698,7 +699,7 @@ void DumpAllRendering( ID3D11DeviceContext* pd3dImmediateContext )
 		ID3D11DepthStencilView* pDSV = DXUTGetD3D11DepthStencilView();
 		pd3dImmediateContext->ClearRenderTargetView(pRTV, ClearColor);
 		pd3dImmediateContext->ClearDepthStencilView(pDSV, D3D11_CLEAR_DEPTH, 1.0f, 0);
-		DX11PhongLighting::render(pd3dImmediateContext, DX11RayCastingHashSDF::getPositonsImageSRV(), DX11RayCastingHashSDF::getNormalsImageSRV(), DX11RayCastingHashSDF::getColorsImageSRV(), DX11RayCastingHashSDF::getSSAOMapFilteredSRV(), true, true);
+		DX11PhongLighting::render(pd3dImmediateContext, DX11RayCastingHashSDF::getPositonsImageSRV(), DX11RayCastingHashSDF::getNormalsImageSRV(), DX11RayCastingHashSDF::getIDsImageSRV(), DX11RayCastingHashSDF::getColorsImageSRV(), DX11RayCastingHashSDF::getSSAOMapFilteredSRV(), true, true);
 
 		std::string fileName = baseFolder + "reconstructionColor\\" + ssFrameNumber.str() + ".png";
 		std::wstring fileNameW(fileName.begin(), fileName.end());
@@ -914,7 +915,7 @@ void CALLBACK OnD3D11FrameRender( ID3D11Device* pd3dDevice, ID3D11DeviceContext*
 
 			//这个render是获取2D数据的？？
 			DX11RayCastingHashSDF::Render(pd3dImmediateContext, g_SceneRepSDFLocal.GetHashSRV(), g_SceneRepSDFLocal.GetHashCompactifiedSRV(), g_SceneRepSDFLocal.GetSDFBlocksSDFSRV(), g_SceneRepSDFLocal.GetSDFBlocksRGBWSRV(), g_SceneRepSDFLocal.GetNumOccupiedHashEntries(), DXUTGetWindowWidth(), DXUTGetWindowHeight(), &trans, g_SceneRepSDFLocal.MapAndGetConstantBuffer(pd3dImmediateContext));
-
+			//由于配置文件s_stereoEnabled默认是设置的false的，所以这个函数其实是直接返回，不会渲染的。
 			DX11RayCastingHashSDF::RenderStereo(pd3dImmediateContext, g_SceneRepSDFLocal.GetHashSRV(), g_SceneRepSDFLocal.GetHashCompactifiedSRV(), g_SceneRepSDFLocal.GetSDFBlocksSDFSRV(), g_SceneRepSDFLocal.GetSDFBlocksRGBWSRV(), g_SceneRepSDFLocal.GetNumOccupiedHashEntries(), GlobalAppState::getInstance().s_windowWidthStereo, GlobalAppState::getInstance().s_windowHeightStereo, &trans, g_SceneRepSDFLocal.MapAndGetConstantBuffer(pd3dImmediateContext));
 
 			//辅助计时函数
@@ -929,15 +930,15 @@ void CALLBACK OnD3D11FrameRender( ID3D11Device* pd3dDevice, ID3D11DeviceContext*
 			if(GlobalAppState::getInstance().s_DisplayTexture == 0)
 			{
 				//看raycasting的过程， 参数中的数据是上面的DX11RayCastingHashSDF::Render()填充的 RayCasting的成员变量
-				DX11PhongLighting::render(pd3dImmediateContext, DX11RayCastingHashSDF::getPositonsImageSRV(), DX11RayCastingHashSDF::getNormalsImageSRV(), DX11RayCastingHashSDF::getColorsImageSRV(), DX11RayCastingHashSDF::getSSAOMapFilteredSRV(), false, false);
+				DX11PhongLighting::render(pd3dImmediateContext, DX11RayCastingHashSDF::getPositonsImageSRV(), DX11RayCastingHashSDF::getNormalsImageSRV(), DX11RayCastingHashSDF::getColorsImageSRV(), DX11RayCastingHashSDF::getIDsImageSRV(), DX11RayCastingHashSDF::getSSAOMapFilteredSRV(), false, false);
 			}
 			else if(GlobalAppState::getInstance().s_DisplayTexture == 3)
 			{
-				DX11PhongLighting::render(pd3dImmediateContext, DX11RayCastingHashSDF::getPositonsImageSRV(), DX11RayCastingHashSDF::getNormalsImageSRV(), DX11RayCastingHashSDF::getColorsImageSRV(), DX11RayCastingHashSDF::getSSAOMapFilteredSRV(), false, true);
+				DX11PhongLighting::render(pd3dImmediateContext, DX11RayCastingHashSDF::getPositonsImageSRV(), DX11RayCastingHashSDF::getNormalsImageSRV(), DX11RayCastingHashSDF::getColorsImageSRV(), DX11RayCastingHashSDF::getIDsImageSRV(), DX11RayCastingHashSDF::getSSAOMapFilteredSRV(), false, true);
 			}
 			else if(GlobalAppState::getInstance().s_DisplayTexture == 5)
 			{
-				DX11PhongLighting::render(pd3dImmediateContext, DX11RayCastingHashSDF::getPositonsImageSRV(), DX11RayCastingHashSDF::getNormalsImageSRV(), DX11RayCastingHashSDF::getColorsImageSRV(), DX11RayCastingHashSDF::getSSAOMapFilteredSRV(), true, true);
+				DX11PhongLighting::render(pd3dImmediateContext, DX11RayCastingHashSDF::getPositonsImageSRV(), DX11RayCastingHashSDF::getNormalsImageSRV(), DX11RayCastingHashSDF::getColorsImageSRV(), DX11RayCastingHashSDF::getIDsImageSRV(), DX11RayCastingHashSDF::getSSAOMapFilteredSRV(), true, true);
 			}
 
 			bool trackingLost = false;

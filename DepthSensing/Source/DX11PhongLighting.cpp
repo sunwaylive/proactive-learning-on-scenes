@@ -83,7 +83,7 @@ HRESULT DX11PhongLighting::OnD3D11CreateDevice( ID3D11Device* pd3dDevice )
 //根据最后两个bool参数的不同，渲染出不同的结果
 //Screen Space Ambient Occlusion，SSAO,屏幕空间环境光屏蔽
 //这几个shader resource view都是raycasting得来的
-void DX11PhongLighting::render( ID3D11DeviceContext* pd3dDeviceContext, ID3D11ShaderResourceView* positions, ID3D11ShaderResourceView* normals, ID3D11ShaderResourceView* colors, ID3D11ShaderResourceView* ssaoMap, bool useMaterial, bool useSSAO )
+void DX11PhongLighting::render(ID3D11DeviceContext* pd3dDeviceContext, ID3D11ShaderResourceView* positions, ID3D11ShaderResourceView* normals, ID3D11ShaderResourceView* colors, ID3D11ShaderResourceView* IDs, ID3D11ShaderResourceView* ssaoMap, bool useMaterial, bool useSSAO)
 {
 	// Initialize Constant Buffers
 	//map 和 unmap对应, map从GPU拿到数据，然后在CPU中修改之后，再unmap给GPU。修改s_ConstantBuffer中的数据
