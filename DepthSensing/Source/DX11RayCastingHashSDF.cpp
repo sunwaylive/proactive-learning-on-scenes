@@ -258,6 +258,7 @@ HRESULT DX11RayCastingHashSDF::RenderToTexture( ID3D11DeviceContext* context, ID
 	context->Unmap(s_ConstantBufferSplatting, 0);
 
 	// Setup pipeline
+	//这几个shader resource其实只是在SceneRepChunkGrid中创建的
 	context->CSSetShaderResources(0, 1, &hash);
 	context->CSSetShaderResources(1, 1, &sdfBlocksSDF);
 	context->CSSetShaderResources(4, 1, &sdfBlocksRGBW);

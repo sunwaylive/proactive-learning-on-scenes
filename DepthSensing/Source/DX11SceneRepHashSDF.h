@@ -270,7 +270,7 @@ public:
 	void DebugHash0() {
 		unsigned int* cpuMemory = (unsigned int*)CreateAndCopyToDebugBuf(DXUTGetD3D11Device(), DXUTGetD3D11DeviceContext(), m_Hash, true);
 		std::vector<HashEntry> ptrs;
-		for(unsigned int i = 0; i< m_HashNumBuckets*m_HashBucketSize; i++)
+		for(unsigned int i = 0; i< m_HashNumBuckets * m_HashBucketSize; i++)
 		{
 			HashEntry entry;
 			int i0 = cpuMemory[3*i+0];
@@ -308,9 +308,12 @@ public:
 	};
 
 	void DebugSDFBlocks1() {	
+		const unsigned int numVoxels = m_SDFNumBlocks * SDF_BLOCK_SIZE * SDF_BLOCK_SIZE * SDF_BLOCK_SIZE;
+		std::cout<<"In DebugSDFBlock1 numVoxels: " <<numVoxels <<std::endl;
+
 		unsigned int* cpuMemory = (unsigned int*)CreateAndCopyToDebugBuf(DXUTGetD3D11Device(), DXUTGetD3D11DeviceContext(), m_SDFBlocksSDF, true);
 		unsigned int count = 0;
-		const unsigned int numVoxels = m_SDFNumBlocks*SDF_BLOCK_SIZE*SDF_BLOCK_SIZE*SDF_BLOCK_SIZE;
+		
 		for (unsigned int i = 0; i< numVoxels; i++)
 		{
 			VoxelDebug voxel;
@@ -325,13 +328,16 @@ public:
 			last >>= 0x8;
 			voxel.color.z = last & 0x000000ff;
 
+			if(abs(*f) > 1e-5){
+				continue;
+			}
+
 			if(voxel.weight != 0)
 			{
 				//	std::cout  << "a" << std::endl;
 				count++;
 			}
 		}
-
 		SAFE_DELETE_ARRAY(cpuMemory);
 	}
 

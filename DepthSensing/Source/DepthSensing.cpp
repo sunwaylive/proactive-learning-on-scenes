@@ -297,6 +297,7 @@ void StopScanningAndDumpVoxelHash() {
 	g_SceneRepChunkGrid.DumpVoxelHash(DXUTGetD3D11DeviceContext(), 
 		GlobalAppState::getInstance().s_DumpVoxelGridFile + ".dump", 
 		g_SceneRepSDFLocal, p, GlobalAppState::getInstance().s_StreamingRadius);
+	g_SceneRepSDFLocal.DebugSDFBlocks1();
 	std::cout << "done!" << std::endl;
 
 	std::cout << "Dump Voxel Hash Processing Time " << t.getElapsedTime() << " seconds" << std::endl;
