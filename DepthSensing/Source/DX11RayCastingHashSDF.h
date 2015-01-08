@@ -32,6 +32,7 @@ class DX11RayCastingHashSDF
 										ID3D11ShaderResourceView* pPositionsSRV, ID3D11UnorderedAccessView* pPositionsUAV,
 										ID3D11UnorderedAccessView* pColorsUAV,
 										ID3D11ShaderResourceView* pNormalsSRV, ID3D11UnorderedAccessView* pNormalsUAV,
+										ID3D11UnorderedAccessView* pIDsUAV,
 										ID3D11ShaderResourceView* pSSAOMapSRV, ID3D11UnorderedAccessView* pSSAOMapUAV, ID3D11UnorderedAccessView* pSSAOMapFilteredUAV);
 
 		// Depth
@@ -136,6 +137,11 @@ class DX11RayCastingHashSDF
 		static ID3D11ShaderResourceView* s_pNormalsSRV;
 		static ID3D11UnorderedAccessView* s_pNormalsUAV;
 		
+		//wei add
+		static ID3D11Texture2D* s_pIDs;
+		static ID3D11ShaderResourceView* s_pIDsSRV;
+		static ID3D11UnorderedAccessView* s_pIDsUAV;
+
 		static ID3D11Buffer* s_ConstantBufferSplatting;
 
 		static ID3D11VertexShader*s_pVertexShaderSplatting;
@@ -182,6 +188,10 @@ class DX11RayCastingHashSDF
 		static ID3D11Texture2D* s_pNormalsStereo;
 		static ID3D11ShaderResourceView* s_pNormalsStereoSRV;
 		static ID3D11UnorderedAccessView* s_pNormalsStereoUAV;
+
+		static ID3D11Texture2D* s_pIDsStereo;
+		static ID3D11ShaderResourceView* s_pIDsStereoSRV;
+		static ID3D11UnorderedAccessView* s_pIDsStereoUAV;
 
 		static ID3D11Texture2D* s_pDepthStencilSplattingMinStereo;
 		static ID3D11DepthStencilView*	s_pDepthStencilSplattingMinDSVStereo;

@@ -297,7 +297,7 @@ void StopScanningAndDumpVoxelHash() {
 	g_SceneRepChunkGrid.DumpVoxelHash(DXUTGetD3D11DeviceContext(), 
 		GlobalAppState::getInstance().s_DumpVoxelGridFile + ".dump", 
 		g_SceneRepSDFLocal, p, GlobalAppState::getInstance().s_StreamingRadius);
-	g_SceneRepSDFLocal.DebugSDFBlocks1();
+	//g_SceneRepSDFLocal.DebugSDFBlocks1();
 	std::cout << "done!" << std::endl;
 
 	std::cout << "Dump Voxel Hash Processing Time " << t.getElapsedTime() << " seconds" << std::endl;
@@ -901,8 +901,8 @@ void CALLBACK OnD3D11FrameRender( ID3D11Device* pd3dDevice, ID3D11DeviceContext*
 				g_SceneRepSDFLocal.RunCompactifyForView(pd3dImmediateContext);
 				g_SceneRepSDFGlobal.RunCompactifyForView(pd3dImmediateContext);
 				//wei 打开调试输出
-				std::cout << "Occupied Local  Entries: " << g_SceneRepSDFLocal.GetNumOccupiedHashEntries() << std::endl;
-				std::cout << "Occupied Global Entries: " << g_SceneRepSDFGlobal.GetNumOccupiedHashEntries() << std::endl;
+				std::cout << "wei Open For Debug. Occupied Local  Entries: " << g_SceneRepSDFLocal.GetNumOccupiedHashEntries() << std::endl;
+				std::cout << "wei Open For Debug. Occupied Global Entries: " << g_SceneRepSDFGlobal.GetNumOccupiedHashEntries() << std::endl;
 				UINT numOccupied = g_SceneRepSDFLocal.GetNumOccupiedHashEntries() + g_SceneRepSDFGlobal.GetNumOccupiedHashEntries();
 				std::cout << "Occupied + free: " << numOccupied + g_SceneRepSDFLocal.GetHeapFreeCount(pd3dImmediateContext) << std::endl;
 			}

@@ -946,6 +946,7 @@ HRESULT DX11ImageHelper::applyCameraSpace( ID3D11DeviceContext* context, ID3D11S
 	return hr;
 }
 
+//这个函数将产生屏幕上实际出现的内容
 HRESULT DX11ImageHelper::applyCameraSpaceProjection( ID3D11DeviceContext* context, ID3D11ShaderResourceView* inputSRV, ID3D11UnorderedAccessView* outputUAV, unsigned int imageWidth, unsigned int imageHeight )
 {
 	HRESULT hr = S_OK;
@@ -955,6 +956,7 @@ HRESULT DX11ImageHelper::applyCameraSpaceProjection( ID3D11DeviceContext* contex
 	hr = context->Map(m_constantBufferCameraSpaceProjection, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	if(FAILED(hr)) return hr;
 
+	//强制转换的类型只需要和实际存放的数据对应上就可以了
 	CBufferCameraSpaceProjection *cbuffer = (CBufferCameraSpaceProjection*)mappedResource.pData;
 	cbuffer->imageWidth = (int)imageWidth;
 	cbuffer->imageHeigth = (int)imageHeight;
@@ -976,7 +978,7 @@ HRESULT DX11ImageHelper::applyCameraSpaceProjection( ID3D11DeviceContext* contex
 	assert(dimX <= D3D11_CS_DISPATCH_MAX_THREAD_GROUPS_PER_DIMENSION);
 	assert(dimY <= D3D11_CS_DISPATCH_MAX_THREAD_GROUPS_PER_DIMENSION);
 
-	// De-Initialize Pipeline
+	// De-Initialize Pipeline, cleanup
 	ID3D11ShaderResourceView* nullSAV[1] = { NULL };
 	ID3D11UnorderedAccessView* nullUAV[1] = { NULL };
 	ID3D11Buffer* nullCB[1] = { NULL };
