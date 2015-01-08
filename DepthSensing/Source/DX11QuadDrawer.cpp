@@ -233,9 +233,10 @@ void DX11QuadDrawer::RenderQuad( ID3D11DeviceContext* pd3dDeviceContext, ID3D11S
 	pd3dDeviceContext->PSSetShaderResources(10, 1, srvNULL);
 }
 
-
+//绘制quad
 void DX11QuadDrawer::RenderQuad( ID3D11DeviceContext* pd3dDeviceContext, ID3D11PixelShader* pixelShader, ID3D11ShaderResourceView** srvs, UINT numShaderResourceViews, float2 Pow2Ratios /*= float2(1.0f, 1.0f)*/ )
 {
+	//根据参数Pow2Ratios来设置GPU中的数据
 	D3D11_MAPPED_SUBRESOURCE MappedResource;
 	pd3dDeviceContext->Map( s_pcbVSPowTwoRatios, 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedResource );
 	CB_POW_TWO_RATIOS* pCSPowTwoRatios = ( CB_POW_TWO_RATIOS* )MappedResource.pData;
@@ -258,11 +259,13 @@ void DX11QuadDrawer::RenderQuad( ID3D11DeviceContext* pd3dDeviceContext, ID3D11P
 	pd3dDeviceContext->IASetVertexBuffers(0, 1, &s_VertexBuffer, &stride, &offset);
 	pd3dDeviceContext->IASetIndexBuffer(s_IndexBuffer, DXGI_FORMAT_R32_UINT, 0);
 
+	//这个srvs就是需要显示的数据， shader resource view
 	pd3dDeviceContext->PSSetShaderResources(10, numShaderResourceViews, srvs);
 	pd3dDeviceContext->PSSetSamplers(10, 1, &s_PointSampler);
 
 	pd3dDeviceContext->DrawIndexed(6, 0, 0);
 
+	//release resources
 	pd3dDeviceContext->VSSetShader(NULL, NULL, 0);
 	pd3dDeviceContext->PSSetShader(NULL, NULL, 0);
 	ID3D11SamplerState* samplerNULL[] = {NULL};

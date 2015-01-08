@@ -80,24 +80,34 @@ HRESULT DX11PhongLighting::OnD3D11CreateDevice( ID3D11Device* pd3dDevice )
 		return hr;
 }
 
+//根据最后两个bool参数的不同，渲染出不同的结果
+//Screen Space Ambient Occlusion，SSAO,屏幕空间环境光屏蔽
+//这几个shader resource view都是raycasting得来的
 void DX11PhongLighting::render( ID3D11DeviceContext* pd3dDeviceContext, ID3D11ShaderResourceView* positions, ID3D11ShaderResourceView* normals, ID3D11ShaderResourceView* colors, ID3D11ShaderResourceView* ssaoMap, bool useMaterial, bool useSSAO )
 {
 	// Initialize Constant Buffers
+	//map 和 unmap对应, map从GPU拿到数据，然后在CPU中修改之后，再unmap给GPU。修改s_ConstantBuffer中的数据
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
 	HRESULT hr = pd3dDeviceContext->Map(s_ConstantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	if(FAILED(hr)) return;
+
 	cbConstant *cbufferConstant = (cbConstant*)mappedResource.pData;
 	cbufferConstant->useMaterial = (int)useMaterial;
 	cbufferConstant->useSSAO = (int)useSSAO;
 	pd3dDeviceContext->Unmap(s_ConstantBuffer, 0);
-
+	
+	//Sets the constant buffers used by the pixel shader pipeline stage.
 	pd3dDeviceContext->PSSetConstantBuffers(0, 1, &s_ConstantBuffer);
 	ID3D11Buffer* CBGlobalAppState = GlobalAppState::getInstance().MapAndGetConstantBuffer(pd3dDeviceContext);
 	pd3dDeviceContext->PSSetConstantBuffers(8, 1, &CBGlobalAppState);
 
 	ID3D11ShaderResourceView* srvs[] = {positions, normals, colors, ssaoMap};
-	DX11QuadDrawer::RenderQuad(pd3dDeviceContext, s_PixelShaderPhong, srvs, 4);
 
+	//用Pixel shader 去绘制模型
+	//pixel shader在渲染管线的位置如下： http://msdn.microsoft.com/en-us/library/windows/desktop/bb205123(v=vs.85).aspx
+	DX11QuadDrawer::RenderQuad(pd3dDeviceContext, s_PixelShaderPhong, srvs, 4); //srvs has 4 elements
+
+	//下面是release过程
 	ID3D11Buffer* nullCB[] = { NULL };
 	pd3dDeviceContext->PSSetConstantBuffers(0, 1, nullCB);
 	pd3dDeviceContext->PSSetConstantBuffers(8, 1, nullCB);

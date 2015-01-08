@@ -825,7 +825,7 @@ void GLDrawer::drawGraphShow(GRAPHSHOW *graphcut, GraphType graphType)
     line_thickness = 0.5;
   }
 
-  //draw sphere
+  //draw dot in sphere
   for (int i = 0; i < graphcut->vecNodes.size(); ++i){
     MyPt_RGB_NORMAL &pt = graphcut->vecNodes[i];
     glDrawSphere(Point3f(pt.x, pt.y, pt.z), GLColor(pt.r, pt.g, pt.b), sphere_radius, 0);

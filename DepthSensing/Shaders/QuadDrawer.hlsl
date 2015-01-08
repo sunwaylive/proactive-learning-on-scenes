@@ -28,7 +28,7 @@ VS_OUTPUT QuadVS( VS_INPUT Input )
 {
     VS_OUTPUT Output;
 	Output.vPosition = float4(Input.vPosition, 1.0f);
-	Output.vTexcoord = float2(m_WidthoverNextPowOfTwo*Input.vTexcoord.x, m_HeightoverNextPowOfTwo*Input.vTexcoord.y );
+	Output.vTexcoord = float2(m_WidthoverNextPowOfTwo * Input.vTexcoord.x, m_HeightoverNextPowOfTwo * Input.vTexcoord.y );
 
     return Output;
 }

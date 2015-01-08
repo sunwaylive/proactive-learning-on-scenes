@@ -525,10 +525,7 @@ void GLArea::paintGL()
 
       //2. show contraction graph
 
-
       //3. show patch graph
-
-
     }
 
     if (para->getBool("Show Bounding Box") && para->getBool("Show View Grid Slice"))

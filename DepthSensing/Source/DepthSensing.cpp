@@ -745,6 +745,7 @@ void DumpAllRendering( ID3D11DeviceContext* pd3dImmediateContext )
 //--------------------------------------------------------------------------------------
 // Render the scene using the D3D11 device
 //--------------------------------------------------------------------------------------
+//core part of the program, wei !!
 void CALLBACK OnD3D11FrameRender( ID3D11Device* pd3dDevice, ID3D11DeviceContext* pd3dImmediateContext, double fTime, float fElapsedTime, void* pUserContext )
 {
 	if(GlobalAppState::getInstance().s_bApplicationEnabled) {
@@ -765,8 +766,8 @@ void CALLBACK OnD3D11FrameRender( ID3D11Device* pd3dDevice, ID3D11DeviceContext*
 
 		g_Sensor.setFiterDepthValues(GlobalAppState::getInstance().s_bFilterKinectInputData, 2.5f, 0.03f);
 
-		// Clear the back buffer
-		static float ClearColor[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+		// Clear the back buffer, set the color to ClearColor, and depth to 1.0f
+		static float ClearColor[4] = { 1.0f, 0.0f, 0.0f, 1.0f };
 		ID3D11RenderTargetView* pRTV = DXUTGetD3D11RenderTargetView();
 		ID3D11DepthStencilView* pDSV = DXUTGetD3D11DepthStencilView();
 		pd3dImmediateContext->ClearRenderTargetView(pRTV, ClearColor);
@@ -787,17 +788,23 @@ void CALLBACK OnD3D11FrameRender( ID3D11Device* pd3dDevice, ID3D11DeviceContext*
 		HRESULT hr1 = g_Sensor.processColor(pd3dImmediateContext);
 
 		if (hr0 == S_OK) {
-			//bool printFrameNumbers = true;
-			//if (printFrameNumbers) {
-			//	std::cout << g_Sensor.GetFrameNumberDepth() << std::endl;
-			//}
+			//depth sensor handle ok. wei debug, this is an important variable
+			bool printFrameNumbers = true;
+			if (printFrameNumbers) {
+				std::cout << g_Sensor.GetFrameNumberDepth() << std::endl;
+			}
+
 			if (GlobalAppState::getInstance().s_DataDumpDepthData) {
-				std::stringstream ss;	ss << GlobalAppState::getInstance().s_DataDumpPath;
-				for (unsigned int i = std::max(1u,g_Sensor.GetFrameNumberDepth()); i < 1000000; i *= 10) ss << "0";
+				std::stringstream ss;
+				ss << GlobalAppState::getInstance().s_DataDumpPath;
+				for (unsigned int i = std::max(1u, g_Sensor.GetFrameNumberDepth()); i < 1000000; i *= 10) 
+					ss << "0";
+
 				ss << g_Sensor.GetFrameNumberDepth() << ".mbindepth";
 				std::cout << "Dumping " << ss.str() << std::endl;
 				g_Sensor.writeDepthDataToFile(ss.str());
 			}
+
 			if (GlobalAppState::getInstance().s_DataDumpColorData) {
 				std::stringstream ss;	ss << GlobalAppState::getInstance().s_DataDumpPath;
 				for (unsigned int i = std::max(1u,g_Sensor.GetFrameNumberDepth()); i < 1000000; i *= 10) ss << "0";
@@ -812,6 +819,7 @@ void CALLBACK OnD3D11FrameRender( ID3D11Device* pd3dDevice, ID3D11DeviceContext*
 		}
 
 		//dumps data at a specific frame number (if specified)
+		//如果我们设置了，在s_ImageReaderSensorNumFrames帧的时候，程序就会到启动marching cube导出当前的mesh
 		if (GlobalAppState::getInstance().s_ImageReaderSensorNumFrames > 0) {
 			if (g_Sensor.GetFrameNumberDepth() == GlobalAppState::getInstance().s_ImageReaderSensorNumFrames - 1)	{
 				StopScanningAndExtractIsoSurfaceMC();	
@@ -829,17 +837,18 @@ void CALLBACK OnD3D11FrameRender( ID3D11Device* pd3dDevice, ID3D11DeviceContext*
 
 		if (GlobalAppState::getInstance().s_DisplayTexture == 0 || GlobalAppState::getInstance().s_DisplayTexture == 3 || GlobalAppState::getInstance().s_DisplayTexture == 5) {
 
+			// wei: core part
 			// Voxel Hashing
 			mat4f trans = g_SceneRepSDFLocal.GetLastRigidTransform();
 			if (GlobalAppState::getInstance().s_RenderMode == RENDERMODE_VIEW) {
+
 				D3DXMATRIX view = *g_Camera.GetViewMatrix();
 				D3DXMatrixInverse(&view, NULL, &view);
 				D3DXMatrixTranspose(&view, &view);
 				trans = trans * *(mat4f*)&view;
 
-				vec4f posWorld = trans*GlobalAppState::getInstance().s_StreamingPos; // trans laggs one frame *trans
+				vec4f posWorld = trans * GlobalAppState::getInstance().s_StreamingPos; // trans laggs one frame *trans
 				vec3f p(posWorld.x, posWorld.y, posWorld.z);
-
 
 				//g_SceneRepChunkGrid.StreamOutToCPUPass0GPU(DXUTGetD3D11DeviceContext(), g_SceneRepSDFLocal, p, GlobalAppState::getInstance().s_StreamingRadius, true, true);
 				//g_SceneRepChunkGrid.StreamInToGPUPass1GPU(DXUTGetD3D11DeviceContext(), g_SceneRepSDFLocal, true);
@@ -871,10 +880,12 @@ void CALLBACK OnD3D11FrameRender( ID3D11Device* pd3dDevice, ID3D11DeviceContext*
 				}
 
 				if (GlobalAppState::getInstance().s_bEnableGlobalLocalStreaming) {
+					//这里不是Integrate
 					g_SceneRepSDFLocal.RemoveAndIntegrateToOther(pd3dImmediateContext, &g_SceneRepSDFGlobal, &trans, true);
 					g_SceneRepSDFGlobal.RemoveAndIntegrateToOther(pd3dImmediateContext, &g_SceneRepSDFLocal, &trans, false);
 				}
 
+				//这里只是一个计时用的辅助函数
 				if (GlobalAppState::getInstance().s_timingsDetailledEnabled) {
 					GlobalAppState::getInstance().WaitForGPU();
 					GlobalAppState::getInstance().s_Timer.stop();
@@ -883,23 +894,29 @@ void CALLBACK OnD3D11FrameRender( ID3D11Device* pd3dDevice, ID3D11DeviceContext*
 				}
 			}
 
+			//如果只是view模式, 就是不集成新获取的frame，而只是观察， 即按了Tab之后进入的模式
 			if (GlobalAppState::getInstance().s_RenderMode == RENDERMODE_VIEW) {
+				//？？local 和 global
 				g_SceneRepSDFLocal.RunCompactifyForView(pd3dImmediateContext);
 				g_SceneRepSDFGlobal.RunCompactifyForView(pd3dImmediateContext);
-				//std::cout << "Occupied Local  Entries: " << g_SceneRepSDFLocal.GetNumOccupiedHashEntries() << std::endl;
-				//std::cout << "Occupied Global Entries: " << g_SceneRepSDFGlobal.GetNumOccupiedHashEntries() << std::endl;
-				//UINT numOccupied = g_SceneRepSDFLocal.GetNumOccupiedHashEntries() + g_SceneRepSDFGlobal.GetNumOccupiedHashEntries();
-				//std::cout << "Occupied + free: " << numOccupied + g_SceneRepSDFLocal.GetHeapFreeCount(pd3dImmediateContext) << std::endl;
+				//wei 打开调试输出
+				std::cout << "Occupied Local  Entries: " << g_SceneRepSDFLocal.GetNumOccupiedHashEntries() << std::endl;
+				std::cout << "Occupied Global Entries: " << g_SceneRepSDFGlobal.GetNumOccupiedHashEntries() << std::endl;
+				UINT numOccupied = g_SceneRepSDFLocal.GetNumOccupiedHashEntries() + g_SceneRepSDFGlobal.GetNumOccupiedHashEntries();
+				std::cout << "Occupied + free: " << numOccupied + g_SceneRepSDFLocal.GetHeapFreeCount(pd3dImmediateContext) << std::endl;
 			}
 
 			if (GlobalAppState::getInstance().s_timingsStepsEnabled) {
 				GlobalAppState::getInstance().WaitForGPU();
 				GlobalAppState::getInstance().s_Timer.start();
 			}
+
+			//这个render是获取2D数据的？？
 			DX11RayCastingHashSDF::Render(pd3dImmediateContext, g_SceneRepSDFLocal.GetHashSRV(), g_SceneRepSDFLocal.GetHashCompactifiedSRV(), g_SceneRepSDFLocal.GetSDFBlocksSDFSRV(), g_SceneRepSDFLocal.GetSDFBlocksRGBWSRV(), g_SceneRepSDFLocal.GetNumOccupiedHashEntries(), DXUTGetWindowWidth(), DXUTGetWindowHeight(), &trans, g_SceneRepSDFLocal.MapAndGetConstantBuffer(pd3dImmediateContext));
 
 			DX11RayCastingHashSDF::RenderStereo(pd3dImmediateContext, g_SceneRepSDFLocal.GetHashSRV(), g_SceneRepSDFLocal.GetHashCompactifiedSRV(), g_SceneRepSDFLocal.GetSDFBlocksSDFSRV(), g_SceneRepSDFLocal.GetSDFBlocksRGBWSRV(), g_SceneRepSDFLocal.GetNumOccupiedHashEntries(), GlobalAppState::getInstance().s_windowWidthStereo, GlobalAppState::getInstance().s_windowHeightStereo, &trans, g_SceneRepSDFLocal.MapAndGetConstantBuffer(pd3dImmediateContext));
 
+			//辅助计时函数
 			if (GlobalAppState::getInstance().s_timingsStepsEnabled) {
 				GlobalAppState::getInstance().WaitForGPU();
 				GlobalAppState::getInstance().s_Timer.stop();
@@ -907,8 +924,10 @@ void CALLBACK OnD3D11FrameRender( ID3D11Device* pd3dDevice, ID3D11DeviceContext*
 				TimingLog::totalTimeRender += GlobalAppState::getInstance().s_Timer.getElapsedTimeMS();
 			}
 
+			//以不同的形式去显示数据,显示的数据都是raycasting得来的
 			if(GlobalAppState::getInstance().s_DisplayTexture == 0)
 			{
+				//看raycasting的过程， 参数中的数据是上面的DX11RayCastingHashSDF::Render()填充的 RayCasting的成员变量
 				DX11PhongLighting::render(pd3dImmediateContext, DX11RayCastingHashSDF::getPositonsImageSRV(), DX11RayCastingHashSDF::getNormalsImageSRV(), DX11RayCastingHashSDF::getColorsImageSRV(), DX11RayCastingHashSDF::getSSAOMapFilteredSRV(), false, false);
 			}
 			else if(GlobalAppState::getInstance().s_DisplayTexture == 3)
@@ -924,7 +943,8 @@ void CALLBACK OnD3D11FrameRender( ID3D11Device* pd3dDevice, ID3D11DeviceContext*
 
 			if (GlobalAppState::getInstance().s_RenderMode == RENDERMODE_INTEGRATE && GlobalAppState::getInstance().s_bRegistrationEnabled && hr0 == S_OK)
 			{
-				mat4f transformation; transformation.setIdentity();
+				mat4f transformation; 
+				transformation.setIdentity();
 		
 				if (g_SceneRepSDFLocal.GetNumIntegratedImages() > 0)
 				{
@@ -932,12 +952,14 @@ void CALLBACK OnD3D11FrameRender( ID3D11Device* pd3dDevice, ID3D11DeviceContext*
 						GlobalAppState::getInstance().WaitForGPU();
 						GlobalAppState::getInstance().s_Timer.start();
 					}
+
 					if (GlobalAppState::getInstance().s_usePreComputedCameraTrajectory) {
 						//transformation = g_TrajectoryLogReader.getNextTransform();
 						transformation = g_Sensor.getRigidTransform();	//should map from the current frame to the base frame 
 						//std::cout << transformation << std::endl;
 					} else {
 						mat4f deltaEstimate; deltaEstimate.setIdentity();
+						//apply CameraTracking
 						transformation = DX11CameraTrackingMultiRes::applyCT
 							(pd3dImmediateContext, 
 							g_Sensor.GetDepthFloat4SRV(), 
@@ -956,6 +978,7 @@ void CALLBACK OnD3D11FrameRender( ID3D11Device* pd3dDevice, ID3D11DeviceContext*
 							NULL //&g_ICPErrorLog with an error log, it will be much slower since all steps are executed twice)
 							);
 		 			}
+					//辅助函数
 					if (GlobalAppState::getInstance().s_timingsStepsEnabled) {
 						GlobalAppState::getInstance().WaitForGPU();
 						GlobalAppState::getInstance().s_Timer.stop();
@@ -981,12 +1004,16 @@ void CALLBACK OnD3D11FrameRender( ID3D11Device* pd3dDevice, ID3D11DeviceContext*
 				}
 
 				if (GlobalAppState::getInstance().s_DataDumpRigidTransform) {
-					std::stringstream ss;	ss << GlobalAppState::getInstance().s_DataDumpPath;
-					for (unsigned int i = std::max(1u,g_Sensor.GetFrameNumberDepth()); i < 1000000; i *= 10) ss << "0";
+					std::stringstream ss;	
+					ss << GlobalAppState::getInstance().s_DataDumpPath;
+					for (unsigned int i = std::max(1u,g_Sensor.GetFrameNumberDepth()); i < 1000000; i *= 10) 
+						ss << "0";
+
 					ss << g_Sensor.GetFrameNumberDepth() << ".matrix";
 					std::cout << "Dumping " << ss.str() << std::endl;
 					transformation.saveMatrixToFile(ss.str());
 				}
+
 				if (GlobalAppState::getInstance().s_RecordData) {
 					g_Sensor.recordTrajectory(transformation);
 				}
@@ -995,11 +1022,13 @@ void CALLBACK OnD3D11FrameRender( ID3D11Device* pd3dDevice, ID3D11DeviceContext*
 					GlobalAppState::getInstance().WaitForGPU();
 					GlobalAppState::getInstance().s_Timer.start();
 				}
-
+				
+				//为什么又来一遍？？
 				if (GlobalAppState::getInstance().s_bEnableGlobalLocalStreaming) {
 					g_SceneRepSDFLocal.RemoveAndIntegrateToOther(pd3dImmediateContext, &g_SceneRepSDFGlobal, &transformation, true);
 					g_SceneRepSDFGlobal.RemoveAndIntegrateToOther(pd3dImmediateContext, &g_SceneRepSDFLocal, &transformation, false);
 				}
+
 				if (GlobalAppState::getInstance().s_timingsDetailledEnabled) {
 					GlobalAppState::getInstance().WaitForGPU();
 					GlobalAppState::getInstance().s_Timer.stop();
@@ -1007,7 +1036,7 @@ void CALLBACK OnD3D11FrameRender( ID3D11Device* pd3dDevice, ID3D11DeviceContext*
 					TimingLog::totalTimeRemoveAndIntegrate += GlobalAppState::getInstance().s_Timer.getElapsedTimeMS();
 				}
 						
-				vec4f posWorld = transformation*GlobalAppState::getInstance().s_StreamingPos; // trans laggs one frame *trans
+				vec4f posWorld = transformation * GlobalAppState::getInstance().s_StreamingPos; // trans laggs one frame *trans
 				vec3f p(posWorld.x, posWorld.y, posWorld.z);
 				//g_SceneRepChunkGrid.setPositionAndRadius(p, GlobalAppState::getInstance().s_StreamingRadius, true);
 
@@ -1020,10 +1049,11 @@ void CALLBACK OnD3D11FrameRender( ID3D11Device* pd3dDevice, ID3D11DeviceContext*
 					GlobalAppState::getInstance().s_Timer.start();
 				}
 				
+				//??这个是做什么的？
 				g_SceneRepChunkGrid.StreamOutToCPUPass0GPU(DXUTGetD3D11DeviceContext(), g_SceneRepSDFLocal, p, GlobalAppState::getInstance().s_StreamingRadius, true, true);
 				g_SceneRepChunkGrid.StreamInToGPUPass1GPU(DXUTGetD3D11DeviceContext(), g_SceneRepSDFLocal, true);
 				
-				
+				//辅助函数
 				if (GlobalAppState::getInstance().s_timingsStepsEnabled) {
 					GlobalAppState::getInstance().WaitForGPU();
 					GlobalAppState::getInstance().s_Timer.stop();
@@ -1033,13 +1063,16 @@ void CALLBACK OnD3D11FrameRender( ID3D11Device* pd3dDevice, ID3D11DeviceContext*
 
 				//V_RETURN(StreamInToGPUPass1GPU(DXUTGetD3D11DeviceContext(), g_SceneRepSDFLocal, nStreamedBlocks, true));
 			
+				//注意取反了, 默认是 s_bDisableIntegration = false; 就是默认是integrate所有frame的
 				if(!GlobalAppState::getInstance().s_bDisableIntegration)
 				{
 					if (GlobalAppState::getInstance().s_timingsStepsEnabled) {
 						GlobalAppState::getInstance().WaitForGPU();
 						GlobalAppState::getInstance().s_Timer.start();
 					}
+					//！！！！！！！！！！！！！wei: core part： 事实证明，这里就是最关键最核心的部分，集成每次扫描到的数据
 					g_SceneRepSDFLocal.Integrate(pd3dImmediateContext, g_Sensor.GetDepthFErodedSRV(), g_Sensor.GetColorSRV(), g_SceneRepChunkGrid.getBitMask(pd3dImmediateContext), &transformation);
+
 					if (GlobalAppState::getInstance().s_timingsStepsEnabled) {
 						GlobalAppState::getInstance().WaitForGPU();
 						GlobalAppState::getInstance().s_Timer.stop();
@@ -1110,16 +1143,19 @@ void CALLBACK OnD3D11FrameRender( ID3D11Device* pd3dDevice, ID3D11DeviceContext*
 		else if (GlobalAppState::getInstance().s_DisplayTexture == 1)
 		{
 			//DX11QuadDrawer::RenderQuad(pd3dImmediateContext, g_KinectSensor.GetDepthFSRV(), 1.0f);
+			std::cout<<"孙威： No Integrate happens!" <<std::endl;
 			DX11QuadDrawer::RenderQuad(pd3dImmediateContext, g_Sensor.GetHSVDepthFloat4SRV(), 1.0f);
 			//DX11QuadDrawer::RenderQuad(pd3dImmediateContext, g_KinectSensor.GetDepthFloat4SRV(), 1.0f/2.0f);
 		}
 		else if (GlobalAppState::getInstance().s_DisplayTexture == 2)
 		{
+			std::cout<<"孙威： No Integrate happens!" <<std::endl;
 			DX11QuadDrawer::RenderQuad(pd3dImmediateContext, g_Sensor.GetNormalFloat4SRV());
 		}
 		else if (GlobalAppState::getInstance().s_DisplayTexture == 4)
 		{
 			//DX11QuadDrawer::RenderQuad(pd3dImmediateContext, DX11RayCastingHashSDF::getColorsImageSRV());
+			std::cout<<"孙威： No Integrate happens!" <<std::endl;
 			DX11QuadDrawer::RenderQuad(pd3dImmediateContext, g_Sensor.GetColorSRV());
 		}
 
@@ -1142,14 +1178,13 @@ void CALLBACK OnD3D11FrameRender( ID3D11Device* pd3dDevice, ID3D11DeviceContext*
 		}
 
 	}
-
-
+	
 
 
 	if (GlobalAppState::getInstance().s_DumpVoxelGridFrames > 0 && 
 		(g_Sensor.GetFrameNumberDepth() % GlobalAppState::getInstance().s_DumpVoxelGridFrames) == 0) 
 	{	
-		std::cout << "dumping voxel grid... ";
+		std::cout << "孙威debug: dumping voxel grid at the given frame... ";
 		vec4f pos = g_SceneRepSDFLocal.GetLastRigidTransform()*GlobalAppState::getInstance().s_StreamingPos;
 		g_SceneRepSDFLocal.DumpHashToDisk(GlobalAppState::getInstance().s_DumpVoxelGridFile + std::to_string(g_Sensor.GetFrameNumberDepth()) + ".dump", 
 			GlobalAppState::getInstance().s_StreamingRadius - sqrt(3.0f), pos.getPoint3d());
@@ -1158,7 +1193,8 @@ void CALLBACK OnD3D11FrameRender( ID3D11Device* pd3dDevice, ID3D11DeviceContext*
 	}
 
 	TimingLog::printTimings();
-		
+
+	//基本的绘制功能，包括帮助信息等等
 	if (true)
 	{	
 		DXUT_BeginPerfEvent( DXUT_PERFEVENTCOLOR, L"HUD / Stats" );
@@ -1167,9 +1203,4 @@ void CALLBACK OnD3D11FrameRender( ID3D11Device* pd3dDevice, ID3D11DeviceContext*
 		RenderText();
 		DXUT_EndPerfEvent();
 	}
-
-
-
-
-
 }
