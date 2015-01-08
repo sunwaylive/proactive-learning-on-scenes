@@ -788,11 +788,11 @@ void CALLBACK OnD3D11FrameRender( ID3D11Device* pd3dDevice, ID3D11DeviceContext*
 		HRESULT hr1 = g_Sensor.processColor(pd3dImmediateContext);
 
 		if (hr0 == S_OK) {
-			//depth sensor handle ok. wei debug, this is an important variable
-			bool printFrameNumbers = true;
+			//frame count. depth sensor handle ok. wei debug, this is an important variable
+			/*bool printFrameNumbers = true;
 			if (printFrameNumbers) {
-				std::cout << g_Sensor.GetFrameNumberDepth() << std::endl;
-			}
+			std::cout << g_Sensor.GetFrameNumberDepth() << std::endl;
+			}*/
 
 			if (GlobalAppState::getInstance().s_DataDumpDepthData) {
 				std::stringstream ss;

@@ -714,7 +714,7 @@ public:
 						if(m_grid[index] != NULL && m_grid[index]->isStreamedOut()) // As been allocated and has streamed out blocks
 						{
 							ChunkDesc* chunkDesc = m_grid[index];
-							//遍历该chunk中包含的sdfBlock
+							//遍历该chunk中包含的sdfBlock, 每个chunk包含数目不等的sdfBlock
 							for (size_t i = 0; i < chunkDesc->m_ChunkDesc.size(); i++) {
 								//由于对ptr的判断已经被注释掉了，所以这两句其实没用，sdfDesc还有一个pos信息有可能有用，但是这个pos是SDFBlock的pos,而不是每个
 								//小的voxel的pos
@@ -725,6 +725,7 @@ public:
 								//if (ptr != -2) {
 								VoxelBlock vBlock; 
 								//memcpy(vBlock.voxels, &voxels[ptr], sizeof(VoxelBlock));
+								//遍历每个sdfBlock中的小voxels
 								for (unsigned int j = 0; j < SDF_BLOCK_SIZE * SDF_BLOCK_SIZE * SDF_BLOCK_SIZE; j++) {
 									int first = chunkDesc->m_SDFBlocks[i].data[2*j+0];
 									float sdf =  *(float*)(&first);
@@ -732,9 +733,9 @@ public:
 
 									//过滤掉一些sdf voxel, 
 									//test: 只存sdf为0的点
-									/*if (abs(sdf) > 1e-5){
-									continue;
-									}*/
+									if (abs(sdf) > 1e-5){
+										continue;
+									}
 
 									sdf_max = std::max(sdf, sdf_max);
 									sdf_min = std::min(sdf, sdf_min);
