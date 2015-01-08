@@ -15,6 +15,7 @@ Buffer<float>	g_FragmentSortedDepthBufferSRV	: register( t6 );
 #include "RayCastingUtilHashSDF.h.hlsl"
       
 RWTexture2D<float> g_output : register(u0);
+RWTexture2D<int> g_outputIDs : register(u3);
 RWTexture2D<float4> g_outputColor : register(u1);
 RWTexture2D<float4> g_outputNormals : register(u2);
   
@@ -128,6 +129,7 @@ void renderCS(int3 dTid : SV_DispatchThreadID)
 	}
 	else
 	{
+		//实际程序中跑这个分支
 		traverseCoarseGridSimpleSampleAll(worldCamPos, worldDir, camDir, dTid);
 	} 
 }

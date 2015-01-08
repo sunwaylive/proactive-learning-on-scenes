@@ -193,6 +193,8 @@ void traverseCoarseGridSimpleSampleAll(float3 worldCamPos, float3 worldDir, floa
 						//将获取到的数据存放到输出变量中
 						g_output[dTid.xy] = alpha/depthToRayLength; // Convert ray length to depth depthToRayLength
 						g_outputColor[dTid.xy] = float4(color/255.0f, 1.0f);
+						//wei add
+						g_outputIDs[dTid.xy] = 0;
 
 						if(g_useGradients == 1)
 						{
