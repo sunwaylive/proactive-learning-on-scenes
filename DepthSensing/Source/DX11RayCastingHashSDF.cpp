@@ -284,6 +284,8 @@ HRESULT DX11RayCastingHashSDF::RenderToTexture(ID3D11DeviceContext* context, ID3
 	context->CSSetUnorderedAccessViews(0, 1, &pOutputImage2DUAV, 0);
 	context->CSSetUnorderedAccessViews(1, 1, &pColorsUAV, 0);
 	context->CSSetUnorderedAccessViews(2, 1, &pNormalsUAV, 0);
+	//wei add
+	context->CSSetUnorderedAccessViews(3, 1, &pIDsUAV, 0);
 
 	//context->CSSetConstantBuffers(0, 1, &m_constantBuffer);
 	context->CSSetConstantBuffers(0, 1, &CBsceneRepSDF);
@@ -326,6 +328,9 @@ HRESULT DX11RayCastingHashSDF::RenderToTexture(ID3D11DeviceContext* context, ID3
 	context->CSSetUnorderedAccessViews(0, 1, nullUAV, 0);
 	context->CSSetUnorderedAccessViews(1, 1, nullUAV, 0);
 	context->CSSetUnorderedAccessViews(2, 1, nullUAV, 0);
+	//wei add
+	context->CSSetUnorderedAccessViews(3, 1, nullUAV, 0);
+
 	context->CSSetConstantBuffers(0, 2, nullB);
 	context->CSSetConstantBuffers(8, 1, nullB);
 	context->CSSetShader(0, 0, 0);
@@ -467,6 +472,9 @@ HRESULT DX11RayCastingHashSDF::initialize( ID3D11Device* pd3dDevice )
 	V_RETURN(pd3dDevice->CreateTexture2D(&descID, NULL, &s_pIDs));
 	V_RETURN(pd3dDevice->CreateShaderResourceView(s_pIDs, NULL, &s_pIDsSRV));
 	V_RETURN(pd3dDevice->CreateUnorderedAccessView(s_pIDs, NULL, &s_pIDsUAV));
+	D3D11_TEXTURE2D_DESC tmp;
+	s_pIDs->GetDesc(&tmp);
+	std::cout << tmp.Width << " " << tmp.Height << std::endl;
 	std::cout << "wei add: Successfully create ID SRV and UAV." << std::endl;
 	//wei add end
 
@@ -814,6 +822,11 @@ void DX11RayCastingHashSDF::destroy()
 	SAFE_RELEASE(s_pNormals);
 	SAFE_RELEASE(s_pNormalsSRV);
 	SAFE_RELEASE(s_pNormalsUAV);
+
+	//wei add
+	SAFE_RELEASE(s_pIDs);
+	SAFE_RELEASE(s_pIDsSRV);
+	SAFE_RELEASE(s_pIDsUAV);
 
 	// Ray Interval	
 	SAFE_RELEASE(s_ConstantBufferSplatting);
