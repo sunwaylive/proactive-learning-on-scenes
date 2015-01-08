@@ -76,6 +76,15 @@ class DX11RayCastingHashSDF
 			return s_pColorsSRV;
 		}
 
+		//wei add
+		static ID3D11UnorderedAccessView* getIDsImageUAV(){
+			return s_pIDsUAV;
+		}
+
+		static ID3D11ShaderResourceView* getIDsImageSRV(){
+			return s_pIDsSRV;
+		}
+
 		// Ray Interval Splatting
 		static ID3D11ShaderResourceView* getDepthSplattingMinSRV() {
 			return s_pDepthStencilSplattingMinSRV;
