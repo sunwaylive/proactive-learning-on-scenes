@@ -158,11 +158,12 @@ void traverseCoarseGridSimpleSampleAllMultiLayer(float3 worldCamPos, float3 worl
 	}
 }
 
+//在RayCastingHashSF.hlsl中的renderCS函数中被调用
 void traverseCoarseGridSimpleSampleAll(float3 worldCamPos, float3 worldDir, float3 camDir, int3 dTid)
 {
 	// Last Sample
 	Sample lastSample; lastSample.sdf = 0.0f; lastSample.alpha = 0.0f; lastSample.weight = 0; // lastSample.color = int3(0, 0, 0);
-	const float depthToRayLength = 1.0f/camDir.z; // scale factor to convert from depth to ray length
+	const float depthToRayLength = 1.0f / camDir.z; // scale factor to convert from depth to ray length
 
 	float rayCurrent = depthToRayLength*max(g_SensorDepthWorldMin, kinectProjZToCamera(g_RayIntervalMin[dTid.xy])); // Convert depth to raylength
 	float rayEnd = depthToRayLength*min(g_SensorDepthWorldMax, kinectProjZToCamera(g_RayIntervalMax[dTid.xy])); // Convert depth to raylength
@@ -171,8 +172,11 @@ void traverseCoarseGridSimpleSampleAll(float3 worldCamPos, float3 worldDir, floa
 	while(rayCurrent < rayEnd)
 	{
 		float3 currentPosWorld = worldCamPos+rayCurrent*worldDir;
+		//得到当前位置的hash entry
 		HashEntry entry = getHashEntryForSDFBlockPos(g_Hash, worldToSDFBlock(currentPosWorld));
+
 		float dist;	float3 color;
+		//去的dist 和 color根据插值算法
 		if(trilinearInterpolationSimpleFastFast(currentPosWorld, dist, color))
 		//if(trilinearInterpolation(currentPosWorld, dist, color))
 		{
@@ -186,6 +190,7 @@ void traverseCoarseGridSimpleSampleAll(float3 worldCamPos, float3 worldDir, floa
 				{
 					if(abs(dist) < g_thresDist)
 					{
+						//将获取到的数据存放到输出变量中
 						g_output[dTid.xy] = alpha/depthToRayLength; // Convert ray length to depth depthToRayLength
 						g_outputColor[dTid.xy] = float4(color/255.0f, 1.0f);
 
