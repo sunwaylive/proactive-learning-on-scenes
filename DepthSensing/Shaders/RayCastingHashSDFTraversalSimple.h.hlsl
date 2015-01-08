@@ -127,9 +127,7 @@ void traverseCoarseGridSimpleSampleAllMultiLayer(float3 worldCamPos, float3 worl
 					{
 						if(abs(dist) < g_thresDist)
 						{
-							g_output[dTid.xy] = alpha / depthToRayLength; // Convert ray length to depth depthToRayLength
-							//wei add
-							g_outputID[dTid.xy] = 0;//!!wei TODO: here should be what we get from prev codes, not been set
+							g_output[dTid.xy] = alpha/depthToRayLength; // Convert ray length to depth depthToRayLength
 							g_outputColor[dTid.xy] = float4(color/255.0f, 1.0f);
 
 							if(g_useGradients == 1)
@@ -145,7 +143,7 @@ void traverseCoarseGridSimpleSampleAllMultiLayer(float3 worldCamPos, float3 worl
 
 				lastSample.sdf = dist;
 				lastSample.alpha = rayCurrent;
-				//lastSample.color = color;
+				// lastSample.color = color;
 				lastSample.weight = 1;
 			}
 			else
@@ -160,23 +158,21 @@ void traverseCoarseGridSimpleSampleAllMultiLayer(float3 worldCamPos, float3 worl
 	}
 }
 
-//这个代码就是映射3D voxel到 2D image了
 void traverseCoarseGridSimpleSampleAll(float3 worldCamPos, float3 worldDir, float3 camDir, int3 dTid)
 {
 	// Last Sample
 	Sample lastSample; lastSample.sdf = 0.0f; lastSample.alpha = 0.0f; lastSample.weight = 0; // lastSample.color = int3(0, 0, 0);
 	const float depthToRayLength = 1.0f/camDir.z; // scale factor to convert from depth to ray length
 
-	float rayCurrent = depthToRayLength * max(g_SensorDepthWorldMin, kinectProjZToCamera(g_RayIntervalMin[dTid.xy])); // Convert depth to raylength
-	float rayEnd = depthToRayLength * min(g_SensorDepthWorldMax, kinectProjZToCamera(g_RayIntervalMax[dTid.xy])); // Convert depth to raylength
+	float rayCurrent = depthToRayLength*max(g_SensorDepthWorldMin, kinectProjZToCamera(g_RayIntervalMin[dTid.xy])); // Convert depth to raylength
+	float rayEnd = depthToRayLength*min(g_SensorDepthWorldMax, kinectProjZToCamera(g_RayIntervalMax[dTid.xy])); // Convert depth to raylength
  
 	[allow_uav_condition]
 	while(rayCurrent < rayEnd)
 	{
-		float3 currentPosWorld = worldCamPos + rayCurrent * worldDir;
+		float3 currentPosWorld = worldCamPos+rayCurrent*worldDir;
 		HashEntry entry = getHashEntryForSDFBlockPos(g_Hash, worldToSDFBlock(currentPosWorld));
-		float dist;	
-		float3 color;
+		float dist;	float3 color;
 		if(trilinearInterpolationSimpleFastFast(currentPosWorld, dist, color))
 		//if(trilinearInterpolation(currentPosWorld, dist, color))
 		{
@@ -185,21 +181,20 @@ void traverseCoarseGridSimpleSampleAll(float3 worldCamPos, float3 worldDir, floa
 				float alpha; // = findIntersectionLinear(lastSample.alpha, rayCurrent, lastSample.sdf, dist);
 				findIntersectionBisection(worldCamPos, worldDir, lastSample.sdf, lastSample.alpha, dist, rayCurrent, alpha);
 					
-				float3 currentIso = worldCamPos + alpha * worldDir;
+				float3 currentIso = worldCamPos+alpha*worldDir;
 				if(abs(lastSample.sdf - dist) < g_thresSampleDist)
 				{
 					if(abs(dist) < g_thresDist)
 					{
-						g_output[dTid.xy] = alpha / depthToRayLength; // Convert ray length to depth depthToRayLength						
-						//!!!!!!!!!!!!wei debug
-						g_outputColor[dTid.xy] = float4(float3(0.f, 1.0f, 0.0f), 1.0f);//float4(color/255.0f, 1.0f);
+						g_output[dTid.xy] = alpha/depthToRayLength; // Convert ray length to depth depthToRayLength
+						g_outputColor[dTid.xy] = float4(color/255.0f, 1.0f);
 
 						if(g_useGradients == 1)
 						{
 							float3 normal = gradientForPoint(currentIso);
 							g_outputNormals[dTid.xy] = float4(mul(float4(normal,0.0f), g_ViewMat).xyz, 1.0f);
 						}
-						//wei add g_outputID
+
 						return;
 					}
 				}

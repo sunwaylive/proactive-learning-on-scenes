@@ -115,7 +115,6 @@ public:
 struct Voxel
 {
 	float sdf;
-	//unsigned short id; //wei added
 	vec3i color;
 	unsigned int weight;
 };

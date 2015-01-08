@@ -41,19 +41,17 @@ float4 PhongPS(VS_OUTPUT Input) : SV_TARGET
 {
 	float3 position = inputPositions.Sample(g_PointSampler, Input.vTexcoord).xyz;
 	float3 normal = inputNormals.Sample(g_PointSampler, Input.vTexcoord).xyz;
-	//wei changed the color
-	//float3 color = inputColors.Sample(g_PointSampler, Input.vTexcoord).xyz;
-	float3 color = float3(1.0f, 0.f, 0.f);
+	float3 color = inputColors.Sample(g_PointSampler, Input.vTexcoord).xyz;
 
 	if(position.x != MINF && color.x != MINF && normal.x != MINF)
 	{
 		//float4 material= float4(1.0f, 1.0f, 1.0f, 1.0f);
 		float4 material = materialDiffuse;
 
-		//只有按5之后进入的模式，这个开关打开的时候， 上面设的颜色才有用
 		if(g_useMaterial == 1)
 		{
-			material = float4(color, 1.0f);
+			//wei add
+			material = float4(float3(0.f, 1.0f, 0.f), 1.0f);//float4(color, 1.0f);
 		}
 
 		float4 lightAmbientMod = lightAmbient;

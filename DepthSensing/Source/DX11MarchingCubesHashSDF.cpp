@@ -74,7 +74,6 @@ void DX11MarchingCubesHashSDF::saveMesh( const std::string& filename, const mat4
 	clearMeshBuffer();
 }
 
-//存出iso-surface point的核心代码
 HRESULT DX11MarchingCubesHashSDF::extractIsoSurface( ID3D11DeviceContext* context, ID3D11ShaderResourceView* hash, ID3D11ShaderResourceView* sdfBlocksSDF, ID3D11ShaderResourceView* sdfBlocksRGBW, ID3D11Buffer* CBsceneRepSDF, unsigned int hashNumBuckets, unsigned int hashBucketSize, vec3f& minCorner /*= vec3f(0.0f, 0.0f, 0.0f)*/, vec3f& maxCorner /*= vec3f(0.0f, 0.0f, 0.0f)*/, bool boxEnabled /*= false*/ )
 {
 	HRESULT hr = S_OK;
@@ -82,10 +81,12 @@ HRESULT DX11MarchingCubesHashSDF::extractIsoSurface( ID3D11DeviceContext* contex
 	// Initialize constant buffer
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
 	V_RETURN(context->Map(m_constantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource));
+
 	CBuffer *cbuffer = (CBuffer*)mappedResource.pData;
 	cbuffer->boxEnabled = boxEnabled ? 1 : 0;
 	memcpy(&cbuffer->minCorner, &minCorner.array[0], sizeof(vec3f));
 	memcpy(&cbuffer->maxCorner, &maxCorner.array[0], sizeof(vec3f));
+
 	context->Unmap(m_constantBuffer, 0);
 
 	// Setup pipeline
@@ -98,7 +99,6 @@ HRESULT DX11MarchingCubesHashSDF::extractIsoSurface( ID3D11DeviceContext* contex
 	context->CSSetConstantBuffers(2, 1, &m_constantBuffer);
 	ID3D11Buffer* CBGlobalAppState = GlobalAppState::getInstance().MapAndGetConstantBuffer(context);
 	context->CSSetConstantBuffers(8, 1, &CBGlobalAppState);
-	//这个shader里面有提取iso-surface的所有代码, 在Shaders\\ExtractIsoSurfaceHashSDF.hlsl中
 	context->CSSetShader(m_pComputeShader, 0, 0);
 
 	// Run compute shader

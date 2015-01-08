@@ -34,11 +34,6 @@ ID3D11Texture2D* DX11RayCastingHashSDF::s_pNormals = NULL;
 ID3D11ShaderResourceView* DX11RayCastingHashSDF::s_pNormalsSRV = NULL;
 ID3D11UnorderedAccessView* DX11RayCastingHashSDF::s_pNormalsUAV = NULL;
 
-//wei add
-ID3D11Texture2D* DX11RayCastingHashSDF::s_pIDs = NULL;
-ID3D11ShaderResourceView* DX11RayCastingHashSDF::s_pIDsSRV = NULL;
-ID3D11UnorderedAccessView* DX11RayCastingHashSDF::s_pIDsUAV = NULL;
-
 // Ray Interval	
 ID3D11Buffer* DX11RayCastingHashSDF::s_ConstantBufferSplatting = NULL;
 
@@ -87,11 +82,6 @@ ID3D11Texture2D* DX11RayCastingHashSDF::s_pNormalsStereo = NULL;
 ID3D11ShaderResourceView* DX11RayCastingHashSDF::s_pNormalsStereoSRV = NULL;
 ID3D11UnorderedAccessView* DX11RayCastingHashSDF::s_pNormalsStereoUAV = NULL;
 
-//wei add
-ID3D11Texture2D* DX11RayCastingHashSDF::s_pIDsStereo = NULL;
-ID3D11ShaderResourceView* DX11RayCastingHashSDF::s_pIDsStereoSRV = NULL;
-ID3D11UnorderedAccessView* DX11RayCastingHashSDF::s_pIDsStereoUAV = NULL;
-
 ID3D11Texture2D* DX11RayCastingHashSDF::s_pDepthStencilSplattingMinStereo = NULL;
 ID3D11DepthStencilView*	DX11RayCastingHashSDF::s_pDepthStencilSplattingMinDSVStereo = NULL;
 ID3D11ShaderResourceView* DX11RayCastingHashSDF::s_pDepthStencilSplattingMinSRVStereo = NULL;
@@ -124,9 +114,8 @@ HRESULT DX11RayCastingHashSDF::Render( ID3D11DeviceContext* context, ID3D11Shade
 		s_pDepthStencilSplattingMinDSV, s_pDepthStencilSplattingMaxDSV,
 		m_pOutputImage2DSRV, m_pOutputImage2DUAV,
 		s_pPositionsSRV, s_pPositionsUAV,//这几个变量就是后面要用的
-		s_pColorsUAV,                    //颜色的UAV
+		s_pColorsUAV,
 		s_pNormalsSRV, s_pNormalsUAV,
-		s_pIDsUAV,
 		m_pSSAOMapSRV, m_pSSAOMapUAV, m_pSSAOMapFilteredUAV);
 }
 
@@ -174,7 +163,6 @@ HRESULT DX11RayCastingHashSDF::RenderStereo( ID3D11DeviceContext* context, ID3D1
 				s_pPositionsStereoSRV, s_pPositionsStereoUAV,
 				s_pColorsStereoUAV,
 				s_pNormalsStereoSRV, s_pNormalsStereoUAV,
-				s_pIDsStereoUAV,//wei add
 				m_pSSAOMapStereoSRV, m_pSSAOMapStereoUAV, m_pSSAOMapFilteredStereoUAV));
 
 			DX11PhongLighting::renderStereo(context, s_pPositionsStereoSRV, s_pNormalsStereoSRV, s_pColorsStereoSRV, m_pSSAOMapStereoSRV, useColor, false);
@@ -206,7 +194,6 @@ HRESULT DX11RayCastingHashSDF::RenderStereo( ID3D11DeviceContext* context, ID3D1
 				s_pPositionsStereoSRV, s_pPositionsStereoUAV,
 				s_pColorsStereoUAV,
 				s_pNormalsStereoSRV, s_pNormalsStereoUAV,
-				s_pIDsStereoUAV,//wei add
 				m_pSSAOMapStereoSRV, m_pSSAOMapStereoUAV, m_pSSAOMapFilteredStereoUAV));
 
 			DX11PhongLighting::renderStereo(context, s_pPositionsStereoSRV, s_pNormalsStereoSRV, s_pColorsStereoSRV, m_pSSAOMapStereoSRV, useColor, false);
@@ -240,7 +227,7 @@ HRESULT DX11RayCastingHashSDF::RenderStereo( ID3D11DeviceContext* context, ID3D1
 }
 
 //这个函数决定了如何把三维的东西映射到2D的纹理上去，然后在界面上显示出来
-HRESULT DX11RayCastingHashSDF::RenderToTexture(ID3D11DeviceContext* context, ID3D11ShaderResourceView* hash, ID3D11ShaderResourceView* hashCompact, ID3D11ShaderResourceView* sdfBlocksSDF, ID3D11ShaderResourceView* sdfBlocksRGBW, unsigned int hashNumValidBuckets, unsigned int renderTargetWidth, unsigned int renderTargetHeight, const mat4f* lastRigidTransform, ID3D11Buffer* CBsceneRepSDF, ID3D11ShaderResourceView* pDepthStencilSplattingMinSRV, ID3D11ShaderResourceView* pDepthStencilSplattingMaxSRV, ID3D11DepthStencilView* pDepthStencilSplattingMinDSV, ID3D11DepthStencilView* pDepthStencilSplattingMaxDSV, ID3D11ShaderResourceView* pOutputImage2DSRV, ID3D11UnorderedAccessView* pOutputImage2DUAV, ID3D11ShaderResourceView* pPositionsSRV, ID3D11UnorderedAccessView* pPositionsUAV, ID3D11UnorderedAccessView* pColorsUAV, ID3D11ShaderResourceView* pNormalsSRV, ID3D11UnorderedAccessView* pNormalsUAV, ID3D11UnorderedAccessView* pIDsUAV, ID3D11ShaderResourceView* pSSAOMapSRV, ID3D11UnorderedAccessView* pSSAOMapUAV, ID3D11UnorderedAccessView* pSSAOMapFilteredUAV)
+HRESULT DX11RayCastingHashSDF::RenderToTexture( ID3D11DeviceContext* context, ID3D11ShaderResourceView* hash, ID3D11ShaderResourceView* hashCompact, ID3D11ShaderResourceView* sdfBlocksSDF, ID3D11ShaderResourceView* sdfBlocksRGBW, unsigned int hashNumValidBuckets, unsigned int renderTargetWidth, unsigned int renderTargetHeight, const mat4f* lastRigidTransform, ID3D11Buffer* CBsceneRepSDF, ID3D11ShaderResourceView* pDepthStencilSplattingMinSRV, ID3D11ShaderResourceView* pDepthStencilSplattingMaxSRV, ID3D11DepthStencilView* pDepthStencilSplattingMinDSV, ID3D11DepthStencilView* pDepthStencilSplattingMaxDSV, ID3D11ShaderResourceView* pOutputImage2DSRV, ID3D11UnorderedAccessView* pOutputImage2DUAV, ID3D11ShaderResourceView* pPositionsSRV, ID3D11UnorderedAccessView* pPositionsUAV, ID3D11UnorderedAccessView* pColorsUAV, ID3D11ShaderResourceView* pNormalsSRV, ID3D11UnorderedAccessView* pNormalsUAV, ID3D11ShaderResourceView* pSSAOMapSRV, ID3D11UnorderedAccessView* pSSAOMapUAV, ID3D11UnorderedAccessView* pSSAOMapFilteredUAV )
 {
 	HRESULT hr = S_OK;
 
@@ -284,16 +271,12 @@ HRESULT DX11RayCastingHashSDF::RenderToTexture(ID3D11DeviceContext* context, ID3
 	context->CSSetUnorderedAccessViews(0, 1, &pOutputImage2DUAV, 0);
 	context->CSSetUnorderedAccessViews(1, 1, &pColorsUAV, 0);
 	context->CSSetUnorderedAccessViews(2, 1, &pNormalsUAV, 0);
-	//wei add
-	context->CSSetUnorderedAccessViews(3, 1, &pIDsUAV, 0);
 
 	//context->CSSetConstantBuffers(0, 1, &m_constantBuffer);
 	context->CSSetConstantBuffers(0, 1, &CBsceneRepSDF);
 	context->CSSetConstantBuffers(1, 1, &s_ConstantBufferSplatting);
 	ID3D11Buffer* CBGlobalAppState = GlobalAppState::getInstance().MapAndGetConstantBuffer(context);
 	context->CSSetConstantBuffers(8, 1, &CBGlobalAppState);
-	//这个cs的代码在RayCastingHashSDF.hlsl 文件的 renderCS函数。
-	//项目中三个shader用到这个名字了，容易跟丢
 	context->CSSetShader(m_pComputeShader, 0, 0);
 
 	// Run compute shader
@@ -330,13 +313,11 @@ HRESULT DX11RayCastingHashSDF::RenderToTexture(ID3D11DeviceContext* context, ID3
 	context->CSSetUnorderedAccessViews(0, 1, nullUAV, 0);
 	context->CSSetUnorderedAccessViews(1, 1, nullUAV, 0);
 	context->CSSetUnorderedAccessViews(2, 1, nullUAV, 0);
-	//wei add
-	context->CSSetUnorderedAccessViews(3, 1, nullUAV, 0);
 	context->CSSetConstantBuffers(0, 2, nullB);
 	context->CSSetConstantBuffers(8, 1, nullB);
 	context->CSSetShader(0, 0, 0);
 
-	// Output， s_currentlyInStereoMode default false
+	// Output
 	if(GlobalAppState::getInstance().s_currentlyInStereoMode)
 	{
 		DX11ImageHelper::StereoCameraSpaceProjection(context, pOutputImage2DSRV, pPositionsUAV, renderTargetWidth, renderTargetHeight);

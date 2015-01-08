@@ -14,12 +14,10 @@ Buffer<float>	g_FragmentSortedDepthBufferSRV	: register( t6 );
 #include "VoxelUtilHashSDF.h.hlsl"
 #include "RayCastingUtilHashSDF.h.hlsl"
       
-RWTexture2D<float>  g_output : register(u0);
+RWTexture2D<float> g_output : register(u0);
 RWTexture2D<float4> g_outputColor : register(u1);
 RWTexture2D<float4> g_outputNormals : register(u2);
-//wei add
-RWTexture2D<short>  g_outputID : register(u3);
-
+  
 cbuffer cbConstant : register(b1)
 { 
 	float4x4	g_ViewMat;
@@ -30,7 +28,6 @@ cbuffer cbConstant : register(b1)
 	uint		g_dummyRayInteveral337;
 };
 
-//将该文件的函数包含进来，等于只是减小了该文件的size
 #include "RayCastingHashSDFTraversalSimple.h.hlsl"
  
 // rayCurrent and rayEnd need to be be the intersections between ray and the coarse grid box
@@ -116,7 +113,6 @@ void traverseCoarseGridSimple(float3 worldCamPos, float3 worldDir, float3 camDir
 void renderCS(int3 dTid : SV_DispatchThreadID)
 {
 	g_output[dTid.xy] = MINF;
-	//颜色会在下面的traverseCoarseGridSimpleSampleAll中被修改
 	//g_outputColor[dTid.xy] = float4(0.0f, 0.0f, 0.0f, 1.0f);
 	
 	if(dTid.x >= g_RenderTargetWidth || dTid.y >= g_RenderTargetHeight) return;
@@ -132,7 +128,6 @@ void renderCS(int3 dTid : SV_DispatchThreadID)
 	}
 	else
 	{
-		//这个代码在RayCastingHashSDFTraversalSimple.h.hlsl中
 		traverseCoarseGridSimpleSampleAll(worldCamPos, worldDir, camDir, dTid);
 	} 
 }
