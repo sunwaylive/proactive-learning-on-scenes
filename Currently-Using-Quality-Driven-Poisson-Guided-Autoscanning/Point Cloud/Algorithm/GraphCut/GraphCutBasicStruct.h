@@ -30,11 +30,6 @@ typedef matrix Matrix;
 #endif
 
 
-struct GRAPHSHOW
-{
-	vector<MyPt_RGB_NORMAL> vecNodes;
-	vector<pair<int,int>> vecEdges;
-};
 
 struct ISOPOINT
 {
@@ -108,4 +103,5 @@ public:
 	double GetBinarySmoothValue(int m,int n);
 	void CrossProduct(double ax,double ay,double az,double bx,double by,double bz,double &rx,double &ry,double &rz);
 	void Merge();
+	void Invalidt();
 };

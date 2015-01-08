@@ -13,6 +13,16 @@ CScanEstimation::~CScanEstimation(void)
 {
 }
 
+void CScanEstimation::Clear()
+{
+	vecPatchConfidenceScore.clear();
+	vecvecIsoPoint.clear();
+	vecObjectIsoPoint.clear();
+	vecObjectHypo.clear();
+	vecEdgeHypo.clear();
+	vecObjectSorting.clear();
+	vecEdgeSorting.clear();
+}
 
 void CScanEstimation::saveMultiResultToOriginal( CMesh *original, int m )
 {
@@ -73,7 +83,9 @@ void CScanEstimation::ScoreUpdate()
 	}
 
 	ComputeScore();
+	UpdateGraph();
 }
+
 
 double CScanEstimation::ComputePatchConfidenceScore(int objectIndex,int patchIndex)
 {
@@ -133,7 +145,7 @@ void CScanEstimation::ComputeScore()
 		outFileh << "objectHypo.areaIndex " << objectHypo.areaIndex <<  endl;
 	}
 	outFileh.close();
-	
+
 	ofstream outFilee("Output\\EdgeHypo.txt");
 	for(int i = 0;i < vecEdgeHypo.size();i++)
 	{
@@ -143,16 +155,27 @@ void CScanEstimation::ComputeScore()
 		outFilee << "edgeHypo.end " << edgeHypo.end <<  endl;
 		outFilee << "edgeHypo.areaIndex " << edgeHypo.areaIndex <<  endl;
 		outFilee << "edgeHypo.separateness " << edgeHypo.separateness <<  endl;
-		
+
 	}
 	outFilee.close();
+
+	Sorting(vecObjectHypo,vecEdgeHypo,vecObjectSorting,vecEdgeSorting);
+
+	ofstream outFiles("Output\\Sorting.txt");
+	for(int i = 0;i < vecObjectSorting.size();i++)
+	{
+		outFiles << "vecObjectSorting: " << vecObjectSorting[i] <<  endl;
+	}
+	for(int i = 0;i < vecEdgeSorting.size();i++)
+	{
+		outFiles << "vecEdgeSorting: " << vecEdgeSorting[i] <<  endl;
+	}
+	outFiles.close();
 
 }
 
 void CScanEstimation::ComputeObjectness(int m)
 {
-	vecObjectness.clear();
-
 	double objectness = 0;
 	double fSum = 0;
 	double concaveSum = 0;
@@ -196,12 +219,11 @@ void CScanEstimation::ComputeObjectness(int m)
 	objectHypo.areaIndex = GetAreaIndex(vecvecMultiResult[m][0]);
 	objectHypo.mergeFlag = false;
 	vecObjectHypo.push_back(objectHypo);
+
 }
 
 void CScanEstimation::ComputeSeparateness(int m,int n)
 {
-	vecSeparateness.clear();
-
 	double separateness = 0;
 	vector<pair<int,int>> vecpairSeperatenessSmallEdge;
 	for(int i = 0;i < vecvecMultiResult[m].size();i++)
@@ -274,4 +296,95 @@ int CScanEstimation::GetAreaIndex(int patchIndex)
 		if(patchIndex >= clusterPatchInitIndex[i] && patchIndex < clusterPatchInitIndex[i] + clusterPatchNum[i])
 			return i;
 	}
+}
+
+void CScanEstimation::Sorting(vector<ObjectHypo> obj,vector<EdgeHypo> edge,vector<int> &objSorting,vector<int> &edgeSorting)
+{
+	objSorting.clear();
+	for(int i = 0;i < obj.size();i++)
+	{
+		objSorting.push_back(i);
+	}
+	
+	for(int i =0 ; i< obj.size()-1; ++i) 
+	{  
+		for(int j = 0; j < obj.size()-i-1; ++j) 
+		{  
+			if(obj[j].objectness < obj[j+1].objectness)  
+			{  
+				double tmp = obj[j].objectness; obj[j].objectness = obj[j+1].objectness;  obj[j+1].objectness = tmp;
+				int tmpIndex = objSorting[j]; objSorting[j] = objSorting[j+1]; objSorting[j+1] = tmpIndex;
+			}  
+		}  
+	}  
+
+	edgeSorting.clear();
+	for(int i = 0;i < edge.size();i++)
+	{
+		edgeSorting.push_back(i);
+	}
+
+	for(int i =0 ; i< edge.size()-1; ++i) 
+	{  
+		for(int j = 0; j < edge.size()-i-1; ++j) 
+		{  
+			if(edge[j].separateness < edge[j+1].separateness)  
+			{  
+				double tmp = edge[j].separateness; edge[j].separateness = edge[j+1].separateness;  edge[j+1].separateness = tmp;
+				int tmpIndex = edgeSorting[j]; edgeSorting[j] = edgeSorting[j+1]; edgeSorting[j+1] = tmpIndex;
+			}  
+		}  
+	}  
+}
+
+void CScanEstimation::GetColour(double v,double vmin,double vmax,double &r,double &g,double &b)
+{
+	double dv;
+
+	if (v < vmin)
+		v = vmin;
+	if (v > vmax)
+		v = vmax;
+	dv = vmax - vmin;
+
+	if (v < (vmin + 0.25 * dv)) {
+		r = 0;
+		g = 4 * (v - vmin) / dv;
+	} else if (v < (vmin + 0.5 * dv)) {
+		r = 0;
+		b = 1 + 4 * (vmin + 0.25 * dv - v) / dv;
+	} else if (v < (vmin + 0.75 * dv)) {
+		r = 4 * (v - vmin - 0.5 * dv) / dv;
+		b = 0;
+	} else {
+		g = 1 + 4 * (vmin + 0.75 * dv - v) / dv;
+		b = 0;
+	}
+
+}
+
+void CScanEstimation::UpdateGraph()
+{
+	ofstream outFileg("Output\\11111.txt");
+	outFileg << "let's begin :) " << endl;
+
+	for(int i = 0;i < vecObjectness.size();i++)
+	{
+		double r,g,b;
+		GetColour(vecObjectness[i],0,3,r,g,b);
+		graphContract.vecNodes[i].r = r;
+		graphContract.vecNodes[i].g = g;
+		graphContract.vecNodes[i].b = b;
+	}
+
+	for(int i = 0;i < vecSeparateness.size();i++)
+	{
+		double r,g,b;
+		GetColour(vecSeparateness[i],0,3,r,g,b);
+		graphContract.vecEdgeColor.push_back(r);
+		graphContract.vecEdgeColor.push_back(g);
+		graphContract.vecEdgeColor.push_back(b);
+	}
+	outFileg << "111111111  " << vecObjectness.size() << "  " << vecSeparateness.size()<<endl;
+	outFileg.close();
 }

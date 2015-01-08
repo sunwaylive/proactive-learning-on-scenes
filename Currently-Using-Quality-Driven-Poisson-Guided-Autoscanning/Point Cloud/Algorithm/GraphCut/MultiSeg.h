@@ -46,6 +46,7 @@ public:
 	vector<vector<int>> vecvecObjectPoolClustering;
 	vector<int> vecObjectPoolClusteringCount;
 public:
+	void Clear();
 	void MainStep();
 	void GetColorModel();
 	void AddObjectPool();

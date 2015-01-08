@@ -387,3 +387,8 @@ void CAreaInterest::Merge()
 {
 	mergeFlag = true;
 }
+
+void CAreaInterest::Invalidt()
+{
+	validFlag = false;
+}

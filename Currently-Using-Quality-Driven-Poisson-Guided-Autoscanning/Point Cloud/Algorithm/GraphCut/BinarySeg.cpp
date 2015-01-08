@@ -47,6 +47,27 @@ void CBinarySeg::AddPatchNormal(vector<Normalt> &normal)
 	vecPatcNormal = normal;
 }
 
+void CBinarySeg::Clear()
+{
+	vecPatchPoint.clear();
+	vecPatcNormal.clear();
+	vecvecPatchMinDis.clear();
+	vecvecPatchCenDis.clear();
+	vecvecPatchConnectFlag.clear();
+	vecSmoothValue.clear();
+	vecAppearenceValue.clear();
+	vecGeometryValue.clear();
+	vecGeometryConvex.clear();
+	vecPatchCenPoint.clear();
+	vecPatchColor.clear();
+	vecpairPatchConnection.clear();
+	vecvecPatchColorDetial.clear();
+	vecIfConnectTable.clear();
+	graphInit.vecEdges.clear();
+	graphInit.vecNodes.clear();
+	vecvecObjectPool.clear();
+}
+
 void CBinarySeg::MainStep(bool initFlag,int newAreaNum)
 {
 	clock_t time[10];
@@ -145,6 +166,7 @@ void CBinarySeg::InitAreaInterest()
 
 void CBinarySeg::UpdateAreaInterest(int newAreaNum) //要改
 {
+	Clear();
 	int initIndex = 0;
 	clusterPatchInitIndex.clear();
 	for(int i = 0;i < clusterPatchNum.size(); i++)
@@ -174,24 +196,6 @@ void CBinarySeg::UpdateAreaInterest(int newAreaNum) //要改
 
 void CBinarySeg::CollectAreaInterest()
 {
-	vecPatchPoint.clear();
-	vecPatcNormal.clear();
-	vecvecPatchMinDis.clear();
-	vecvecPatchCenDis.clear();
-	vecvecPatchConnectFlag.clear();
-	vecSmoothValue.clear();
-	vecAppearenceValue.clear();
-	vecGeometryValue.clear();
-	vecGeometryConvex.clear();
-	vecPatchCenPoint.clear();
-	vecPatchColor.clear();
-	vecpairPatchConnection.clear();
-	vecvecPatchColorDetial.clear();
-	vecIfConnectTable.clear();
-	graphInit.vecEdges.clear();
-	graphInit.vecNodes.clear();
-	vecvecObjectPool.clear();
-	
 	for(int i = 0;i < vecAreaInterest.size();i++)
 	{
 		vecPatchPoint.insert(vecPatchPoint.end(),vecAreaInterest[i].vecPatchPoint.begin(),vecAreaInterest[i].vecPatchPoint.end());
@@ -487,8 +491,12 @@ void CBinarySeg::ConstructGraph()
 		point.x = vecPatchCenPoint[i].x;
 		point.y = vecPatchCenPoint[i].y;
 		point.z = vecPatchCenPoint[i].z;
+		point.r = 0.2;
+		point.g = 0.6;
+		point.b = 1.8;
 		graphInit.vecNodes.push_back(point);
 	}
 
 	graphInit.vecEdges = vecpairPatchConnection;
+
 }

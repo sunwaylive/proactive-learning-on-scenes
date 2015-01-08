@@ -83,6 +83,12 @@ void CClustering::AddObjectPool()
 // 	inFile1.close();
 }
 
+void CClustering::Clear()
+{
+	vecvecObjectPoolClustering.clear();
+	vecObjectPoolClusteringCount.clear();
+}
+
 void CClustering::MainStep()
 {
 	CleanObjectPool();

@@ -9,7 +9,6 @@ class CClustering
 {
 public:
 	vector<MyPointCloud_RGB_NORMAL> vecPatchPoint;
-	vector<int> clusterPatchNum;
 	vector<vector<int>> vecvecObjectPool;
 	vector<vector<int>> vecvecObjectPoolClustering;
 	vector<int> vecObjectPoolClusteringCount;
@@ -20,6 +19,7 @@ public:
 public:
 	CClustering(void);
 	~CClustering(void);
+	void Clear();
 	void AddObjectPool();
 	void MainStep();
 	void CleanObjectPool();

@@ -13,12 +13,22 @@ CPointCloudAnalysis::~CPointCloudAnalysis(void)
 
 void CPointCloudAnalysis::MainStep(bool initFlag,int newAreNum)
 {
+	//output
+	ofstream outFile1("Output\\MainStep.txt",ios::app);
+	outFile1 <<  "  0" <<endl;
+
 	if(initFlag)
 		DataIn();
+	outFile1 <<  "  1" <<endl;
 	BinarySegmentation(initFlag,newAreNum);
+	outFile1 <<  "  2" <<endl;
 	Clustering();
+	outFile1 <<  "  3" <<endl;
 	MultiSegmentation();
+	outFile1 <<  "  4" <<endl;
 	ScanEstimation();
+	outFile1 <<  "  5" <<endl;
+	outFile1.close();
 }
 
 
@@ -245,14 +255,16 @@ void CPointCloudAnalysis::BinarySegmentation(bool initFlag, int newAreaNum)
 
 void CPointCloudAnalysis::Clustering()
 {
+	cClustering.Clear();
 	cClustering.vecPatchPoint = cBinarySeg.vecPatchPoint;
 	cClustering.vecvecObjectPool = cBinarySeg.vecvecObjectPool;
-	
 	cClustering.MainStep();
 }
 
 void CPointCloudAnalysis::MultiSegmentation()
 {
+	cMultiSeg.Clear();
+
 	cMultiSeg.vecPatchPoint = cBinarySeg.vecPatchPoint;
 	cMultiSeg.vecpairPatchConnection = cBinarySeg.vecpairPatchConnection;
 	cMultiSeg.vecSmoothValue = cBinarySeg.vecSmoothValue;
@@ -271,6 +283,8 @@ void CPointCloudAnalysis::MultiSegmentation()
 
 void CPointCloudAnalysis::ScanEstimation()
 {
+	cScanEstimation.Clear();
+
 	cScanEstimation.vecSmoothValue = cBinarySeg.vecSmoothValue;
 	cScanEstimation.vecGeometryConvex = cBinarySeg.vecGeometryConvex;
 	cScanEstimation.vecGeometryValue = cBinarySeg.vecGeometryValue;
@@ -288,12 +302,15 @@ void CPointCloudAnalysis::ScanEstimation()
 	cScanEstimation.vecvecpairSeperatenessSmallEdge = cMultiSeg.vecvecpairSeperatenessSmallEdge;
 	cScanEstimation.vecObjectness = cMultiSeg.vecObjectness;
 	cScanEstimation.vecSeparateness = cMultiSeg.vecSeparateness;
-
+	cScanEstimation.graphContract = cMultiSeg.graphContract;
 }
 
 void CPointCloudAnalysis::Merge(int pushArea)
 {
+	//merge area
 	cBinarySeg.vecAreaInterest[pushArea].Merge();
+
+	//add a objecthypo
 	ObjectHypo objectHypo;
 	objectHypo.areaIndex = pushArea;
 	objectHypo.objectness = 0;
@@ -301,19 +318,28 @@ void CPointCloudAnalysis::Merge(int pushArea)
 	objectHypo.mergeFlag = true;
 	cScanEstimation.vecObjectHypo.push_back(objectHypo);
 
-	for(int i = 0;i < cScanEstimation.vecObjectHypo.size();i++)
+	//delete some objecthypo
+	for(int i = 0;i < cScanEstimation.vecObjectHypo.size();)
 	{
 		if(cScanEstimation.vecObjectHypo[i].areaIndex == pushArea)
-			cScanEstimation.vecObjectHypo.erase(cScanEstimation.vecObjectHypo.begin() + i - 1);
+			cScanEstimation.vecObjectHypo.erase(cScanEstimation.vecObjectHypo.begin() + i);
+		else
+			i++;
 	}
+
 }
 
-int CPointCloudAnalysis::ReAnalysis(int pushArea)
+void CPointCloudAnalysis::ReAnalysis(int pushArea)
 {
-	cBinarySeg.vecAreaInterest.erase(cBinarySeg.vecAreaInterest.begin() + pushArea -1);
-	cBinarySeg.clusterPatchNum.erase(cBinarySeg.clusterPatchNum.begin() + pushArea -1);
+	//invalid the area
+	cBinarySeg.vecAreaInterest[pushArea].Invalidt();
 
-	int newAreaNum = DataUpdate();
-
-	return newAreaNum;
+	//delete some objecthypo
+	for(int i = 0;i < cScanEstimation.vecObjectHypo.size();)
+	{
+		if(cScanEstimation.vecObjectHypo[i].areaIndex == pushArea)
+			cScanEstimation.vecObjectHypo.erase(cScanEstimation.vecObjectHypo.begin() + i);
+		else
+			i++;
+	}
 }

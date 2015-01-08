@@ -80,7 +80,7 @@ public:
 
   GLColor getColorByType(CVertex& v);
   //shiyifei
-  void drawGraphShow(GRAPHSHOW *graphcut, GraphType graphType = PATCH_GRAPH);
+  void drawGraphShow(GRAPHSHOW *graphcut, int graphType);
 
 private:
 	
@@ -93,7 +93,7 @@ private:
 	void drawNormal(CVertex& v);
 
 	void glDrawPoint(Point3f& p, GLColor color, double size);
-	void glDrawSphere(Point3f& p, GLColor color, double radius, int slide = 0);
+	void glDrawSphere(Point3f& p, GLColor color, double radius, int slide = 5);
 	void glDrawCylinder(Point3f& p0, Point3f& p1, GLColor color, double width);
 	//void glDrawCurves(vector<Curve>& curves, GLColor gl_color);
 

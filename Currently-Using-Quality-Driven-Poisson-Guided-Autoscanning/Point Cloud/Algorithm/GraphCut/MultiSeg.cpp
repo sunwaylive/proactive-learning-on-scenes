@@ -51,6 +51,21 @@ void CMultiSeg::AddObjectPool()
 // 	inFile.close();
 }
 
+void CMultiSeg::Clear()
+{
+	vecDataValue.clear();
+	vecObjectColorModel.clear();
+	clusterPatchInterval.clear();
+	vecObjectClusteringIndex.clear();
+	vecObjectness.clear();
+	vecSeparateness.clear();
+	vecpairSeperatenessEdge.clear();
+	vecvecpairSeperatenessSmallEdge.clear();
+	graphContract.vecEdgeColor.clear();
+	graphContract.vecEdges.clear();
+	graphContract.vecNodes.clear();
+	vecvecMultiResult.clear();
+}
 
 void CMultiSeg::MainStep()
 {
@@ -445,6 +460,9 @@ void CMultiSeg::ConstructGraph()
 		point.x /= vecvecMultiResult[i].size();
 		point.y /= vecvecMultiResult[i].size();
 		point.z /= vecvecMultiResult[i].size();
+		point.r = 0.2;
+		point.g = 0.2;
+		point.b = 1.0;
 
 		graphContract.vecNodes.push_back(point);
 	}

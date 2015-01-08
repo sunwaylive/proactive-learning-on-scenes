@@ -650,6 +650,7 @@ void MainWindow::showSDFSlices(bool _val)
 void MainWindow::showGraphCutRelated(bool _val)
 {
   paras->glarea.setValue("Show GraphCut Related", BoolValue(_val));
+  //jerrysyf
   area->updateGL();
 }
 

@@ -20,14 +20,14 @@ public:
 public:
 	CPointCloudAnalysis(void);
 	~CPointCloudAnalysis(void);
-	void MainStep(bool initFlag,int newAreaNum);
+	void MainStep(bool initFlag,int newAreaNum = 0);
 	void DataIn();
 	int DataUpdate();
-	void BinarySegmentation(bool initFlag,int newAreaNum);
+	void BinarySegmentation(bool initFlag,int newAreaNum = 0);
 	void Clustering();
 	void MultiSegmentation();
 	void ScanEstimation();
 	void Merge(int pushArea);
-	int ReAnalysis(int pushArea);
+	void ReAnalysis(int pushArea);
 };
 

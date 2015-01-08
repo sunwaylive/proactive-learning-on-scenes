@@ -71,7 +71,8 @@ public:
 	void AddTable(MyPointCloud_RGB_NORMAL &table);
 	void AddClusterPoints(vector<MyPointCloud_RGB_NORMAL> &points);
 	void AddPatchNormal(vector<Normalt> &normal);
-	void MainStep(bool initFlag,int newAreaNum);
+	void Clear();
+	void MainStep(bool initFlag,int newAreaNum = 0);
 	void InitAreaInterest();
 	void UpdateAreaInterest(int newAreaNum);
 	void CollectAreaInterest();

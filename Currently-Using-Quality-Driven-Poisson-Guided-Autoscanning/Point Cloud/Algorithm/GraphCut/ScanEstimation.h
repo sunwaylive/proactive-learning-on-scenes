@@ -41,16 +41,25 @@ public:
 
 	vector<ObjectHypo> vecObjectHypo;
 	vector<EdgeHypo> vecEdgeHypo;
+	vector<int> vecObjectSorting;
+	vector<int> vecEdgeSorting;
+
+	GRAPHSHOW graphContract;
+
 public:
 	CScanEstimation(void);
 	~CScanEstimation(void);
+	void Clear();
 	void saveMultiResultToOriginal(CMesh *original, int m);
 	void ScoreUpdate();
 	void ComputeScore();
+	void GetColour(double v,double vmin,double vmax,double &r,double &g,double &b);
+	void UpdateGraph();
 	void ComputeObjectness(int m);
 	void ComputeSeparateness(int m,int n);
 	double GaussianFunction(double x);
 	double ComputePatchConfidenceScore(int objectIndex,int patchIndex);
 	double ComputePointConfidenceScore(int objectIndex,MyPoint_RGB_NORMAL point);
 	int GetAreaIndex(int patchIndex);
+	void Sorting(vector<ObjectHypo> obj,vector<EdgeHypo> edge,vector<int> &objSorting,vector<int> &edgeSorting);
 };
