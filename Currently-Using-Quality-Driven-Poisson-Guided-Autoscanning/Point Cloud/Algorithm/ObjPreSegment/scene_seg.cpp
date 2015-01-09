@@ -971,9 +971,12 @@ void detect_table(PointCloudPtr_RGB_NORMAL sourceCloud, pcl::ModelCoefficients& 
     if(std::abs(normal.dot(Eigen::Vector3d(0,0,1)))>0.7){
       break;
     }
+    else{
+      appendCloud_RGB_NORMAL(planeCloud, remainingCloud);
+    }
   }
 
-  pcl::copyPointCloud(*cloud_tem, *remainingCloud);
+  appendCloud_RGB_NORMAL(cloud_tem, remainingCloud);
 }
 
 //get transform matrix between plane and x_y plane 
@@ -1019,7 +1022,8 @@ void getCloudOnTable(PointCloudPtr_RGB_NORMAL cloud, PointCloudPtr rect_cloud, E
       p.normal_y = cloud_tem->at(k).normal_y;
       p.normal_z = cloud_tem->at(k).normal_z;
 
-      if(cloud_tem->at(k).z < rect_cloud_tem->at(0).z){
+      //=========modify the height of tabletop things
+      if(cloud_tem->at(k).z < rect_cloud_tem->at(0).z + 0.015){
         continue;
       }
 
