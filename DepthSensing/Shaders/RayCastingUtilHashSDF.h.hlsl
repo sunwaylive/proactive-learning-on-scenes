@@ -138,28 +138,7 @@ bool trilinearInterpolationSimpleFastFast(float3 pos, out float dist, out float3
 	return true;
 }
 
-//wei add. 唯一区别是这个函数可以获取id号
-bool trilinearInterpolationSimpleFastFast2(float3 pos, out float dist, out float3 color, out uint id)
-{
-	const float oSet = g_VirtualVoxelSize;
-	const float3 posDual = pos - float3(oSet / 2.0f, oSet / 2.0f, oSet / 2.0f);
-	float3 weight = frac(worldToVirtualVoxelPosFloat(pos));
 
-	dist = 0.0f;
-	int3 virtualVoxelPos = worldToVirtualVoxelPos(posDual + float3(0.0f, 0.0f, 0.0f)); int ptr = getHashEntryForSDFBlockPos(g_Hash, virtualVoxelPosToSDFBlock(virtualVoxelPos)).ptr; if (ptr == FREE_ENTRY) return false; int	linearMemoryIndex = ptr + virtualVoxelPosToLocalSDFBlockIndex(virtualVoxelPos); Voxel	v = getVoxel(g_SDFBlocksSDF, g_SDFBlocksRGBW, linearMemoryIndex); if (v.weight == 0) return false; dist += (1.0f - weight.x)*(1.0f - weight.y)*(1.0f - weight.z)*v.sdf;
-		 virtualVoxelPos = worldToVirtualVoxelPos(posDual + float3(oSet, 0.0f, 0.0f));	 ptr = getHashEntryForSDFBlockPos(g_Hash, virtualVoxelPosToSDFBlock(virtualVoxelPos)).ptr; if (ptr == FREE_ENTRY) return false;		linearMemoryIndex = ptr + virtualVoxelPosToLocalSDFBlockIndex(virtualVoxelPos);		v = getVoxel(g_SDFBlocksSDF, g_SDFBlocksRGBW, linearMemoryIndex); if (v.weight == 0) return false; dist += weight.x *(1.0f - weight.y)*(1.0f - weight.z)*v.sdf;
-	     virtualVoxelPos = worldToVirtualVoxelPos(posDual + float3(0.0f, oSet, 0.0f));	 ptr = getHashEntryForSDFBlockPos(g_Hash, virtualVoxelPosToSDFBlock(virtualVoxelPos)).ptr; if (ptr == FREE_ENTRY) return false;		linearMemoryIndex = ptr + virtualVoxelPosToLocalSDFBlockIndex(virtualVoxelPos);		v = getVoxel(g_SDFBlocksSDF, g_SDFBlocksRGBW, linearMemoryIndex); if (v.weight == 0) return false; dist += (1.0f - weight.x)*	   weight.y *(1.0f - weight.z)*v.sdf;
-	     virtualVoxelPos = worldToVirtualVoxelPos(posDual + float3(0.0f, 0.0f, oSet));	 ptr = getHashEntryForSDFBlockPos(g_Hash, virtualVoxelPosToSDFBlock(virtualVoxelPos)).ptr; if (ptr == FREE_ENTRY) return false;		linearMemoryIndex = ptr + virtualVoxelPosToLocalSDFBlockIndex(virtualVoxelPos);		v = getVoxel(g_SDFBlocksSDF, g_SDFBlocksRGBW, linearMemoryIndex); if (v.weight == 0) return false; dist += (1.0f - weight.x)*(1.0f - weight.y)*	   weight.z *v.sdf;
-	     virtualVoxelPos = worldToVirtualVoxelPos(posDual + float3(oSet, oSet, 0.0f));	 ptr = getHashEntryForSDFBlockPos(g_Hash, virtualVoxelPosToSDFBlock(virtualVoxelPos)).ptr; if (ptr == FREE_ENTRY) return false;		linearMemoryIndex = ptr + virtualVoxelPosToLocalSDFBlockIndex(virtualVoxelPos);		v = getVoxel(g_SDFBlocksSDF, g_SDFBlocksRGBW, linearMemoryIndex); if (v.weight == 0) return false; dist += weight.x *	   weight.y *(1.0f - weight.z)*v.sdf;
-	     virtualVoxelPos = worldToVirtualVoxelPos(posDual + float3(0.0f, oSet, oSet));	 ptr = getHashEntryForSDFBlockPos(g_Hash, virtualVoxelPosToSDFBlock(virtualVoxelPos)).ptr; if (ptr == FREE_ENTRY) return false;		linearMemoryIndex = ptr + virtualVoxelPosToLocalSDFBlockIndex(virtualVoxelPos);		v = getVoxel(g_SDFBlocksSDF, g_SDFBlocksRGBW, linearMemoryIndex); if (v.weight == 0) return false; dist += (1.0f - weight.x)*	   weight.y *	   weight.z *v.sdf;
-	     virtualVoxelPos = worldToVirtualVoxelPos(posDual + float3(oSet, 0.0f, oSet));	 ptr = getHashEntryForSDFBlockPos(g_Hash, virtualVoxelPosToSDFBlock(virtualVoxelPos)).ptr; if (ptr == FREE_ENTRY) return false;		linearMemoryIndex = ptr + virtualVoxelPosToLocalSDFBlockIndex(virtualVoxelPos);		v = getVoxel(g_SDFBlocksSDF, g_SDFBlocksRGBW, linearMemoryIndex); if (v.weight == 0) return false; dist += weight.x *(1.0f - weight.y)*	   weight.z *v.sdf;
-	     virtualVoxelPos = worldToVirtualVoxelPos(posDual + float3(oSet, oSet, oSet));	 ptr = getHashEntryForSDFBlockPos(g_Hash, virtualVoxelPosToSDFBlock(virtualVoxelPos)).ptr; if (ptr == FREE_ENTRY) return false;		linearMemoryIndex = ptr + virtualVoxelPosToLocalSDFBlockIndex(virtualVoxelPos);		v = getVoxel(g_SDFBlocksSDF, g_SDFBlocksRGBW, linearMemoryIndex); if (v.weight == 0) return false; dist += weight.x *	   weight.y *	   weight.z *v.sdf;
-
-	color = v.color;
-	//wei add
-	id = asuint(0);  // v.id;
-	return true;
-}
 
 
 // Takes a world space position pos -> returns false if not all samples were available
