@@ -58,23 +58,29 @@ bool isSDFBlockStreamedOut(int3 sdfBlock)
 	return ((g_bitMask[index/nBitsInT] & (0x1 << (index%nBitsInT))) != 0x0);
 }
 
+//根据sdfBlock的位置，分配内存，并放入hash表中，当然会检测该位置是否已经存在于hash表中了
 void allocBlock(const in int3 pos) {
-
+	//根据voxel的3D 索引通过hash函数计算其所在的hash表中的元素
 	uint h = computeHashPos(pos);		//hash bucket
+	//找到该hash bucket的起始位置
 	uint hp = h * g_HashBucketSize;		//hash position
 
 	int firstEmpty = -1;
 	[allow_uav_condition]
+	//遍历该hash bucket
 	for (uint j = 0; j < g_HashBucketSize; j++) {
-		uint i = j + hp;		
+		uint i = j + hp;
+		//获取到hash bucket中对应位置上的元素
 		HashEntry curr = getHashEntry(g_Hash, i);
 		
 		//in that case the SDF-block is already alloacted and corresponds to the current position -> exit thread
+		//如果该位置的voxel已经被分配了，也就是之前扫到过该位置了
 		if (curr.pos.x == pos.x && curr.pos.y == pos.y && curr.pos.z == pos.z && curr.ptr != FREE_ENTRY) {
 			return;
 		}
 
 		//store the first FREE_ENTRY hash entry
+		//找到第一个free的entry给后面用
 		if (firstEmpty == -1 && curr.ptr == FREE_ENTRY) {
 			firstEmpty = i;
 		}
@@ -83,7 +89,7 @@ void allocBlock(const in int3 pos) {
 	  
 	#ifdef HANDLE_COLLISIONS
 		//updated variables as after the loop
-		const uint idxLastEntryInBucket = (h+1)*g_HashBucketSize - 1;	//get last index of bucket
+		const uint idxLastEntryInBucket = (h + 1) * g_HashBucketSize - 1;	//get last index of bucket
 		uint i = idxLastEntryInBucket;									//start with the last entry of the current bucket
 		//int offset = 0;
 		HashEntry curr;	curr.offset = 0;
@@ -114,7 +120,8 @@ void allocBlock(const in int3 pos) {
 		if (prevValue != LOCK_ENTRY) {	//only proceed if the bucket has been locked
 			HashEntry entry;
 			entry.pos = pos;
-			entry.offset = NO_OFFSET;		
+			entry.offset = NO_OFFSET;
+			//设置新的hashentry，其所指向其包含的sdfBlock
 			entry.ptr = g_HeapConsume.Consume() * SDF_BLOCK_SIZE * SDF_BLOCK_SIZE * SDF_BLOCK_SIZE;	//memory alloc
 			setHashEntry(g_Hash, firstEmpty, entry);
 		}
@@ -211,17 +218,20 @@ void allocBlock(const in int3 pos) {
 void allocCS(uint3 DTid : SV_DispatchThreadID, uint3 GTid : SV_GroupThreadID, uint GI: SV_GroupIndex)
 {
 	if (DTid.x >= g_ImageWidth || DTid.y >= g_ImageHeight)	return;
-		
+
+	//获取当前帧上，对应位置的深度值
 	float d = g_InputDepth[DTid.xy];
 	if (d == MINF)	return;
 
 	if(d >= g_maxIntegrationDistance) return;
 
+	//设置sdf那层的厚度？
 	float t = getTruncation(d);
 	float minDepth = min(g_maxIntegrationDistance, d-t);
 	float maxDepth = min(g_maxIntegrationDistance, d+t);
 	if (minDepth >= maxDepth) return;
 
+	//屏幕上2D点，加上对应深度 转换成  camera坐标系下的三维点
 	float3 rayMin = kinectDepthToSkeleton(DTid.x, DTid.y, minDepth);
 	rayMin = mul(float4(rayMin, 1.0f), g_RigidTransform).xyz;
 	float3 rayMax = kinectDepthToSkeleton(DTid.x, DTid.y, maxDepth);
@@ -229,14 +239,20 @@ void allocCS(uint3 DTid : SV_DispatchThreadID, uint3 GTid : SV_GroupThreadID, ui
 	
 	float3 rayDir = normalize(rayMax - rayMin);
 	
+	//找到rayMin， rayMax对应的sdfBlock
 	int3 idCurrentVoxel = worldToSDFBlock(rayMin);
 	int3 idEnd = worldToSDFBlock(rayMax);
 
+	//当x>0，sign(x)=1;当x=0，sign(x)=0; 当x<0， sign(x)=-1
+	//根据光线方向，决定步长的正负性
 	float3 step = sign(rayDir);
-	float3 boundaryPos = SDFBlockToWorld(idCurrentVoxel+(int3)clamp(step, 0.0, 1.0f))-0.5f*g_VirtualVoxelSize;
-	float3 tMax = (boundaryPos-rayMin)/rayDir;
-	float3 tDelta = (step*SDF_BLOCK_SIZE*g_VirtualVoxelSize)/rayDir;
-	int3 idBound = idEnd+step;
+
+	//先算出curVoxel的左下角，然后沿着step的方向走一步
+	float3 boundaryPos = SDFBlockToWorld(idCurrentVoxel - 0.5f * g_VirtualVoxelSize + (int3)clamp(step, 0.0, 1.0f)) ;
+
+	float3 tMax = (boundaryPos - rayMin) / rayDir;
+	float3 tDelta = (step * SDF_BLOCK_SIZE * g_VirtualVoxelSize) / rayDir;
+	int3 idBound = idEnd + step;
 
 	[unroll]
 	for(int c = 0; c < 3; c++) {
@@ -250,7 +266,7 @@ void allocCS(uint3 DTid : SV_DispatchThreadID, uint3 GTid : SV_GroupThreadID, ui
 
 	unsigned int iter = 0; // iter < g_MaxLoopIterCount
 	while(true && iter < g_MaxLoopIterCount) {
-		
+		//如果在相机的视野范围内， 则分配新的Voxel
 		if (isSDFBlockInCameraFrustumApprox(idCurrentVoxel) && !isSDFBlockStreamedOut(idCurrentVoxel)) {
 			allocBlock(idCurrentVoxel);
 		}
@@ -310,8 +326,8 @@ void allocCS(uint3 DTid : SV_DispatchThreadID, uint3 GTid : SV_GroupThreadID, ui
 } 
 
 #define NUM_GROUPS_X 1024
-
-[numthreads(SDF_BLOCK_SIZE*SDF_BLOCK_SIZE*SDF_BLOCK_SIZE, 1, 1)]
+//This is key key key part!! wei
+[numthreads(SDF_BLOCK_SIZE * SDF_BLOCK_SIZE * SDF_BLOCK_SIZE, 1, 1)]
 void integrateCS(uint3 DTid : SV_DispatchThreadID, uint3 GTid : SV_GroupThreadID, uint GI: SV_GroupIndex, uint3 GID : SV_GroupID)
 {
 	uint groupID = GID.x + GID.y * NUM_GROUPS_X;
@@ -321,16 +337,20 @@ void integrateCS(uint3 DTid : SV_DispatchThreadID, uint3 GTid : SV_GroupThreadID
 		//if (entry.ptr == FREE_ENTRY) return; //should never happen since we did compactify before
 	
 		//int3 pi_base = entry.pos * SDF_BLOCK_SIZE;
+		//这个是sdfBlock的位置，每个sdfBlock又由8 * 8 * 8个voxels组成
 		int3 pi_base = SDFBlockToVirtualVoxelPos(entry.pos);
 
 		uint i = GTid.x;
+		//在sdfBlock的基础上，获取每个小voxel的线性索引
 		int3 pi = pi_base + delinearizeVoxelIndex(i);
+		//每个小voxel的世界坐标系
 		float3 pf = virtualVoxelPosToWorld(pi);
+		//检测是不是在屏幕上
 		pf = mul(float4(pf, 1.0f), g_RigidTransformInverse).xyz;
 		uint2 screenPos = uint2(cameraToKinectScreenInt(pf)); 
 	
 		if (screenPos.x < g_ImageWidth && screenPos.y < g_ImageHeight) {	//on screen
-				
+			//当前depth sensor获取的深度数据
 			float depth = g_InputDepth[screenPos];
 			if (depth != MINF) {	//valid depth value
 				 
@@ -338,7 +358,7 @@ void integrateCS(uint3 DTid : SV_DispatchThreadID, uint3 GTid : SV_GroupThreadID
 				{
 					float depthZeroOne = cameraToKinectProjZ(depth);
 							
-					float sdf = depth - pf.z;
+					float sdf = depth - pf.z; //传感器获得的深度值 减去 通过GPU一系列计算得到的深度值
 					float truncation = getTruncation(depth);
 					if (sdf > -truncation) // && depthZeroOne >= 0.0f && depthZeroOne <= 1.0f) //check if in truncation range should already be made in depth map computation
 					{
@@ -353,7 +373,8 @@ void integrateCS(uint3 DTid : SV_DispatchThreadID, uint3 GTid : SV_GroupThreadID
 						//weightUpdate = (1-depthZeroOne)*5.0f + depthZeroOne*0.05f;
 						//weightUpdate *= g_WeightSample;
 						float weightUpdate = max(g_WeightSample * 1.5f * (1.0f-depthZeroOne), 1.0f);
-						 
+						
+						//生成新的voxel
 						Voxel curr;	//construct current voxel
 						curr.sdf = sdf;
 						curr.weight = weightUpdate;
@@ -361,9 +382,9 @@ void integrateCS(uint3 DTid : SV_DispatchThreadID, uint3 GTid : SV_GroupThreadID
 						float3 c = g_InputColor[screenPos].xyz;
 						curr.color = (int3)(c * 255.0f);
 
-						uint idx = entry.ptr + i;
+						uint idx = entry.ptr + i;//i是2D depth frame的横坐标
 						Voxel prev = getVoxel(g_SDFBlocksSDFUAV, g_SDFBlocksRGBWUAV, idx);
-
+						//curr的权重更大，跟prev的voxel进行组合，返回新的voxel
 						Voxel newVoxel = combineVoxel(curr, prev);
 
 						if(sdf >= truncation)
@@ -371,7 +392,7 @@ void integrateCS(uint3 DTid : SV_DispatchThreadID, uint3 GTid : SV_GroupThreadID
 							//newVoxel.sdf = 0.0f;
 							//newVoxel.weight = 0;
 						}
-
+						//用新的Voxel代替原来idx位置上的voxel，即prev
 						setVoxel(g_SDFBlocksSDFUAV, g_SDFBlocksRGBWUAV, idx, newVoxel);
 					}
 				}

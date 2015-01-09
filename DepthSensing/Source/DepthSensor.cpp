@@ -27,6 +27,7 @@ void DepthSensor::init(unsigned int depthWidth, unsigned int depthHeight, unsign
 	m_colorHeight = static_cast<LONG>(colorHeight);
 
 	SAFE_DELETE_ARRAY(m_depthD16);
+	//this is data that saves each frame acquired by sensors
 	m_depthD16 = new USHORT[m_depthWidth*m_depthHeight];
 	memset(m_depthD16, 0, sizeof(USHORT)*m_depthWidth*m_depthHeight);
 

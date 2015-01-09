@@ -68,8 +68,8 @@ typedef struct MyPoint_RGB_NORMAL{
 
 class MyPointCloud{
 public:
-  MyPointCloud();
-  ~MyPointCloud();
+  MyPointCloud(){}
+  ~MyPointCloud(){}
 
 public:
   vector<MyPt> mypoints;
@@ -77,8 +77,8 @@ public:
 
 class MyPointCloud_RGB{
 public:
-  MyPointCloud_RGB();
-  ~MyPointCloud_RGB();
+  MyPointCloud_RGB(){}
+  ~MyPointCloud_RGB(){}
 
 public:
   vector<MyPt_RGB> mypoints;
@@ -86,8 +86,8 @@ public:
 
 class MyPointCloud_RGB_NORMAL{
 public:
-  MyPointCloud_RGB_NORMAL();
-  ~MyPointCloud_RGB_NORMAL();
+  MyPointCloud_RGB_NORMAL(){}
+  ~MyPointCloud_RGB_NORMAL(){}
 
 public:
   vector<MyPt_RGB_NORMAL> mypoints;
@@ -127,4 +127,13 @@ void MyPointCloud_RGB_NORMAL2MyPointCloud(MyPointCloud_RGB_NORMAL& mc_rgb, MyPoi
 
 void CopyMyPointCloud_RGB(MyPointCloud_RGB& source, MyPointCloud_RGB& target);
 void CopyMyPointCloud(MyPointCloud& source, MyPointCloud& target);
+
+//shiyifei types
+struct GRAPHSHOW
+{
+  vector<MyPt_RGB_NORMAL> vecNodes;
+  vector<pair<int,int> > vecEdges;
+  vector<float> vecEdgeColor; 
+};
+
 #endif 

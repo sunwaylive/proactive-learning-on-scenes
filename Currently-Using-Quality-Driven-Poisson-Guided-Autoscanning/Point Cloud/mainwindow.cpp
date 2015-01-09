@@ -69,6 +69,7 @@ void MainWindow::initWidgets()
   //sdf related
   ui.actionShow_SDF_Voxels->setChecked(paras->glarea.getBool("Show SDF Voxels"));
   ui.actionShow_SDF_Voxels->setChecked(paras->glarea.getBool("Show SDF Slices"));
+  ui.actionShow_GraphCut_Related->setChecked(paras->glarea.getBool("Show GraphCut Related"));
 }
 
 void MainWindow::initConnect()
@@ -167,6 +168,7 @@ void MainWindow::initConnect()
   //sdf related
   connect(ui.actionShow_SDF_Voxels, SIGNAL(toggled(bool)), this, SLOT(showSDFVoxels(bool)));
   connect(ui.actionShow_SDF_Slices, SIGNAL(toggled(bool)), this, SLOT(showSDFSlices(bool)));
+  connect(ui.actionShow_GraphCut_Related, SIGNAL(toggled(bool)), this, SLOT(showGraphCutRelated(bool)));
 
 	QTimer *timer = new QTimer(this);
 	connect(timer, SIGNAL(timeout()), this->area, SLOT(update()));
@@ -642,6 +644,13 @@ void MainWindow::showSDFVoxels(bool _val)
 void MainWindow::showSDFSlices(bool _val)
 {
   paras->glarea.setValue("Show SDF Slices", BoolValue(_val));
+  area->updateGL();
+}
+
+void MainWindow::showGraphCutRelated(bool _val)
+{
+  paras->glarea.setValue("Show GraphCut Related", BoolValue(_val));
+  //jerrysyf
   area->updateGL();
 }
 

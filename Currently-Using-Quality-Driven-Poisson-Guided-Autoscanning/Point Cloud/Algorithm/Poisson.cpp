@@ -2094,7 +2094,12 @@ void Poisson::runComputeIsoSmoothnessConfidence()
   {
     time.start("confidence 4");
     int knn = para->getDouble("Original KNN");
-    cout << "Knn: " << knn << endl;
+
+    if (knn > original->vert.size()){
+      knn = original->vert.size() - 5;//ensure points num is less than total points
+    }
+
+    cout << "knn: " << knn << endl;
     GlobalFun::computeAnnNeigbhors(original->vert, iso_points->vert, knn, false, "runComputeIsoSmoothnessConfidence");
     
     double sigma = global_paraMgr.norSmooth.getDouble("Sharpe Feature Bandwidth Sigma");

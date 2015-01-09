@@ -1,3 +1,4 @@
+#pragma once
 #ifndef POISSON_PARAM_H
 #define POISSON_PARAM_H
 

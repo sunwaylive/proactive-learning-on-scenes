@@ -72,7 +72,7 @@ Voxel getVoxelSRV4(Buffer<int4> hash, in uint id) {
 	return voxel;
 }
 
-  
+//用参数voxel，去更新参数hash表中第id号位置的voxel
 void setVoxel(RWBuffer<int> hash, in uint id, in Voxel voxel) {
 
 	//TODO so something for sync

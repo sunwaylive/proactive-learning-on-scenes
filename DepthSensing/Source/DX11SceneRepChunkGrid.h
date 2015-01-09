@@ -637,7 +637,9 @@ public:
 
 		float sdf_max = -1000.f;
 		float sdf_min = +1000.f;
-		int point_num = 0;
+		int sdf_total_point_num = 0;
+		int sdf_skip_point_num = 0;
+		int sdf_zero_point_num = 0;
 
 		//define SAVE_M_GRID
 #ifdef  SAVE_M_GRID
@@ -686,20 +688,21 @@ public:
 		sdf_out_ply << "property list uchar int vertex_indices\n";
 		sdf_out_ply << "end_header\n";
 
-		int chunkNum = 0;
+		int chunkNumContainSDF = 0;
 		//遍历每个grid，一共有257 * 257 *257个grid， grid是由chunk组成
 		for (int x = minGridPos.x; x < maxGridPos.x; x+=1)	{
 			for (int y = minGridPos.y; y < maxGridPos.y; y+=1) {
 				for (int z = minGridPos.z; z< maxGridPos.z; z+=1)	{
 					//这是每个chunk的索引坐标
 					vec3i chunk(x, y, z);
-					chunkNum++;
+					//chunkNum++;
 
 					int chunkSDFNum = 0;
 					float chunkSDFSum = 0.0f;
 
 					//这个函数里面其实有调用linearizeChunkPos
 					if (containsSDFBlocksChunk(chunk))	{
+						chunkNumContainSDF++;//wei moved
 						std::cout << "Dump Hash on chunk (" << x << ", " << y << ", " << z << ") " << std::endl;
 
 						vec3f& chunkCenter = getWorldPosChunk(chunk);
@@ -714,8 +717,9 @@ public:
 						if(m_grid[index] != NULL && m_grid[index]->isStreamedOut()) // As been allocated and has streamed out blocks
 						{
 							ChunkDesc* chunkDesc = m_grid[index];
-							//遍历该chunk中包含的sdfBlock
+							//遍历该chunk中包含的sdfBlock, 每个chunk包含数目不等的sdfBlock
 							for (size_t i = 0; i < chunkDesc->m_ChunkDesc.size(); i++) {
+								occupiedBlocks++;//wei moved
 								//由于对ptr的判断已经被注释掉了，所以这两句其实没用，sdfDesc还有一个pos信息有可能有用，但是这个pos是SDFBlock的pos,而不是每个
 								//小的voxel的pos
 								SDFDesc& sdfDesc = chunkDesc->m_ChunkDesc[i];
@@ -725,16 +729,19 @@ public:
 								//if (ptr != -2) {
 								VoxelBlock vBlock; 
 								//memcpy(vBlock.voxels, &voxels[ptr], sizeof(VoxelBlock));
+								//遍历每个sdfBlock中的小voxels
 								for (unsigned int j = 0; j < SDF_BLOCK_SIZE * SDF_BLOCK_SIZE * SDF_BLOCK_SIZE; j++) {
 									int first = chunkDesc->m_SDFBlocks[i].data[2*j+0];
 									float sdf =  *(float*)(&first);
 									vBlock.voxels[j].sdf = *(float*)(&first);
 
+									sdf_total_point_num++;
 									//过滤掉一些sdf voxel, 
 									//test: 只存sdf为0的点
-									/*if (abs(sdf) > 1e-5){
-									continue;
-									}*/
+									if (abs(sdf) > 1e-5){
+										sdf_skip_point_num++;
+										continue;
+									}
 
 									sdf_max = std::max(sdf, sdf_max);
 									sdf_min = std::min(sdf, sdf_min);
@@ -753,7 +760,7 @@ public:
 									//wei add
 									//大的sdfBlock的位置 + 每个小voxel的偏移位置
 									vec3f voxelWordPos = VoxelUtilHelper::SDFBlockToWorld(sdfDesc.pos)+ VoxelUtilHelper::virtualVoxelPosToWorld(VoxelUtilHelper::delinearlize(j));
-									++point_num;
+									++sdf_zero_point_num;
 
 									//1. in ply format
 									vec3i voxelColor = VoxelUtilHelper::getColorBySDF(vBlock.voxels[j].sdf, VoxelUtilHelper::g_min_sdf, VoxelUtilHelper::g_max_sdf);
@@ -790,7 +797,7 @@ public:
 									}					
 								}
 
-								occupiedBlocks++;
+								//occupiedBlocks++;
 								//}//end for "if ptr != 2"
 							} //end for i
 						} //end for if
@@ -820,11 +827,13 @@ public:
 			}
 		}
 		std::cout<<sdf_max <<" " <<sdf_min <<std::endl;
-		std::cout<<"sdf point num: " <<point_num <<std::endl;
-		std::cout<<"chunk point num: " <<chunkNum <<std::endl;
+		std::cout<<"sdf total point num: " <<sdf_total_point_num <<std::endl;
+		std::cout<<"sdf skip point num: " <<sdf_skip_point_num <<std::endl;
+		std::cout<<"sdf zero point num: " <<sdf_zero_point_num <<std::endl;
+		std::cout<<"containing sdfBlock chunk point num: " <<chunkNumContainSDF <<std::endl;
 		//binary 把sdf voxel point num 写到文件头部
 		sdf_out_binary.seekp(0, std::ios::beg);
-		sdf_out_binary.write((const char*)&point_num, sizeof(point_num));
+		sdf_out_binary.write((const char*)&sdf_zero_point_num, sizeof(sdf_zero_point_num));
 
 		sdf_out_ply.close();
 		sdf_out_binary.close();
@@ -833,7 +842,8 @@ public:
 		m_grid_out.close();
 #endif
 
-		std::cout << "found " << occupiedBlocks << " voxel blocks   ";
+		std::cout<< "found " << occupiedBlocks << " voxel blocks   ";
+		std::cout<<"occupiedBlocks * 512 = " <<occupiedBlocks * 512 <<std::endl;
 		grid.writeBinaryDump(filename);
 
 		unsigned int nStreamedBlock;

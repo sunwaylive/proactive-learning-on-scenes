@@ -142,6 +142,7 @@ public:
   bool is_iso;
   bool is_hole;
   bool is_poisson;
+  bool is_graphcut_related;
   bool is_visible;
   bool is_barely_visible;
   bool is_boundary;
@@ -196,6 +197,7 @@ public:
     is_iso(false),
     is_hole(false),
     is_poisson(false),
+    is_graphcut_related(false),
 		is_fixed_sample(false),
     is_boundary(false),
     is_sdf(false),

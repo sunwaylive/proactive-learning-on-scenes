@@ -34,6 +34,11 @@ ID3D11Texture2D* DX11RayCastingHashSDF::s_pNormals = NULL;
 ID3D11ShaderResourceView* DX11RayCastingHashSDF::s_pNormalsSRV = NULL;
 ID3D11UnorderedAccessView* DX11RayCastingHashSDF::s_pNormalsUAV = NULL;
 
+//wei add
+ID3D11Texture2D* DX11RayCastingHashSDF::s_pIDs = NULL;
+ID3D11ShaderResourceView* DX11RayCastingHashSDF::s_pIDsSRV = NULL;
+ID3D11UnorderedAccessView* DX11RayCastingHashSDF::s_pIDsUAV = NULL;
+
 // Ray Interval	
 ID3D11Buffer* DX11RayCastingHashSDF::s_ConstantBufferSplatting = NULL;
 
@@ -82,6 +87,11 @@ ID3D11Texture2D* DX11RayCastingHashSDF::s_pNormalsStereo = NULL;
 ID3D11ShaderResourceView* DX11RayCastingHashSDF::s_pNormalsStereoSRV = NULL;
 ID3D11UnorderedAccessView* DX11RayCastingHashSDF::s_pNormalsStereoUAV = NULL;
 
+//wei add
+ID3D11Texture2D* DX11RayCastingHashSDF::s_pIDsStereo = NULL;
+ID3D11ShaderResourceView* DX11RayCastingHashSDF::s_pIDsStereoSRV = NULL;
+ID3D11UnorderedAccessView* DX11RayCastingHashSDF::s_pIDsStereoUAV = NULL;
+
 ID3D11Texture2D* DX11RayCastingHashSDF::s_pDepthStencilSplattingMinStereo = NULL;
 ID3D11DepthStencilView*	DX11RayCastingHashSDF::s_pDepthStencilSplattingMinDSVStereo = NULL;
 ID3D11ShaderResourceView* DX11RayCastingHashSDF::s_pDepthStencilSplattingMinSRVStereo = NULL;
@@ -106,15 +116,17 @@ void DX11RayCastingHashSDF::OnD3D11DestroyDevice()
 	destroy();
 }
 
+//这个函数的作用是用扫描数据，填充它的成员变量：s_pPositionsSRV， s_pColorsUAV， s_pNormalsSRV等等，为后面显示在界面上用。因为这个几个变量都是最后被绘制在窗口中的
 HRESULT DX11RayCastingHashSDF::Render( ID3D11DeviceContext* context, ID3D11ShaderResourceView* hash, ID3D11ShaderResourceView* hashCompact, ID3D11ShaderResourceView* sdfBlocksSDF, ID3D11ShaderResourceView* sdfBlocksRGBW, unsigned int hashNumValidBuckets, unsigned int renderTargetWidth, unsigned int renderTargetHeight, const mat4f* lastRigidTransform, ID3D11Buffer* CBsceneRepSDF )
 {
 	return RenderToTexture( context, hash, hashCompact, sdfBlocksSDF, sdfBlocksRGBW, hashNumValidBuckets, renderTargetWidth, renderTargetHeight, lastRigidTransform, CBsceneRepSDF,
 		s_pDepthStencilSplattingMinSRV, s_pDepthStencilSplattingMaxSRV,
 		s_pDepthStencilSplattingMinDSV, s_pDepthStencilSplattingMaxDSV,
 		m_pOutputImage2DSRV, m_pOutputImage2DUAV,
-		s_pPositionsSRV, s_pPositionsUAV,
+		s_pPositionsSRV, s_pPositionsUAV,//这几个变量就是后面要用的
 		s_pColorsUAV,
 		s_pNormalsSRV, s_pNormalsUAV,
+		s_pIDsUAV,
 		m_pSSAOMapSRV, m_pSSAOMapUAV, m_pSSAOMapFilteredUAV);
 }
 
@@ -122,7 +134,7 @@ HRESULT DX11RayCastingHashSDF::Render( ID3D11DeviceContext* context, ID3D11Shade
 HRESULT DX11RayCastingHashSDF::RenderStereo( ID3D11DeviceContext* context, ID3D11ShaderResourceView* hash, ID3D11ShaderResourceView* hashCompact, ID3D11ShaderResourceView* sdfBlocksSDF, ID3D11ShaderResourceView* sdfBlocksRGBW, unsigned int hashNumValidBuckets, unsigned int renderTargetWidth, unsigned int renderTargetHeight, const mat4f* lastRigidTransform, ID3D11Buffer* CBsceneRepSDF )
 {
 	HRESULT hr = S_OK;
-
+	//默认为false
 	if(GlobalAppState::getInstance().s_stereoEnabled)
 	{
 		GlobalAppState::getInstance().s_currentlyInStereoMode = true;
@@ -162,8 +174,10 @@ HRESULT DX11RayCastingHashSDF::RenderStereo( ID3D11DeviceContext* context, ID3D1
 				s_pPositionsStereoSRV, s_pPositionsStereoUAV,
 				s_pColorsStereoUAV,
 				s_pNormalsStereoSRV, s_pNormalsStereoUAV,
+				s_pIDsStereoUAV,//wei add
 				m_pSSAOMapStereoSRV, m_pSSAOMapStereoUAV, m_pSSAOMapFilteredStereoUAV));
 
+			//得到数据后用PhonLighting显示出来
 			DX11PhongLighting::renderStereo(context, s_pPositionsStereoSRV, s_pNormalsStereoSRV, s_pColorsStereoSRV, m_pSSAOMapStereoSRV, useColor, false);
 
 			std::stringstream toNumber; toNumber << whichShot;
@@ -193,6 +207,7 @@ HRESULT DX11RayCastingHashSDF::RenderStereo( ID3D11DeviceContext* context, ID3D1
 				s_pPositionsStereoSRV, s_pPositionsStereoUAV,
 				s_pColorsStereoUAV,
 				s_pNormalsStereoSRV, s_pNormalsStereoUAV,
+				s_pIDsStereoUAV,//wei add
 				m_pSSAOMapStereoSRV, m_pSSAOMapStereoUAV, m_pSSAOMapFilteredStereoUAV));
 
 			DX11PhongLighting::renderStereo(context, s_pPositionsStereoSRV, s_pNormalsStereoSRV, s_pColorsStereoSRV, m_pSSAOMapStereoSRV, useColor, false);
@@ -220,13 +235,13 @@ HRESULT DX11RayCastingHashSDF::RenderStereo( ID3D11DeviceContext* context, ID3D1
 		context->RSSetViewports( 1, &vp );
 
 		GlobalAppState::getInstance().s_currentlyInStereoMode = false;
-	}
+	}//end if 默认这个函数是不执行的
 
 	return hr;
 }
 
-
-HRESULT DX11RayCastingHashSDF::RenderToTexture( ID3D11DeviceContext* context, ID3D11ShaderResourceView* hash, ID3D11ShaderResourceView* hashCompact, ID3D11ShaderResourceView* sdfBlocksSDF, ID3D11ShaderResourceView* sdfBlocksRGBW, unsigned int hashNumValidBuckets, unsigned int renderTargetWidth, unsigned int renderTargetHeight, const mat4f* lastRigidTransform, ID3D11Buffer* CBsceneRepSDF, ID3D11ShaderResourceView* pDepthStencilSplattingMinSRV, ID3D11ShaderResourceView* pDepthStencilSplattingMaxSRV, ID3D11DepthStencilView* pDepthStencilSplattingMinDSV, ID3D11DepthStencilView* pDepthStencilSplattingMaxDSV, ID3D11ShaderResourceView* pOutputImage2DSRV, ID3D11UnorderedAccessView* pOutputImage2DUAV, ID3D11ShaderResourceView* pPositionsSRV, ID3D11UnorderedAccessView* pPositionsUAV, ID3D11UnorderedAccessView* pColorsUAV, ID3D11ShaderResourceView* pNormalsSRV, ID3D11UnorderedAccessView* pNormalsUAV, ID3D11ShaderResourceView* pSSAOMapSRV, ID3D11UnorderedAccessView* pSSAOMapUAV, ID3D11UnorderedAccessView* pSSAOMapFilteredUAV )
+//这个函数决定了如何把三维的东西映射到2D的纹理上去，然后在界面上显示出来
+HRESULT DX11RayCastingHashSDF::RenderToTexture(ID3D11DeviceContext* context, ID3D11ShaderResourceView* hash, ID3D11ShaderResourceView* hashCompact, ID3D11ShaderResourceView* sdfBlocksSDF, ID3D11ShaderResourceView* sdfBlocksRGBW, unsigned int hashNumValidBuckets, unsigned int renderTargetWidth, unsigned int renderTargetHeight, const mat4f* lastRigidTransform, ID3D11Buffer* CBsceneRepSDF, ID3D11ShaderResourceView* pDepthStencilSplattingMinSRV, ID3D11ShaderResourceView* pDepthStencilSplattingMaxSRV, ID3D11DepthStencilView* pDepthStencilSplattingMinDSV, ID3D11DepthStencilView* pDepthStencilSplattingMaxDSV, ID3D11ShaderResourceView* pOutputImage2DSRV, ID3D11UnorderedAccessView* pOutputImage2DUAV, ID3D11ShaderResourceView* pPositionsSRV, ID3D11UnorderedAccessView* pPositionsUAV, ID3D11UnorderedAccessView* pColorsUAV, ID3D11ShaderResourceView* pNormalsSRV, ID3D11UnorderedAccessView* pNormalsUAV, ID3D11UnorderedAccessView* pIDsUAV, ID3D11ShaderResourceView* pSSAOMapSRV, ID3D11UnorderedAccessView* pSSAOMapUAV, ID3D11UnorderedAccessView* pSSAOMapFilteredUAV)
 {
 	HRESULT hr = S_OK;
 
@@ -257,6 +272,7 @@ HRESULT DX11RayCastingHashSDF::RenderToTexture( ID3D11DeviceContext* context, ID
 	context->Unmap(s_ConstantBufferSplatting, 0);
 
 	// Setup pipeline
+	//这几个shader resource其实只是在SceneRepChunkGrid中创建的
 	context->CSSetShaderResources(0, 1, &hash);
 	context->CSSetShaderResources(1, 1, &sdfBlocksSDF);
 	context->CSSetShaderResources(4, 1, &sdfBlocksRGBW);
@@ -269,6 +285,8 @@ HRESULT DX11RayCastingHashSDF::RenderToTexture( ID3D11DeviceContext* context, ID
 	context->CSSetUnorderedAccessViews(0, 1, &pOutputImage2DUAV, 0);
 	context->CSSetUnorderedAccessViews(1, 1, &pColorsUAV, 0);
 	context->CSSetUnorderedAccessViews(2, 1, &pNormalsUAV, 0);
+	//wei add
+	context->CSSetUnorderedAccessViews(3, 1, &pIDsUAV, 0);
 
 	//context->CSSetConstantBuffers(0, 1, &m_constantBuffer);
 	context->CSSetConstantBuffers(0, 1, &CBsceneRepSDF);
@@ -311,6 +329,9 @@ HRESULT DX11RayCastingHashSDF::RenderToTexture( ID3D11DeviceContext* context, ID
 	context->CSSetUnorderedAccessViews(0, 1, nullUAV, 0);
 	context->CSSetUnorderedAccessViews(1, 1, nullUAV, 0);
 	context->CSSetUnorderedAccessViews(2, 1, nullUAV, 0);
+	//wei add
+	context->CSSetUnorderedAccessViews(3, 1, nullUAV, 0);
+
 	context->CSSetConstantBuffers(0, 2, nullB);
 	context->CSSetConstantBuffers(8, 1, nullB);
 	context->CSSetShader(0, 0, 0);
@@ -435,6 +456,29 @@ HRESULT DX11RayCastingHashSDF::initialize( ID3D11Device* pd3dDevice )
 	V_RETURN(pd3dDevice->CreateShaderResourceView(s_pNormals, NULL, &s_pNormalsSRV));
 	V_RETURN(pd3dDevice->CreateUnorderedAccessView(s_pNormals, NULL, &s_pNormalsUAV));
 
+	//wei add
+	D3D11_TEXTURE2D_DESC descID;
+	ZeroMemory(&descID, sizeof(D3D11_TEXTURE2D_DESC));
+	descID.Width = GlobalAppState::getInstance().s_windowWidth;
+	descID.Height = GlobalAppState::getInstance().s_windowHeight;
+	descID.MipLevels = 1;
+	descID.ArraySize = 1;
+	descID.Format = DXGI_FORMAT_R32_UINT;//DXGI_FORMAT_R32_FLOAT;
+	descID.SampleDesc.Count = 1;
+	descID.SampleDesc.Quality = 0;
+	descID.Usage = D3D11_USAGE_DEFAULT;
+	descID.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS;
+	descID.CPUAccessFlags = 0;
+	descID.MiscFlags = 0;
+
+	V_RETURN(pd3dDevice->CreateTexture2D(&descID, NULL, &s_pIDs));
+	V_RETURN(pd3dDevice->CreateShaderResourceView(s_pIDs, NULL, &s_pIDsSRV));
+	V_RETURN(pd3dDevice->CreateUnorderedAccessView(s_pIDs, NULL, &s_pIDsUAV));
+	D3D11_TEXTURE2D_DESC tmp;
+	s_pIDs->GetDesc(&tmp);
+	std::cout << tmp.Width << " " << tmp.Height << std::endl;
+	std::cout << "wei add: Successfully create ID SRV and UAV." << std::endl;
+	//wei add end
 
 	// Ray Interval
 	V_RETURN(CompileShaderFromFile(L"Shaders\\RayIntervalSplatting.hlsl", "VS", "vs_5_0", &pBlob, validDefines));
@@ -591,6 +635,30 @@ HRESULT DX11RayCastingHashSDF::initialize( ID3D11Device* pd3dDevice )
 			V_RETURN(pd3dDevice->CreateTexture2D(&descTex, NULL, &s_pNormalsStereo));
 			V_RETURN(pd3dDevice->CreateShaderResourceView(s_pNormalsStereo, NULL, &s_pNormalsStereoSRV));
 			V_RETURN(pd3dDevice->CreateUnorderedAccessView(s_pNormalsStereo, NULL, &s_pNormalsStereoUAV));
+			
+			//wei add, 不过配置文件中默认是关闭Stereo的，由s_stereoEnabled开关控制
+			D3D11_TEXTURE2D_DESC descStereoID;
+			ZeroMemory(&descTex, sizeof(D3D11_TEXTURE2D_DESC));
+			descStereoID.Width = GlobalAppState::getInstance().s_windowWidth;
+			descStereoID.Height = GlobalAppState::getInstance().s_windowHeight;
+			descStereoID.MipLevels = 1;
+			descStereoID.ArraySize = 1;
+			descStereoID.Format = DXGI_FORMAT_R32_UINT;//DXGI_FORMAT_R32_FLOAT;
+			descStereoID.SampleDesc.Count = 1;
+			descStereoID.SampleDesc.Quality = 0;
+			descStereoID.Usage = D3D11_USAGE_DEFAULT;
+			descStereoID.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS;
+			descStereoID.CPUAccessFlags = 0;
+			descStereoID.MiscFlags = 0;
+
+			V_RETURN(pd3dDevice->CreateTexture2D(&descStereoID, NULL, &s_pIDsStereo));
+			V_RETURN(pd3dDevice->CreateShaderResourceView(s_pIDsStereo, NULL, &s_pIDsStereoSRV));
+			V_RETURN(pd3dDevice->CreateUnorderedAccessView(s_pIDsStereo, NULL, &s_pIDsStereoUAV));
+			D3D11_TEXTURE2D_DESC tmpStereo;
+			s_pIDsStereo->GetDesc(&tmpStereo);
+			std::cout << tmpStereo.Width << " " << tmpStereo.Height << std::endl;
+			std::cout << "wei add: Stereo  Successfully create ID SRV and UAV." << std::endl;
+			//wei add end
 
 			//for first pass
 			ZeroMemory(&descTex, sizeof(D3D11_TEXTURE2D_DESC));
@@ -733,6 +801,7 @@ HRESULT DX11RayCastingHashSDF::rayIntervalSplattingRenderToTexture( ID3D11Device
 	context->OMSetDepthStencilState(s_pDepthStencilStateSplattingMin, 0); // Min is also default state
 	context->OMSetBlendState(s_pBlendStateDefault, NULL, 0xffffffff);
 
+	//release resources
 	ID3D11ShaderResourceView* nullSRV[] = { NULL };
 	ID3D11UnorderedAccessView* nullUAV[] = { NULL };
 	ID3D11Buffer* nullCB[] = { NULL, NULL };
@@ -779,6 +848,11 @@ void DX11RayCastingHashSDF::destroy()
 	SAFE_RELEASE(s_pNormals);
 	SAFE_RELEASE(s_pNormalsSRV);
 	SAFE_RELEASE(s_pNormalsUAV);
+
+	//wei add
+	SAFE_RELEASE(s_pIDs);
+	SAFE_RELEASE(s_pIDsSRV);
+	SAFE_RELEASE(s_pIDsUAV);
 
 	// Ray Interval	
 	SAFE_RELEASE(s_ConstantBufferSplatting);
@@ -827,6 +901,11 @@ void DX11RayCastingHashSDF::destroy()
 	SAFE_RELEASE(s_pNormalsStereo);
 	SAFE_RELEASE(s_pNormalsStereoSRV);
 	SAFE_RELEASE(s_pNormalsStereoUAV);
+
+	//wei add
+	SAFE_RELEASE(s_pIDsStereo);
+	SAFE_RELEASE(s_pIDsStereoSRV);
+	SAFE_RELEASE(s_pIDsStereoUAV);
 
 	SAFE_RELEASE(s_pDepthStencilSplattingMinStereo);
 	SAFE_RELEASE(s_pDepthStencilSplattingMinDSVStereo);

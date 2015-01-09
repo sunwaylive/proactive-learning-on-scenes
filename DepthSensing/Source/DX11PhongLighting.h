@@ -13,7 +13,7 @@ class DX11PhongLighting
 
 		static HRESULT OnD3D11CreateDevice(ID3D11Device* pd3dDevice);
 
-		static void render(ID3D11DeviceContext* pd3dDeviceContext, ID3D11ShaderResourceView* positions, ID3D11ShaderResourceView* normals, ID3D11ShaderResourceView* colors, ID3D11ShaderResourceView* ssaoMap, bool useMaterial, bool useSSAO);
+		static void render(ID3D11DeviceContext* pd3dDeviceContext, ID3D11ShaderResourceView* positions, ID3D11ShaderResourceView* normals, ID3D11ShaderResourceView* colors, ID3D11ShaderResourceView* IDs, ID3D11ShaderResourceView* ssaoMap, bool useMaterial, bool useSSAO);
 
 		static void renderStereo(ID3D11DeviceContext* pd3dDeviceContext, ID3D11ShaderResourceView* positions, ID3D11ShaderResourceView* normals, ID3D11ShaderResourceView* colors, ID3D11ShaderResourceView* ssaoMap, bool useMaterial, bool useSSAO);
 

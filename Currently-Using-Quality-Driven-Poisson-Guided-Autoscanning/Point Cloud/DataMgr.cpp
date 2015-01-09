@@ -134,6 +134,21 @@ bool DataMgr::isOriginalEmpty()
   return original.vert.empty();
 }
 
+bool DataMgr::isGraphCutResultEmpty()
+{
+  return graphcut_result.vert.empty();
+}
+
+bool DataMgr::isContractionGraphEmpty()
+{
+	return contractionGraph.vecNodes.empty();
+}
+
+bool DataMgr::isPatchGraphEmpty()
+{
+	return patchGraph.vecNodes.empty();
+}
+
 bool DataMgr::isIsoPointsEmpty()
 {
   return iso_points.vert.empty();
@@ -441,6 +456,12 @@ void DataMgr::setCurrentTemperalSample(CMesh *mesh)
   this->temperal_sample = mesh;
 }
 
+CMesh* DataMgr::getCurrentGraphCutResult()
+{
+  if (&graphcut_result == NULL) return NULL;
+  return &graphcut_result;
+}
+
 CMesh* DataMgr::getCurrentIsoPoints()
 {
   if(&iso_points == NULL) return NULL;
@@ -480,9 +501,9 @@ CMesh* DataMgr::getCurrentPoissonSurface()
 
 CMesh* DataMgr::getCurrentOriginal()
 {
-  if(&original == NULL) return NULL;
+	if(&original == NULL) return NULL;
 
-  return & original;
+	return & original;
 }
 
 CMesh* DataMgr::getCurrentTemperalOriginal()
@@ -1702,3 +1723,13 @@ void DataMgr::loadOwnToSDFVoxelBinary(QString fileName)
 //  y_sdf_slice_plane.vn = y_sdf_slice_plane.vert.size();
 //  z_sdf_slice_plane.vn = z_sdf_slice_plane.vert.size();
 //}
+
+GRAPHSHOW* DataMgr::getPatchGraph()
+{
+	return &patchGraph;
+}
+
+GRAPHSHOW* DataMgr::getContractionGraph()
+{
+	return &contractionGraph;
+}

@@ -63,7 +63,7 @@ void GLDrawer::updateDrawer(vector<int>& pickList)
 
 void GLDrawer::draw(DrawType type, CMesh* _mesh)
 {
-	if (!_mesh)
+	if (_mesh == NULL)
 		return;
 
 	bool doPick = para->getBool("Doing Pick");
@@ -212,6 +212,11 @@ GLColor GLDrawer::getColorByType(CVertex& v)
 	if (v.is_model)
 		return cBlack;
 
+  //shiyifei show graph point color
+  if (v.is_graphcut_related){
+    return GLColor(v.C()[0] / 255.0f, v.C()[1] / 255.0f, v.C()[2] / 255.0f);
+  }
+
   if (v.is_original)
   {
     if (v.is_barely_visible)
@@ -324,7 +329,8 @@ void GLDrawer::drawDot(CVertex& v)
 	glBegin(GL_POINTS);
 
 	GLColor color = getColorByType(v);
-	glColor4f(color.r, color.g, color.b, 1);
+	glColor4f(float(v.C()[0])/255, float(v.C()[1])/255, float(v.C()[2])/255, 1);
+
 	Point3f p = v.P();
 
 	//p.X() += 2 * int(v.eigen_confidence / iso_step_size);
@@ -804,13 +810,59 @@ void GLDrawer::drawSDFSliceDot(CMesh *sdf_slice)
   }
 }
 
+//shiyifei
+void GLDrawer::drawGraphShow(GRAPHSHOW *graphcut, int graphType)
+{
+  if(graphcut == NULL) return;
+
+  double sphere_radius = 0.0f;
+  double line_thickness = 0.0f;
+
+  if (graphType == 0/*PATCH_GRAPH*/){
+	  sphere_radius = 0.005;
+	  line_thickness = 5;
+  }else if(graphType == 1/*CONTRACTION_GRAPH*/){
+    sphere_radius = 1.5;
+    line_thickness = 1.5;
+  }
+
+  //draw dot in sphere
+  for (int i = 0; i < graphcut->vecNodes.size(); ++i){
+    MyPt_RGB_NORMAL &pt = graphcut->vecNodes[i];
+    glDrawSphere(Point3f(pt.x, pt.y, pt.z), GLColor(pt.r, pt.g, pt.b), sphere_radius, 20);
+  }
+
+  //draw edges
+  for(int i = 0; i < graphcut->vecEdges.size(); ++i){
+    int s_idx = graphcut->vecEdges[i].first;
+    int e_idx = graphcut->vecEdges[i].second;
+    MyPt_RGB_NORMAL &s_pt = graphcut->vecNodes[s_idx];
+    MyPt_RGB_NORMAL &e_pt = graphcut->vecNodes[e_idx];
+
+	float r,g,b;
+	if(graphcut->vecEdgeColor.size())
+	{
+		r = graphcut->vecEdgeColor[3 * i];
+		g = graphcut->vecEdgeColor[3 * i + 1];
+		b = graphcut->vecEdgeColor[3 * i + 2];
+	}
+	else
+	{
+		r = 0.2;
+		g = 0.6;
+		b = 0.8;
+	}
+   
+    glDrawLine(Point3f(s_pt.x, s_pt.y, s_pt.z), Point3f(e_pt.x, e_pt.y, e_pt.z), GLColor(r, g, b), line_thickness);
+  }
+}
+
 void GLDrawer::drawMeshLables(CMesh *mesh, QPainter *painter)
 {
   for (int i = 0; i < mesh->vert.size(); i++)
   {
     CVertex& v = mesh->vert[i];
-
-
+    
     glPushAttrib(GL_ALL_ATTRIB_BITS);
     glDepthFunc(GL_ALWAYS);
     glDisable(GL_LIGHTING);

@@ -1,32 +1,23 @@
 #pragma once
 
 //#include "scene_seg.h"
+#include "GraphCutGlobalHeader.h"
 #include "Algorithm/Common/common_type.h"
 #include "Algorithm/Common/color_op.h"
 #include "PoissonParam.h"
 #include "CMesh.h"
-
-#define LARGE_NUM 9999999
-#define SMALL_NUM -9999999
-
-struct ISOPOINT
-{
-	int objectIndex;
-	double x,y,z;
-	double fg,fs;
-};
+#include "Algorithm/GraphCut/GraphCutBasicStruct.h"
 
 
 class CScanEstimation
 {
 public:
-	CScanEstimation(void);
-	~CScanEstimation(void);
-
-public:
 	vector<MyPointCloud_RGB_NORMAL> vecPatchPoint;
+	vector<MyPoint> vecPatchCenPoint;
 	vector<vector<int>> vecvecMultiResult;
 	vector<vector<ISOPOINT>> vecvecIsoPoint;
+	vector<int> clusterPatchNum;
+	vector<int> clusterPatchInitIndex;
 
 	vector<pair<int,int>> vecpairPatchConnection;
 	vector<vector<bool>> vecvecPatchConnectFlag;
@@ -45,8 +36,30 @@ public:
 	double paraConfidence;
 	double paraSmoothAdjust;
 
+	vector<OBJECTISOPOINT> vecObjectIsoPoint;
+	vector<double> vecPatchConfidenceScore;
+
+	vector<ObjectHypo> vecObjectHypo;
+	vector<EdgeHypo> vecEdgeHypo;
+	vector<int> vecObjectSorting;
+	vector<int> vecEdgeSorting;
+
+	GRAPHSHOW graphContract;
+
 public:
-	void runComputeIsoGradientConfidence();
-  void saveMultiResultToOriginal(CMesh *original, int m);
-	void MainStep(CMesh *original);
+	CScanEstimation(void);
+	~CScanEstimation(void);
+	void Clear();
+	void saveMultiResultToOriginal(CMesh *original, int m);
+	void ScoreUpdate();
+	void ComputeScore();
+	void GetColour(double v,double vmin,double vmax,double &r,double &g,double &b);
+	void UpdateGraph();
+	void ComputeObjectness(int m);
+	void ComputeSeparateness(int m,int n);
+	double GaussianFunction(double x);
+	double ComputePatchConfidenceScore(int objectIndex,int patchIndex);
+	double ComputePointConfidenceScore(int objectIndex,MyPoint_RGB_NORMAL point);
+	int GetAreaIndex(int patchIndex);
+	void Sorting(vector<ObjectHypo> obj,vector<EdgeHypo> edge,vector<int> &objSorting,vector<int> &edgeSorting);
 };

@@ -107,6 +107,7 @@ private slots:
   //sdf related
   void showSDFVoxels(bool _val);
   void showSDFSlices(bool _val);
+  void showGraphCutRelated(bool _val);
 
 	void setSmapleType(QAction * action);
 	void setOriginalType(QAction * action);

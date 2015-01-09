@@ -205,9 +205,6 @@
     <ClCompile Include="GeneratedFiles\Release\moc_OneKeyNBVBack.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="common_type.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Algorithm\GraphCut\BinarySeg.cpp">
       <Filter>Algorithm\GraphCut</Filter>
     </ClCompile>
@@ -240,9 +237,6 @@
     </ClCompile>
     <ClCompile Include="Algorithm\GraphCut\PointCloudAnalysis.cpp">
       <Filter>Algorithm\GraphCut</Filter>
-    </ClCompile>
-    <ClCompile Include="Algorithm\ObjPreSegment\main.cpp">
-      <Filter>Algorithm\ObjPreSegment</Filter>
     </ClCompile>
     <ClCompile Include="Algorithm\ObjPreSegment\main_scene_seg.cpp">
       <Filter>Algorithm\ObjPreSegment</Filter>
@@ -279,6 +273,9 @@
     </ClCompile>
     <ClCompile Include="Algorithm\Common\visualizer.cpp">
       <Filter>Algorithm\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Algorithm\GraphCut\GraphCutBasicStruct.cpp">
+      <Filter>Algorithm\GraphCut</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -449,9 +446,6 @@
     <ClInclude Include="Algorithm\pointcloud_normal.h">
       <Filter>Algorithm</Filter>
     </ClInclude>
-    <ClInclude Include="common_type.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Algorithm\SparseICP.h">
       <Filter>Algorithm</Filter>
     </ClInclude>
@@ -535,6 +529,9 @@
     </ClInclude>
     <ClInclude Include="Algorithm\Common\visualizer.h">
       <Filter>Algorithm\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Algorithm\GraphCut\GraphCutBasicStruct.h">
+      <Filter>Algorithm\GraphCut</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

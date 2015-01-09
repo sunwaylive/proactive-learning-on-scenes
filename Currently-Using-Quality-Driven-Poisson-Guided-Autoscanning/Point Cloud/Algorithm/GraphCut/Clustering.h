@@ -1,32 +1,25 @@
 #pragma once
-
-//#include "scene_seg.h"
+#include "Algorithm/GraphCut/graph.h"
 #include "Algorithm/Common/common_type.h"
-#include "Algorithm/Common/color_op.h"
-#include "graph.h"
+#include "Algorithm/GraphCut/GraphCutBasicStruct.h"
 
-#define LARGE_NUM 9999999
-#define SMALL_NUM -9999999
-
-extern vector<vector<int>> vecvecObjectPoolClustering;
-extern vector<int> vecObjectPoolClusteringCount;
-extern vector<vector<int>> vecvecObjectPool;
 
 
 class CClustering
 {
 public:
-	CClustering(void);
-	~CClustering(void);
-
-public:
 	vector<MyPointCloud_RGB_NORMAL> vecPatchPoint;
-	vector<int> clusterPatchNum;
+	vector<vector<int>> vecvecObjectPool;
+	vector<vector<int>> vecvecObjectPoolClustering;
+	vector<int> vecObjectPoolClusteringCount;
+
 	int initObject;
-	
 	double paraH, paraSi;
 	
 public:
+	CClustering(void);
+	~CClustering(void);
+	void Clear();
 	void AddObjectPool();
 	void MainStep();
 	void CleanObjectPool();

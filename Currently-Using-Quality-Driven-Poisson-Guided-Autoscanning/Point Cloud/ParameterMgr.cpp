@@ -46,7 +46,7 @@ void ParameterMgr::setGlobalParameter(QString paraName,Value& val)
 void ParameterMgr::initDataMgrParameter()
 {
 	data.addParam(new RichDouble("Init Radius Para", 2.0));
-	data.addParam(new RichDouble("Down Sample Num", 10000));
+	data.addParam(new RichDouble("Down Sample Num", 5000));
 	data.addParam(new RichDouble("CGrid Radius", grid_r));
   data.addParam(new RichDouble("Outlier Percentage", 0.01));
   data.addParam(new RichDouble("H Gaussian Para", 4));
@@ -129,6 +129,7 @@ void ParameterMgr::initGlareaParameter()
   //sdf related
   glarea.addParam(new RichBool("Show SDF Slices",false));
   glarea.addParam(new RichBool("Show SDF Voxels", false));
+  glarea.addParam(new RichBool("Show GraphCut Related", false));
 }
 
 void ParameterMgr::initDrawerParameter()
@@ -217,7 +218,7 @@ void ParameterMgr::initPoissonParameter()
 	poisson.addParam(new RichDouble("Current Y Slice Position", 0.5f));
 	poisson.addParam(new RichDouble("Current Z Slice Position", 0.5f));
 	poisson.addParam(new RichDouble("Show Slice Percentage", 0.75));
-	poisson.addParam(new RichDouble("Poisson Disk Sample Number", 3000));
+	poisson.addParam(new RichDouble("Poisson Disk Sample Number", 30));
   poisson.addParam(new RichDouble("Original KNN", 251));
 
 	poisson.addParam(new RichBool("Use Confidence 1", false));

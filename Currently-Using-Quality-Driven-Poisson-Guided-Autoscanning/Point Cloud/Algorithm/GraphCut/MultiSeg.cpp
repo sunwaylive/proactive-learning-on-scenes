@@ -2,6 +2,7 @@
 #include "MultiSeg.h"
 
 
+
 CMultiSeg::CMultiSeg(void)
 {
 
@@ -50,6 +51,21 @@ void CMultiSeg::AddObjectPool()
 // 	inFile.close();
 }
 
+void CMultiSeg::Clear()
+{
+	vecDataValue.clear();
+	vecObjectColorModel.clear();
+	clusterPatchInterval.clear();
+	vecObjectClusteringIndex.clear();
+	vecObjectness.clear();
+	vecSeparateness.clear();
+	vecpairSeperatenessEdge.clear();
+	vecvecpairSeperatenessSmallEdge.clear();
+	graphContract.vecEdgeColor.clear();
+	graphContract.vecEdges.clear();
+	graphContract.vecNodes.clear();
+	vecvecMultiResult.clear();
+}
 
 void CMultiSeg::MainStep()
 {
@@ -151,7 +167,7 @@ double CMultiSeg::GetMultiDataValue(int SiteID,int LableID)
 		objectCount = 0;
 	else
 		objectCount = vecObjectPoolClusteringCount[LableID];
-	
+
 	int objectCountMax = -1;
 	for(int i = 0;i < vecObjectPoolClusteringCount.size();i++)
 	{
@@ -162,7 +178,6 @@ double CMultiSeg::GetMultiDataValue(int SiteID,int LableID)
 	objectCount = (7 - 10 * objectCount)/7;
 	if(objectCount < 0)
 		objectCount =0;
-
 
 	//color similarity
 	double colorSimilarity;
@@ -179,7 +194,7 @@ double CMultiSeg::GetMultiDataValue(int SiteID,int LableID)
 	dif(0,0) = difT(0,0) = vecPatchColor[SiteID].mRed - vecObjectColorModel[LableID].muRed;
 	dif(0,1) = difT(1,0) = vecPatchColor[SiteID].mGreen - vecObjectColorModel[LableID].muGreen;
 	dif(0,2) = difT(2,0) = vecPatchColor[SiteID].mBlue - vecObjectColorModel[LableID].muBlue;
-	
+
 	Matrix covarianceInv,difTCovarianceInv,result;
 	covarianceInv = covariance.Inv();
 	difTCovarianceInv = dif * covarianceInv;
@@ -192,20 +207,13 @@ double CMultiSeg::GetMultiDataValue(int SiteID,int LableID)
 	para0 = 0;
 	para1 = 10;
 	para2 = 0;
-
 	dataValue = (para0 * centerDistance + para1 * objectCount + para2 * colorSimilarity) / (para0 + para1 + para2) * 3;
-
-	//output
-// 	ofstream outFile2("Output\\MultiData.txt",ios::app);
-// 	outFile2 <<  "centerDistance:" << centerDistance <<  "  objectCount:" << objectCount <<  "  colorSimilarity:" << colorSimilarity <<  "  dataValue:" << dataValue << endl;
-// 	outFile2 << "  " << endl;
-// 	outFile2.close();
 
 	return dataValue; 
 }
 
 void CMultiSeg::GraphCutSolve()
-{
+{	
 	clusterPatchInterval.push_back(0);
 	for(int i = 0;i < clusterPatchNum.size();i++)
 	{
@@ -228,7 +236,6 @@ void CMultiSeg::GraphCutSolve()
 			}
 		}
 	}
-
 	int num_sites, num_labels;
 	num_sites = vecPatchPoint.size();
 	num_labels = vecvecObjectPoolClustering.size();
@@ -242,7 +249,7 @@ void CMultiSeg::GraphCutSolve()
 			gc->setSmoothCost(i,j,1);
 		}
 	}
-
+	
 	//smooth
 	for(int i = 0;i < vecpairPatchConnection.size();i++)
 	{
@@ -277,7 +284,6 @@ void CMultiSeg::GraphCutSolve()
 		}
 	}
 
-
 	gc->swap(2);
 
 	vector<int> vecResult(num_sites,-1);
@@ -301,17 +307,39 @@ void CMultiSeg::GraphCutSolve()
 	}
 	vecvecMultiResult = vecvecMultiResultClean;
 
+	srand((unsigned)time(0));
 
-	ofstream outFile1("Output\\MultiResult.txt");
+
+
+	for(int i = 0; i < vecvecMultiResult.size();i++)
+	{
+		double r,g,b;
+		r = double(rand()%255);
+		g = double(rand()%255);
+		b = double(rand()%255);
+		for(int j = 0; j < vecvecMultiResult[i].size();j++)
+		{
+			int patchIndex = vecvecMultiResult[i][j];
+			for(int k = 0; k < vecPatchPoint[patchIndex].mypoints.size();k++)
+			{
+				vecPatchPoint[patchIndex].mypoints[k].r = r;
+				vecPatchPoint[patchIndex].mypoints[k].g = g;
+				vecPatchPoint[patchIndex].mypoints[k].b = b;
+			}
+		}
+	}
+	
+
+	ofstream outFile("Output\\MultiResult.txt");
 	for(int i=0;i<vecvecMultiResult.size();i++)
 	{
 		for(int j=0;j<vecvecMultiResult[i].size();j++)
 		{
-			outFile1 << vecvecMultiResult[i][j] <<  "  ";
+			outFile << vecvecMultiResult[i][j] <<  "  ";
 		}
-		outFile1 << "  " << endl;
+		outFile << "  " << endl;
 	}
-	outFile1.close();
+	outFile.close();
 }
 
 void CMultiSeg::ComputeScore()
@@ -334,53 +362,50 @@ void CMultiSeg::ComputeScore()
 void CMultiSeg::ComputeObjectness(int m)
 {
 	double objectness = 0;
-	for(int i = 0;i < vecvecMultiResult[m].size();i++)
-	{
-		int patchIndex = vecvecMultiResult[m][i];
+// 	for(int i = 0;i < vecvecMultiResult[m].size();i++)
+// 	{
+// 		int patchIndex = vecvecMultiResult[m][i];
+// 
+// 		// connect before
+// 		vector<int> vecConnectPatchBefore;
+// 		for(int j = 0;j < vecvecPatchConnectFlag[patchIndex].size();j++)
+// 		{
+// 			if(vecvecPatchConnectFlag[patchIndex][j])
+// 			{
+// 				vecConnectPatchBefore.push_back(j);
+// 			}
+// 		}
+// 
+// 		// disconnnect after
+// 		vector<int> vecDisconnectPatchAfter;
+// 		for(int j = 0;j < vecConnectPatchBefore.size();j++)
+// 		{
+// 			int connectPatchIndex = vecConnectPatchBefore[j];
+// 			bool exsitFlag = false;
+// 			for(int k = 0;k < vecvecMultiResult[m].size();k++)
+// 			{
+// 				if(i == k)
+// 					continue;
+// 				if(connectPatchIndex == vecvecMultiResult[m][k])
+// 					exsitFlag = true;
+// 			}
+// 			if(!exsitFlag)
+// 				vecDisconnectPatchAfter.push_back(connectPatchIndex);
+// 		}
+// 
+// 		for(int j = 0;j < vecDisconnectPatchAfter.size();j++)
+// 		{
+// 			for(int k = 0;k < vecpairPatchConnection.size();k++)
+// 			{
+// 				if(vecpairPatchConnection[k].first == patchIndex && vecpairPatchConnection[k].second == vecDisconnectPatchAfter[j])
+// 				{
+// 					objectness += vecSmoothValue[k];
+// 				}	
+// 			}
+// 		}
+// 	}
 
-		// connect before
-		vector<int> vecConnectPatchBefore;
-		for(int j = 0;j < vecvecPatchConnectFlag[patchIndex].size();j++)
-		{
-			if(vecvecPatchConnectFlag[patchIndex][j])
-			{
-				vecConnectPatchBefore.push_back(j);
-			}
-		}
-
-		// disconnnect after
-		vector<int> vecDisconnectPatchAfter;
-		for(int j = 0;j < vecConnectPatchBefore.size();j++)
-		{
-			int connectPatchIndex = vecConnectPatchBefore[j];
-			bool exsitFlag = false;
-			for(int k = 0;k < vecvecMultiResult[m].size();k++)
-			{
-				if(i == k)
-					continue;
-				if(connectPatchIndex == vecvecMultiResult[m][k])
-					exsitFlag = true;
-			}
-			if(!exsitFlag)
-				vecDisconnectPatchAfter.push_back(connectPatchIndex);
-		}
-
-		for(int j = 0;j < vecDisconnectPatchAfter.size();j++)
-		{
-			for(int k = 0;k < vecpairPatchConnection.size();k++)
-			{
-				if(vecpairPatchConnection[k].first == patchIndex && vecpairPatchConnection[k].second == vecDisconnectPatchAfter[j])
-				{
-					objectness += vecSmoothValue[k];
-				}	
-			}
-		}
-	}
 	vecObjectness.push_back(objectness);
-
-	ofstream outFile("Output\\Objectness.txt",ios::app);
-	outFile << objectness <<  endl;
-	outFile.close();
 }
 
 void CMultiSeg::ComputeSeparateness(int m,int n)
@@ -437,9 +462,6 @@ void CMultiSeg::ComputeSeparateness(int m,int n)
 		vecpairSeperatenessEdge.push_back(edge);
 		vecSeparateness.push_back(separateness);
 		vecvecpairSeperatenessSmallEdge.push_back(vecpairSeperatenessSmallEdge);
-		ofstream outFile("Output\\Separateness.txt",ios::app);
-		outFile << "separateness:" << separateness<< endl;
-		outFile.close();
 	}
 
 }
@@ -459,6 +481,9 @@ void CMultiSeg::ConstructGraph()
 		point.x /= vecvecMultiResult[i].size();
 		point.y /= vecvecMultiResult[i].size();
 		point.z /= vecvecMultiResult[i].size();
+		point.r = 0.2;
+		point.g = 0.2;
+		point.b = 1.0;
 
 		graphContract.vecNodes.push_back(point);
 	}

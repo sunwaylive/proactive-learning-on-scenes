@@ -23,6 +23,8 @@
 
 #include <string>
 
+#define OPEN_NI //wei
+
 #define X_GLOBAL_APP_STATE_FIELDS \
 	X(unsigned int, s_sensorIdx) \
 	X(bool, s_timingsDetailledEnabled) \

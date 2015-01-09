@@ -7,9 +7,11 @@ CClustering::CClustering(void)
 	paraH = 0.9;
 }
 
+
 CClustering::~CClustering(void)
 {
 }
+
 
 void CClustering::AddObjectPool()
 {
@@ -50,35 +52,41 @@ void CClustering::AddObjectPool()
 // 	inFile.close();
 
 	//¶ÁObject Pool
-	vecvecObjectPool.clear();
-	ifstream inFile1("Output\\ObjectPool.txt",std::ios::in);
-	char buf[256000];
-	bool flagStop = false;
-	int count=0;
-	while (inFile1.getline(buf, sizeof buf))
-	{
-		vector<int> vecObject;
-		istringstream line(buf);
-		if(count != 0)
-		{
-			flagStop = false;
-			int index,indexOld;
-			index = indexOld = -1;
-			do
-			{
-				line >> index;
-				if(index != indexOld && index <LARGE_NUM && index >0)
-					vecObject.push_back(index);
-				else
-					flagStop = true;
-				indexOld = index;
-			}
-			while(!flagStop);
-			vecvecObjectPool.push_back(vecObject);
-		}
-		count++;
-	}
-	inFile1.close();
+// 	vecvecObjectPool.clear();
+// 	ifstream inFile1("Output\\ObjectPool.txt",std::ios::in);
+// 	char buf[256000];
+// 	bool flagStop = false;
+// 	int count=0;
+// 	while (inFile1.getline(buf, sizeof buf))
+// 	{
+// 		vector<int> vecObject;
+// 		istringstream line(buf);
+// 		if(count != 0)
+// 		{
+// 			flagStop = false;
+// 			int index,indexOld;
+// 			index = indexOld = -1;
+// 			do
+// 			{
+// 				line >> index;
+// 				if(index != indexOld && index <LARGE_NUM && index >0)
+// 					vecObject.push_back(index);
+// 				else
+// 					flagStop = true;
+// 				indexOld = index;
+// 			}
+// 			while(!flagStop);
+// 			vecvecObjectPool.push_back(vecObject);
+// 		}
+// 		count++;
+// 	}
+// 	inFile1.close();
+}
+
+void CClustering::Clear()
+{
+	vecvecObjectPoolClustering.clear();
+	vecObjectPoolClusteringCount.clear();
 }
 
 void CClustering::MainStep()
