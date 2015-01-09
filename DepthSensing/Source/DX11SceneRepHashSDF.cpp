@@ -512,7 +512,7 @@ void DX11SceneRepHashSDF::Alloc(ID3D11DeviceContext* context, ID3D11ShaderResour
 	ID3D11Buffer* CBGlobalAppState = GlobalAppState::getInstance().MapAndGetConstantBuffer(context);
 	context->CSSetConstantBuffers(8, 1, &CBGlobalAppState);
 
-	//利用了compute shader来利用GPU的性能，代码在对应的compute shader中，即对应的HLSL
+	//利用了compute shader来利用GPU的特性，代码在对应的compute shader中，即对应的HLSL
 	context->CSSetShader(s_SDFVoxelHashAlloc, NULL, 0);
 
 	const unsigned int imageWidth = GlobalAppState::getInstance().s_windowWidth;
@@ -610,21 +610,24 @@ void DX11SceneRepHashSDF::CompactifyHashEntries( ID3D11DeviceContext* context )
 }
 
 //这里对深度数据进行了Integrate
+//这个里面涉及了新voxel的分配和合并
 void DX11SceneRepHashSDF::IntegrateDepthMap( ID3D11DeviceContext* context, ID3D11ShaderResourceView* inputDepth, ID3D11ShaderResourceView* inputColor )
 {
 	context->CSSetShaderResources(0, 1, &inputDepth);
 	context->CSSetShaderResources(1, 1, &inputColor);
 	context->CSSetShaderResources(4, 1, &m_HashCompactifiedSRV);
+	//下面两个是CPU GPU沟通数据的桥梁
 	context->CSSetUnorderedAccessViews(1, 1, &m_SDFBlocksSDFUAV, NULL);
 	context->CSSetUnorderedAccessViews(7, 1, &m_SDFBlocksRGBWUAV, NULL);
+
 	context->CSSetConstantBuffers(0, 1, &m_SDFVoxelHashCB);
 	ID3D11Buffer* CBGlobalAppState = GlobalAppState::getInstance().MapAndGetConstantBuffer(context);
 	context->CSSetConstantBuffers(8, 1, &CBGlobalAppState);
-
+	//这个compute shader里面涉及了新voxel的分配和合并
 	context->CSSetShader(s_SDFVoxelHashIntegrate, NULL, 0);
+
 	//groupThreads = BLOCK_SIZE_SCENE_REP*BLOCK_SIZE_SCENE_REP;
 	//dimX = (m_NumOccupiedHashEntries + groupThreads - 1) / groupThreads;
-
 	unsigned int dimX = NUM_GROUPS_X;
 	unsigned int dimY = (m_NumOccupiedHashEntries + NUM_GROUPS_X - 1) / NUM_GROUPS_X;
 	assert(dimX <= D3D11_CS_DISPATCH_MAX_THREAD_GROUPS_PER_DIMENSION);	

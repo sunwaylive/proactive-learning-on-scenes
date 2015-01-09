@@ -40,11 +40,15 @@ struct Voxel {
 	int3 color;
 };
 
+//上面这个数据结构(Voxel)的weight和color在hash表中被压缩了
 Voxel getVoxel(RWBuffer<int> hash, in uint id) {
 	Voxel voxel;
+	//pos占3个字节
 	voxel.pos.x = hash[4*id+0];
 	voxel.pos.y = hash[4*id+1];
 	voxel.pos.z = hash[4*id+2];
+
+	//weight color一共占1个字节
 	int last = hash[4*id+3];
 	voxel.weight = last & 0x000000ff;
 	last >>= 0x8;
@@ -53,6 +57,7 @@ Voxel getVoxel(RWBuffer<int> hash, in uint id) {
 	voxel.color.y = last & 0x000000ff;
 	last >>= 0x8;
 	voxel.color.z = last & 0x000000ff;
+
 	return voxel;
 }
 
@@ -74,11 +79,11 @@ Voxel getVoxelSRV4(Buffer<int4> hash, in uint id) {
 
 //用参数voxel，去更新参数hash表中第id号位置的voxel
 void setVoxel(RWBuffer<int> hash, in uint id, in Voxel voxel) {
-
 	//TODO so something for sync
 	hash[4*id+0] = voxel.pos.x;
 	hash[4*id+1] = voxel.pos.y;
 	hash[4*id+2] = voxel.pos.z;
+
 	int last = 0;
 	last |= voxel.color.z & 0x000000ff;
 	last <<= 8;
@@ -220,6 +225,8 @@ void integrateCS(uint3 DTid : SV_DispatchThreadID, uint3 GTid : SV_GroupThreadID
 	voxel.pos = worldToVirtualVoxelPos(p);
 	voxel.color = (int3)(c * 255.0f);
 	voxel.weight = g_WeightHit;
+	//wei add
+	
 	integrateVoxel(g_VoxelHash, voxel);
 
 	//float3 m = voxel.pos / voxel.pos.z;

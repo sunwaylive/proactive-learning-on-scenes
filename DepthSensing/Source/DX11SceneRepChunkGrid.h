@@ -732,7 +732,7 @@ public:
 								//遍历每个sdfBlock中的小voxels
 								//wei add, 加上id之后，每个元素占三个字节
 								for (unsigned int j = 0; j < SDF_BLOCK_SIZE * SDF_BLOCK_SIZE * SDF_BLOCK_SIZE; j++) {
-									int first = chunkDesc->m_SDFBlocks[i].data[2*j+0];
+									int first = chunkDesc->m_SDFBlocks[i].data[3*j+0];
 									float sdf =  *(float*)(&first);
 									vBlock.voxels[j].sdf = *(float*)(&first);
 
@@ -749,7 +749,7 @@ public:
 									chunkSDFNum++;
 									chunkSDFSum += sdf;
 
-									int last = chunkDesc->m_SDFBlocks[i].data[2*j+1];
+									int last = chunkDesc->m_SDFBlocks[i].data[3*j+1];
 									vBlock.voxels[j].weight = last & 0x000000ff;
 									last >>= 0x8;
 									vBlock.voxels[j].color.x = last & 0x000000ff;
@@ -757,6 +757,11 @@ public:
 									vBlock.voxels[j].color.y = last & 0x000000ff;
 									last >>= 0x8;
 									vBlock.voxels[j].color.z = last & 0x000000ff;
+
+									int id = chunkDesc->m_SDFBlocks[i].data[3 * j + 2];
+									//debug
+									if (j < 10)
+										std::cout << "voxel id: " << id << std::endl;
 
 									//wei add
 									//大的sdfBlock的位置 + 每个小voxel的偏移位置

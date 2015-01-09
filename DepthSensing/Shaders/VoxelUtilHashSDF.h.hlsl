@@ -43,6 +43,7 @@ struct Voxel
 	float sdf;
 	uint3 color;
 	uint weight;
+	float id;
 };
 
 //! computes the (local) virtual voxel pos of an index; idx in [0;511]
@@ -116,6 +117,7 @@ void deleteHashEntry(RWBuffer<int> hash, in uint id)
 	hash[3*id+2] = FREE_ENTRY;
 }
 
+//添加了ID的属性域
 Voxel getVoxel(RWBuffer<float> sdfBlocksSDF, RWBuffer<int> sdfBlocksRGBW, in uint id)
 {
 	Voxel voxel;
@@ -129,13 +131,16 @@ Voxel getVoxel(RWBuffer<float> sdfBlocksSDF, RWBuffer<int> sdfBlocksRGBW, in uin
 	last >>= 0x8;
 	voxel.color.z = last & 0x000000ff;
 	//voxel.color.z = last;
+
 	return voxel;
 }
 
+//我们需要一并给返回的voxel的id属性赋值
 Voxel getVoxel(Buffer<float> sdfBlocksSDF, Buffer<int> sdfBlocksRGBW, in uint id)
 {
 	Voxel voxel;
 	voxel.sdf = sdfBlocksSDF[id];
+
 	int last = sdfBlocksRGBW[id];
 	voxel.weight = last & 0x000000ff;
 	last >>= 0x8;
@@ -145,12 +150,17 @@ Voxel getVoxel(Buffer<float> sdfBlocksSDF, Buffer<int> sdfBlocksRGBW, in uint id
 	last >>= 0x8;
 	voxel.color.z = last & 0x000000ff;
 	//voxel.color.z = last;
+
+	int patch_id = 0;
+	voxel.id = patch_id;
 	return voxel;
 }
 
+//我们需要将传入的voxel的id属性赋给
 void setVoxel(RWBuffer<float> sdfBlocksSDF, RWBuffer<int> sdfBlocksRGBW, in uint id, in Voxel voxel)
 {
 	sdfBlocksSDF[id] = voxel.sdf;
+
 	int last = 0;
 	last |= voxel.color.z & 0x000000ff;
 	last <<= 8;
@@ -167,6 +177,8 @@ void setVoxel(RWBuffer<float> sdfBlocksSDF, RWBuffer<int> sdfBlocksRGBW, in uint
 	//last <<= 8;
 	//last |= voxel.weight;
 	sdfBlocksRGBW[id] = last;
+
+	//设置id
 }
 
 void starveVoxel(RWBuffer<int> sdfBlocksRGBW, in uint id) {
@@ -186,7 +198,7 @@ void deleteVoxel(RWBuffer<float> sdfBlocksSDF, RWBuffer<int> sdfBlocksRGBW, in u
 
 float3 worldToVirtualVoxelPosFloat(in float3 pos)
 {
-	return pos*g_VirtualVoxelResolutionScalar;
+	return pos * g_VirtualVoxelResolutionScalar;
 }
 
 int3 worldToVirtualVoxelPos(in float3 pos)

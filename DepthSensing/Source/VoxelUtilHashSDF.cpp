@@ -3,14 +3,15 @@
 #include "VoxelUtilHashSDF.h"
 
 
-
+//wei add, 添加id数据域之后， 每个元素变成3个字节
 Voxel VoxelUtilHelper::getVoxel(const SDFBlock& sdfBlocks, unsigned int id)
 {
 	Voxel voxel;
 
 	//float* f = ((float*)(&(sdfBlocks.data[0])))[2*id+0]; voxel.sdf = *f;
-	voxel.sdf = ((float*)&(sdfBlocks.data[0]))[2*id+0];
-	int last = sdfBlocks.data[2*id+1];
+	voxel.sdf = ((float*)&(sdfBlocks.data[0]))[3 * id + 0];
+
+	int last = sdfBlocks.data[3 * id + 1];
 	voxel.weight = last & 0x000000ff;
 	last >>= 0x8;
 	voxel.color.x = last & 0x000000ff;
@@ -19,12 +20,18 @@ Voxel VoxelUtilHelper::getVoxel(const SDFBlock& sdfBlocks, unsigned int id)
 	last >>= 0x8;
 	voxel.color.z = last & 0x000000ff;
 
+	int patch_id = sdfBlocks.data[3 * id + 2];
+	voxel.id = patch_id;
+
 	return voxel;
 }
 
+//添加了id后，sdfBlock中每个元素由2个字节变成3个字节
 void VoxelUtilHelper::setVoxel(SDFBlock& sdfBlocks, unsigned int id, const Voxel& voxel)
 {
-	unsigned int* f = (unsigned int*)&voxel.sdf; sdfBlocks.data[2*id+0] = *f;
+	unsigned int* f = (unsigned int*)&voxel.sdf; 
+	sdfBlocks.data[3*id+0] = *f;
+
 	int last = 0;
 	last |= voxel.color.z & 0x000000ff;
 	last <<= 8;
@@ -33,7 +40,10 @@ void VoxelUtilHelper::setVoxel(SDFBlock& sdfBlocks, unsigned int id, const Voxel
 	last |= voxel.color.x & 0x000000ff;
 	last <<= 8;
 	last |= voxel.weight & 0x000000ff;
-	sdfBlocks.data[2*id+1] = last;
+	sdfBlocks.data[3*id+1] = last;
+
+	int patchi_id = voxel.id;
+	sdfBlocks.data[3 * id + 2] = patchi_id;
 }
 				
 vec3i VoxelUtilHelper::SDFBlockToVirtualVoxelPos(vec3i sdfBlock)
