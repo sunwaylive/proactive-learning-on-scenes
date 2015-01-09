@@ -66,6 +66,11 @@ DX11SceneRepHashSDF::DX11SceneRepHashSDF()
 	m_SDFBlocksRGBWSRV = NULL;
 	m_SDFBlocksRGBWUAV = NULL;
 
+	//wei add
+	m_SDFBlocksID = NULL;
+	m_SDFBlocksIDSRV = NULL;
+	m_SDFBlocksIDUAV = NULL;
+
 	m_SDFVoxelHashCB = NULL;
 
 	m_bEnableGarbageCollect = true;
@@ -198,6 +203,10 @@ void DX11SceneRepHashSDF::Destroy()
 	SAFE_RELEASE(m_SDFBlocksRGBWSRV);
 	SAFE_RELEASE(m_SDFBlocksRGBWUAV);
 
+	//wei add
+	SAFE_RELEASE(m_SDFBlocksID);
+	SAFE_RELEASE(m_SDFBlocksIDSRV);
+	SAFE_RELEASE(m_SDFBlocksIDUAV);
 
 	SAFE_RELEASE(m_HashIntegrateDecision);
 	SAFE_RELEASE(m_HashIntegrateDecisionUAV);
@@ -1028,6 +1037,37 @@ HRESULT DX11SceneRepHashSDF::CreateBuffers( ID3D11Device* pd3dDevice )
 		V_RETURN(pd3dDevice->CreateShaderResourceView(m_SDFBlocksSDF, &descSRV, &m_SDFBlocksSDFSRV));
 		V_RETURN(pd3dDevice->CreateUnorderedAccessView(m_SDFBlocksSDF, &descUAV, &m_SDFBlocksSDFUAV));
 
+		//wei add£¬ create id part
+		ZeroMemory(&descBUF, sizeof(D3D11_BUFFER_DESC));
+		descBUF.BindFlags = D3D11_BIND_UNORDERED_ACCESS | D3D11_BIND_SHADER_RESOURCE;
+		descBUF.Usage = D3D11_USAGE_DEFAULT;
+		descBUF.CPUAccessFlags = 0;
+		descBUF.MiscFlags = 0;
+		descBUF.ByteWidth = (sizeof(float)) * m_SDFBlockSize * m_SDFBlockSize * m_SDFBlockSize * m_SDFNumBlocks;
+		descBUF.StructureByteStride = sizeof(int);
+
+		ZeroMemory(&descSRV, sizeof(D3D11_SHADER_RESOURCE_VIEW_DESC));
+		descSRV.Format = DXGI_FORMAT_R32_FLOAT;
+		descSRV.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
+		descSRV.Buffer.FirstElement = 0;
+		descSRV.Buffer.NumElements = m_SDFBlockSize * m_SDFBlockSize * m_SDFBlockSize * m_SDFNumBlocks;
+
+		ZeroMemory(&descUAV, sizeof(D3D11_UNORDERED_ACCESS_VIEW_DESC));
+		descUAV.Format = DXGI_FORMAT_R32_FLOAT;
+		descUAV.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
+		descUAV.Buffer.FirstElement = 0;
+		descUAV.Buffer.NumElements = m_SDFBlockSize * m_SDFBlockSize * m_SDFBlockSize * m_SDFNumBlocks;
+
+		ZeroMemory(&InitData, sizeof(D3D11_SUBRESOURCE_DATA));
+		cpuNull = new int[m_SDFBlockSize * m_SDFBlockSize * m_SDFBlockSize * m_SDFNumBlocks];
+		ZeroMemory(cpuNull, sizeof(int) * m_SDFBlockSize * m_SDFBlockSize * m_SDFBlockSize * m_SDFNumBlocks);
+		InitData.pSysMem = cpuNull;
+		V_RETURN(pd3dDevice->CreateBuffer(&descBUF, &InitData, &m_SDFBlocksID));
+		SAFE_DELETE_ARRAY(cpuNull);
+
+		V_RETURN(pd3dDevice->CreateShaderResourceView(m_SDFBlocksID, &descSRV, &m_SDFBlocksIDSRV));
+		V_RETURN(pd3dDevice->CreateUnorderedAccessView(m_SDFBlocksID, &descUAV, &m_SDFBlocksIDUAV));
+		std::cout << "wei successfully create sdfBlock ID SRV and UAV." << std::endl;
 
 		//create sdf blocks (8x8x8 -> 8 byte per voxel: RGBW part)
 		ZeroMemory(&descBUF, sizeof(D3D11_BUFFER_DESC));

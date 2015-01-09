@@ -529,6 +529,10 @@ private:
 	ID3D11ShaderResourceView*	m_SDFBlocksRGBWSRV;
 	ID3D11UnorderedAccessView*	m_SDFBlocksRGBWUAV;
 
+	//wei add
+	ID3D11Buffer*				m_SDFBlocksID;
+	ID3D11ShaderResourceView*	m_SDFBlocksIDSRV;
+	ID3D11UnorderedAccessView*	m_SDFBlocksIDUAV;
 
 	ID3D11Buffer*				m_SDFVoxelHashCB;
 
