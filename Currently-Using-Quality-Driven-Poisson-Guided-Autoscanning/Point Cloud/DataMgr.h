@@ -17,6 +17,8 @@
 #include <set>
 #include <utility>
 
+#include "Algorithm/Common/common_type.h"
+
 using namespace vcg;
 using namespace std;
 using namespace tri;
@@ -55,6 +57,8 @@ public:
   bool      isSamplesEmpty();
   bool      isOriginalEmpty();
   bool      isGraphCutResultEmpty();
+  bool      isContractionGraphEmpty();
+  bool      isPatchGraphEmpty();
   bool      isIsoPointsEmpty();
   bool      isFieldPointsEmpty();
   bool      isViewCandidatesEmpty();
@@ -95,6 +99,8 @@ public:
   CMesh*                  getCurrentScannedMesh();
   vector<CMesh* >*        getScannedResults();
   int*                    getScanCount();
+  GRAPHSHOW*              getPatchGraph();
+  GRAPHSHOW*              getContractionGraph();
 
 	void      recomputeBox();
 	double    getInitRadiuse();
@@ -135,7 +141,9 @@ private:
 public:
   CMesh                  model;
   CMesh                  original;
+//jerrysyf
   CMesh                  graphcut_result;
+  GRAPHSHOW         patchGraph,contractionGraph;
   CMesh                  poisson_surface;
   CMesh                 *temperal_original;
   Point3f                original_center_point;
@@ -178,6 +186,8 @@ public:
   CMesh                  y_sdf_slice_plane;
   CMesh                  z_sdf_slice_plane;
   vector<CMesh*>         sdf_slices;
+
+ 
 
   void                   loadPlyToSDFVoxel(QString fileName);
   void                   loadOwnToSDFVoxel(QString fileName);

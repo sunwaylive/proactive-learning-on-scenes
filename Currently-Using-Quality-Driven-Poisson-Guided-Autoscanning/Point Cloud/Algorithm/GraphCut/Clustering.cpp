@@ -2,13 +2,6 @@
 #include "Clustering.h"
 
 
-extern vector<MyPointCloud_RGB_NORMAL> vecPatchPoint;
-extern vector<int> clusterPatchNum;
-extern vector<vector<int>> vecvecObjectPool;
-extern vector<vector<int>> vecvecObjectPoolClustering;
-extern vector<int> vecObjectPoolClusteringCount;
-
-
 CClustering::CClustering(void)
 {
 	paraH = 0.9;
@@ -88,6 +81,12 @@ void CClustering::AddObjectPool()
 // 		count++;
 // 	}
 // 	inFile1.close();
+}
+
+void CClustering::Clear()
+{
+	vecvecObjectPoolClustering.clear();
+	vecObjectPoolClusteringCount.clear();
 }
 
 void CClustering::MainStep()

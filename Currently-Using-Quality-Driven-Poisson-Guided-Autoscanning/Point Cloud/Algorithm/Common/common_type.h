@@ -136,22 +136,4 @@ struct GRAPHSHOW
   vector<float> vecEdgeColor; 
 };
 
-struct NEARBYPOINT
-{
-  int patchFirst;
-  int patchSecond;
-
-  int indexFirst;
-  int indexSecond;
-};
-
-struct NEARBYPOINTSUM
-{
-  vector<NEARBYPOINT> nearbyPoint;
-};
-
-struct NEARBYNORMAL
-{
-  Normalt normal0,normal1;
-};
 #endif 

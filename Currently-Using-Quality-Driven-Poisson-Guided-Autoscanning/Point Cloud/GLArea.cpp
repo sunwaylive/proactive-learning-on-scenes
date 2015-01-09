@@ -524,8 +524,17 @@ void GLArea::paintGL()
       }
 
       //2. show contraction graph
+	  if(!dataMgr.isContractionGraphEmpty())
+	  {
+//		  glDrawer.drawGraphShow(dataMgr.getContractionGraph(),1);
+	  }
 
       //3. show patch graph
+	  if(!dataMgr.isPatchGraphEmpty())
+	  {
+//		  glDrawer.drawGraphShow(dataMgr.getPatchGraph(),0);
+	  }
+
     }
 
     if (para->getBool("Show Bounding Box") && para->getBool("Show View Grid Slice"))
