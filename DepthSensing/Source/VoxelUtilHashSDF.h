@@ -8,12 +8,13 @@
 
 struct SDFBlock
 {
-	//first int stores the sdf value
-	//second int stores the weight,color r,g,b value， 8 bit * 4 = 1 int
-	int data[2*SDF_BLOCK_SIZE*SDF_BLOCK_SIZE*SDF_BLOCK_SIZE];
+	//first byte stores the sdf value
+	//second byte stores the weight,color r,g,b value， 8 bit * 4 = 1 int
+	//加了id之后，多一个字节
+	int data[3 * SDF_BLOCK_SIZE * SDF_BLOCK_SIZE * SDF_BLOCK_SIZE];
 	SDFBlock(){
 		std::cout<<"set default sdf value to INT_MAX" <<std::endl;
-		int s = 2 * SDF_BLOCK_SIZE * SDF_BLOCK_SIZE * SDF_BLOCK_SIZE;
+		int s = 3 * SDF_BLOCK_SIZE * SDF_BLOCK_SIZE * SDF_BLOCK_SIZE;
 		for (size_t i = 0; i < s; ++i)
 		{
 			data[i] = INT_MAX;
@@ -117,6 +118,7 @@ struct Voxel
 	float sdf;
 	vec3i color;
 	unsigned int weight;
+	int id;
 };
 
 

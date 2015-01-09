@@ -1,5 +1,5 @@
 
-Buffer<int>	g_Hash					: register( t0 );
+Buffer<int>	     g_Hash				: register( t0 );
 Buffer<float>	 g_SDFBlocksSDF		: register( t1 );
 Texture2D<float> g_RayIntervalMin   : register( t2 );
 Texture2D<float> g_RayIntervalMax   : register( t3 );
@@ -36,19 +36,19 @@ bool trilinearInterpolationSimpleFastFast2(float3 pos, out float dist, out float
 	const float3 posDual = pos - float3(oSet / 2.0f, oSet / 2.0f, oSet / 2.0f);
 	float3 weight = frac(worldToVirtualVoxelPosFloat(pos));
 
-		dist = 0.0f;
+	dist = 0.0f;
 	int3 virtualVoxelPos = worldToVirtualVoxelPos(posDual + float3(0.0f, 0.0f, 0.0f)); int ptr = getHashEntryForSDFBlockPos(g_Hash, virtualVoxelPosToSDFBlock(virtualVoxelPos)).ptr; if (ptr == FREE_ENTRY) return false; int	linearMemoryIndex = ptr + virtualVoxelPosToLocalSDFBlockIndex(virtualVoxelPos); Voxel	v = getVoxel(g_SDFBlocksSDF, g_SDFBlocksRGBW, linearMemoryIndex); if (v.weight == 0) return false; dist += (1.0f - weight.x)*(1.0f - weight.y)*(1.0f - weight.z)*v.sdf;
-		virtualVoxelPos = worldToVirtualVoxelPos(posDual + float3(oSet, 0.0f, 0.0f));	 ptr = getHashEntryForSDFBlockPos(g_Hash, virtualVoxelPosToSDFBlock(virtualVoxelPos)).ptr; if (ptr == FREE_ENTRY) return false;		linearMemoryIndex = ptr + virtualVoxelPosToLocalSDFBlockIndex(virtualVoxelPos);		v = getVoxel(g_SDFBlocksSDF, g_SDFBlocksRGBW, linearMemoryIndex); if (v.weight == 0) return false; dist += weight.x *(1.0f - weight.y)*(1.0f - weight.z)*v.sdf;
-	virtualVoxelPos = worldToVirtualVoxelPos(posDual + float3(0.0f, oSet, 0.0f));	 ptr = getHashEntryForSDFBlockPos(g_Hash, virtualVoxelPosToSDFBlock(virtualVoxelPos)).ptr; if (ptr == FREE_ENTRY) return false;		linearMemoryIndex = ptr + virtualVoxelPosToLocalSDFBlockIndex(virtualVoxelPos);		v = getVoxel(g_SDFBlocksSDF, g_SDFBlocksRGBW, linearMemoryIndex); if (v.weight == 0) return false; dist += (1.0f - weight.x)*	   weight.y *(1.0f - weight.z)*v.sdf;
-	virtualVoxelPos = worldToVirtualVoxelPos(posDual + float3(0.0f, 0.0f, oSet));	 ptr = getHashEntryForSDFBlockPos(g_Hash, virtualVoxelPosToSDFBlock(virtualVoxelPos)).ptr; if (ptr == FREE_ENTRY) return false;		linearMemoryIndex = ptr + virtualVoxelPosToLocalSDFBlockIndex(virtualVoxelPos);		v = getVoxel(g_SDFBlocksSDF, g_SDFBlocksRGBW, linearMemoryIndex); if (v.weight == 0) return false; dist += (1.0f - weight.x)*(1.0f - weight.y)*	   weight.z *v.sdf;
-	virtualVoxelPos = worldToVirtualVoxelPos(posDual + float3(oSet, oSet, 0.0f));	 ptr = getHashEntryForSDFBlockPos(g_Hash, virtualVoxelPosToSDFBlock(virtualVoxelPos)).ptr; if (ptr == FREE_ENTRY) return false;		linearMemoryIndex = ptr + virtualVoxelPosToLocalSDFBlockIndex(virtualVoxelPos);		v = getVoxel(g_SDFBlocksSDF, g_SDFBlocksRGBW, linearMemoryIndex); if (v.weight == 0) return false; dist += weight.x *	   weight.y *(1.0f - weight.z)*v.sdf;
-	virtualVoxelPos = worldToVirtualVoxelPos(posDual + float3(0.0f, oSet, oSet));	 ptr = getHashEntryForSDFBlockPos(g_Hash, virtualVoxelPosToSDFBlock(virtualVoxelPos)).ptr; if (ptr == FREE_ENTRY) return false;		linearMemoryIndex = ptr + virtualVoxelPosToLocalSDFBlockIndex(virtualVoxelPos);		v = getVoxel(g_SDFBlocksSDF, g_SDFBlocksRGBW, linearMemoryIndex); if (v.weight == 0) return false; dist += (1.0f - weight.x)*	   weight.y *	   weight.z *v.sdf;
-	virtualVoxelPos = worldToVirtualVoxelPos(posDual + float3(oSet, 0.0f, oSet));	 ptr = getHashEntryForSDFBlockPos(g_Hash, virtualVoxelPosToSDFBlock(virtualVoxelPos)).ptr; if (ptr == FREE_ENTRY) return false;		linearMemoryIndex = ptr + virtualVoxelPosToLocalSDFBlockIndex(virtualVoxelPos);		v = getVoxel(g_SDFBlocksSDF, g_SDFBlocksRGBW, linearMemoryIndex); if (v.weight == 0) return false; dist += weight.x *(1.0f - weight.y)*	   weight.z *v.sdf;
-	virtualVoxelPos = worldToVirtualVoxelPos(posDual + float3(oSet, oSet, oSet));	 ptr = getHashEntryForSDFBlockPos(g_Hash, virtualVoxelPosToSDFBlock(virtualVoxelPos)).ptr; if (ptr == FREE_ENTRY) return false;		linearMemoryIndex = ptr + virtualVoxelPosToLocalSDFBlockIndex(virtualVoxelPos);		v = getVoxel(g_SDFBlocksSDF, g_SDFBlocksRGBW, linearMemoryIndex); if (v.weight == 0) return false; dist += weight.x *	   weight.y *	   weight.z *v.sdf;
+		 virtualVoxelPos = worldToVirtualVoxelPos(posDual + float3(oSet, 0.0f, 0.0f));	   ptr = getHashEntryForSDFBlockPos(g_Hash, virtualVoxelPosToSDFBlock(virtualVoxelPos)).ptr; if (ptr == FREE_ENTRY) return false;		linearMemoryIndex = ptr + virtualVoxelPosToLocalSDFBlockIndex(virtualVoxelPos);		    v = getVoxel(g_SDFBlocksSDF, g_SDFBlocksRGBW, linearMemoryIndex); if (v.weight == 0) return false; dist += weight.x *(1.0f - weight.y)*(1.0f - weight.z)*v.sdf;
+	     virtualVoxelPos = worldToVirtualVoxelPos(posDual + float3(0.0f, oSet, 0.0f));	   ptr = getHashEntryForSDFBlockPos(g_Hash, virtualVoxelPosToSDFBlock(virtualVoxelPos)).ptr; if (ptr == FREE_ENTRY) return false;		linearMemoryIndex = ptr + virtualVoxelPosToLocalSDFBlockIndex(virtualVoxelPos);		    v = getVoxel(g_SDFBlocksSDF, g_SDFBlocksRGBW, linearMemoryIndex); if (v.weight == 0) return false; dist += (1.0f - weight.x)*	   weight.y *(1.0f - weight.z)*v.sdf;
+	     virtualVoxelPos = worldToVirtualVoxelPos(posDual + float3(0.0f, 0.0f, oSet));	   ptr = getHashEntryForSDFBlockPos(g_Hash, virtualVoxelPosToSDFBlock(virtualVoxelPos)).ptr; if (ptr == FREE_ENTRY) return false;		linearMemoryIndex = ptr + virtualVoxelPosToLocalSDFBlockIndex(virtualVoxelPos);		    v = getVoxel(g_SDFBlocksSDF, g_SDFBlocksRGBW, linearMemoryIndex); if (v.weight == 0) return false; dist += (1.0f - weight.x)*(1.0f - weight.y)*	   weight.z *v.sdf;
+	     virtualVoxelPos = worldToVirtualVoxelPos(posDual + float3(oSet, oSet, 0.0f));	   ptr = getHashEntryForSDFBlockPos(g_Hash, virtualVoxelPosToSDFBlock(virtualVoxelPos)).ptr; if (ptr == FREE_ENTRY) return false;		linearMemoryIndex = ptr + virtualVoxelPosToLocalSDFBlockIndex(virtualVoxelPos);		    v = getVoxel(g_SDFBlocksSDF, g_SDFBlocksRGBW, linearMemoryIndex); if (v.weight == 0) return false; dist += weight.x *	   weight.y *(1.0f - weight.z)*v.sdf;
+	     virtualVoxelPos = worldToVirtualVoxelPos(posDual + float3(0.0f, oSet, oSet));	   ptr = getHashEntryForSDFBlockPos(g_Hash, virtualVoxelPosToSDFBlock(virtualVoxelPos)).ptr; if (ptr == FREE_ENTRY) return false;		linearMemoryIndex = ptr + virtualVoxelPosToLocalSDFBlockIndex(virtualVoxelPos);		    v = getVoxel(g_SDFBlocksSDF, g_SDFBlocksRGBW, linearMemoryIndex); if (v.weight == 0) return false; dist += (1.0f - weight.x)*	   weight.y *	   weight.z *v.sdf;
+	     virtualVoxelPos = worldToVirtualVoxelPos(posDual + float3(oSet, 0.0f, oSet));	   ptr = getHashEntryForSDFBlockPos(g_Hash, virtualVoxelPosToSDFBlock(virtualVoxelPos)).ptr; if (ptr == FREE_ENTRY) return false;		linearMemoryIndex = ptr + virtualVoxelPosToLocalSDFBlockIndex(virtualVoxelPos);		    v = getVoxel(g_SDFBlocksSDF, g_SDFBlocksRGBW, linearMemoryIndex); if (v.weight == 0) return false; dist += weight.x *(1.0f - weight.y)*	   weight.z *v.sdf;
+	     virtualVoxelPos = worldToVirtualVoxelPos(posDual + float3(oSet, oSet, oSet));	   ptr = getHashEntryForSDFBlockPos(g_Hash, virtualVoxelPosToSDFBlock(virtualVoxelPos)).ptr; if (ptr == FREE_ENTRY) return false;		linearMemoryIndex = ptr + virtualVoxelPosToLocalSDFBlockIndex(virtualVoxelPos);		    v = getVoxel(g_SDFBlocksSDF, g_SDFBlocksRGBW, linearMemoryIndex); if (v.weight == 0) return false; dist += weight.x *	   weight.y *	   weight.z *v.sdf;
 
-	color = v.color; 
+	color = v.color;  
 	//wei add
-	id = 3.0f;//asuint(0);  // v.id;
+	id = 3.0f; // v.id;
 	return true;
 }
 
@@ -70,7 +70,6 @@ void traverseCoarseGridSimpleSampleAll(float3 worldCamPos, float3 worldDir, floa
 			HashEntry entry = getHashEntryForSDFBlockPos(g_Hash, worldToSDFBlock(currentPosWorld));
 
 		float dist;	float3 color; float id;
-	//	trilinearInterpolationSimpleFastFast2(currentPosWorld, dist, color, id);//
 		//取的dist 和 color根据插值算法
 		if (trilinearInterpolationSimpleFastFast2(currentPosWorld, dist, color, id))
 			//if(trilinearInterpolation(currentPosWorld, dist, color))
@@ -90,13 +89,13 @@ void traverseCoarseGridSimpleSampleAll(float3 worldCamPos, float3 worldDir, floa
 						g_outputColor[dTid.xy] = float4(color / 255.0f, 1.0f); //wei add  
 						//wei add, 这里好像不能直接根据ID设置颜色，因为点的颜色不是有这个阶段直接决定？？
 						g_outputIDs[dTid.xy] = id; //这里后面紧接 PhongLighting.hlsl中的PhongPS函数
-/*
-						if (g_useGradients == 1)
+
+						//normal 被关闭了，打开会报错
+						/*if (g_useGradients == 1)
 						{
 							float3 normal = gradientForPoint(currentIso);
-								g_outputNormals[dTid.xy] = float4(mul(float4(normal, 0.0f), g_ViewMat).xyz, 1.0f);
-						}
-*/
+							g_outputNormals[dTid.xy] = float4(mul(float4(normal, 0.0f), g_ViewMat).xyz, 1.0f);
+						}*/
 						return;
 					}
 				}

@@ -383,7 +383,10 @@ void integrateCS(uint3 DTid : SV_DispatchThreadID, uint3 GTid : SV_GroupThreadID
 						curr.color = (int3)(c * 255.0f);
 
 						uint idx = entry.ptr + i;//i是2D depth frame的横坐标
+
+						//！！这里可以获取得到的voxel的patch id， 需要添加一个类似于g_SDFBlocksSDFUAV或者g_SDFBlocksRGBWUAV的变量与CPU交互
 						Voxel prev = getVoxel(g_SDFBlocksSDFUAV, g_SDFBlocksRGBWUAV, idx);
+
 						//curr的权重更大，跟prev的voxel进行组合，返回新的voxel
 						Voxel newVoxel = combineVoxel(curr, prev);
 
@@ -392,7 +395,8 @@ void integrateCS(uint3 DTid : SV_DispatchThreadID, uint3 GTid : SV_GroupThreadID
 							//newVoxel.sdf = 0.0f;
 							//newVoxel.weight = 0;
 						}
-						//用新的Voxel代替原来idx位置上的voxel，即prev
+
+						//！！用新的Voxel代替原来idx位置上的voxel，即prev
 						setVoxel(g_SDFBlocksSDFUAV, g_SDFBlocksRGBWUAV, idx, newVoxel);
 					}
 				}
