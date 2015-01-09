@@ -1375,48 +1375,22 @@ void CameraParaDlg::runOverSegmentation(){
   //loadPointCloud_normal_ply("data/big_table_normal.ply", cloud);
   loadPointCloud_normal_ply("data/big_table_normal.ply", cloud);
 
-  PointCloudPtr_RGB_NORMAL cloud_mark(new PointCloud_RGB_NORMAL);
-  pcl::copyPointCloud(*cloud,*cloud_mark);
-
-  CBinarySeg cBinarySeg;
-  CClustering cClustering; 
-  CMultiSeg cMultiSeg;
-
-
   /******************detect table************************/
   PointCloudPtr_RGB_NORMAL tabletopCloud(new PointCloud_RGB_NORMAL());
   PointCloudPtr_RGB_NORMAL planeCloud(new PointCloud_RGB_NORMAL());
-  //detect_table_plane_r(cloud, planeCloud, tabletopCloud);
-  detect_table_plane(cloud, planeCloud, tabletopCloud);
-  //showPointClound(planeCloud,"planeCloud");
+  PointCloudPtr rect_cloud(new PointCloud());
+  PointCloudPtr_RGB_NORMAL remainingCloud(new PointCloud_RGB_NORMAL());
+  pcl::ModelCoefficients coefficients;
+  //detect_table_plane(cloud, planeCloud, tabletopCloud);
 
-  pcl::ModelCoefficients::Ptr coefficients_plane(new pcl::ModelCoefficients);
-  pcl::PointIndices::Ptr inliers_plane(new pcl::PointIndices);
-  detect_table(cloud, coefficients_plane, inliers_plane);
+  detect_table(cloud, coefficients, planeCloud, rect_cloud, remainingCloud);
 
-  PointCloudPtr_RGB_NORMAL table_cloud(new PointCloud_RGB_NORMAL());
+  Eigen::Matrix4f matrix_transform;
+  Eigen::Matrix4f matrix_transform_r;
 
-  pcl::ExtractIndices<Point_RGB_NORMAL> extract0;// Create the filtering object
-  // Extract the inliers
-  extract0.setInputCloud (cloud);
-  extract0.setIndices (inliers_plane);
-  extract0.setNegative (false);
-  extract0.filter (*table_cloud);
+  getTemTransformMatrix(coefficients, matrix_transform, matrix_transform_r);
 
-  PointCloudPtr_RGB pc(new PointCloud_RGB);
-  
-  for(int i=0;i<table_cloud->size();i++){
-    Point_RGB pr;
-    pr.x=table_cloud->at(i).x;
-    pr.y=table_cloud->at(i).y;
-    pr.z=table_cloud->at(i).z;
-    pr.r=table_cloud->at(i).r;
-    pr.g=table_cloud->at(i).g;
-    pr.b=table_cloud->at(i).b;
-    pc->push_back(pr);
-  }
-
-  vs.viewer->addPointCloud (pc, "table_cloud");
+  getCloudOnTable(remainingCloud, rect_cloud, matrix_transform, matrix_transform_r, tabletopCloud);
 
   float voxel_resolution = 0.004f;
   float seed_resolution = 0.06f;
@@ -1427,29 +1401,25 @@ void CameraParaDlg::runOverSegmentation(){
   /******************Euclidean Cluster Extraction************************/
   std::vector<PointCloudPtr_RGB_NORMAL> cluster_points;
 
-  vector<MyPointCloud_RGB_NORMAL> vecPatchPoint;
-  vector<pcl::Normal> vecPatcNormal;
-
-  
-
   object_seg_ECE(tabletopCloud, cluster_points);
 
   for(int i=0;i<cluster_points.size();i++){
+    if(cluster_points.at(i)->size()<200){
+      continue;
+    }
 
     PointCloudT::Ptr colored_cloud(new PointCloudT);
     vector<MyPointCloud_RGB_NORMAL> patch_clouds;
     PointNCloudT::Ptr normal_cloud(new PointNCloudT);
     VCCS_over_segmentation(cluster_points.at(i),voxel_resolution,seed_resolution,color_importance,spatial_importance,normal_importance,patch_clouds,colored_cloud,normal_cloud);
-	
+
     std::stringstream str;
     str<<"colored_voxel_cloud"<<i;
     std::string id_pc=str.str();
-
     vs.viewer->addPointCloud (colored_cloud, id_pc);
   }
 
   vs.show();
-
 }
 
 void CameraParaDlg::runSceneSegmentation(){
