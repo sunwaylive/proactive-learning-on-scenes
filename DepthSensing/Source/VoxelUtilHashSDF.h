@@ -12,6 +12,7 @@ struct SDFBlock
 	//second int stores the weight,color r,g,b value£¬ 8 bit * 4 = 1 int
 	int data[2*SDF_BLOCK_SIZE*SDF_BLOCK_SIZE*SDF_BLOCK_SIZE];
 	SDFBlock(){
+		std::cout<<"set default sdf value to INT_MAX" <<std::endl;
 		int s = 2 * SDF_BLOCK_SIZE * SDF_BLOCK_SIZE * SDF_BLOCK_SIZE;
 		for (size_t i = 0; i < s; ++i)
 		{
@@ -54,7 +55,7 @@ public:
 	{
 		SDF_DEFAULT = 100
 	};
-
+	
 	ChunkDesc(unsigned int initialChunkListSize)
 	{
 		m_SDFBlocks = std::vector<SDFBlock>(); m_SDFBlocks.reserve(initialChunkListSize);
