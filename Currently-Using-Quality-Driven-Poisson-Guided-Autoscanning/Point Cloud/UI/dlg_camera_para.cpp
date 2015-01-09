@@ -1609,19 +1609,23 @@ int CameraParaDlg::getUpdateData()
   float normal_importance = 1.0f;
 
   /******************Euclidean Cluster Extraction************************/
-  std::vector<PointCloudPtr_RGB_NORMAL> cluster_points;
+  std::vector<MyPointCloud_RGB_NORMAL> cluster_points;
 
   object_seg_ECE(tabletopCloud, cluster_points);
 
   for(int i=0;i<cluster_points.size();i++){
-    if(cluster_points.at(i)->size()<200){
+    if(cluster_points.at(i).mypoints.size()<200){
       continue;
     }
 
     PointCloudT::Ptr colored_cloud(new PointCloudT);
     vector<MyPointCloud_RGB_NORMAL> patch_clouds;
     PointNCloudT::Ptr normal_cloud(new PointNCloudT);
-    VCCS_over_segmentation(cluster_points.at(i),voxel_resolution,seed_resolution,color_importance,spatial_importance,normal_importance,patch_clouds,colored_cloud,normal_cloud);
+
+    PointCloudPtr_RGB_NORMAL ct(new PointCloud_RGB_NORMAL);
+    MyPointCloud_RGB_NORMAL2PointCloud_RGB_NORMAL(cluster_points.at(i), ct);
+
+    VCCS_over_segmentation(ct,voxel_resolution,seed_resolution,color_importance,spatial_importance,normal_importance,patch_clouds,colored_cloud,normal_cloud);
 
 		std::stringstream str;
 		str<<"colored_voxel_cloud"<<i;
@@ -1700,19 +1704,23 @@ void CameraParaDlg::runOverSegmentation()
   float normal_importance = 1.0f;
 
   /******************Euclidean Cluster Extraction************************/
-  std::vector<PointCloudPtr_RGB_NORMAL> cluster_points;
+  std::vector<MyPointCloud_RGB_NORMAL> cluster_points;
 
   object_seg_ECE(tabletopCloud, cluster_points);
 
   for(int i=0;i<cluster_points.size();i++){
-    if(cluster_points.at(i)->size()<200){
+    if(cluster_points.at(i).mypoints.size()<200){
       continue;
     }
 
     PointCloudT::Ptr colored_cloud(new PointCloudT);
     vector<MyPointCloud_RGB_NORMAL> patch_clouds;
     PointNCloudT::Ptr normal_cloud(new PointNCloudT);
-    VCCS_over_segmentation(cluster_points.at(i),voxel_resolution,seed_resolution,color_importance,spatial_importance,normal_importance,patch_clouds,colored_cloud,normal_cloud);
+
+    PointCloudPtr_RGB_NORMAL ct(new PointCloud_RGB_NORMAL);
+    MyPointCloud_RGB_NORMAL2PointCloud_RGB_NORMAL(cluster_points.at(i), ct);
+
+    VCCS_over_segmentation(ct,voxel_resolution,seed_resolution,color_importance,spatial_importance,normal_importance,patch_clouds,colored_cloud,normal_cloud);
 
     std::stringstream str;
     str<<"colored_voxel_cloud"<<i;
