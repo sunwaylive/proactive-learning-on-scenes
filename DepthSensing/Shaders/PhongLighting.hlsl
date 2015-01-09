@@ -2,6 +2,8 @@ Texture2D<float4> inputPositions : register (t10);
 Texture2D<float4> inputNormals : register (t11);
 Texture2D<float4> inputColors : register (t12);
 Texture2D<float> inputSSAOMap : register (t13);
+//wei add
+Texture2D<uint> inputIDs : register (t14);
 
 #include "GlobalAppStateShaderBuffer.h.hlsl"
 
@@ -37,13 +39,16 @@ struct VS_OUTPUT
 
 #define MINF asfloat(0xff800000)
 
+//这个函数就是实际看到的点的Pixel shader函数
 float4 PhongPS(VS_OUTPUT Input) : SV_TARGET
 {
 	float3 position = inputPositions.Sample(g_PointSampler, Input.vTexcoord).xyz;
 	float3 normal = inputNormals.Sample(g_PointSampler, Input.vTexcoord).xyz;
 	float3 color = inputColors.Sample(g_PointSampler, Input.vTexcoord).xyz;
+	//wei add
+	uint id = inputIDs.Sample(g_PointSampler, Input.vTexcoord);
 
-	if(position.x != MINF && color.x != MINF && normal.x != MINF)
+	if (id != MINF && position.x != MINF && color.x != MINF && normal.x != MINF)
 	{
 		//float4 material= float4(1.0f, 1.0f, 1.0f, 1.0f);
 		float4 material = materialDiffuse;
@@ -51,13 +56,28 @@ float4 PhongPS(VS_OUTPUT Input) : SV_TARGET
 		if(g_useMaterial == 1)
 		{
 			//wei add
-			material = float4(float3(0.f, 1.0f, 0.f), 1.0f);//float4(color, 1.0f);
+			//if (id > 0){
+			//	material = float4(float3(0.f, 1.0f, 0.f), 1.0f);//float4(color, 1.0f);
+			//}
+			//else {
+			//	//material = float4(float3(1.f, 0.f, 0.f), 1.0f);
+			//}
+			//if (id == 0) {
+			//	material = float4(float3(1.f, 0.0f, 0.f), 1.0f);//float4(color, 1.0f);
+			//}
+
+			//if (id == 1){
+			//	material = float4(float3(0.f, 1.0f, 0.f), 1.0f);//float4(color, 1.0f);
+			//}
+
+			//这句必经的设置颜色必须有，一旦注释掉就会报错
+			material = float4(float3(0.f, 0.0f, 1.f), 1.0f);//float4(color, 1.0f);
 		}
 
 		float4 lightAmbientMod = lightAmbient;
 		if(g_useSSAO == 1)
 		{
-			lightAmbientMod*=inputSSAOMap.Sample(g_PointSampler, Input.vTexcoord);
+			lightAmbientMod *= inputSSAOMap.Sample(g_PointSampler, Input.vTexcoord);
 		}
 			
 		//float3 lightDir = float3(1.0f, 0.0f, 1.0f);

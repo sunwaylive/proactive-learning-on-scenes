@@ -90,7 +90,6 @@ void DX11PhongLighting::render(ID3D11DeviceContext* pd3dDeviceContext, ID3D11Sha
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
 	HRESULT hr = pd3dDeviceContext->Map(s_ConstantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	if(FAILED(hr)) return;
-
 	cbConstant *cbufferConstant = (cbConstant*)mappedResource.pData;
 	cbufferConstant->useMaterial = (int)useMaterial;
 	cbufferConstant->useSSAO = (int)useSSAO;
@@ -102,7 +101,7 @@ void DX11PhongLighting::render(ID3D11DeviceContext* pd3dDeviceContext, ID3D11Sha
 	pd3dDeviceContext->PSSetConstantBuffers(8, 1, &CBGlobalAppState);
 
 	//wei add， ID
-	ID3D11ShaderResourceView* srvs[] = {positions, normals, colors, IDs, ssaoMap};
+	ID3D11ShaderResourceView* srvs[] = {positions, normals, colors,  ssaoMap, IDs};
 
 	//用Pixel shader 去绘制模型
 	//pixel shader在渲染管线的位置如下： http://msdn.microsoft.com/en-us/library/windows/desktop/bb205123(v=vs.85).aspx
