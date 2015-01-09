@@ -307,6 +307,27 @@ void CMultiSeg::GraphCutSolve()
 	}
 	vecvecMultiResult = vecvecMultiResultClean;
 
+	srand((unsigned)time(0));
+
+
+
+	for(int i = 0; i < vecvecMultiResult.size();i++)
+	{
+		double r,g,b;
+		r = double(rand()%255);
+		g = double(rand()%255);
+		b = double(rand()%255);
+		for(int j = 0; j < vecvecMultiResult[i].size();j++)
+		{
+			int patchIndex = vecvecMultiResult[i][j];
+			for(int k = 0; k < vecPatchPoint[patchIndex].mypoints.size();k++)
+			{
+				vecPatchPoint[patchIndex].mypoints[k].r = r;
+				vecPatchPoint[patchIndex].mypoints[k].g = g;
+				vecPatchPoint[patchIndex].mypoints[k].b = b;
+			}
+		}
+	}
 	
 
 	ofstream outFile("Output\\MultiResult.txt");

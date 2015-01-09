@@ -31,6 +31,9 @@
 #include "Algorithm/GraphCut/PointCloudAnalysis.h"
 #include "Algorithm/GraphCut/GraphCutBasicStruct.h"
 
+#include <stdlib.h> 
+#include <time.h>  
+
 using namespace std;
 
 class CameraParaDlg : public QFrame

@@ -1408,22 +1408,24 @@ void CameraParaDlg::runGraphCut()
 	GRAPHSHOW *contractionGraph = area->dataMgr.getContractionGraph();
 	GRAPHSHOW *patchGraph = area->dataMgr.getPatchGraph();
 
-	for(int i = 0; i < cPointCloudAnalysis.cScanEstimation.vecObjectHypo.size();i++)
-	{
-		int r,g,b;
-		r = int(rand()%255);
-		g = int(rand()%255);
-		b = int(rand()%255);
 
-		ofstream outFile1("Output\\11111111111111111.txt",ios::app);
+	for(int i = 0; i < cPointCloudAnalysis.cMultiSeg.vecvecMultiResult.size();i++)
+	{
 		
-		
-		for(int j = 0; j < cPointCloudAnalysis.cScanEstimation.vecObjectHypo[i].patchIndex.size();j++)
+	
+		for(int j = 0; j < cPointCloudAnalysis.cMultiSeg.vecvecMultiResult[i].size();j++)
 		{
-			int patchIndex = cPointCloudAnalysis.cScanEstimation.vecObjectHypo[i].patchIndex[j];
-			for(int k = 0; k < cPointCloudAnalysis.cBinarySeg.vecPatchPoint[patchIndex].mypoints.size();k++)
+			double r,g,b;
+			r = double(rand()%255);
+			g = double(rand()%255);
+			b = double(rand()%255);
+
+			int patchIndex = cPointCloudAnalysis.cMultiSeg.vecvecMultiResult[i][j];
+			for(int k = 0; k < cPointCloudAnalysis.cMultiSeg.vecPatchPoint[patchIndex].mypoints.size();k++)
 			{
-				MyPoint_RGB_NORMAL point = cPointCloudAnalysis.cBinarySeg.vecPatchPoint[patchIndex].mypoints[k];
+				
+
+				MyPoint_RGB_NORMAL point = cPointCloudAnalysis.cMultiSeg.vecPatchPoint[patchIndex].mypoints[k];
 				CVertex new_point;
 				new_point.P()[0] = point.x;
 				new_point.P()[1] = point.y;
@@ -1431,13 +1433,12 @@ void CameraParaDlg::runGraphCut()
 				new_point.N()[0] = point.normal_x;
 				new_point.N()[1] = point.normal_y;
 				new_point.N()[2] = point.normal_z;
+
 				new_point.C()[0] = r;
 				new_point.C()[1] = g;
 				new_point.C()[2] = b;
-				outFile1 << r <<  "  ";
-				outFile1 << g <<  "  ";
-				outFile1 << b <<  "  ";
-				outFile1 << "  " << endl;
+				
+
 
 				new_point.m_index = i;
 				new_point.is_graphcut_related = true;
@@ -1445,10 +1446,17 @@ void CameraParaDlg::runGraphCut()
 				graphCutResult_mesh->bbox.Add(new_point.P());
 			}
 		}
-		outFile1.close();
 
 	}
 	graphCutResult_mesh->vn = graphCutResult_mesh->vert.size();
+
+
+	for(int i=0;i<graphCutResult_mesh->vert.size();i++)
+	{
+		outFileg << "r: " << graphCutResult_mesh->vert[i].C()[0]<< endl;
+		outFileg << "g: " << graphCutResult_mesh->vert[i].C()[1]<< endl;
+		outFileg << "b: " << graphCutResult_mesh->vert[i].C()[2]<< endl;
+	}
 
 // 	contractionGraph->vecEdgeColor = cPointCloudAnalysis.cScanEstimation.graphContract.vecEdgeColor;
 // 	contractionGraph->vecEdges = cPointCloudAnalysis.cScanEstimation.graphContract.vecEdges;

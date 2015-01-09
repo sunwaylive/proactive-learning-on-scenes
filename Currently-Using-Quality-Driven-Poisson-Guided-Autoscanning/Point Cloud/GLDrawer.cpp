@@ -214,8 +214,6 @@ GLColor GLDrawer::getColorByType(CVertex& v)
 
   //shiyifei show graph point color
   if (v.is_graphcut_related){
-// 	  std::count << v.C()[0] / 255.0f <<v.C()[0] / 255.0f
-
     return GLColor(v.C()[0] / 255.0f, v.C()[1] / 255.0f, v.C()[2] / 255.0f);
   }
 
