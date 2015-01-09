@@ -11,6 +11,7 @@ struct Voxel
 	float sdf;
     uint3 color;
     uint weight;
+	float id;
 };
 
 //这个是设置voxel数据的

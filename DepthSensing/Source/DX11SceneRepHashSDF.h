@@ -179,7 +179,7 @@ public:
 			float sdf;
 			vec3uc color;
 			unsigned char weight;
-			int id;
+			int id; //wei add
 		};
 		struct VoxelBlock 
 		{
@@ -189,7 +189,7 @@ public:
 		HashEntry* hashEntries = (HashEntry*)CreateAndCopyToDebugBuf(DXUTGetD3D11Device(), DXUTGetD3D11DeviceContext(), m_Hash, true);
 		float*	voxelsSDF = (float*)CreateAndCopyToDebugBuf(DXUTGetD3D11Device(), DXUTGetD3D11DeviceContext(), m_SDFBlocksSDF, true);
 		int*	voxelsRGBW = (int*)CreateAndCopyToDebugBuf(DXUTGetD3D11Device(), DXUTGetD3D11DeviceContext(), m_SDFBlocksRGBW, true);
-		//这里可以测试voxelID设置的对不对了
+		//wei add 这里可以测试voxelID设置的对不对了
 		int * voxelsID = (int*)CreateAndCopyToDebugBuf(DXUTGetD3D11Device(), DXUTGetD3D11DeviceContext(), m_SDFBlocksID, true);
 
 		const unsigned int numHashEntries = m_HashNumBuckets * m_HashBucketSize;
@@ -215,8 +215,9 @@ public:
 					vBlock.voxels[j].color.y = last & 0x000000ff;
 					last >>= 0x8;
 					vBlock.voxels[j].color.z = last & 0x000000ff;
-
-					std::cout << "voxel id: " << voxelsID[ptr + j] << std::endl;
+					//wei add
+					if (voxelsID[ptr + j] == 2)
+						std::cout << "sw voxel id: " << voxelsID[ptr + j] << std::endl;
 				}
 
 				vec3i coord(hashEntries[i].pos.x, hashEntries[i].pos.y, hashEntries[i].pos.z);

@@ -628,6 +628,8 @@ void DX11SceneRepHashSDF::IntegrateDepthMap( ID3D11DeviceContext* context, ID3D1
 	//下面两个是CPU GPU沟通数据的桥梁
 	context->CSSetUnorderedAccessViews(1, 1, &m_SDFBlocksSDFUAV, NULL);
 	context->CSSetUnorderedAccessViews(7, 1, &m_SDFBlocksRGBWUAV, NULL);
+	//wei add, 传递voxel patch id的UAV
+	context->CSSetUnorderedAccessViews(3, 1, &m_SDFBlocksIDUAV, NULL);
 
 	context->CSSetConstantBuffers(0, 1, &m_SDFVoxelHashCB);
 	ID3D11Buffer* CBGlobalAppState = GlobalAppState::getInstance().MapAndGetConstantBuffer(context);
@@ -668,6 +670,9 @@ void DX11SceneRepHashSDF::IntegrateDepthMap( ID3D11DeviceContext* context, ID3D1
 	context->CSSetShaderResources(4, 1, nullSRV);
 	context->CSSetUnorderedAccessViews(1, 1, nullUAV, NULL);
 	context->CSSetUnorderedAccessViews(7, 1, nullUAV, NULL);
+	//wei add
+	context->CSSetUnorderedAccessViews(3, 1, nullUAV, NULL);
+
 	context->CSSetConstantBuffers(0, 1, nullCB);
 	context->CSSetConstantBuffers(8, 1, nullCB);
 	context->CSSetShader(0, 0, 0);

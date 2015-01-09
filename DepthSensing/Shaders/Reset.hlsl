@@ -22,6 +22,7 @@ void resetCS(int3 dTid : SV_DispatchThreadID)
 	voxel.sdf = 0.0f;
 	voxel.weight = 0;
 	voxel.color = int3(0, 0, 0);
+	voxel.id = 1;
 
 	setVoxel(g_voxelBuffer, linearizeIndex(dTid), voxel);
 }

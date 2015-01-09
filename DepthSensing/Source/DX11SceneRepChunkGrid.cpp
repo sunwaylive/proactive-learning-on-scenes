@@ -51,6 +51,8 @@ HRESULT DX11SceneRepChunkGrid::StreamOutToCPUAll(ID3D11DeviceContext* context, D
 	return hr;
 }
 
+
+//这里是CPU和GPU交换数据的核心了
 HRESULT DX11SceneRepChunkGrid::StreamOutToCPUPass0GPU(ID3D11DeviceContext* context, DX11SceneRepHashSDF& sceneRepHashSDF, const vec3f& posCamera, float radius, bool useParts, bool multiThreaded)
 {
 	HRESULT hr = S_OK;
@@ -152,12 +154,15 @@ HRESULT DX11SceneRepChunkGrid::StreamOutToCPUPass0GPU(ID3D11DeviceContext* conte
 
 		// Setup pipeline
 		context->CSSetUnorderedAccessViews(0, 1, &sdfBlocksSDFUAV, 0);
+		//1号位置上的这个UVA是负责接收GPU的输出的，见下面shader的入口函数
 		context->CSSetUnorderedAccessViews(1, 1, &m_pSDFBlockOutputUAV, 0);
 		context->CSSetUnorderedAccessViews(2, 1, &sdfBlocksRGBWUAV, 0);
 		context->CSSetShaderResources(0, 1, &m_pSDFBlockDescOutputSRV);
 		context->CSSetConstantBuffers(0, 1, &CBsceneRepSDF);
 		context->CSSetConstantBuffers(1, 1, &m_constantBufferIntegrateFromGlobalHash);
 		context->CSSetConstantBuffers(8, 1, &CBGlobalAppState);
+
+		//这里是compute shader阶段
 		context->CSSetShader(m_pComputeShaderIntegrateFromGlobalHashPass2, 0, 0);
 
 		// Run compute shader

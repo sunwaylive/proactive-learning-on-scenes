@@ -118,7 +118,7 @@ struct Voxel
 	float sdf;
 	vec3i color;
 	unsigned int weight;
-	int id;
+	float id;
 };
 
 

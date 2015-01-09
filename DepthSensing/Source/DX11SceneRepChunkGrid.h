@@ -621,6 +621,7 @@ public:
 			float sdf;
 			vec3uc color;
 			unsigned char weight;
+			float id;
 		};
 		struct VoxelBlock 
 		{
@@ -758,10 +759,12 @@ public:
 									last >>= 0x8;
 									vBlock.voxels[j].color.z = last & 0x000000ff;
 
-									int id = chunkDesc->m_SDFBlocks[i].data[3 * j + 2];
+									//这里获取了voxel的patch id
+									int third = chunkDesc->m_SDFBlocks[i].data[3 * j + 2];
+									//float patch_id = *(float*)(&third);
 									//debug
-									if (j < 10)
-										std::cout << "voxel id: " << id << std::endl;
+									//if (abs(third - 1) < 1e-5)
+										std::cout << "sw voxel id: " << third << std::endl;
 
 									//wei add
 									//大的sdfBlock的位置 + 每个小voxel的偏移位置
