@@ -730,6 +730,7 @@ public:
 								VoxelBlock vBlock; 
 								//memcpy(vBlock.voxels, &voxels[ptr], sizeof(VoxelBlock));
 								//遍历每个sdfBlock中的小voxels
+								//wei add, 加上id之后，每个元素占三个字节
 								for (unsigned int j = 0; j < SDF_BLOCK_SIZE * SDF_BLOCK_SIZE * SDF_BLOCK_SIZE; j++) {
 									int first = chunkDesc->m_SDFBlocks[i].data[2*j+0];
 									float sdf =  *(float*)(&first);

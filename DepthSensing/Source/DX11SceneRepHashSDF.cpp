@@ -267,7 +267,6 @@ void DX11SceneRepHashSDF::Integrate( ID3D11DeviceContext* context, ID3D11ShaderR
 	MapConstantBuffer(context);	//we need to remap the buffer since numOccupiedEntries was re-computed by 'Compacitfy'
 	IntegrateDepthMap(context, inputDepth, inputColor);
 
-
 	if (false)
 	{
 		std::cout << "occupied hash entries: " << m_NumOccupiedHashEntries << std::endl;
@@ -905,7 +904,6 @@ HRESULT DX11SceneRepHashSDF::CreateBuffers( ID3D11Device* pd3dDevice )
 	V_RETURN(pd3dDevice->CreateUnorderedAccessView(m_HashCompactified, &descUAV, &m_HashCompactifiedUAV));
 
 	if (!m_JustHashAndNoSDFBlocks)	{
-
 		//create hash mutex
 		ZeroMemory(&descBUF, sizeof(D3D11_BUFFER_DESC));
 		descBUF.BindFlags	= D3D11_BIND_UNORDERED_ACCESS | D3D11_BIND_SHADER_RESOURCE;
@@ -1016,7 +1014,6 @@ HRESULT DX11SceneRepHashSDF::CreateBuffers( ID3D11Device* pd3dDevice )
 		descUAV.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
 		descUAV.Buffer.FirstElement = 0;
 		descUAV.Buffer.NumElements =  m_SDFBlockSize * m_SDFBlockSize * m_SDFBlockSize * m_SDFNumBlocks;
-
 
 		ZeroMemory( &InitData, sizeof(D3D11_SUBRESOURCE_DATA) );
 		cpuNull = new int[m_SDFBlockSize * m_SDFBlockSize * m_SDFBlockSize * m_SDFNumBlocks];

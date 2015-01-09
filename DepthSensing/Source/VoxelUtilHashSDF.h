@@ -8,9 +8,9 @@
 
 struct SDFBlock
 {
-	//first int stores the sdf value
-	//second int stores the weight,color r,g,b value£¬ 8 bit * 4 = 1 int
-	int data[2*SDF_BLOCK_SIZE*SDF_BLOCK_SIZE*SDF_BLOCK_SIZE];
+	//first byte stores the sdf value
+	//second byte stores the weight,color r,g,b value£¬ 8 bit * 4 = 1 int
+	int data[2 * SDF_BLOCK_SIZE * SDF_BLOCK_SIZE * SDF_BLOCK_SIZE];
 	SDFBlock(){
 		std::cout<<"set default sdf value to INT_MAX" <<std::endl;
 		int s = 2 * SDF_BLOCK_SIZE * SDF_BLOCK_SIZE * SDF_BLOCK_SIZE;
