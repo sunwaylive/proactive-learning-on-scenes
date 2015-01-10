@@ -99,11 +99,13 @@ HRESULT DX11MarchingCubesHashSDF::extractIsoSurface( ID3D11DeviceContext* contex
 	context->CSSetConstantBuffers(2, 1, &m_constantBuffer);
 	ID3D11Buffer* CBGlobalAppState = GlobalAppState::getInstance().MapAndGetConstantBuffer(context);
 	context->CSSetConstantBuffers(8, 1, &CBGlobalAppState);
+
+	//"ExtractIsoSurfaceHashSDF.hlsl", "extractIsoSurfaceHashSDFCS", 这个shader得到了triangle的信息
 	context->CSSetShader(m_pComputeShader, 0, 0);
 
 	// Run compute shader
 	unsigned int dimX = NUM_GROUPS_X;
-	unsigned int dimY = (hashNumBuckets*hashBucketSize + NUM_GROUPS_X - 1) / NUM_GROUPS_X;
+	unsigned int dimY = (hashNumBuckets * hashBucketSize + NUM_GROUPS_X - 1) / NUM_GROUPS_X;
 	assert(dimX <= D3D11_CS_DISPATCH_MAX_THREAD_GROUPS_PER_DIMENSION);
 	assert(dimY <= D3D11_CS_DISPATCH_MAX_THREAD_GROUPS_PER_DIMENSION);
 
@@ -124,6 +126,7 @@ HRESULT DX11MarchingCubesHashSDF::extractIsoSurface( ID3D11DeviceContext* contex
 	//D3D11_MAPPED_SUBRESOURCE mappedResource;
 	context->CopyStructureCount(s_BuffCountTriangles, 0, s_pTrianglesUAV);
 	V_RETURN(context->Map(s_BuffCountTriangles, 0, D3D11_MAP_READ, 0, &mappedResource));
+	//三角面的数量
 	unsigned int nTriangles = ((unsigned int*)mappedResource.pData)[0];
 	context->Unmap(s_BuffCountTriangles, 0);
 
@@ -135,6 +138,7 @@ HRESULT DX11MarchingCubesHashSDF::extractIsoSurface( ID3D11DeviceContext* contex
 		s_meshData.m_Vertices.resize(baseIdx + 3*nTriangles);
 		s_meshData.m_Colors.resize(baseIdx + 3*nTriangles);
 
+		//遍历三角面，存出每个顶点
 		vec3f* vc = (vec3f*)mappedResource.pData;
 		for (unsigned int i = 0; i < 3*nTriangles; i++) {
 			s_meshData.m_Vertices[baseIdx + i] = vc[2*i+0];

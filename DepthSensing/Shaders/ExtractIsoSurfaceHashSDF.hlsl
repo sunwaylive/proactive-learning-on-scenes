@@ -79,8 +79,9 @@ bool isInBoxAA(float3 minCorner, float3 maxCorner, float3 pos)
 void extractIsoSurfaceHashSDFCS(int3 dTid : SV_DispatchThreadID, uint3 GTid : SV_GroupThreadID, uint GI: SV_GroupIndex, uint3 GID : SV_GroupID)
 {
 	uint groupID = GID.x + GID.y * NUM_GROUPS_X;
-	if(groupID < g_HashNumBuckets*g_HashBucketSize)
+	if(groupID < g_HashNumBuckets * g_HashBucketSize)
 	{
+		//获得hash表中项
 		HashEntry entry = getHashEntry(g_Hash, groupID);
 		
 		if(entry.ptr != FREE_ENTRY)
@@ -185,10 +186,10 @@ void extractIsoSurfaceHashSDFCS(int3 dTid : SV_DispatchThreadID, uint3 GTid : SV
 				t.v0 = vertlist[triTable[cubeindex][i+0]];
 				t.v1 = vertlist[triTable[cubeindex][i+1]];
 				t.v2 = vertlist[triTable[cubeindex][i+2]];
-
-				t.v0.c /= 255.0f;
-				t.v1.c /= 255.0f;
-				t.v2.c /= 255.0f;
+				//wei add, 这个颜色改了，应该会影响到按9存出来的scan.ply
+				t.v0.c = 1.0f; // /= 255.0f;
+				t.v1.c = 0.0f; // /= 255.0f;
+				t.v2.c = 0.0f; // /= 255.0f;
 
 				g_triangles.Append(t);
 			}

@@ -269,6 +269,7 @@ void StopScanningAndExtractIsoSurfaceMC()
 	vec3f p(posWorld.x, posWorld.y, posWorld.z);
 
 	mat4f rigidTransform = g_SceneRepSDFLocal.GetLastRigidTransform();
+	//导出Iso Surface
 	DX11MarchingCubesChunkGrid::extractIsoSurface(DXUTGetD3D11DeviceContext(), g_SceneRepChunkGrid, g_SceneRepSDFLocal, p, GlobalAppState::getInstance().s_StreamingRadius, "./Scans/scan.ply", &rigidTransform);
 
 

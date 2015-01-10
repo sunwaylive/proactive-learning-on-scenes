@@ -31,6 +31,10 @@ class DX11MarchingCubesHashSDF
 
 		static HRESULT extractIsoSurface(ID3D11DeviceContext* context, ID3D11ShaderResourceView* hash, ID3D11ShaderResourceView* sdfBlocksSDF, ID3D11ShaderResourceView* sdfBlocksRGBW, ID3D11Buffer* CBsceneRepSDF, unsigned int hashNumBuckets, unsigned int hashBucketSize, vec3f& minCorner = vec3f(0.0f, 0.0f, 0.0f), vec3f& maxCorner = vec3f(0.0f, 0.0f, 0.0f), bool boxEnabled = false);
 
+		//需要添加计算patch_id的函数
+
+		//添加把patch_id映射到voxel的函数
+
 	private:
 
 		static HRESULT initialize(ID3D11Device* pd3dDevice);
