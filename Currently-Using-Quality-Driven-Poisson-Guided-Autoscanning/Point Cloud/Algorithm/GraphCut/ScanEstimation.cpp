@@ -52,6 +52,17 @@ void CScanEstimation::saveMultiResultToOriginal( CMesh *original, int m )
 
 void CScanEstimation::ScoreUpdate()
 {
+	ofstream outFilegs("Output\\SmoothValue.txt",ios::app);
+	for(int i = 0;i < vecSmoothValue.size();i++)
+	{
+		outFilegs << "vecSmoothValue: " << vecSmoothValue[i] << endl;
+	}
+	outFilegs.close();
+
+
+	ofstream outFileg("Output\\RunSU.txt");
+	outFileg << "let's begin :) " << endl;
+
 	//get confidence score for each patch
 	vecPatchConfidenceScore.resize(vecPatchPoint.size(),0);
 	for(int i = 0;i < vecvecMultiResult.size();i++)
@@ -63,6 +74,7 @@ void CScanEstimation::ScoreUpdate()
 		}
 	}
 
+	outFileg << "let's begin 1:) " << endl;
 	//update the smooth term
 	for(int i = 0;i < vecpairPatchConnection.size();i++)
 	{
@@ -82,8 +94,15 @@ void CScanEstimation::ScoreUpdate()
 		vecSmoothValue[i] = paraSmoothAdjust * pow(2.7183,- (1 - vecSmoothValue[i]) * (1 - vecSmoothValue[i]) / para /para);
 	}
 
+	outFileg << "let's begin 2:) " << endl;
 	ComputeScore();
+	outFileg << "let's begin 3:) " << endl;
 	UpdateGraph();
+	outFileg << "let's begin 4:) " << endl;
+
+	outFileg << "Show results finished :)   " << endl;
+
+	outFileg.close();
 }
 
 
@@ -118,7 +137,6 @@ double CScanEstimation::ComputePointConfidenceScore(int objectIndex, MyPoint_RGB
 	return confidenceScore;
 }
 
-
 void CScanEstimation::ComputeScore()
 {
 	for(int i = 0;i < vecvecMultiResult.size();i++)
@@ -134,6 +152,8 @@ void CScanEstimation::ComputeScore()
 			ComputeSeparateness(i,j);
 		}
 	}
+
+	Sorting(vecObjectHypo,vecEdgeHypo,vecObjectSorting,vecEdgeSorting);
 
 	ofstream outFileh("Output\\ObjectHypo.txt");
 	for(int i = 0;i < vecObjectHypo.size();i++)
@@ -158,8 +178,6 @@ void CScanEstimation::ComputeScore()
 
 	}
 	outFilee.close();
-
-	Sorting(vecObjectHypo,vecEdgeHypo,vecObjectSorting,vecEdgeSorting);
 
 	ofstream outFiles("Output\\Sorting.txt");
 	for(int i = 0;i < vecObjectSorting.size();i++)
@@ -204,81 +222,48 @@ void CScanEstimation::ComputeObjectness(int m)
 				concaveSum += vecSmoothValue[i];
 		}
 	}
-	concaveSum /= edgeNum;
+	if(edgeNum > 0)
+		concaveSum /= edgeNum;
+	else
+		concaveSum = 0;
+
 	concaveSum *= 1000;
 
 	if(concaveSum < 0.000001)
 		concaveSum = 0;
 
 	objectness = fSum * concaveSum; 
-	vecObjectness.push_back(objectness);
 
-	ObjectHypo objectHypo;
-	objectHypo.patchIndex = vecvecMultiResult[m];
-	objectHypo.objectness = objectness;
-	objectHypo.areaIndex = GetAreaIndex(vecvecMultiResult[m][0]);
-	objectHypo.mergeFlag = false;
-	vecObjectHypo.push_back(objectHypo);
-
+	
+	vecObjectHypo[m].objectness = objectness;
 }
 
 void CScanEstimation::ComputeSeparateness(int m,int n)
 {
 	double separateness = 0;
-	vector<pair<int,int>> vecpairSeperatenessSmallEdge;
-	for(int i = 0;i < vecvecMultiResult[m].size();i++)
+	int hypoIndex;
+
+	for(int i = 0;i < vecEdgeHypo.size();i++)
 	{
-		int patchIndex = vecvecMultiResult[m][i];
-
-		// connect before
-		vector<int> vecConnectPatchBefore;
-		for(int j = 0;j < vecvecPatchConnectFlag[patchIndex].size();j++)
+		if(vecEdgeHypo[i].begin == m && vecEdgeHypo[i].end == n)
 		{
-			if(vecvecPatchConnectFlag[patchIndex][j])
-			{
-				vecConnectPatchBefore.push_back(j);
-			}
-		}
-
-		// disconnnect after
-		vector<pair<int,int>> vecpairDisconnect;
-		pair<int,int> pairsDisconnect;
-		for(int j = 0;j < vecConnectPatchBefore.size();j++)
-		{
-			pairsDisconnect.first = patchIndex;
-			pairsDisconnect.second = vecConnectPatchBefore[j];
-
-			for(int k = 0;k < vecvecMultiResult[n].size();k++)
-			{
-				if(vecvecMultiResult[n][k] == vecConnectPatchBefore[j])
-					vecpairDisconnect.push_back(pairsDisconnect);
-			}
-		}
-
-		for(int j = 0;j < vecpairDisconnect.size();j++)
-		{
-			for(int k = 0;k < vecpairPatchConnection.size();k++)
-			{
-				if(vecpairPatchConnection[k].first == vecpairDisconnect[j].first && vecpairPatchConnection[k].second == vecpairDisconnect[j].second)
-				{
-					separateness += vecSmoothValue[k];
-					vecpairSeperatenessSmallEdge.push_back(vecpairDisconnect[j]);
-				}	
-			}
+			hypoIndex = i;
 		}
 	}
 
-	if(separateness > 0)
+	for(int i = 0;i < vecEdgeHypo[hypoIndex].pairPatch.size();i++)
 	{
-		vecSeparateness.push_back(separateness);
-
-		EdgeHypo edgeHypo;
-		edgeHypo.begin = m;
-		edgeHypo.end = n;
-		edgeHypo.areaIndex =  GetAreaIndex(vecvecMultiResult[m][0]);
-		edgeHypo.separateness = separateness;
-		vecEdgeHypo.push_back(edgeHypo);
+		for(int j = 0;j < vecpairPatchConnection.size();j++)
+		{
+			if(vecEdgeHypo[hypoIndex].pairPatch[i].first == vecpairPatchConnection[j].first && vecEdgeHypo[hypoIndex].pairPatch[i].second == vecpairPatchConnection[j].second)
+			{
+				separateness += vecSmoothValue[j];
+				break;
+			}
+		}
 	}
+	
+	vecEdgeHypo[hypoIndex].separateness = separateness;
 }
 
 double CScanEstimation::GaussianFunction(double x)
@@ -339,6 +324,7 @@ void CScanEstimation::Sorting(vector<ObjectHypo> obj,vector<EdgeHypo> edge,vecto
 
 void CScanEstimation::GetColour(double v,double vmin,double vmax,double &r,double &g,double &b)
 {
+	r = g = b =1.0;
 	double dv;
 
 	if (v < vmin)
@@ -363,28 +349,53 @@ void CScanEstimation::GetColour(double v,double vmin,double vmax,double &r,doubl
 
 }
 
+
 void CScanEstimation::UpdateGraph()
 {
-	ofstream outFileg("Output\\11111.txt");
-	outFileg << "let's begin :) " << endl;
+	double objMax,objMin,sepaMax,sepaMin;
+	objMax = sepaMax = SMALL_NUM;
+	sepaMax = sepaMin = LARGE_NUM;
 
-	for(int i = 0;i < vecObjectness.size();i++)
+	for(int i = 0;i < vecObjectHypo.size();i++)
 	{
+		if(objMax < vecObjectHypo[i].objectness)
+			objMax =vecObjectHypo[i].objectness;
+		if(objMin > vecObjectHypo[i].objectness)
+			objMin = vecObjectHypo[i].objectness;
+	}
+	objMax = 2000;
+	objMin = 0;
+
+	for(int i = 0;i < vecEdgeHypo.size();i++)
+	{
+		if(sepaMax < vecEdgeHypo[i].separateness)
+			sepaMax =vecEdgeHypo[i].separateness;
+		if(sepaMin > vecEdgeHypo[i].separateness)
+			sepaMin = vecEdgeHypo[i].separateness;
+
+	}
+	sepaMax = 0.5;
+	sepaMin = 0;
+
+
+	for(int i = 0;i < vecObjectHypo.size();i++)
+	{
+		if(vecObjectHypo[i].objectness < 0)
+			vecObjectHypo[i].objectness = 0;
 		double r,g,b;
-		GetColour(vecObjectness[i],0,3,r,g,b);
+		GetColour(vecObjectHypo[i].objectness,objMin,objMax,r,g,b);
 		graphContract.vecNodes[i].r = r;
 		graphContract.vecNodes[i].g = g;
 		graphContract.vecNodes[i].b = b;
 	}
 
-	for(int i = 0;i < vecSeparateness.size();i++)
+	for(int i = 0;i < vecEdgeHypo.size();i++)
 	{
 		double r,g,b;
-		GetColour(vecSeparateness[i],0,3,r,g,b);
+		GetColour(vecEdgeHypo[i].separateness,sepaMin,sepaMax,r,g,b);
 		graphContract.vecEdgeColor.push_back(r);
 		graphContract.vecEdgeColor.push_back(g);
 		graphContract.vecEdgeColor.push_back(b);
 	}
-	outFileg << "111111111  " << vecObjectness.size() << "  " << vecSeparateness.size()<<endl;
-	outFileg.close();
+
 }

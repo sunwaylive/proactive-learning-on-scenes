@@ -2,7 +2,6 @@
 #include "MultiSeg.h"
 
 
-
 CMultiSeg::CMultiSeg(void)
 {
 
@@ -71,7 +70,7 @@ void CMultiSeg::MainStep()
 {
 	GetColorModel();
  	GraphCutSolve();
- 	ComputeScore();
+ 	ComputeHypo();
 	ConstructGraph();
 }
 
@@ -307,28 +306,6 @@ void CMultiSeg::GraphCutSolve()
 	}
 	vecvecMultiResult = vecvecMultiResultClean;
 
-	srand((unsigned)time(0));
-
-
-
-	for(int i = 0; i < vecvecMultiResult.size();i++)
-	{
-		double r,g,b;
-		r = double(rand()%255);
-		g = double(rand()%255);
-		b = double(rand()%255);
-		for(int j = 0; j < vecvecMultiResult[i].size();j++)
-		{
-			int patchIndex = vecvecMultiResult[i][j];
-			for(int k = 0; k < vecPatchPoint[patchIndex].mypoints.size();k++)
-			{
-				vecPatchPoint[patchIndex].mypoints[k].r = r;
-				vecPatchPoint[patchIndex].mypoints[k].g = g;
-				vecPatchPoint[patchIndex].mypoints[k].b = b;
-			}
-		}
-	}
-	
 
 	ofstream outFile("Output\\MultiResult.txt");
 	for(int i=0;i<vecvecMultiResult.size();i++)
@@ -342,7 +319,7 @@ void CMultiSeg::GraphCutSolve()
 	outFile.close();
 }
 
-void CMultiSeg::ComputeScore()
+void CMultiSeg::ComputeHypo()
 {
 	for(int i = 0;i < vecvecMultiResult.size();i++)
 	{
@@ -361,51 +338,12 @@ void CMultiSeg::ComputeScore()
 
 void CMultiSeg::ComputeObjectness(int m)
 {
-	double objectness = 0;
-// 	for(int i = 0;i < vecvecMultiResult[m].size();i++)
-// 	{
-// 		int patchIndex = vecvecMultiResult[m][i];
-// 
-// 		// connect before
-// 		vector<int> vecConnectPatchBefore;
-// 		for(int j = 0;j < vecvecPatchConnectFlag[patchIndex].size();j++)
-// 		{
-// 			if(vecvecPatchConnectFlag[patchIndex][j])
-// 			{
-// 				vecConnectPatchBefore.push_back(j);
-// 			}
-// 		}
-// 
-// 		// disconnnect after
-// 		vector<int> vecDisconnectPatchAfter;
-// 		for(int j = 0;j < vecConnectPatchBefore.size();j++)
-// 		{
-// 			int connectPatchIndex = vecConnectPatchBefore[j];
-// 			bool exsitFlag = false;
-// 			for(int k = 0;k < vecvecMultiResult[m].size();k++)
-// 			{
-// 				if(i == k)
-// 					continue;
-// 				if(connectPatchIndex == vecvecMultiResult[m][k])
-// 					exsitFlag = true;
-// 			}
-// 			if(!exsitFlag)
-// 				vecDisconnectPatchAfter.push_back(connectPatchIndex);
-// 		}
-// 
-// 		for(int j = 0;j < vecDisconnectPatchAfter.size();j++)
-// 		{
-// 			for(int k = 0;k < vecpairPatchConnection.size();k++)
-// 			{
-// 				if(vecpairPatchConnection[k].first == patchIndex && vecpairPatchConnection[k].second == vecDisconnectPatchAfter[j])
-// 				{
-// 					objectness += vecSmoothValue[k];
-// 				}	
-// 			}
-// 		}
-// 	}
-
-	vecObjectness.push_back(objectness);
+	ObjectHypo objectHypo;
+	objectHypo.patchIndex = vecvecMultiResult[m];
+	objectHypo.objectness = 0;
+	objectHypo.areaIndex = GetAreaIndex(vecvecMultiResult[m][0]);
+	objectHypo.mergeFlag = false;
+	vecObjectHypo.push_back(objectHypo);
 }
 
 void CMultiSeg::ComputeSeparateness(int m,int n)
@@ -456,14 +394,14 @@ void CMultiSeg::ComputeSeparateness(int m,int n)
 
 	if(separateness > 0)
 	{
-		pair<int,int> edge;
-		edge.first = m;
-		edge.second = n;
-		vecpairSeperatenessEdge.push_back(edge);
-		vecSeparateness.push_back(separateness);
-		vecvecpairSeperatenessSmallEdge.push_back(vecpairSeperatenessSmallEdge);
+		EdgeHypo edgeHypo;
+		edgeHypo.begin = m;
+		edgeHypo.end = n;
+		edgeHypo.areaIndex = GetAreaIndex(vecvecMultiResult[m][0]);
+		edgeHypo.pairPatch = vecpairSeperatenessSmallEdge;
+		edgeHypo.separateness = 0;
+		vecEdgeHypo.push_back(edgeHypo);
 	}
-
 }
 
 void CMultiSeg::ConstructGraph()
@@ -481,6 +419,9 @@ void CMultiSeg::ConstructGraph()
 		point.x /= vecvecMultiResult[i].size();
 		point.y /= vecvecMultiResult[i].size();
 		point.z /= vecvecMultiResult[i].size();
+		point.x -= (xMax + xMin)/2;
+		point.y -= (yMax + yMin)/2;
+		point.z -= (zMax + zMin)/2;
 		point.r = 0.2;
 		point.g = 0.2;
 		point.b = 1.0;
@@ -488,7 +429,20 @@ void CMultiSeg::ConstructGraph()
 		graphContract.vecNodes.push_back(point);
 	}
 
-	graphContract.vecEdges = vecpairSeperatenessEdge;
+	for(int i = 0; i < vecEdgeHypo.size();i++)
+	{
+		pair<int,int> edge;
+		edge.second = vecEdgeHypo[i].end;
+		edge.first = vecEdgeHypo[i].begin;
+		graphContract.vecEdges.push_back(edge);
+	}
 }
 
-
+int CMultiSeg::GetAreaIndex(int patchIndex)
+{
+	for(int i = 0;i < clusterPatchInitIndex.size();i++)
+	{
+		if(patchIndex >= clusterPatchInitIndex[i] && patchIndex < clusterPatchInitIndex[i] + clusterPatchNum[i])
+			return i;
+	}
+}

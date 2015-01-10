@@ -1,5 +1,6 @@
 #include "GLDrawer.h"
 
+
 GLDrawer::GLDrawer(RichParameterSet* _para)
 {
 	para = _para;
@@ -324,12 +325,17 @@ void GLDrawer::drawDot(CVertex& v)
 	{
 		size = sample_dot_size;
 	}
+//	glPointSize(size);
 
-	glPointSize(size);
+	if(v.C()[0] > 0)	
+		glPointSize(double(size)/20);
+	else			
+		glPointSize(double(size)/100);
+	
 	glBegin(GL_POINTS);
-
 	GLColor color = getColorByType(v);
 	glColor4f(float(v.C()[0])/255, float(v.C()[1])/255, float(v.C()[2])/255, 1);
+	
 
 	Point3f p = v.P();
 
@@ -572,12 +578,81 @@ void GLDrawer::drawPickPoint(CMesh* samples, vector<int>& pickList, bool bShow_a
 void GLDrawer::glDrawLine(Point3f& p0, Point3f& p1, GLColor color, double width)
 {
 	glColor3f(color.r, color.g, color.b);
-	glLineWidth(width);
+	glLineWidth(/*0.1*/2);
 	glBegin(GL_LINES);
 	glVertex3f(p0[0], p0[1], p0[2]);
 	glVertex3f(p1[0], p1[1], p1[2]);
 	glEnd();
 }
+
+void  DrawChannel(GLfloat   x1, GLfloat   y1, GLfloat   z1,   GLfloat   x2,   GLfloat   y2,   GLfloat   z2   ,double size)   
+{   
+	static GLUquadricObj *  quad_obj = NULL;  
+	if ( quad_obj == NULL )  
+		quad_obj = gluNewQuadric();  
+	gluQuadricDrawStyle( quad_obj, GLU_FILL );  
+	gluQuadricNormals( quad_obj, GLU_SMOOTH );  
+
+	// 起始线段：以(0,1,0)为起点,它的长度(distance)通过目标线段计算,  
+	//           终点坐标为(0,1-distance,0)  
+	// 目标线段：以(x1,y1,z1)为起点，以(x2,y2,z2)为终点  
+	// 计算目标向量  
+	GLfloat   dx   =   x2   -   x1;   
+	GLfloat   dy   =   y2   -   y1;   
+	GLfloat   dz   =   z2   -   z1;  
+	// 算出目标向量模(即AB长度)  
+	GLfloat   distance  =  sqrt(dx*dx + dy*dy + dz*dz);   
+	// 计算平移量  
+	GLfloat  px = x1;  
+	GLfloat  py = y1 - 1;  
+	GLfloat  pz = z1;  
+	// 起始线段的末端点  
+	GLfloat  bx = px;    
+	GLfloat  by = (1-distance) + py;  
+	GLfloat  bz = pz;  
+	// 计算起始向量  
+	GLfloat  sx = bx - x1;  
+	GLfloat  sy = by - y1;  
+	GLfloat  sz = bz - z1;  
+	// 计算向量(sx,sy,sz)与向量(dx,dy,dz)的法向量(sy*dz - dy*sz,sz*dx - sx*dz,sx*dy - dx*sy)  
+	GLfloat fx = sy*dz - dy*sz;  
+	GLfloat fy = sz*dx - sx*dz;  
+	GLfloat fz = sx*dy - dx*sy;  
+	// 求两向量间的夹角  
+	// 计算第三条边的长度  
+	GLfloat ax = fabs(x2 - bx);  
+	GLfloat ay = fabs(y2 - by);  
+	GLfloat az = fabs(z2 - bz);  
+	GLfloat length = sqrt(ax*ax + ay*ay + az*az);  
+	// 根据余弦定理计算夹角  
+	GLfloat angle = acos((distance*distance*2 - length*length)/(2*distance*distance))*180.0f/3.14159;  
+	// 绘制第一个点A   
+	// 	glPushMatrix();   
+	// 	glTranslatef(x1,y1,z1);   
+	// 	auxSolidSphere(0.002);     
+	// 	glPopMatrix();   
+	// 绘制圆柱   
+	glPushMatrix();   
+	// 变换的顺序与函数书写的顺序相反，  
+	// 即先平移(0,-1,0)，再绕法向量旋转，最后再平移  
+	glTranslatef(x1,y1,z1);  
+	glRotatef(angle,fx,fy,fz);    
+	glTranslatef(0,-1,0);  
+
+	// 圆柱体参数   
+	GLdouble radius= size;        // 半径   
+	GLdouble slices = 10.0;      //  段数   
+	GLdouble stack = 10.0;       // 递归次数   
+	gluCylinder( quad_obj, radius, radius, distance, slices, stack );   
+//	auxSolidCylinder(size,distance);  
+	glPopMatrix();  
+	// 绘制第二个点B  
+	// 	glPushMatrix();   
+	// 	glTranslatef(x2,y2,z2);   
+	// 	auxSolidSphere(0.002);       
+	// 	glPopMatrix();   
+};  
+
 
 void RenderBone(float x0, float y0, float z0, float x1, float y1, float z1, double width = 20)  
 {  
@@ -633,7 +708,8 @@ void RenderBone(float x0, float y0, float z0, float x1, float y1, float z1, doub
 void GLDrawer::glDrawCylinder(Point3f& p0, Point3f& p1, GLColor color, double width)
 {
 	glColor3f(color.r, color.g, color.b);
-	RenderBone(p0[0], p0[1], p0[2], p1[0], p1[1], p1[2], width);
+//	RenderBone(p0[0], p0[1], p0[2], p1[0], p1[1], p1[2], width);
+	DrawChannel(p0[0], p0[1], p0[2], p1[0], p1[1], p1[2], width);
 }
 
 
@@ -645,7 +721,11 @@ void GLDrawer::glDrawSphere(Point3f& p, GLColor color, double radius, int slide)
 	glColor3f(color.r, color.g, color.b);
 	glPushMatrix();      
 	glTranslatef(p[0], p[1], p[2]);
-	glutSolidSphere(radius, slide, slide);
+	glPointSize(radius);
+	glBegin(GL_POINTS);
+	glVertex3f(0,0,0);
+	glEnd();
+//	glutSolidSphere(radius, slide, slide);
 	glPopMatrix();
 }
 
@@ -819,17 +899,17 @@ void GLDrawer::drawGraphShow(GRAPHSHOW *graphcut, int graphType)
   double line_thickness = 0.0f;
 
   if (graphType == 0/*PATCH_GRAPH*/){
-	  sphere_radius = 0.005;
-	  line_thickness = 5;
+	  sphere_radius = 12;
+	  line_thickness = 0.1;
   }else if(graphType == 1/*CONTRACTION_GRAPH*/){
-    sphere_radius = 1.5;
-    line_thickness = 1.5;
+    sphere_radius = 24;
+    line_thickness = 0.3;
   }
 
   //draw dot in sphere
   for (int i = 0; i < graphcut->vecNodes.size(); ++i){
     MyPt_RGB_NORMAL &pt = graphcut->vecNodes[i];
-    glDrawSphere(Point3f(pt.x, pt.y, pt.z), GLColor(pt.r, pt.g, pt.b), sphere_radius, 20);
+    glDrawSphere(Point3f(pt.x, pt.y, pt.z), GLColor(pt.r, pt.g, pt.b), sphere_radius, 80);
   }
 
   //draw edges
@@ -848,12 +928,13 @@ void GLDrawer::drawGraphShow(GRAPHSHOW *graphcut, int graphType)
 	}
 	else
 	{
-		r = 0.2;
-		g = 0.6;
-		b = 0.8;
+		r = 0.0;
+		g = 0.0;
+		b = 1.0;
 	}
-   
-    glDrawLine(Point3f(s_pt.x, s_pt.y, s_pt.z), Point3f(e_pt.x, e_pt.y, e_pt.z), GLColor(r, g, b), line_thickness);
+
+ //   glDrawCylinder(Point3f(s_pt.x, s_pt.y, s_pt.z), Point3f(e_pt.x, e_pt.y, e_pt.z), GLColor(r, g, b), line_thickness);
+	glDrawLine(Point3f(s_pt.x, s_pt.y, s_pt.z), Point3f(e_pt.x, e_pt.y, e_pt.z), GLColor(r, g, b), line_thickness);
   }
 }
 

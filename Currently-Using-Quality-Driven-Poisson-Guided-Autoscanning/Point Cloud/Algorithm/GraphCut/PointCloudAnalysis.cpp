@@ -15,10 +15,7 @@ void CPointCloudAnalysis::MainStep(bool initFlag,int newAreNum)
 {
 	//output
 	ofstream outFile1("Output\\MainStep.txt",ios::app);
-	outFile1 <<  "  0" <<endl;
 
-	if(initFlag)
-		DataIn();
 	outFile1 <<  "  1" <<endl;
 	BinarySegmentation(initFlag,newAreNum);
 	outFile1 <<  "  2" <<endl;
@@ -259,6 +256,7 @@ void CPointCloudAnalysis::Clustering()
 	cClustering.vecPatchPoint = cBinarySeg.vecPatchPoint;
 	cClustering.vecvecObjectPool = cBinarySeg.vecvecObjectPool;
 	cClustering.MainStep();
+
 }
 
 void CPointCloudAnalysis::MultiSegmentation()
@@ -274,11 +272,18 @@ void CPointCloudAnalysis::MultiSegmentation()
 	cMultiSeg.clusterPatchNum = cBinarySeg.clusterPatchNum;
 	cMultiSeg.clusterPatchInitIndex = cBinarySeg.clusterPatchInitIndex;
 	cMultiSeg.vecvecPatchConnectFlag = cBinarySeg.vecvecPatchConnectFlag;
+	cMultiSeg.xMax = cBinarySeg.xMax;
+	cMultiSeg.xMin = cBinarySeg.xMin;
+	cMultiSeg.yMax = cBinarySeg.yMax;
+	cMultiSeg.yMin = cBinarySeg.yMin;
+	cMultiSeg.zMax = cBinarySeg.zMax;
+	cMultiSeg.zMin = cBinarySeg.zMin;
 
 	cMultiSeg.vecvecObjectPoolClustering = cClustering.vecvecObjectPoolClustering;
 	cMultiSeg.vecObjectPoolClusteringCount = cClustering.vecObjectPoolClusteringCount;
 
 	cMultiSeg.MainStep();
+
 }
 
 void CPointCloudAnalysis::ScanEstimation()
@@ -292,17 +297,18 @@ void CPointCloudAnalysis::ScanEstimation()
 	cScanEstimation.maxSV = cBinarySeg.maxSV;
 	cScanEstimation.minSV = cBinarySeg.minSV;
 
+
 	cScanEstimation.vecPatchPoint = cMultiSeg.vecPatchPoint;
 	cScanEstimation.vecvecMultiResult = cMultiSeg.vecvecMultiResult;
 	cScanEstimation.clusterPatchNum = cMultiSeg.clusterPatchNum;
 	cScanEstimation.clusterPatchInitIndex = cMultiSeg.clusterPatchInitIndex;
 	cScanEstimation.vecvecPatchConnectFlag = cMultiSeg.vecvecPatchConnectFlag;
-	cScanEstimation.vecpairSeperatenessEdge = cMultiSeg.vecpairSeperatenessEdge;
 	cScanEstimation.vecpairPatchConnection = cMultiSeg.vecpairPatchConnection;
-	cScanEstimation.vecvecpairSeperatenessSmallEdge = cMultiSeg.vecvecpairSeperatenessSmallEdge;
-	cScanEstimation.vecObjectness = cMultiSeg.vecObjectness;
-	cScanEstimation.vecSeparateness = cMultiSeg.vecSeparateness;
 	cScanEstimation.graphContract = cMultiSeg.graphContract;
+	cScanEstimation.vecObjectHypo = cMultiSeg.vecObjectHypo;
+	cScanEstimation.vecEdgeHypo = cMultiSeg.vecEdgeHypo;
+	
+		
 }
 
 void CPointCloudAnalysis::Merge(int pushArea)

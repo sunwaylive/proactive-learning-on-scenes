@@ -143,7 +143,7 @@ void GLArea::resizeGL(int w, int h)
   glLoadIdentity();  
 
   float r = w/(float)h;
-  gluPerspective(60, r, 0.1, 10);
+  gluPerspective(30, r, 0.1, 10);
   glMatrixMode(GL_MODELVIEW);  
 }
 
@@ -526,7 +526,7 @@ void GLArea::paintGL()
       //2. show contraction graph
 	  if(!dataMgr.isContractionGraphEmpty())
 	  {
-//		  glDrawer.drawGraphShow(dataMgr.getContractionGraph(),1);
+		  glDrawer.drawGraphShow(dataMgr.getContractionGraph(),1);
 	  }
 
       //3. show patch graph

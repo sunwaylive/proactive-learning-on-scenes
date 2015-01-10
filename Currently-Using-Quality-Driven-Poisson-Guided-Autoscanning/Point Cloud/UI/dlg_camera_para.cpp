@@ -1373,7 +1373,7 @@ void CameraParaDlg::runGraphCut()
 	/////////////////////////////////////run graph cut
 	cPointCloudAnalysis.MainStep(true,0);
 
-
+	outFileg << "MainStep finished :)   " << endl;
 	/////////////////////////////////////compute the score,sorting
 	CMesh *original = area->dataMgr.getCurrentOriginal();
 
@@ -1402,6 +1402,10 @@ void CameraParaDlg::runGraphCut()
 		cPointCloudAnalysis.cScanEstimation.vecObjectIsoPoint.push_back(objectIsoPointTemp);
 	}
 	cPointCloudAnalysis.cScanEstimation.ScoreUpdate();
+	outFileg << "ScoreUpdate finished :)   " << endl;
+
+	//action according to the score
+	int pushArea = 0;
 
 	////////////////////////////////////show the results
 	CMesh *graphCutResult_mesh = area->dataMgr.getCurrentGraphCutResult();
@@ -1409,27 +1413,24 @@ void CameraParaDlg::runGraphCut()
 	GRAPHSHOW *patchGraph = area->dataMgr.getPatchGraph();
 
 
+	srand((unsigned)time(0));
 	for(int i = 0; i < cPointCloudAnalysis.cMultiSeg.vecvecMultiResult.size();i++)
 	{
-		
-	
+		double r,g,b;
+		r = double(rand()%255);
+		g = double(rand()%255);
+		b = double(rand()%255);
+
 		for(int j = 0; j < cPointCloudAnalysis.cMultiSeg.vecvecMultiResult[i].size();j++)
 		{
-			double r,g,b;
-			r = double(rand()%255);
-			g = double(rand()%255);
-			b = double(rand()%255);
-
 			int patchIndex = cPointCloudAnalysis.cMultiSeg.vecvecMultiResult[i][j];
 			for(int k = 0; k < cPointCloudAnalysis.cMultiSeg.vecPatchPoint[patchIndex].mypoints.size();k++)
 			{
-				
-
 				MyPoint_RGB_NORMAL point = cPointCloudAnalysis.cMultiSeg.vecPatchPoint[patchIndex].mypoints[k];
 				CVertex new_point;
-				new_point.P()[0] = point.x;
-				new_point.P()[1] = point.y;
-				new_point.P()[2] = point.z;
+				new_point.P()[0] = point.x - (cPointCloudAnalysis.cBinarySeg.xMax + cPointCloudAnalysis.cBinarySeg.xMin)/2;
+				new_point.P()[1] = point.y - (cPointCloudAnalysis.cBinarySeg.yMax + cPointCloudAnalysis.cBinarySeg.yMin)/2;
+				new_point.P()[2] = point.z - (cPointCloudAnalysis.cBinarySeg.zMax + cPointCloudAnalysis.cBinarySeg.zMin)/2;
 				new_point.N()[0] = point.normal_x;
 				new_point.N()[1] = point.normal_y;
 				new_point.N()[2] = point.normal_z;
@@ -1437,53 +1438,51 @@ void CameraParaDlg::runGraphCut()
 				new_point.C()[0] = r;
 				new_point.C()[1] = g;
 				new_point.C()[2] = b;
-				
-
-
+	
 				new_point.m_index = i;
 				new_point.is_graphcut_related = true;
 				graphCutResult_mesh->vert.push_back(new_point);
 				graphCutResult_mesh->bbox.Add(new_point.P());
 			}
 		}
-
 	}
-	graphCutResult_mesh->vn = graphCutResult_mesh->vert.size();
 
-
-	for(int i=0;i<graphCutResult_mesh->vert.size();i++)
+	for(int i = 0; i < cPointCloudAnalysis.cBinarySeg.tablePoint.mypoints.size();i++)
 	{
-		outFileg << "r: " << graphCutResult_mesh->vert[i].C()[0]<< endl;
-		outFileg << "g: " << graphCutResult_mesh->vert[i].C()[1]<< endl;
-		outFileg << "b: " << graphCutResult_mesh->vert[i].C()[2]<< endl;
+		MyPoint_RGB_NORMAL point = cPointCloudAnalysis.cBinarySeg.tablePoint.mypoints[i];
+		CVertex new_point;
+		new_point.P()[0] = point.x - (cPointCloudAnalysis.cBinarySeg.xMax + cPointCloudAnalysis.cBinarySeg.xMin)/2;;
+		new_point.P()[1] = point.y - (cPointCloudAnalysis.cBinarySeg.yMax + cPointCloudAnalysis.cBinarySeg.yMin)/2;
+		new_point.P()[2] = point.z - (cPointCloudAnalysis.cBinarySeg.zMax + cPointCloudAnalysis.cBinarySeg.zMin)/2;
+		new_point.N()[0] = 0;
+		new_point.N()[1] = 0;
+		new_point.N()[2] = 1;
+
+		new_point.C()[0] = 0;
+		new_point.C()[1] = 0;
+		new_point.C()[2] = 0;
+
+		new_point.m_index = i;
+		new_point.is_graphcut_related = true;
+		graphCutResult_mesh->vert.push_back(new_point);
+		graphCutResult_mesh->bbox.Add(new_point.P());
 	}
 
-// 	contractionGraph->vecEdgeColor = cPointCloudAnalysis.cScanEstimation.graphContract.vecEdgeColor;
-// 	contractionGraph->vecEdges = cPointCloudAnalysis.cScanEstimation.graphContract.vecEdges;
-// 	contractionGraph->vecNodes = cPointCloudAnalysis.cScanEstimation.graphContract.vecNodes;
+	graphCutResult_mesh->vn = graphCutResult_mesh->vert.size();
+	outFileg << "Show results finished :)   " << endl;
 
-	contractionGraph->vecEdgeColor = cPointCloudAnalysis.cMultiSeg.graphContract.vecEdgeColor;
-	contractionGraph->vecEdges = cPointCloudAnalysis.cMultiSeg.graphContract.vecEdges;
-	contractionGraph->vecNodes = cPointCloudAnalysis.cMultiSeg.graphContract.vecNodes;
+	contractionGraph->vecEdgeColor = cPointCloudAnalysis.cScanEstimation.graphContract.vecEdgeColor;
+	contractionGraph->vecEdges = cPointCloudAnalysis.cScanEstimation.graphContract.vecEdges;
+	contractionGraph->vecNodes = cPointCloudAnalysis.cScanEstimation.graphContract.vecNodes;
 
 	patchGraph->vecEdgeColor = cPointCloudAnalysis.cBinarySeg.graphInit.vecEdgeColor;
 	patchGraph->vecEdges = cPointCloudAnalysis.cBinarySeg.graphInit.vecEdges;
 	patchGraph->vecNodes = cPointCloudAnalysis.cBinarySeg.graphInit.vecNodes;
 
 
-	outFileg << "First round finished :)   " << cPointCloudAnalysis.cScanEstimation.graphContract.vecEdgeColor.size() << "  " <<  contractionGraph->vecEdgeColor.size() << endl;
-	outFileg << "First round finished :)   " << cPointCloudAnalysis.cScanEstimation.graphContract.vecEdges.size() << "  " <<  contractionGraph->vecEdges.size() << endl;
-	outFileg << "First round finished :)   " << cPointCloudAnalysis.cScanEstimation.graphContract.vecNodes.size() << "  " <<  contractionGraph->vecNodes.size() << endl;
-
-	outFileg << "First round finished :)   " << cPointCloudAnalysis.cBinarySeg.graphInit.vecEdgeColor.size() << "  " <<  patchGraph->vecEdgeColor.size() << endl;
-	outFileg << "First round finished :)   " << cPointCloudAnalysis.cBinarySeg.graphInit.vecEdges.size() << "  " <<  patchGraph->vecEdges.size() << endl;
-	outFileg << "First round finished :)   " << cPointCloudAnalysis.cBinarySeg.graphInit.vecNodes.size() << "  " <<  patchGraph->vecNodes.size() << endl;
-
-
 	outFileg << "First round finished :) " << endl;
 
-	//action according to the score
-	int pushArea = 0;
+	
 
 	//isSeparate
 	ofstream outFile1("Output\\isSeparate.txt",ios::app);
