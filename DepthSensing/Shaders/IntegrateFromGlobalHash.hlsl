@@ -41,8 +41,8 @@ static const uint linBlockSize = SDF_BLOCK_SIZE * SDF_BLOCK_SIZE * SDF_BLOCK_SIZ
 [numthreads(groupthreads, 1, 1)]
 void integrateFromGlobalHashPass1CS(int3 dTid : SV_DispatchThreadID, uint3 GTid : SV_GroupThreadID, uint GI: SV_GroupIndex, uint3 GID : SV_GroupID)
 {
-	uint bucketID = start+groupthreads * (GID.x + GID.y * NUM_GROUPS_X)+GI;
-	if(bucketID < g_HashNumBuckets * g_HashBucketSize)
+	uint bucketID = start+groupthreads*(GID.x + GID.y * NUM_GROUPS_X)+GI;
+	if(bucketID < g_HashNumBuckets*g_HashBucketSize)
 	{
 		HashEntry entry = getHashEntry(g_Hash, bucketID);
 
@@ -87,7 +87,6 @@ StructuredBuffer<SDFBlockDesc> g_SDFBLockDescs : register(t0);
 RWBuffer<float> g_SDFBlocksSDF : register(u0);
 RWBuffer<int> g_outputSDFBlocks : register(u1);
 RWBuffer<int> g_SDFBlocksRGBW : register(u2);
-RWBuffer<float> g_SDFBlocksID : register(u3);
 
 [numthreads(SDF_BLOCK_SIZE*SDF_BLOCK_SIZE*SDF_BLOCK_SIZE, 1, 1)]
 void integrateFromGlobalHashPass2CS(int3 dTid : SV_DispatchThreadID, uint3 GTid : SV_GroupThreadID, uint GI: SV_GroupIndex, uint3 GID : SV_GroupID)
@@ -98,17 +97,13 @@ void integrateFromGlobalHashPass2CS(int3 dTid : SV_DispatchThreadID, uint3 GTid 
 	{
 		SDFBlockDesc desc = g_SDFBLockDescs[idxBlock];
 
-		//这里需要针对sdfblockid修改代码！！！从这里开始！！！    
-
-		// Copy SDF block to CPU， 添加了id之后 每个voxel占3个字节
-		g_outputSDFBlocks[3 * (linBlockSize*idxBlock + GI) + 0] = asint(g_SDFBlocksSDF[desc.ptr + GI]);
-		g_outputSDFBlocks[3 * (linBlockSize*idxBlock + GI) + 1] = g_SDFBlocksRGBW[desc.ptr + GI];
-		// wei add, 拷贝sdfblocks中每个voxel的id
-		g_outputSDFBlocks[3 * (linBlockSize*idxBlock + GI) + 2] = g_SDFBlocksID[desc.ptr + GI];
+		// Copy SDF block to CPU
+		g_outputSDFBlocks[2*(linBlockSize*idxBlock+GI)+0] = asint(g_SDFBlocksSDF[desc.ptr+GI]);
+		g_outputSDFBlocks[2*(linBlockSize*idxBlock+GI)+1] = g_SDFBlocksRGBW[desc.ptr+GI];
 
 		//// Reset SDF Block
 		//g_SDFBlocks[2*(desc.ptr+GI)+0] = 0;
 		//g_SDFBlocks[2*(desc.ptr+GI)+1] = 0;
-		deleteVoxel(g_SDFBlocksSDF, g_SDFBlocksRGBW, g_SDFBlocksID, desc.ptr + GI);
+		deleteVoxel(g_SDFBlocksSDF, g_SDFBlocksRGBW, desc.ptr+GI);
 	}
 }

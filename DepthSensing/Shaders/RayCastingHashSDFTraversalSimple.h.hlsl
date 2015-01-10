@@ -5,13 +5,14 @@
 float3 gradientForPoint(float3 pos)
 {
 	float3 offset = g_VirtualVoxelSize;
-	float distp00; float3 colorp00; trilinearInterpolationSimpleFastFast(pos - float3(0.5f*offset.x, 0.0f, 0.0f), distp00, colorp00);
-	float dist0p0; float3 color0p0; trilinearInterpolationSimpleFastFast(pos - float3(0.0f, 0.5f*offset.y, 0.0f), dist0p0, color0p0);
-	float dist00p; float3 color00p; trilinearInterpolationSimpleFastFast(pos - float3(0.0f, 0.0f, 0.5f*offset.z), dist00p, color00p);
-																															   
-	float dist100; float3 color100; trilinearInterpolationSimpleFastFast(pos + float3(0.5f*offset.x, 0.0f, 0.0f), dist100, color100);
-	float dist010; float3 color010; trilinearInterpolationSimpleFastFast(pos + float3(0.0f, 0.5f*offset.y, 0.0f), dist010, color010);
-	float dist001; float3 color001; trilinearInterpolationSimpleFastFast(pos + float3(0.0f, 0.0f, 0.5f*offset.z), dist001, color001);
+
+	float distp00; float3 colorp00; trilinearInterpolationSimpleFastFast(pos-float3(0.5f*offset.x, 0.0f, 0.0f), distp00, colorp00);
+	float dist0p0; float3 color0p0; trilinearInterpolationSimpleFastFast(pos-float3(0.0f, 0.5f*offset.y, 0.0f), dist0p0, color0p0);
+	float dist00p; float3 color00p; trilinearInterpolationSimpleFastFast(pos-float3(0.0f, 0.0f, 0.5f*offset.z), dist00p, color00p);
+
+	float dist100; float3 color100; trilinearInterpolationSimpleFastFast(pos+float3(0.5f*offset.x, 0.0f, 0.0f), dist100, color100);
+	float dist010; float3 color010; trilinearInterpolationSimpleFastFast(pos+float3(0.0f, 0.5f*offset.y, 0.0f), dist010, color010);
+	float dist001; float3 color001; trilinearInterpolationSimpleFastFast(pos+float3(0.0f, 0.0f, 0.5f*offset.z), dist001, color001);
 
 	float3 grad = float3((distp00-dist100)/offset.x, (dist0p0-dist010)/offset.y, (dist00p-dist001)/offset.z);
 
@@ -110,26 +111,25 @@ void traverseCoarseGridSimpleSampleAllMultiLayer(float3 worldCamPos, float3 worl
 		rayCurrent = max(rayStart, rayCurrent);
 				
 		[allow_uav_condition]
-		while(rayCurrent <= rayStart + 1.74f * SDF_BLOCK_SIZE * g_VirtualVoxelSize + rayIncrement) // 1.74f > sqrt(3)
+		while(rayCurrent <= rayStart+1.74f*SDF_BLOCK_SIZE*g_VirtualVoxelSize+rayIncrement) // 1.74f > sqrt(3)
 		{
 			float3 currentPosWorld = worldCamPos+rayCurrent*worldDir;
-			float dist;	float3 color; uint id;
-			if(trilinearInterpolationSimpleFastFast(currentPosWorld, dist, color, id))
+			float dist;	float3 color;
+			if(trilinearInterpolationSimpleFastFast(currentPosWorld, dist, color))
 			{
 				if(lastSample.weight > 0 && lastSample.sdf > 0.0f && dist < 0.0f) // current sample is always valid here
 				{
 					float alpha; // = findIntersectionLinear(lastSample.alpha, rayCurrent, lastSample.sdf, dist);
 					findIntersectionBisection(worldCamPos, worldDir, lastSample.sdf, lastSample.alpha, dist, rayCurrent, alpha);
 					
-					float3 currentIso = worldCamPos + alpha * worldDir;
+					float3 currentIso = worldCamPos+alpha*worldDir;
 					if(abs(lastSample.sdf - dist) < g_thresSampleDist)
 					{
 						if(abs(dist) < g_thresDist)
 						{
 							g_output[dTid.xy] = alpha/depthToRayLength; // Convert ray length to depth depthToRayLength
-							g_outputColor[dTid.xy] = float4(float3(1.0f, 0.0f, 0.0f), 0.0f); //float4(color / 255.0f, 1.0f);
-							//wei add
-							g_outputIDs[dTid.xy] = 0;
+							g_outputColor[dTid.xy] = float4(color/255.0f, 1.0f);
+
 							if(g_useGradients == 1)
 							{
 								float3 normal = gradientForPoint(currentIso);
@@ -158,12 +158,11 @@ void traverseCoarseGridSimpleSampleAllMultiLayer(float3 worldCamPos, float3 worl
 	}
 }
 
-//在RayCastingHashSF.hlsl中的renderCS函数中被调用
 void traverseCoarseGridSimpleSampleAll(float3 worldCamPos, float3 worldDir, float3 camDir, int3 dTid)
 {
 	// Last Sample
 	Sample lastSample; lastSample.sdf = 0.0f; lastSample.alpha = 0.0f; lastSample.weight = 0; // lastSample.color = int3(0, 0, 0);
-	const float depthToRayLength = 1.0f / camDir.z; // scale factor to convert from depth to ray length
+	const float depthToRayLength = 1.0f/camDir.z; // scale factor to convert from depth to ray length
 
 	float rayCurrent = depthToRayLength*max(g_SensorDepthWorldMin, kinectProjZToCamera(g_RayIntervalMin[dTid.xy])); // Convert depth to raylength
 	float rayEnd = depthToRayLength*min(g_SensorDepthWorldMax, kinectProjZToCamera(g_RayIntervalMax[dTid.xy])); // Convert depth to raylength
@@ -172,12 +171,9 @@ void traverseCoarseGridSimpleSampleAll(float3 worldCamPos, float3 worldDir, floa
 	while(rayCurrent < rayEnd)
 	{
 		float3 currentPosWorld = worldCamPos+rayCurrent*worldDir;
-		//得到当前位置的hash entry
 		HashEntry entry = getHashEntryForSDFBlockPos(g_Hash, worldToSDFBlock(currentPosWorld));
-
-		float dist;	float3 color; uint id;
-		//取的dist 和 color根据插值算法
-		if(trilinearInterpolationSimpleFastFast(currentPosWorld, dist, color, id))
+		float dist;	float3 color;
+		if(trilinearInterpolationSimpleFastFast(currentPosWorld, dist, color))
 		//if(trilinearInterpolation(currentPosWorld, dist, color))
 		{
 			if(lastSample.weight > 0 && lastSample.sdf > 0.0f && dist < 0.0f) // current sample is always valid here
@@ -190,11 +186,8 @@ void traverseCoarseGridSimpleSampleAll(float3 worldCamPos, float3 worldDir, floa
 				{
 					if(abs(dist) < g_thresDist)
 					{
-						//将获取到的数据存放到输出变量中
 						g_output[dTid.xy] = alpha/depthToRayLength; // Convert ray length to depth depthToRayLength
-						g_outputColor[dTid.xy] = float4(float3(1.0f, 0.0f, 0.0f), 0.0f);//float4(color / 255.0f, 1.0f); //wei add  
-						//wei add, 这里好像不能直接根据ID设置颜色，因为点的颜色不是有这个阶段直接决定？？
-						g_outputIDs[dTid.xy] = id; //这里后面紧接 PhongLighting.hlsl中的PhongPS函数
+						g_outputColor[dTid.xy] = float4(color/255.0f, 1.0f);
 
 						if(g_useGradients == 1)
 						{

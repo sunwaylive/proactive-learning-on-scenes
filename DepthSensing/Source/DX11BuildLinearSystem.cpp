@@ -99,8 +99,7 @@ HRESULT DX11BuildLinearSystem::OnD3D11CreateDevice( ID3D11Device* pd3dDevice )
 	return  hr;
 }
 
-HRESULT DX11BuildLinearSystem::applyBL( ID3D11DeviceContext* context, ID3D11ShaderResourceView* inputSRV, ID3D11ShaderResourceView* correspondenceSRV, ID3D11ShaderResourceView* correspondenceNormalsSRV, D3DXVECTOR3& mean, float meanStDev, 
-									   Eigen::Matrix4f& deltaTransform, unsigned int imageWidth, unsigned int imageHeight, unsigned int level, Matrix6x7f& res, LinearSystemConfidence& conf )
+HRESULT DX11BuildLinearSystem::applyBL( ID3D11DeviceContext* context, ID3D11ShaderResourceView* inputSRV, ID3D11ShaderResourceView* correspondenceSRV, ID3D11ShaderResourceView* correspondenceNormalsSRV, D3DXVECTOR3& mean, float meanStDev, Eigen::Matrix4f& deltaTransform, unsigned int imageWidth, unsigned int imageHeight, unsigned int level, Matrix6x7f& res, LinearSystemConfidence& conf )
 {
 	HRESULT hr = S_OK;
 

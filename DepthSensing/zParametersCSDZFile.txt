@@ -4,7 +4,7 @@
 //// 0 = Kinect, 1 = PrimeSense, 2 = SoftKinect, 3 = BinaryDumpOld, 4 = ImageReader, 5 = KinectOneSensor, 6 = Christoph Sesnor, 7 = BinaryDumpReader
 //GlobalAppState::s_sensorIdx = 5;
 //#else
-s_sensorIdx = 0;
+s_sensorIdx = 7;
 //#endif
 s_ImageReaderSensorSourcePath = "../stanfordData/copyroom_png/";	//just for image reader sensor, where images are loaded
 s_ImageReaderSensorNumFrames = 0;									//dumps the data after n frames (for every reader)
@@ -17,9 +17,9 @@ s_timingsTotalEnabled = false;
 //s_windowWidth = 512;
 //s_windowHeight = 424;
 //#else
-s_windowWidth = 320;
+s_windowWidth = 640;
 s_windowHeight = 480;
-s_outputWindowWidth = 320;
+s_outputWindowWidth = 640;
 s_outputWindowHeight = 480;
 //#endif
 s_RenderMode = 0;

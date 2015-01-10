@@ -115,7 +115,6 @@ bool trilinearInterpolationComplex(float3 pos, out float dist, out float3 color)
 }*/
 
 // Takes a world space position pos -> returns false if not all samples were available
-//这个函数实现了找三维坐标系中跟点对应的Voxel信息
 bool trilinearInterpolationSimpleFastFast(float3 pos, out float dist, out float3 color)
 {
 	const float oSet = g_VirtualVoxelSize;
@@ -123,23 +122,19 @@ bool trilinearInterpolationSimpleFastFast(float3 pos, out float dist, out float3
 	float3 weight = frac(worldToVirtualVoxelPosFloat(pos));
 
 	dist = 0.0f;
-	int3 virtualVoxelPos = worldToVirtualVoxelPos(posDual+float3(0.0f, 0.0f, 0.0f)); int ptr = getHashEntryForSDFBlockPos(g_Hash, virtualVoxelPosToSDFBlock(virtualVoxelPos)).ptr; if(ptr == FREE_ENTRY) return false; int	linearMemoryIndex = ptr+virtualVoxelPosToLocalSDFBlockIndex(virtualVoxelPos); Voxel	v = getVoxel(g_SDFBlocksSDF, g_SDFBlocksRGBW, linearMemoryIndex); if(v.weight == 0) return false; dist+= (1.0f-weight.x)*(1.0f-weight.y)*(1.0f-weight.z)*v.sdf; 
-		 virtualVoxelPos = worldToVirtualVoxelPos(posDual+float3(oSet, 0.0f, 0.0f));	 ptr = getHashEntryForSDFBlockPos(g_Hash, virtualVoxelPosToSDFBlock(virtualVoxelPos)).ptr; if(ptr == FREE_ENTRY) return false;		linearMemoryIndex = ptr+virtualVoxelPosToLocalSDFBlockIndex(virtualVoxelPos);		v = getVoxel(g_SDFBlocksSDF, g_SDFBlocksRGBW, linearMemoryIndex); if(v.weight == 0) return false; dist+=	   weight.x *(1.0f-weight.y)*(1.0f-weight.z)*v.sdf; 
-		 virtualVoxelPos = worldToVirtualVoxelPos(posDual+float3(0.0f, oSet, 0.0f));	 ptr = getHashEntryForSDFBlockPos(g_Hash, virtualVoxelPosToSDFBlock(virtualVoxelPos)).ptr; if(ptr == FREE_ENTRY) return false;		linearMemoryIndex = ptr+virtualVoxelPosToLocalSDFBlockIndex(virtualVoxelPos);		v = getVoxel(g_SDFBlocksSDF, g_SDFBlocksRGBW, linearMemoryIndex); if(v.weight == 0) return false; dist+= (1.0f-weight.x)*	   weight.y *(1.0f-weight.z)*v.sdf; 
-		 virtualVoxelPos = worldToVirtualVoxelPos(posDual+float3(0.0f, 0.0f, oSet));	 ptr = getHashEntryForSDFBlockPos(g_Hash, virtualVoxelPosToSDFBlock(virtualVoxelPos)).ptr; if(ptr == FREE_ENTRY) return false;		linearMemoryIndex = ptr+virtualVoxelPosToLocalSDFBlockIndex(virtualVoxelPos);		v = getVoxel(g_SDFBlocksSDF, g_SDFBlocksRGBW, linearMemoryIndex); if(v.weight == 0) return false; dist+= (1.0f-weight.x)*(1.0f-weight.y)*	   weight.z *v.sdf; 
-		 virtualVoxelPos = worldToVirtualVoxelPos(posDual+float3(oSet, oSet, 0.0f));	 ptr = getHashEntryForSDFBlockPos(g_Hash, virtualVoxelPosToSDFBlock(virtualVoxelPos)).ptr; if(ptr == FREE_ENTRY) return false;		linearMemoryIndex = ptr+virtualVoxelPosToLocalSDFBlockIndex(virtualVoxelPos);		v = getVoxel(g_SDFBlocksSDF, g_SDFBlocksRGBW, linearMemoryIndex); if(v.weight == 0) return false; dist+=	   weight.x *	   weight.y *(1.0f-weight.z)*v.sdf; 
-		 virtualVoxelPos = worldToVirtualVoxelPos(posDual+float3(0.0f, oSet, oSet));	 ptr = getHashEntryForSDFBlockPos(g_Hash, virtualVoxelPosToSDFBlock(virtualVoxelPos)).ptr; if(ptr == FREE_ENTRY) return false;		linearMemoryIndex = ptr+virtualVoxelPosToLocalSDFBlockIndex(virtualVoxelPos);		v = getVoxel(g_SDFBlocksSDF, g_SDFBlocksRGBW, linearMemoryIndex); if(v.weight == 0) return false; dist+= (1.0f-weight.x)*	   weight.y *	   weight.z *v.sdf; 
-		 virtualVoxelPos = worldToVirtualVoxelPos(posDual+float3(oSet, 0.0f, oSet));	 ptr = getHashEntryForSDFBlockPos(g_Hash, virtualVoxelPosToSDFBlock(virtualVoxelPos)).ptr; if(ptr == FREE_ENTRY) return false;		linearMemoryIndex = ptr+virtualVoxelPosToLocalSDFBlockIndex(virtualVoxelPos);		v = getVoxel(g_SDFBlocksSDF, g_SDFBlocksRGBW, linearMemoryIndex); if(v.weight == 0) return false; dist+=	   weight.x *(1.0f-weight.y)*	   weight.z *v.sdf; 
-		 virtualVoxelPos = worldToVirtualVoxelPos(posDual+float3(oSet, oSet, oSet));	 ptr = getHashEntryForSDFBlockPos(g_Hash, virtualVoxelPosToSDFBlock(virtualVoxelPos)).ptr; if(ptr == FREE_ENTRY) return false;		linearMemoryIndex = ptr+virtualVoxelPosToLocalSDFBlockIndex(virtualVoxelPos);		v = getVoxel(g_SDFBlocksSDF, g_SDFBlocksRGBW, linearMemoryIndex); if(v.weight == 0) return false; dist+=	   weight.x *	   weight.y *	   weight.z *v.sdf; 
+	int3 virtualVoxelPos = worldToVirtualVoxelPos(posDual+float3(0.0f, 0.0f, 0.0f)); int ptr = getHashEntryForSDFBlockPos(g_Hash, virtualVoxelPosToSDFBlock(virtualVoxelPos)).ptr; if(ptr == FREE_ENTRY) return false; int	linearMemoryIndex = ptr+virtualVoxelPosToLocalSDFBlockIndex(virtualVoxelPos); Voxel	v = getVoxel(g_SDFBlocksSDF, g_SDFBlocksRGBW, linearMemoryIndex); if(v.weight == 0) return false; dist+= (1.0f-weight.x)*(1.0f-weight.y)*(1.0f-weight.z)*v.sdf;
+		 virtualVoxelPos = worldToVirtualVoxelPos(posDual+float3(oSet, 0.0f, 0.0f));	 ptr = getHashEntryForSDFBlockPos(g_Hash, virtualVoxelPosToSDFBlock(virtualVoxelPos)).ptr; if(ptr == FREE_ENTRY) return false;		linearMemoryIndex = ptr+virtualVoxelPosToLocalSDFBlockIndex(virtualVoxelPos);		v = getVoxel(g_SDFBlocksSDF, g_SDFBlocksRGBW, linearMemoryIndex); if(v.weight == 0) return false; dist+=	   weight.x *(1.0f-weight.y)*(1.0f-weight.z)*v.sdf;
+		 virtualVoxelPos = worldToVirtualVoxelPos(posDual+float3(0.0f, oSet, 0.0f));	 ptr = getHashEntryForSDFBlockPos(g_Hash, virtualVoxelPosToSDFBlock(virtualVoxelPos)).ptr; if(ptr == FREE_ENTRY) return false;		linearMemoryIndex = ptr+virtualVoxelPosToLocalSDFBlockIndex(virtualVoxelPos);		v = getVoxel(g_SDFBlocksSDF, g_SDFBlocksRGBW, linearMemoryIndex); if(v.weight == 0) return false; dist+= (1.0f-weight.x)*	   weight.y *(1.0f-weight.z)*v.sdf;
+		 virtualVoxelPos = worldToVirtualVoxelPos(posDual+float3(0.0f, 0.0f, oSet));	 ptr = getHashEntryForSDFBlockPos(g_Hash, virtualVoxelPosToSDFBlock(virtualVoxelPos)).ptr; if(ptr == FREE_ENTRY) return false;		linearMemoryIndex = ptr+virtualVoxelPosToLocalSDFBlockIndex(virtualVoxelPos);		v = getVoxel(g_SDFBlocksSDF, g_SDFBlocksRGBW, linearMemoryIndex); if(v.weight == 0) return false; dist+= (1.0f-weight.x)*(1.0f-weight.y)*	   weight.z *v.sdf;
+		 virtualVoxelPos = worldToVirtualVoxelPos(posDual+float3(oSet, oSet, 0.0f));	 ptr = getHashEntryForSDFBlockPos(g_Hash, virtualVoxelPosToSDFBlock(virtualVoxelPos)).ptr; if(ptr == FREE_ENTRY) return false;		linearMemoryIndex = ptr+virtualVoxelPosToLocalSDFBlockIndex(virtualVoxelPos);		v = getVoxel(g_SDFBlocksSDF, g_SDFBlocksRGBW, linearMemoryIndex); if(v.weight == 0) return false; dist+=	   weight.x *	   weight.y *(1.0f-weight.z)*v.sdf;
+		 virtualVoxelPos = worldToVirtualVoxelPos(posDual+float3(0.0f, oSet, oSet));	 ptr = getHashEntryForSDFBlockPos(g_Hash, virtualVoxelPosToSDFBlock(virtualVoxelPos)).ptr; if(ptr == FREE_ENTRY) return false;		linearMemoryIndex = ptr+virtualVoxelPosToLocalSDFBlockIndex(virtualVoxelPos);		v = getVoxel(g_SDFBlocksSDF, g_SDFBlocksRGBW, linearMemoryIndex); if(v.weight == 0) return false; dist+= (1.0f-weight.x)*	   weight.y *	   weight.z *v.sdf;
+		 virtualVoxelPos = worldToVirtualVoxelPos(posDual+float3(oSet, 0.0f, oSet));	 ptr = getHashEntryForSDFBlockPos(g_Hash, virtualVoxelPosToSDFBlock(virtualVoxelPos)).ptr; if(ptr == FREE_ENTRY) return false;		linearMemoryIndex = ptr+virtualVoxelPosToLocalSDFBlockIndex(virtualVoxelPos);		v = getVoxel(g_SDFBlocksSDF, g_SDFBlocksRGBW, linearMemoryIndex); if(v.weight == 0) return false; dist+=	   weight.x *(1.0f-weight.y)*	   weight.z *v.sdf;
+		 virtualVoxelPos = worldToVirtualVoxelPos(posDual+float3(oSet, oSet, oSet));	 ptr = getHashEntryForSDFBlockPos(g_Hash, virtualVoxelPosToSDFBlock(virtualVoxelPos)).ptr; if(ptr == FREE_ENTRY) return false;		linearMemoryIndex = ptr+virtualVoxelPosToLocalSDFBlockIndex(virtualVoxelPos);		v = getVoxel(g_SDFBlocksSDF, g_SDFBlocksRGBW, linearMemoryIndex); if(v.weight == 0) return false; dist+=	   weight.x *	   weight.y *	   weight.z *v.sdf;
 		 																																																																															
 	color = v.color;
-	//wei add
-	//id = asuint(0);  // v.id;
+	
 	return true;
 }
-
-
-
 
 // Takes a world space position pos -> returns false if not all samples were available
 /*bool trilinearInterpolationSimpleFast(float3 pos, out float dist, out float3 color)
@@ -203,7 +198,6 @@ float findIntersectionLinear(float tNear, float tFar, float dNear, float dFar)
 static const unsigned int nIterationsBisection = 3;
 
 // d0 near, d1 far
-//这个函数是求交点
 bool findIntersectionBisection(float3 worldCamPos, float3 worldDir, float d0, float r0, float d1, float r1, out float alpha)
 {
 	float a = r0; float aDist = d0;

@@ -22,7 +22,7 @@ HRESULT DX11MarchingCubesChunkGrid::extractIsoSurface( ID3D11DeviceContext* cont
 				vec3i chunk(x, y, z);
 				if(chunkGrid.containsSDFBlocksChunk(chunk))
 				{
-					std::cout << "First: Marching Cubes on chunk (" << x << ", " << y << ", " << z << ") " << std::endl;
+					std::cout << "Marching Cubes on chunk (" << x << ", " << y << ", " << z << ") " << std::endl;
 
 					V_RETURN(chunkGrid.StreamInToGPUChunkNeighborhood(context, hash, chunk, 1));
 
@@ -43,7 +43,6 @@ HRESULT DX11MarchingCubesChunkGrid::extractIsoSurface( ID3D11DeviceContext* cont
 		}
 	}
 
-	std::cout<<"Finally: Marching Cube done! Begin to write to file." <<std::endl;
 	DX11MarchingCubesHashSDF::saveMesh(filename, transform);
 
 	unsigned int nStreamedBlock;

@@ -40,7 +40,6 @@ HRESULT ImageReaderSensor::createFirstConnected()
 	return hr;
 }
 
-//modify m_depthD16 using freeimage file
 HRESULT ImageReaderSensor::processDepth()
 {
 	HRESULT hr = S_OK;
@@ -53,7 +52,6 @@ HRESULT ImageReaderSensor::processDepth()
 	std::string frameNumber(frameNumber_c);
 	std::string currFileName = m_BaseFilename;
 	currFileName.append("depth/").append(frameNumber).append(".png");
-
 	DepthImage image;
 	FreeImageWrapper::loadImage(currFileName, image);
 	image.flipY();

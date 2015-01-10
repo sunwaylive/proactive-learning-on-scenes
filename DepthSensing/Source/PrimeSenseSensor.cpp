@@ -77,7 +77,6 @@ HRESULT PrimeSenseSensor::createFirstConnected()
 
 	// Create Depth Stream
 	rc = m_depthStream.create(m_device, openni::SENSOR_DEPTH);
-	std::cout<<"depth: " << m_depthStream.getVideoMode().getResolutionX() <<" " << m_depthStream.getVideoMode().getResolutionY() <<std::endl;
 	if (rc == openni::STATUS_OK)
 	{
 		rc = m_depthStream.start();
@@ -94,7 +93,6 @@ HRESULT PrimeSenseSensor::createFirstConnected()
 
 	// Create Color Stream
 	rc = m_colorStream.create(m_device, openni::SENSOR_COLOR);
-	std::cout<<"color: " <<m_colorStream.getVideoMode().getResolutionX() <<" " <<m_colorStream.getVideoMode().getResolutionY() <<std::endl;
 	if (rc == openni::STATUS_OK)
 	{
 		rc = m_colorStream.start();
@@ -136,11 +134,7 @@ HRESULT PrimeSenseSensor::createFirstConnected()
 	int depthHeight = m_depthVideoMode.getResolutionY();
 	int colorWidth = m_colorVideoMode.getResolutionX();
 	int colorHeight = m_colorVideoMode.getResolutionY();
-	//manually set
-	/*m_depthStream.getVideoMode().setResolution(640, 480);
-	m_colorStream.getVideoMode().setResolution(640, 480);*/
 
-	std::cout<<getDepthWidth() <<" " << getDepthHeight()<<" " <<getColorWidth() <<" " <<getColorHeight() <<std::endl;
 	if (depthWidth != getDepthWidth() || depthHeight != getDepthHeight() || colorWidth != getColorWidth() || colorHeight != getColorHeight())
 	{
 		std::cout << depthWidth << " " << depthHeight << " " << colorWidth << " " << colorHeight << std::endl;

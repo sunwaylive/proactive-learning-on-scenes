@@ -2,8 +2,6 @@ Texture2D<float4> inputPositions : register (t10);
 Texture2D<float4> inputNormals : register (t11);
 Texture2D<float4> inputColors : register (t12);
 Texture2D<float> inputSSAOMap : register (t13);
-//wei add
-Texture2D<float> inputIDs : register (t14);
 
 #include "GlobalAppStateShaderBuffer.h.hlsl"
 
@@ -38,65 +36,27 @@ struct VS_OUTPUT
 };
 
 #define MINF asfloat(0xff800000)
-//颜色表
-float4 colorTable[15] = {
-	float4(0.00f, 0.00f, 1.00f, 0.0f),
-	float4(0.53f, 0.81f, 1.00f, 0.0f),
-	float4(0.00f, 1.00f, 0.00f, 0.0f),
-	float4(1.00f, 1.00f, 0.00f, 0.0f),
-	float4(1.00f, 0.00f, 0.00f, 0.0f),
-	float4(1.00f, 0.08f, 0.58f, 0.0f),
-	float4(0.63f, 0.13f, 0.94f, 0.0f),
-	float4(0.00f, 0.00f, 0.00f, 0.0f),
-	float4(0.93f, 0.68f, 0.05f, 0.0f),
-	float4(1.00f, 0.50f, 0.14f, 0.0f),
-	float4(1.00f, 0.71f, 0.77f, 0.0f),
-	float4(0.00f, 0.55f, 0.55f, 0.0f),
-	float4(0.55f, 0.49f, 0.48f, 0.0f),
-	float4(1.00f, 0.87f, 0.68f, 0.0f),
-	float4(0.42f, 0.56f, 0.14f, 0.0f)
-};
 
-//这个函数就是实际看到的点的Pixel shader函数
 float4 PhongPS(VS_OUTPUT Input) : SV_TARGET
 {
 	float3 position = inputPositions.Sample(g_PointSampler, Input.vTexcoord).xyz;
 	float3 normal = inputNormals.Sample(g_PointSampler, Input.vTexcoord).xyz;
 	float3 color = inputColors.Sample(g_PointSampler, Input.vTexcoord).xyz;
-	//wei add
-	float id = inputIDs.Sample(g_PointSampler, Input.vTexcoord);
-	//test using color as id
-	//color.x = 0.01;
-	id = (asint(color.x * 100)) % 4;
 
-	if (id != MINF && position.x != MINF && color.x != MINF && normal.x != MINF)
+	if(position.x != MINF && color.x != MINF && normal.x != MINF)
 	{
 		//float4 material= float4(1.0f, 1.0f, 1.0f, 1.0f);
 		float4 material = materialDiffuse;
 
 		if(g_useMaterial == 1)
 		{
-			if (id == 0.0f){
-				material = float4(1.0f, 1.0f, 1.0f, 0.0f);
-			}else if (id == 1.0) {
-				material = float4(1.0f, 0.0f, 0.0f, 0.0f);
-			} else if (id == 2.0) {
-				material = float4(0.0f, 1.0f, 0.0f, 0.0f);
-			} else if (id == 3.0) {
-				material = float4(0.0f, 0.0f, 1.0f, 0.0f);
-			} else if (id == 4.0){
-				material = float4(1.0f, 1.0f, 0.0f, 0.0f);
-			}//else{
-			//	//如果都不是的 默认颜色
-			//	material = float4(0.0f, 0.0f, 0.0f, 0.0f);
-			//}
-		//	material = float4(color, 1.0f);
+			material = float4(color, 1.0f);
 		}
 
 		float4 lightAmbientMod = lightAmbient;
 		if(g_useSSAO == 1)
 		{
-			lightAmbientMod *= inputSSAOMap.Sample(g_PointSampler, Input.vTexcoord);
+			lightAmbientMod*=inputSSAOMap.Sample(g_PointSampler, Input.vTexcoord);
 		}
 			
 		//float3 lightDir = float3(1.0f, 0.0f, 1.0f);

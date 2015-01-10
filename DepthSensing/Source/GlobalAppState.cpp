@@ -120,7 +120,6 @@ void GlobalAppState::StereoCameraFrustum( D3DXMATRIX& proj, D3DXMATRIX& projInv,
 	memcpy(&camToWorld, &lastRigidTransform, sizeof(mat4f));
 }
 
-//全局的设置在这里实现CPU与GPU的沟通
 void GlobalAppState::MapConstantBuffer( ID3D11DeviceContext* context )
 {
 	HRESULT hr = S_OK;

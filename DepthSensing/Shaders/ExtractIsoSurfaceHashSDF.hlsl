@@ -99,7 +99,6 @@ void extractIsoSurfaceHashSDFCS(int3 dTid : SV_DispatchThreadID, uint3 GTid : SV
 			const float P = g_VirtualVoxelSize/2.0f;
 			const float M = -P;
 
-			//wei add, id
 			float3 p000 = worldPos+float3(M, M, M); float dist000; float3 color000; bool valid000 = trilinearInterpolationSimpleFastFast(p000, dist000, color000);
 			float3 p100 = worldPos+float3(P, M, M); float dist100; float3 color100; bool valid100 = trilinearInterpolationSimpleFastFast(p100, dist100, color100);
 			float3 p010 = worldPos+float3(M, P, M); float dist010; float3 color010; bool valid010 = trilinearInterpolationSimpleFastFast(p010, dist010, color010);

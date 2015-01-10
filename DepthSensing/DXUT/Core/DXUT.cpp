@@ -79,11 +79,11 @@ protected:
         D3DCAPS9                m_Caps;                    // D3D caps for current device
 
         // D3D11 specific
-        IDXGIFactory1*           m_DXGIFactory;            // DXGI Factory object
+        IDXGIFactory1*           m_DXGIFactory;             // DXGI Factory object
         IDXGIAdapter1*           m_DXGIAdapter;            // The DXGI adapter object for the D3D11 device
-		IDXGIOutput**           m_DXGIOutputArray;         // The array of output obj for the D3D11 adapter obj
-		UINT                    m_DXGIOutputArraySize;     // Number of elements in m_D3D11OutputArray
-		IDXGISwapChain*         m_DXGISwapChain;           // the D3D11 swapchain
+        IDXGIOutput**           m_DXGIOutputArray;        // The array of output obj for the D3D11 adapter obj
+        UINT                    m_DXGIOutputArraySize;    // Number of elements in m_D3D11OutputArray
+        IDXGISwapChain*         m_DXGISwapChain;          // the D3D11 swapchain
         DXGI_SURFACE_DESC       m_BackBufferSurfaceDescDXGI; // D3D11 back buffer surface description
         bool                    m_RenderingOccluded;       // Rendering is occluded by another window
         bool                    m_DoNotStoreBufferSize;    // Do not store the buffer size on WM_SIZE messages

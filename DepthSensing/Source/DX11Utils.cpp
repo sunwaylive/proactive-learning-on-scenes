@@ -209,6 +209,7 @@ HRESULT CompileShaderFromFile( WCHAR* szFileName, LPCSTR szEntryPoint, LPCSTR sz
 		V_RETURN(D3DCreateBlob(size_data,ppBlobOut));
 		compiledFile.read((char*)(*ppBlobOut)->GetBufferPointer(), size_data);
 		compiledFile.close();
+
 	}
 
 	return hr;

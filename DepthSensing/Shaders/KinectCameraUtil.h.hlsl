@@ -93,7 +93,7 @@ float3 cameraToKinectProj(float3 pos)
 ///////////////////////////////////////////////////////////////
 // Screen to Camera (depth in meters)
 ///////////////////////////////////////////////////////////////
-//屏幕上2D点，加上对应深度 转换成  camera坐标系下的三维点
+
 float3 kinectDepthToSkeleton(uint ux, uint uy, float depth)
 {
 	//float4x4 projInv = g_intrinsicsInv;

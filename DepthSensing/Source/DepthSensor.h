@@ -11,12 +11,11 @@
 struct Intrinsics {
 	union
 	{
-		//see function call in ImageReaderSensor.cpp, ImageReaderSensor::createFirstConnected()
 		struct {
-			float fx;//fovX	
-			float fy;//fovY
-			float mx;//centerX
-			float my;//centerY
+			float fx;	
+			float fy;
+			float mx;
+			float my;
 			float k1;
 			float k2;
 			float k3;
@@ -86,7 +85,6 @@ class DepthSensor
 			float k1 = 0.0f, float k2 = 0.0f, float k3 = 0.0f, float p1 = 0.0f, float p2 = 0.0f);
 
 		//! returns the depth value at ux / uy, does consider clamps
-		//get the corresponding depth at (ux, uy)
 		float getDepth(unsigned int ux, unsigned int uy) const {
 
 			const unsigned int minDepth = 0;
@@ -95,7 +93,7 @@ class DepthSensor
 			if (m_depthD16) {
 				const unsigned int pixel = m_depthD16[ux + uy * getDepthWidth()];
 				if (pixel >= minDepth && pixel <= maxDepth){
-					return pixel*0.001f;	//conversion to meters, default in mm
+					return pixel*0.001f;	//conversion to meters
 				}
 			}
 			return -FLT_MAX;
@@ -135,7 +133,7 @@ class DepthSensor
 			return vec3f(depth*x, depth*y, depth);
 		}
 
-		//! gets the pointer to depth array 
+		//! gets the pointer to depth array
 		USHORT *getDepthD16() { return m_depthD16; }
 
 		//! gets the pointer to color array
@@ -156,7 +154,6 @@ class DepthSensor
 			}
 			return maxDepth;
 		}
-
 		USHORT getMinDepthUSHORT() const {
 			USHORT minDepth = USHRT_MAX;
 			if (m_depthD16) {
@@ -225,18 +222,16 @@ class DepthSensor
 		}
 
 		//! records the current frame and allocates memory accordingly
-		//record each depth and color frame
 		void recordFrame() {
 			if (m_depthD16) {
-				m_RecordedDepth.push_back(m_depthD16);              //save old frame pointer
-				m_depthD16 = new USHORT[m_depthWidth*m_depthHeight];//allocate new memory for next frame
+				m_RecordedDepth.push_back(m_depthD16);
+				m_depthD16 = new USHORT[m_depthWidth*m_depthHeight];
 			}
 			if (m_colorRGBX) {
 				m_RecordedColor.push_back(m_colorRGBX);
 				m_colorRGBX = new BYTE[getColorBytesPerPixel()*m_colorWidth*m_colorHeight];
 			}
 		}
-
 		void recordTrajectory(const mat4f& transformation) {
 			m_RecordedTrajectory.push_back(transformation);
 		}
@@ -305,7 +300,7 @@ class DepthSensor
 
 		std::list<PointCloudf> m_accumulatedPoints;
 
-		//wei, 
+
 		void computePointCurrentPointCloud(PointCloudf& pc, const mat4f& transform = mat4f::identity()) const {
 
 			if (!(getColorWidth() == getDepthWidth() && getColorHeight() == getDepthHeight()))	throw MLIB_EXCEPTION("invalid dimensions");

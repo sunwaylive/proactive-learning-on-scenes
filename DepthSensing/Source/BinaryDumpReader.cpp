@@ -50,7 +50,7 @@ HRESULT BinaryDumpReader::processDepth()
 		std::cout << "curr Frame " << m_CurrFrame << std::endl;
 
 		for (unsigned int k = 0; k < getDepthWidth()*getDepthHeight(); k++) {
-			m_depthD16[k] = (USHORT)(m_data.m_DepthImages[m_CurrFrame][k]*1000.0f + 0.5f); //*1000 is for unit conversion 从米转成毫米
+			m_depthD16[k] = (USHORT)(m_data.m_DepthImages[m_CurrFrame][k]*1000.0f + 0.5f);
 		}
 		if (m_data.m_ColorImages.size() > 0) {
 			for (unsigned int k = 0; k < getColorWidth()*getColorHeight(); k++) {
