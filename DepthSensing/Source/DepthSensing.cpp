@@ -307,6 +307,27 @@ void StopScanningAndDumpVoxelHash() {
 	g_SceneRepChunkGrid.startMultiThreading(DXUTGetD3D11DeviceContext());
 }
 
+void StopScanningAndMapID()
+{
+	g_SceneRepChunkGrid.stopMultiThreading();
+
+	Timer t;
+	std::cout << "Mapping ID !";
+
+	vec4f posWorld = g_SceneRepSDFLocal.GetLastRigidTransform()*GlobalAppState::getInstance().s_StreamingPos; // trans lags one frame
+	vec3f p(posWorld.x, posWorld.y, posWorld.z);
+	mat4f rigidTransform = g_SceneRepSDFLocal.GetLastRigidTransform();
+
+	g_SceneRepChunkGrid.mapID(DXUTGetD3D11DeviceContext(), 
+		GlobalAppState::getInstance().s_DumpVoxelGridFile + ".dump", 
+		g_SceneRepSDFLocal, p, GlobalAppState::getInstance().s_StreamingRadius);
+	std::cout << "done!" << std::endl;
+
+	std::cout << "Mapping ID Processing Time " << t.getElapsedTime() << " seconds" << std::endl;
+
+	g_SceneRepChunkGrid.startMultiThreading(DXUTGetD3D11DeviceContext());
+}
+
 void CALLBACK OnKeyboard( UINT nChar, bool bKeyDown, bool bAltDown, void* pUserContext )
 {
 	static int whichShot = 0;
@@ -515,7 +536,7 @@ void CALLBACK OnKeyboard( UINT nChar, bool bKeyDown, bool bAltDown, void* pUserC
 			break;
 		case 'A':
 			{
-				g_SceneRepChunkGrid.mapID();
+				StopScanningAndMapID();
 			}
 		default:
 			break;
@@ -792,7 +813,8 @@ void CALLBACK OnD3D11FrameRender( ID3D11Device* pd3dDevice, ID3D11DeviceContext*
 		}
 
 		HRESULT hr0 = g_Sensor.processDepth(pd3dImmediateContext); // shouldn't hr0 and h1 be used to check if new work has to be done? registration etc
-		//wei add, we don't need to update color
+		//wei add, we don't need to update color, 这句只是获取颜色的数据，并没有真正的去update,颜色数据的使用请跟踪m_pColorTextureSRV
+		//在DX11DepthSensor.cpp的processDepth函数中被使用
 		//HRESULT hr1 = g_Sensor.processColor(pd3dImmediateContext);
 
 		if (hr0 == S_OK) {
@@ -905,6 +927,7 @@ void CALLBACK OnD3D11FrameRender( ID3D11Device* pd3dDevice, ID3D11DeviceContext*
 				GlobalAppState::getInstance().WaitForGPU();
 				GlobalAppState::getInstance().s_Timer.start();
 			}
+
 			DX11RayCastingHashSDF::Render(pd3dImmediateContext, g_SceneRepSDFLocal.GetHashSRV(), g_SceneRepSDFLocal.GetHashCompactifiedSRV(), g_SceneRepSDFLocal.GetSDFBlocksSDFSRV(), g_SceneRepSDFLocal.GetSDFBlocksRGBWSRV(), g_SceneRepSDFLocal.GetNumOccupiedHashEntries(), DXUTGetWindowWidth(), DXUTGetWindowHeight(), &trans, g_SceneRepSDFLocal.MapAndGetConstantBuffer(pd3dImmediateContext));
 
 			DX11RayCastingHashSDF::RenderStereo(pd3dImmediateContext, g_SceneRepSDFLocal.GetHashSRV(), g_SceneRepSDFLocal.GetHashCompactifiedSRV(), g_SceneRepSDFLocal.GetSDFBlocksSDFSRV(), g_SceneRepSDFLocal.GetSDFBlocksRGBWSRV(), g_SceneRepSDFLocal.GetNumOccupiedHashEntries(), GlobalAppState::getInstance().s_windowWidthStereo, GlobalAppState::getInstance().s_windowHeightStereo, &trans, g_SceneRepSDFLocal.MapAndGetConstantBuffer(pd3dImmediateContext));

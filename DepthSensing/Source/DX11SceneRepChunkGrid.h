@@ -101,7 +101,7 @@ class DX11SceneRepChunkGrid
 		HRESULT StreamInToGPUPass1GPU(ID3D11DeviceContext* context, DX11SceneRepHashSDF& sceneRepHashSDF, bool multiThreaded = true);
 		unsigned int IntegrateInHash(int* desc, int* blockOutput, const vec3f& posCamera, float radius, bool useParts);
 		//wei add
-		void mapID();
+		HRESULT mapID(ID3D11DeviceContext* context, const std::string &filename, DX11SceneRepHashSDF& hash, const vec3f& camPos, float radius, float dumpRadius = 0.0f, vec3f dumpCenter = vec3f(0.0f,0.0f,0.0f));
 
 		void checkForDuplicates();
 

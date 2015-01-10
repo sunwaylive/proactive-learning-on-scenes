@@ -63,7 +63,7 @@ float4 PhongPS(VS_OUTPUT Input) : SV_TARGET
 	float3 color = inputColors.Sample(g_PointSampler, Input.vTexcoord).xyz;
 
 	//在color的r分量重取出 patch_id的信息
-	float id = (asint(color.x * 100)) % 16;
+	int id = (asint(color.x * 100)) % 16;
 
 	if(position.x != MINF && color.x != MINF && normal.x != MINF)
 	{
