@@ -786,7 +786,8 @@ void CALLBACK OnD3D11FrameRender( ID3D11Device* pd3dDevice, ID3D11DeviceContext*
 		}
 
 		HRESULT hr0 = g_Sensor.processDepth(pd3dImmediateContext); // shouldn't hr0 and h1 be used to check if new work has to be done? registration etc
-		HRESULT hr1 = g_Sensor.processColor(pd3dImmediateContext);
+		//wei add, we don't need to update color
+		//HRESULT hr1 = g_Sensor.processColor(pd3dImmediateContext);
 
 		if (hr0 == S_OK) {
 			//bool printFrameNumbers = true;
