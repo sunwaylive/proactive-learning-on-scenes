@@ -39,6 +39,7 @@ struct VS_OUTPUT
 
 #define MINF asfloat(0xff800000)
 
+
 //这个函数就是实际看到的点的Pixel shader函数
 float4 PhongPS(VS_OUTPUT Input) : SV_TARGET
 {
@@ -47,6 +48,9 @@ float4 PhongPS(VS_OUTPUT Input) : SV_TARGET
 	float3 color = inputColors.Sample(g_PointSampler, Input.vTexcoord).xyz;
 	//wei add
 	float id = inputIDs.Sample(g_PointSampler, Input.vTexcoord);
+	//test using color as id
+	//color.x = 0.01;
+	id = (asint(color.x * 100)) % 4;
 
 	if (id != MINF && position.x != MINF && color.x != MINF && normal.x != MINF)
 	{
@@ -55,17 +59,17 @@ float4 PhongPS(VS_OUTPUT Input) : SV_TARGET
 
 		if(g_useMaterial == 1)
 		{
-			//material = float4(color, 1.0f);
-			if (id == 1.0) {
+			if (id == 0.0f){
+				material = float4(1.0f, 1.0f, 1.0f, 0.0f);
+			}else if (id == 1.0) {
 				material = float4(1.0f, 0.0f, 0.0f, 0.0f);
 			} else if (id == 2.0) {
 				material = float4(0.0f, 1.0f, 0.0f, 0.0f);
 			} else if (id == 3.0) {
 				material = float4(0.0f, 0.0f, 1.0f, 0.0f);
-			} else {
+			} else if (id == 4.0){
 				material = float4(1.0f, 1.0f, 0.0f, 0.0f);
 			}
-		//	material = float4(0.0f, 1.0f, 0.0f, 0.0f);
 		//	material = float4(color, 1.0f);
 		}
 

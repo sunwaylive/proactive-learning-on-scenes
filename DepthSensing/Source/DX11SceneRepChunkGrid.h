@@ -1066,8 +1066,8 @@ private:
 	ID3D11Buffer* m_pSDFBlockDescOutputCPU;
 	ID3D11Buffer* m_pSDFBlockDescInputCPU;
 
-	ID3D11ComputeShader* m_pComputeShaderIntegrateFromGlobalHashPass1;
-	ID3D11ComputeShader* m_pComputeShaderIntegrateFromGlobalHashPass2;
+	ID3D11ComputeShader* m_pComputeShaderIntegrateFromGlobalHashPass1;//这个同步的是heap相关的
+	ID3D11ComputeShader* m_pComputeShaderIntegrateFromGlobalHashPass2;//这个同步的是voxel里面的sdf, weight, id等 
 
 	ID3D11ComputeShader* m_pComputeShaderChunkToGlobalHashPass1;
 	ID3D11ComputeShader* m_pComputeShaderChunkToGlobalHashPass2;

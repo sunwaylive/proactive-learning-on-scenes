@@ -85,6 +85,9 @@ public:
 	ID3D11UnorderedAccessView* GetSDFBlocksRGBWUAV() {
 		return m_SDFBlocksRGBWUAV;
 	}
+	ID3D11UnorderedAccessView*	GetSDFBlocksIDUAV() {
+		return m_SDFBlocksIDUAV;
+	}
 	ID3D11UnorderedAccessView*	GetHeapUAV() {
 		return m_HeapUAV;
 	}

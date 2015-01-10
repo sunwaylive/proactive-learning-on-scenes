@@ -70,6 +70,9 @@ HRESULT DX11SceneRepChunkGrid::StreamOutToCPUPass0GPU(ID3D11DeviceContext* conte
 
 	ID3D11UnorderedAccessView* hashUAV = sceneRepHashSDF.GetHashUAV();
 	ID3D11UnorderedAccessView* sdfBlocksSDFUAV = sceneRepHashSDF.GetSDFBlocksSDFUAV();
+	//wei add
+	ID3D11UnorderedAccessView* sdfBlocksIDUAV = sceneRepHashSDF.GetSDFBlocksIDUAV();
+
 	ID3D11UnorderedAccessView* sdfBlocksRGBWUAV = sceneRepHashSDF.GetSDFBlocksRGBWUAV();
 	ID3D11UnorderedAccessView* heapAppendUAV = sceneRepHashSDF.GetHeapUAV();
 	ID3D11UnorderedAccessView* hashBucketMutex = sceneRepHashSDF.GetAndClearHashBucketMutex(context);
@@ -109,6 +112,7 @@ HRESULT DX11SceneRepChunkGrid::StreamOutToCPUPass0GPU(ID3D11DeviceContext* conte
 	context->CSSetConstantBuffers(1, 1, &m_constantBufferIntegrateFromGlobalHash);
 	ID3D11Buffer* CBGlobalAppState = GlobalAppState::getInstance().MapAndGetConstantBuffer(context);
 	context->CSSetConstantBuffers(8, 1, &CBGlobalAppState);
+
 	context->CSSetShader(m_pComputeShaderIntegrateFromGlobalHashPass1, 0, 0);
 	
 	// Run compute shader
@@ -148,21 +152,24 @@ HRESULT DX11SceneRepChunkGrid::StreamOutToCPUPass0GPU(ID3D11DeviceContext* conte
 		V_RETURN(context->Map(m_constantBufferIntegrateFromGlobalHash, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource));
 		cbuffer = (CBufferIntegrateFromGlobalHash*)mappedResource.pData;
 	
-			cbuffer->nSDFBlockDescs = nSDFBlockDescs;
+		cbuffer->nSDFBlockDescs = nSDFBlockDescs;
 
 		context->Unmap(m_constantBufferIntegrateFromGlobalHash, 0);
 
 		// Setup pipeline
 		context->CSSetUnorderedAccessViews(0, 1, &sdfBlocksSDFUAV, 0);
-		//1号位置上的这个UVA是负责接收GPU的输出的，见下面shader的入口函数
+		//1号位置上的这个UVA是负责接收GPU的sdfBlock的输出，见下面shader的入口函数
 		context->CSSetUnorderedAccessViews(1, 1, &m_pSDFBlockOutputUAV, 0);
 		context->CSSetUnorderedAccessViews(2, 1, &sdfBlocksRGBWUAV, 0);
+		//wei add,这个对应于文件IntegrateFromGlobalHash.hlsl的函数integrateFromGlobalHashPass2CS中，register(u3)
+		context->CSSetUnorderedAccessViews(3, 1, &sdfBlocksIDUAV, 0);
+
 		context->CSSetShaderResources(0, 1, &m_pSDFBlockDescOutputSRV);
 		context->CSSetConstantBuffers(0, 1, &CBsceneRepSDF);
 		context->CSSetConstantBuffers(1, 1, &m_constantBufferIntegrateFromGlobalHash);
 		context->CSSetConstantBuffers(8, 1, &CBGlobalAppState);
 
-		//这里是compute shader阶段
+		//这里是compute shader阶段， 对应于integrateFromGlobalHashPass2CS in file “IntegrateFromGlobalHash.hlsl”
 		context->CSSetShader(m_pComputeShaderIntegrateFromGlobalHashPass2, 0, 0);
 
 		// Run compute shader
@@ -179,17 +186,20 @@ HRESULT DX11SceneRepChunkGrid::StreamOutToCPUPass0GPU(ID3D11DeviceContext* conte
 		ID3D11Buffer* nullB2[2] = {NULL, NULL};
 
 		context->CSSetUnorderedAccessViews(0, 3, nullUAV2, 0);
+		//wei add
+		context->CSSetUnorderedAccessViews(3, 1, NULL, 0);
+
 		context->CSSetShaderResources(0, 1, nullSRV);
 		context->CSSetConstantBuffers(0, 2, nullB2);
 		context->CSSetConstantBuffers(8, 1, nullB2);
 		context->CSSetShader(0, 0, 0);
 			
 		// Copy to CPU and Integrate
-		const unsigned int linBlockSize = 2*SDF_BLOCK_SIZE*SDF_BLOCK_SIZE*SDF_BLOCK_SIZE;
-		D3D11_BOX sourceRegionDesc = {0, 0, 0, 4*sizeof(int)*nSDFBlockDescs, 1, 1};
+		const unsigned int linBlockSize = 2 * SDF_BLOCK_SIZE * SDF_BLOCK_SIZE * SDF_BLOCK_SIZE;
+		D3D11_BOX sourceRegionDesc = {0, 0, 0, 4 * sizeof(int) * nSDFBlockDescs, 1, 1};
 		context->CopySubresourceRegion(m_pSDFBlockDescOutputCPU, 0, 0, 0, 0, m_pSDFBlockDescOutput, 0, &sourceRegionDesc);
 
-		D3D11_BOX sourceRegionBlock = {0, 0, 0, sizeof(int)*linBlockSize*nSDFBlockDescs, 1, 1};
+		D3D11_BOX sourceRegionBlock = { 0, 0, 0, sizeof(int)*linBlockSize*nSDFBlockDescs, 1, 1 };
 		context->CopySubresourceRegion(m_pSDFBlockOutputCPU, 0, 0, 0, 0, m_pSDFBlockOutput, 0, &sourceRegionBlock);
 	}
 
@@ -433,6 +443,7 @@ HRESULT DX11SceneRepChunkGrid::StreamInToGPUPass1GPU(ID3D11DeviceContext* contex
 		context->CSSetConstantBuffers(1, 1, &m_constantBufferChunkToGlobalHash);
 		ID3D11Buffer* CBGlobalAppState = GlobalAppState::getInstance().MapAndGetConstantBuffer(context);
 		context->CSSetConstantBuffers(8, 1, &CBGlobalAppState);
+		//设置shader语言
 		context->CSSetShader(m_pComputeShaderChunkToGlobalHashPass1, 0, 0);
 	
 		// Run compute shader
