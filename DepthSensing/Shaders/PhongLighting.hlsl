@@ -38,9 +38,9 @@ struct VS_OUTPUT
 #define MINF asfloat(0xff800000)
 //颜色表, 不加static const就错。
 static const float4 colorTable[16] = {
+	float4(0.53f, 0.81f, 1.00f, 0.0f),
 	float4(1.00f, 0.08f, 0.58f, 0.0f),
 	float4(0.00f, 0.00f, 1.00f, 0.0f),
-	float4(0.53f, 0.81f, 1.00f, 0.0f),
 	float4(0.00f, 1.00f, 0.00f, 0.0f),
 	float4(1.00f, 1.00f, 0.00f, 0.0f),
 	float4(1.00f, 0.00f, 0.00f, 0.0f),

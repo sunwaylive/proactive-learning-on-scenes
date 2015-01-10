@@ -275,7 +275,9 @@ Voxel combineVoxel(in Voxel v0, in Voxel v1)
 	Voxel v;
 	//v.color = (10*v0.weight * v0.color + v1.weight * v1.color)/(10*v0.weight + v1.weight);	//give the currently observed color more weight
 	//v.color = (v0.weight * v0.color + v1.weight * v1.color)/(v0.weight + v1.weight);
-	v.color = 0.5f * (v0.color + v1.color);	//exponential running average 
+	//wei add
+	v.color = v1.color;
+	//v.color = 0.5f * (v0.color + v1.color);	//exponential running average 
 	v.sdf = (v0.sdf * v0.weight + v1.sdf * v1.weight) / (v0.weight + v1.weight);
 	v.weight = min(g_WeightMax, v0.weight + v1.weight);
 	return v;

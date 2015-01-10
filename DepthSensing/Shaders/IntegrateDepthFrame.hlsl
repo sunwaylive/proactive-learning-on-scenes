@@ -29,7 +29,8 @@ RWBuffer<int> g_voxelBuffer : register(u0);
 Voxel combineVoxel(in Voxel v0, in Voxel v1)
 {
 	Voxel v;
-	v.color = (10*v0.weight * v0.color + v1.weight * v1.color)/(10*v0.weight + v1.weight);	//give the currently observed color more weight
+	v.color = v1.color;
+	//v.color = (10*v0.weight * v0.color + v1.weight * v1.color)/(10*v0.weight + v1.weight);	//give the currently observed color more weight
 	v.sdf = (v0.sdf * v0.weight + v1.sdf * v1.weight) / (v0.weight + v1.weight);
 	v.weight = min(255, v0.weight + v1.weight);
 	return v;

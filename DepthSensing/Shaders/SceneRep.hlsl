@@ -95,7 +95,8 @@ void setVoxel(RWBuffer<int> hash, in uint id, in Voxel voxel) {
 //merges two voxels (v0 is the input voxel, v1 the currently stored voxel)
 Voxel combineVoxel(in Voxel v0, in Voxel v1) {
 	Voxel v;
-	v.color = (10*v0.weight * v0.color + v1.weight * v1.color)/(10*v0.weight + v1.weight);	//give the currently observed color more weight
+	v.color = v1.color;
+	//v.color = (10*v0.weight * v0.color + v1.weight * v1.color)/(10*v0.weight + v1.weight);	//give the currently observed color more weight
 	//v.color = (v0.weight * v0.color + v1.weight * v1.color)/(v0.weight + v1.weight);
 	//v.pos = (v0.weight * v0.pos + v1.weight * v1.pos)/(v0.weight + v1.weight);
 	v.pos = v0.pos;	//pos must be identical anyway
