@@ -44,6 +44,7 @@ void DX11MarchingCubesHashSDF::saveMesh( const std::string& filename, const mat4
 
 	//create index buffer (required for merging the triangle soup)
 	s_meshData.m_FaceIndicesVertices.resize(s_meshData.m_Vertices.size(), std::vector<unsigned int>(3));
+
 	for (unsigned int i = 0; i < (unsigned int)s_meshData.m_FaceIndicesVertices.size()/3; i++) {
 		s_meshData.m_FaceIndicesVertices[i][0] = 3*i+0;
 		s_meshData.m_FaceIndicesVertices[i][1] = 3*i+1;
@@ -68,10 +69,12 @@ void DX11MarchingCubesHashSDF::saveMesh( const std::string& filename, const mat4
 	}
 
 	std::cout << "saving mesh (" << filename << ") ...";
+
 	MeshIOf::writeToFile(filename, s_meshData);
+
 	std::cout << "done!" << std::endl;
 
-	clearMeshBuffer();
+	//clearMeshBuffer();
 }
 
 HRESULT DX11MarchingCubesHashSDF::extractIsoSurface( ID3D11DeviceContext* context, ID3D11ShaderResourceView* hash, ID3D11ShaderResourceView* sdfBlocksSDF, ID3D11ShaderResourceView* sdfBlocksRGBW, ID3D11Buffer* CBsceneRepSDF, unsigned int hashNumBuckets, unsigned int hashBucketSize, vec3f& minCorner /*= vec3f(0.0f, 0.0f, 0.0f)*/, vec3f& maxCorner /*= vec3f(0.0f, 0.0f, 0.0f)*/, bool boxEnabled /*= false*/ )
@@ -92,6 +95,7 @@ HRESULT DX11MarchingCubesHashSDF::extractIsoSurface( ID3D11DeviceContext* contex
 	// Setup pipeline
 	unsigned int initialCount = 0;
 	context->CSSetUnorderedAccessViews(0, 1, &s_pTrianglesUAV, &initialCount);
+	//这个hash表存放的就是所有的voxels的sdf color weight
 	context->CSSetShaderResources(0, 1, &hash);
 	context->CSSetShaderResources(1, 1, &sdfBlocksSDF);
 	context->CSSetShaderResources(2, 1, &sdfBlocksRGBW);
@@ -147,8 +151,13 @@ HRESULT DX11MarchingCubesHashSDF::extractIsoSurface( ID3D11DeviceContext* contex
 
 		context->Unmap(s_pOutputFloatCPU, 0);
 	}
-
 	return hr;
+}
+
+void DX11MarchingCubesHashSDF::mapPatchID2Voxel(ID3D11Buffer* sdfBlocksRGBW)
+{
+	
+
 }
 
 HRESULT DX11MarchingCubesHashSDF::initialize( ID3D11Device* pd3dDevice )

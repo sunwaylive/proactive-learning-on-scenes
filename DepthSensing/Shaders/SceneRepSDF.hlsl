@@ -45,9 +45,9 @@ uint linearizeChunkPos(int3 chunkPos)
 
 int3 worldToChunks(float3 posWorld)
 {
-	float3 p = posWorld/m_voxelExtends;
+	float3 p = posWorld / m_voxelExtends;
 	float3 s = sign(p);
-	return int3(p+s*0.5f);
+	return int3(p + s * 0.5f);
 }
 
 bool isSDFBlockStreamedOut(int3 sdfBlock)

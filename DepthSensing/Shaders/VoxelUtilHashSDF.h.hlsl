@@ -189,9 +189,11 @@ float3 worldToVirtualVoxelPosFloat(in float3 pos)
 	return pos*g_VirtualVoxelResolutionScalar;
 }
 
+
+//VirtualVoxelResolutionScalar = 1.0f/m_VirtualVoxelSize;
 int3 worldToVirtualVoxelPos(in float3 pos)
 {
-	const float3 p = pos*g_VirtualVoxelResolutionScalar;
+	const float3 p = pos * g_VirtualVoxelResolutionScalar;
 	return (int3)(p+sign(p)*0.5f);
 }
 
@@ -201,7 +203,7 @@ int3 virtualVoxelPosToSDFBlock(int3 virtualVoxelPos)
 	if (virtualVoxelPos.y < 0) virtualVoxelPos.y -= SDF_BLOCK_SIZE-1;
 	if (virtualVoxelPos.z < 0) virtualVoxelPos.z -= SDF_BLOCK_SIZE-1;
 
-	return virtualVoxelPos/SDF_BLOCK_SIZE;
+	return virtualVoxelPos / SDF_BLOCK_SIZE;
 }
 
 // Computes virtual voxel position of corner sample position
@@ -228,7 +230,7 @@ int3 worldToSDFBlock(float3 worldPos)
 
 int virtualVoxelPosToLocalSDFBlockIndex(int3 virtualVoxelPos)
 {
-	int3 localVoxelPos = virtualVoxelPos%SDF_BLOCK_SIZE;
+	int3 localVoxelPos = virtualVoxelPos % SDF_BLOCK_SIZE;
 
 	if (localVoxelPos.x < 0) localVoxelPos.x += SDF_BLOCK_SIZE;
 	if (localVoxelPos.y < 0) localVoxelPos.y += SDF_BLOCK_SIZE;

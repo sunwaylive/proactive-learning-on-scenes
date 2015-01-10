@@ -100,7 +100,9 @@ class DX11SceneRepChunkGrid
 		HRESULT StreamInToGPUPass0CPU(ID3D11DeviceContext* context, const vec3f& posCamera, float radius, bool useParts, bool multiThreaded = true);
 		HRESULT StreamInToGPUPass1GPU(ID3D11DeviceContext* context, DX11SceneRepHashSDF& sceneRepHashSDF, bool multiThreaded = true);
 		unsigned int IntegrateInHash(int* desc, int* blockOutput, const vec3f& posCamera, float radius, bool useParts);
-		
+		//wei add
+		void mapID();
+
 		void checkForDuplicates();
 
 		~DX11SceneRepChunkGrid()
@@ -256,7 +258,7 @@ class DX11SceneRepChunkGrid
 			m_maxGridPos = -m_minGridPos;
 
 			m_grid.resize(m_gridDimensions.x*m_gridDimensions.y*m_gridDimensions.z, NULL);
-
+			//记录grid是否已经被分配内存
 			m_bitMask = BitArray<unsigned int>(m_gridDimensions.x*m_gridDimensions.y*m_gridDimensions.z);
 
 			// Shader
@@ -790,7 +792,7 @@ class DX11SceneRepChunkGrid
 
 		unsigned int linearizeChunkPos(vec3i chunkPos)
 		{
-			vec3ui p = chunkPos-m_minGridPos;
+			vec3ui p = chunkPos - m_minGridPos;
 
 			return  p.z * m_gridDimensions.x * m_gridDimensions.y +
 					p.y * m_gridDimensions.x +

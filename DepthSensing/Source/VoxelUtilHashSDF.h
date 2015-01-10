@@ -6,11 +6,13 @@
 
 #include <vector>
 
+//int data
 struct SDFBlock
 {
 	int data[2*SDF_BLOCK_SIZE*SDF_BLOCK_SIZE*SDF_BLOCK_SIZE];
 };
 
+//pos, ptr
 class SDFDesc
 {
 	public:
@@ -39,6 +41,8 @@ class SDFDesc
 		int ptr;
 };
 
+//由上面两个组成
+//chunk 就是 grid, 这个即是: m_grid[i]
 class ChunkDesc
 {
 	public:
@@ -51,8 +55,8 @@ class ChunkDesc
 
 		void addSDFBlock(const SDFDesc& desc, const SDFBlock& data)
 		{
-			m_ChunkDesc.push_back(desc);
-			m_SDFBlocks.push_back(data);
+			m_ChunkDesc.push_back(desc);//pos ptr
+			m_SDFBlocks.push_back(data);//sdf color weight
 		}
 
 		unsigned int getNElements()

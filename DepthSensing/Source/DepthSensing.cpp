@@ -512,6 +512,11 @@ void CALLBACK OnKeyboard( UINT nChar, bool bKeyDown, bool bAltDown, void* pUserC
 				//break; 
 				StopScanningAndDumpVoxelHash();
 			}
+			break;
+		case 'A':
+			{
+				g_SceneRepChunkGrid.mapID();
+			}
 		default:
 			break;
 		}

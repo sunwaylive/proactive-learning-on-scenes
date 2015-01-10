@@ -196,3 +196,18 @@ void extractIsoSurfaceHashSDFCS(int3 dTid : SV_DispatchThreadID, uint3 GTid : SV
 		}
 	}
 }
+
+
+void mapPatchId2Voxel(int3 dTid: SV_DispatchThreadID, uint3 GTid : SV_GroupThreadID, uint GI: SV_GroupIndex, uint3 GID: SV_GroupID)
+{
+	//uint groudID = GID.x + GID.y * NUM_GROUPS_X;
+	//if(groupID < g_HashNumBuckets * g_HashBucketSize)//这个保证了数据合理性
+	//{
+	//	HashEntry entry = getHashEntry(g_Hash, groupID);
+	//	
+	//	if(entry.ptr != FREE_ENTRY)
+	//	{
+
+	//	}
+	//}
+}

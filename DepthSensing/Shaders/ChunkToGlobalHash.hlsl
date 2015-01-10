@@ -34,9 +34,10 @@ cbuffer consts : register(b1)
 bool integrateHashEntry(RWBuffer<int> hash, in HashEntry entry)
 {
 	uint h = computeHashPos(entry.pos);
-	uint hp = h * g_HashBucketSize;
+	uint hp = h * g_HashBucketSize;//得到起始地址
 
 	[allow_uav_condition]
+	//遍历该bucket中的所有元素
 	for (uint j = 0; j < g_HashBucketSize; j++) {
 		uint i = j + hp;		
 		HashEntry curr = getHashEntry(hash, i);

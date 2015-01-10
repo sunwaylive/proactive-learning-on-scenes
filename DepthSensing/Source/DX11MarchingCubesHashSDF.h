@@ -11,6 +11,8 @@
 #include "DX11Utils.h"
 #include "TimingLog.h"
 #include "removeDuplicate.h"
+//wei add
+#include "VoxelUtilHashSDF.h"
 
 #include <vector>
 #include <string>
@@ -34,6 +36,7 @@ class DX11MarchingCubesHashSDF
 		//需要添加计算patch_id的函数
 
 		//添加把patch_id映射到voxel的函数
+		static void DX11MarchingCubesHashSDF::mapPatchID2Voxel(ID3D11Buffer* sdfBlocksRGBW);
 
 	private:
 
@@ -72,9 +75,11 @@ class DX11MarchingCubesHashSDF
 		static ID3D11Buffer* s_pOutputFloatCPU;
 		static ID3D11Buffer* s_BuffCountTriangles;
 
+		static Timer m_timer;
 		//static std::vector<Vertex> s_vertices;
 		//static std::vector<unsigned int> s_indices;
+public:
 		static MeshDataf s_meshData;
 
-		static Timer m_timer;
+		
 };

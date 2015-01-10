@@ -43,13 +43,12 @@ HRESULT DX11MarchingCubesChunkGrid::extractIsoSurface( ID3D11DeviceContext* cont
 		}
 	}
 	//上面是用marching cube算法得到mesh的数据
-	DX11MarchingCubesHashSDF::saveMesh(filename, transform);
 
-	//wei add,这里在s_meshData的基础上，计算出patch_id后，把patch_id投射到voxel上去
-	//1. 计算patch_id
+	//DX11MarchingCubesHashSDF::mapPatchID2Voxel();
+	//DX11MarchingCubesHashSDF::saveMesh(filename, transform);
 	
-	//2. 投射到voxel上去	
-	//int nPoints = DX11MarchingCubesHashSDF::s_meshData.m_Vertices.size();
+
+	DX11MarchingCubesHashSDF::clearMeshBuffer();
 
 	unsigned int nStreamedBlock;
 	V_RETURN(chunkGrid.StreamInToGPUAll(context, hash, camPos, radius, true, nStreamedBlock));

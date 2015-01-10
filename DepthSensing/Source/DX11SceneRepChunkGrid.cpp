@@ -244,11 +244,14 @@ HRESULT DX11SceneRepChunkGrid::StreamOutToCPU(ID3D11DeviceContext* context, DX11
 void DX11SceneRepChunkGrid::IntegrateInChunkGrid(const int* desc, const int* block, unsigned int nSDFBlocks)
 {	
 	const unsigned int descSize = 4;
+	std::cout<<"512?? in integrate in chunk grid: " <<nSDFBlocks <<std::endl;
 
 	for(unsigned int i = 0; i < nSDFBlocks; i++)
 	{
-		vec3i pos(&desc[i*descSize]);
+		vec3i pos(&desc[i * descSize]);
+		//真实3D场景的坐标
 		vec3f posWorld = VoxelUtilHelper::SDFBlockToWorld(pos);
+		//根据3D场景的坐标得到所在的grid的坐标
 		vec3i chunk = worldToChunks(posWorld);
 
 		if(!isValidChunk(chunk))
@@ -257,6 +260,7 @@ void DX11SceneRepChunkGrid::IntegrateInChunkGrid(const int* desc, const int* blo
 			continue;
 		}
 
+		//得到线性的grid的索引
 		unsigned int index = linearizeChunkPos(chunk);
 
 		if(m_grid[index] == NULL) // Allocate memory for chunk
@@ -587,4 +591,39 @@ unsigned int DX11SceneRepChunkGrid::IntegrateInHash(int* descOuput, int* blockOu
 	}
 
 	return nSDFBlocks;
+}
+
+void DX11SceneRepChunkGrid::mapID()
+{
+	int grid_size = m_grid.size();
+	for(int i = 0; i < grid_size; ++i){
+		if(m_grid[i] == NULL){
+			//std::cout<<"m_gird[i] == NULL" <<std::endl;
+			continue;
+		}
+		std::cout<<"in grid " <<i <<" " <<"There are " <<m_grid[i]->getSDFBlock(i).data[0] <<"sdfBlocks" <<std::endl;
+	}
+	std::cout<<"map ID ends" <<std::endl;
+	return;
+
+	//遍历所有点
+	vec3f test_pos(0.0f, 0.0f, 0.0f);
+	int color_red = 255; 
+
+	unsigned int index = linearizeChunkPos(worldToChunks(test_pos));
+	//该grid中有sdfBlock, 如果没有错误肯定是有的
+	if(m_grid[index] != NULL && m_grid[index]->isStreamedOut()){
+		ChunkDesc *chunkDesc = m_grid[index];
+		//找到该点所在的sdfBlock或者直接找到voxel
+		int voxelIdx = 0; //???need_compute;
+		SDFBlock &v = chunkDesc->m_SDFBlocks[voxelIdx];
+		
+		//取第二个字节，更新这个voxel的颜色的r分量，用来放patch_id
+		//该字节的布局：bgrw
+
+		int &last = chunkDesc->m_SDFBlocks[voxelIdx].data[2 * voxelIdx + 1];
+		last &= 0xffff00ff;           //先清空颜色的r分量
+		color_red &= 0x000000ff;      //取出颜色的bit位
+		last |= color_red;            //更新颜色的r分量
+	}
 }
