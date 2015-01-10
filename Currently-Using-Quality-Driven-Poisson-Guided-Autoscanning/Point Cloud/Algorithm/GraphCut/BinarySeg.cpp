@@ -196,6 +196,7 @@ void CBinarySeg::UpdateAreaInterest(int newAreaNum) //Òª¸Ä
 
 void CBinarySeg::CollectAreaInterest()
 {
+	vecPatchPoint.clear();
 	for(int i = 0;i < vecAreaInterest.size();i++)
 	{
 		vecPatchPoint.insert(vecPatchPoint.end(),vecAreaInterest[i].vecPatchPoint.begin(),vecAreaInterest[i].vecPatchPoint.end());
@@ -488,12 +489,12 @@ void CBinarySeg::ConstructGraph()
 	MyPt_RGB_NORMAL point;
 	for(int i = 0;i < vecPatchCenPoint.size();i++)
 	{
-		point.x = vecPatchCenPoint[i].x;
-		point.y = vecPatchCenPoint[i].y;
-		point.z = vecPatchCenPoint[i].z;
-		point.r = 0.2;
-		point.g = 0.6;
-		point.b = 1.8;
+		point.x = vecPatchCenPoint[i].x - (xMax + xMin)/2;
+		point.y = vecPatchCenPoint[i].y - (yMax + yMin)/2;
+		point.z = vecPatchCenPoint[i].z - (zMax + zMin)/2;
+		point.r = 0.9;
+		point.g = 0.0;
+		point.b = 0.0;
 		graphInit.vecNodes.push_back(point);
 	}
 

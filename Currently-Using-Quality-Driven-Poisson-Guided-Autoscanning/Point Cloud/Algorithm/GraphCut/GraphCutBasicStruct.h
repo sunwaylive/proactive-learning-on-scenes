@@ -63,6 +63,7 @@ struct EdgeHypo
 {
 	int begin,end;
 	int areaIndex;
+	vector<pair<int,int>> pairPatch;
 	double separateness;
 };
 

@@ -38,6 +38,9 @@ public:
 	vector<pair<int,int>> vecpairSeperatenessEdge;
 	vector<vector<pair<int,int>>> vecvecpairSeperatenessSmallEdge;
 
+	vector<ObjectHypo> vecObjectHypo;
+	vector<EdgeHypo> vecEdgeHypo;
+
 	vector<vector<bool>> vecvecPatchConnectFlag;
 
 	GRAPHSHOW graphContract;
@@ -45,6 +48,9 @@ public:
 	
 	vector<vector<int>> vecvecObjectPoolClustering;
 	vector<int> vecObjectPoolClusteringCount;
+
+	double xMin,xMax,yMin,yMax,zMin,zMax;
+
 public:
 	void Clear();
 	void MainStep();
@@ -52,7 +58,7 @@ public:
 	void AddObjectPool();
 	double GetMultiDataValue(int SiteID,int LableID);
 	void GraphCutSolve();
-	void ComputeScore();
+	void ComputeHypo();
 	void ComputeObjectness(int m);
 	void ComputeSeparateness(int m,int n);
 	void ConstructGraph();
