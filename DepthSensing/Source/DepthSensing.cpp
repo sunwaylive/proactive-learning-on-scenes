@@ -788,7 +788,8 @@ void CALLBACK OnD3D11FrameRender( ID3D11Device* pd3dDevice, ID3D11DeviceContext*
 
 		//处理新到的每一帧数据！！
 		HRESULT hr0 = g_Sensor.processDepth(pd3dImmediateContext); // shouldn't hr0 and h1 be used to check if new work has to be done? registration etc
-		HRESULT hr1 = g_Sensor.processColor(pd3dImmediateContext);
+		//颜色分量已经被我们用来存放patch_id了，不再更新每帧的颜色了
+		//HRESULT hr1 = g_Sensor.processColor(pd3dImmediateContext);
 
 		if (hr0 == S_OK) {
 			//frame count. depth sensor handle ok. wei debug, this is an important variable
