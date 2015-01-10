@@ -621,6 +621,7 @@ public:
 			float sdf;
 			vec3uc color;
 			unsigned char weight;
+			float id;
 		};
 		struct VoxelBlock 
 		{
@@ -730,8 +731,9 @@ public:
 								VoxelBlock vBlock; 
 								//memcpy(vBlock.voxels, &voxels[ptr], sizeof(VoxelBlock));
 								//遍历每个sdfBlock中的小voxels
+								//wei add, 加上id之后，每个元素占三个字节
 								for (unsigned int j = 0; j < SDF_BLOCK_SIZE * SDF_BLOCK_SIZE * SDF_BLOCK_SIZE; j++) {
-									int first = chunkDesc->m_SDFBlocks[i].data[2*j+0];
+									int first = chunkDesc->m_SDFBlocks[i].data[3*j+0];
 									float sdf =  *(float*)(&first);
 									vBlock.voxels[j].sdf = *(float*)(&first);
 
@@ -748,7 +750,7 @@ public:
 									chunkSDFNum++;
 									chunkSDFSum += sdf;
 
-									int last = chunkDesc->m_SDFBlocks[i].data[2*j+1];
+									int last = chunkDesc->m_SDFBlocks[i].data[3*j+1];
 									vBlock.voxels[j].weight = last & 0x000000ff;
 									last >>= 0x8;
 									vBlock.voxels[j].color.x = last & 0x000000ff;
@@ -756,6 +758,13 @@ public:
 									vBlock.voxels[j].color.y = last & 0x000000ff;
 									last >>= 0x8;
 									vBlock.voxels[j].color.z = last & 0x000000ff;
+
+									//这里获取了voxel的patch id
+									int third = chunkDesc->m_SDFBlocks[i].data[3 * j + 2];
+									//float patch_id = *(float*)(&third);
+									//debug
+									//if (abs(third - 1) < 1e-5)
+										std::cout << "sw voxel id: " << third << std::endl;
 
 									//wei add
 									//大的sdfBlock的位置 + 每个小voxel的偏移位置
@@ -1057,8 +1066,8 @@ private:
 	ID3D11Buffer* m_pSDFBlockDescOutputCPU;
 	ID3D11Buffer* m_pSDFBlockDescInputCPU;
 
-	ID3D11ComputeShader* m_pComputeShaderIntegrateFromGlobalHashPass1;
-	ID3D11ComputeShader* m_pComputeShaderIntegrateFromGlobalHashPass2;
+	ID3D11ComputeShader* m_pComputeShaderIntegrateFromGlobalHashPass1;//这个同步的是heap相关的
+	ID3D11ComputeShader* m_pComputeShaderIntegrateFromGlobalHashPass2;//这个同步的是voxel里面的sdf, weight, id等 
 
 	ID3D11ComputeShader* m_pComputeShaderChunkToGlobalHashPass1;
 	ID3D11ComputeShader* m_pComputeShaderChunkToGlobalHashPass2;

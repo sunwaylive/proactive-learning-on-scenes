@@ -11,11 +11,15 @@ struct Voxel
 	float sdf;
     uint3 color;
     uint weight;
+	float id;
 };
 
+//这个是设置voxel数据的
 void setVoxel(RWBuffer<int> buffer, uint id, in Voxel voxel)
 {
+	//设置sdf
 	buffer[2*id+0] = asint(voxel.sdf);
+	//设置color和weight
 	int last = 0;
 	last |= voxel.color.z & 0x000000ff;
 	last <<= 8;
@@ -25,6 +29,8 @@ void setVoxel(RWBuffer<int> buffer, uint id, in Voxel voxel)
 	last <<= 8;
 	last |= voxel.weight & 0x000000ff;
 	buffer[2*id+1] = last;
+	//设置patch id
+
 }
 
 Voxel getVoxel(RWBuffer<int> buffer, uint id)

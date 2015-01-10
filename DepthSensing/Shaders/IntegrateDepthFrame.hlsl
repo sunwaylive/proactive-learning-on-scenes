@@ -33,6 +33,7 @@ Voxel combineVoxel(in Voxel v0, in Voxel v1)
 	v.color = (10*v0.weight * v0.color + v1.weight * v1.color)/(10*v0.weight + v1.weight);	//give the currently observed color more weight
 	v.sdf = (v0.sdf * v0.weight + v1.sdf * v1.weight) / (v0.weight + v1.weight);
 	v.weight = min(255, v0.weight + v1.weight);
+	v.id = v0.id; //id直接设成新的voxel的id
 	return v;
 }
 
@@ -65,6 +66,7 @@ void integrateDepthFrameCS(int3 dTid : SV_DispatchThreadID)
 				curr.sdf = sdf;
 				curr.weight = 1;
 				curr.color = (int3)(g_color[screenPos].xyz*255.0f);
+				cuur.id = 1;//给voxel的patch_id默认设为1
 
 				Voxel prev = getVoxel(g_voxelBuffer, linearizeIndex(dTid));
 				setVoxel(g_voxelBuffer, linearizeIndex(dTid), combineVoxel(curr, prev));

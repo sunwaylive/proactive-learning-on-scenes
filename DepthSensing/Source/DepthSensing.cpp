@@ -786,6 +786,7 @@ void CALLBACK OnD3D11FrameRender( ID3D11Device* pd3dDevice, ID3D11DeviceContext*
 			GlobalAppState::getInstance().s_Timer.start();
 		}
 
+		//处理新到的每一帧数据！！
 		HRESULT hr0 = g_Sensor.processDepth(pd3dImmediateContext); // shouldn't hr0 and h1 be used to check if new work has to be done? registration etc
 		HRESULT hr1 = g_Sensor.processColor(pd3dImmediateContext);
 
@@ -1051,7 +1052,7 @@ void CALLBACK OnD3D11FrameRender( ID3D11Device* pd3dDevice, ID3D11DeviceContext*
 					GlobalAppState::getInstance().s_Timer.start();
 				}
 				
-				//??这个是做什么的？
+				//这个是CPU和GPU同步数据的核心了！！
 				g_SceneRepChunkGrid.StreamOutToCPUPass0GPU(DXUTGetD3D11DeviceContext(), g_SceneRepSDFLocal, p, GlobalAppState::getInstance().s_StreamingRadius, true, true);
 				g_SceneRepChunkGrid.StreamInToGPUPass1GPU(DXUTGetD3D11DeviceContext(), g_SceneRepSDFLocal, true);
 				

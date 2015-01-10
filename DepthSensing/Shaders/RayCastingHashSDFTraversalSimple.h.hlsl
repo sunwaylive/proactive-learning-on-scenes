@@ -127,7 +127,7 @@ void traverseCoarseGridSimpleSampleAllMultiLayer(float3 worldCamPos, float3 worl
 						if(abs(dist) < g_thresDist)
 						{
 							g_output[dTid.xy] = alpha/depthToRayLength; // Convert ray length to depth depthToRayLength
-							g_outputColor[dTid.xy] = float4(color/255.0f, 1.0f);
+							g_outputColor[dTid.xy] = float4(float3(1.0f, 0.0f, 0.0f), 0.0f); //float4(color / 255.0f, 1.0f);
 							//wei add
 							g_outputIDs[dTid.xy] = 0;
 							if(g_useGradients == 1)
@@ -176,7 +176,7 @@ void traverseCoarseGridSimpleSampleAll(float3 worldCamPos, float3 worldDir, floa
 		HashEntry entry = getHashEntryForSDFBlockPos(g_Hash, worldToSDFBlock(currentPosWorld));
 
 		float dist;	float3 color; uint id;
-		//去的dist 和 color根据插值算法
+		//取的dist 和 color根据插值算法
 		if(trilinearInterpolationSimpleFastFast(currentPosWorld, dist, color, id))
 		//if(trilinearInterpolation(currentPosWorld, dist, color))
 		{
@@ -192,9 +192,9 @@ void traverseCoarseGridSimpleSampleAll(float3 worldCamPos, float3 worldDir, floa
 					{
 						//将获取到的数据存放到输出变量中
 						g_output[dTid.xy] = alpha/depthToRayLength; // Convert ray length to depth depthToRayLength
-						g_outputColor[dTid.xy] = float4(color / 255.0f, 1.0f); //wei add float4(float3(1.0f, 0.0f, 0.0f), 0.0f); 
+						g_outputColor[dTid.xy] = float4(float3(1.0f, 0.0f, 0.0f), 0.0f);//float4(color / 255.0f, 1.0f); //wei add  
 						//wei add, 这里好像不能直接根据ID设置颜色，因为点的颜色不是有这个阶段直接决定？？
-						g_outputIDs[dTid.xy] = 1;
+						g_outputIDs[dTid.xy] = id; //这里后面紧接 PhongLighting.hlsl中的PhongPS函数
 
 						if(g_useGradients == 1)
 						{

@@ -1735,7 +1735,7 @@ void GlobalFun::computerICPWithNormal( CMesh *moving_mesh, CMesh *static_mesh)
   //update the moved points
   for(int i = 0; i < srVerNum; i++)
   {
-    CVertex& v = moving_mesh->vert[i];
+    CVertex  &v = moving_mesh->vert[i];
     v.P()[0] = SrCloud(0,i);
     v.P()[1] = SrCloud(1,i);
     v.P()[2] = SrCloud(2,i);

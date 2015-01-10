@@ -2,27 +2,30 @@
 
 
 
-Texture2D<float>				g_InputDepth : register( t0 );
-Texture2D<float3>				g_InputColor	: register( t1 );
-Buffer<int>						g_PrefixSum		: register( t2 );
-Buffer<int>						g_HashSRV		: register( t3 );
+Texture2D<float>				g_InputDepth          : register( t0 );
+Texture2D<float3>				g_InputColor	      : register( t1 );
+Buffer<int>						g_PrefixSum		      : register( t2 );
+Buffer<int>						g_HashSRV		      : register( t3 );
 Buffer<int>						g_HashCompactifiedSRV : register( t4 );
-Buffer<float>					g_SDFBlocksSDFSRV : register( t5 );
-Buffer<int>						g_DecisionArraySRV : register( t6 );
-Buffer<int>						g_SDFBlocksRGBWSRV : register( t7 );
-Buffer<uint>					g_bitMask		 : register( t8 );
+Buffer<float>					g_SDFBlocksSDFSRV     : register( t5 );
+Buffer<int>						g_DecisionArraySRV    : register( t6 );
+Buffer<int>						g_SDFBlocksRGBWSRV    : register( t7 );
+Buffer<uint>					g_bitMask		      : register( t8 );
 
 RWBuffer<int>					g_Hash				: register( u0 );
 RWBuffer<float>					g_SDFBlocksSDFUAV	: register( u1 );
+//wei add (read write buff) 注意这个u3和重用下面的了，暂时不清楚会不会出现问题
+RWBuffer<float>                 g_SDFBlocksIDUAV    : register( u3 );
+
 ConsumeStructuredBuffer<uint>	g_HeapConsume		: register( u2 );
 AppendStructuredBuffer<uint>	g_HeapAppend		: register( u3 );
 RWStructuredBuffer<uint>		g_HeapStatic		: register( u4 );
 RWBuffer<uint>					g_HashBucketMutex	: register( u5 );
-RWBuffer<int>					g_DecisionArrayUAV	: register ( u6 );
-RWBuffer<int>					g_HashCompactified	: register ( u7 );
+RWBuffer<int>					g_DecisionArrayUAV	: register( u6 );
+RWBuffer<int>					g_HashCompactified	: register( u7 );
 
 RWBuffer<int>					g_SDFBlocksRGBWUAV	: register( u7 );
-RWBuffer<int>					g_HashOther		: register ( u1 );
+RWBuffer<int>					g_HashOther		    : register( u1 );
 
 #include "GlobalAppStateShaderBuffer.h.hlsl"
 #include "SDFShaderBuffer.h.hlsl"
@@ -378,12 +381,17 @@ void integrateCS(uint3 DTid : SV_DispatchThreadID, uint3 GTid : SV_GroupThreadID
 						Voxel curr;	//construct current voxel
 						curr.sdf = sdf;
 						curr.weight = weightUpdate;
+						curr.id = 1;
 
 						float3 c = g_InputColor[screenPos].xyz;
 						curr.color = (int3)(c * 255.0f);
 
 						uint idx = entry.ptr + i;//i是2D depth frame的横坐标
-						Voxel prev = getVoxel(g_SDFBlocksSDFUAV, g_SDFBlocksRGBWUAV, idx);
+
+						//！！这里可以获取得到的voxel的patch id， 需要添加一个类似于g_SDFBlocksSDFUAV或者g_SDFBlocksRGBWUAV的变量与CPU交互
+						Voxel prev = getVoxel(g_SDFBlocksSDFUAV, g_SDFBlocksRGBWUAV, g_SDFBlocksIDUAV, idx);
+						//Voxel prev = getVoxel(g_SDFBlocksSDFUAV, g_SDFBlocksRGBWUAV, idx);
+
 						//curr的权重更大，跟prev的voxel进行组合，返回新的voxel
 						Voxel newVoxel = combineVoxel(curr, prev);
 
@@ -392,8 +400,10 @@ void integrateCS(uint3 DTid : SV_DispatchThreadID, uint3 GTid : SV_GroupThreadID
 							//newVoxel.sdf = 0.0f;
 							//newVoxel.weight = 0;
 						}
-						//用新的Voxel代替原来idx位置上的voxel，即prev
-						setVoxel(g_SDFBlocksSDFUAV, g_SDFBlocksRGBWUAV, idx, newVoxel);
+
+						//！！用新的Voxel代替原来idx位置上的voxel，即prev
+						setVoxel(g_SDFBlocksSDFUAV, g_SDFBlocksRGBWUAV, g_SDFBlocksIDUAV, idx, newVoxel);
+						//setVoxel(g_SDFBlocksSDFUAV, g_SDFBlocksRGBWUAV, idx, newVoxel);
 					}
 				}
 			}

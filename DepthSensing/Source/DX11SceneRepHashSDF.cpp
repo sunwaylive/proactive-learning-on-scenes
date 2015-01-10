@@ -66,6 +66,11 @@ DX11SceneRepHashSDF::DX11SceneRepHashSDF()
 	m_SDFBlocksRGBWSRV = NULL;
 	m_SDFBlocksRGBWUAV = NULL;
 
+	//wei add
+	m_SDFBlocksID = NULL;
+	m_SDFBlocksIDSRV = NULL;
+	m_SDFBlocksIDUAV = NULL;
+
 	m_SDFVoxelHashCB = NULL;
 
 	m_bEnableGarbageCollect = true;
@@ -198,6 +203,10 @@ void DX11SceneRepHashSDF::Destroy()
 	SAFE_RELEASE(m_SDFBlocksRGBWSRV);
 	SAFE_RELEASE(m_SDFBlocksRGBWUAV);
 
+	//wei add
+	SAFE_RELEASE(m_SDFBlocksID);
+	SAFE_RELEASE(m_SDFBlocksIDSRV);
+	SAFE_RELEASE(m_SDFBlocksIDUAV);
 
 	SAFE_RELEASE(m_HashIntegrateDecision);
 	SAFE_RELEASE(m_HashIntegrateDecisionUAV);
@@ -266,7 +275,6 @@ void DX11SceneRepHashSDF::Integrate( ID3D11DeviceContext* context, ID3D11ShaderR
 	////////////////////////
 	MapConstantBuffer(context);	//we need to remap the buffer since numOccupiedEntries was re-computed by 'Compacitfy'
 	IntegrateDepthMap(context, inputDepth, inputColor);
-
 
 	if (false)
 	{
@@ -513,7 +521,7 @@ void DX11SceneRepHashSDF::Alloc(ID3D11DeviceContext* context, ID3D11ShaderResour
 	ID3D11Buffer* CBGlobalAppState = GlobalAppState::getInstance().MapAndGetConstantBuffer(context);
 	context->CSSetConstantBuffers(8, 1, &CBGlobalAppState);
 
-	//利用了compute shader来利用GPU的性能，代码在对应的compute shader中，即对应的HLSL
+	//利用了compute shader来利用GPU的特性，代码在对应的compute shader中，即对应的HLSL
 	context->CSSetShader(s_SDFVoxelHashAlloc, NULL, 0);
 
 	const unsigned int imageWidth = GlobalAppState::getInstance().s_windowWidth;
@@ -611,21 +619,26 @@ void DX11SceneRepHashSDF::CompactifyHashEntries( ID3D11DeviceContext* context )
 }
 
 //这里对深度数据进行了Integrate
+//这个里面涉及了新voxel的分配和合并
 void DX11SceneRepHashSDF::IntegrateDepthMap( ID3D11DeviceContext* context, ID3D11ShaderResourceView* inputDepth, ID3D11ShaderResourceView* inputColor )
 {
 	context->CSSetShaderResources(0, 1, &inputDepth);
 	context->CSSetShaderResources(1, 1, &inputColor);
 	context->CSSetShaderResources(4, 1, &m_HashCompactifiedSRV);
+	//下面两个是CPU GPU沟通数据的桥梁
 	context->CSSetUnorderedAccessViews(1, 1, &m_SDFBlocksSDFUAV, NULL);
 	context->CSSetUnorderedAccessViews(7, 1, &m_SDFBlocksRGBWUAV, NULL);
+	//wei add, 传递voxel patch id的UAV
+	context->CSSetUnorderedAccessViews(3, 1, &m_SDFBlocksIDUAV, NULL);
+
 	context->CSSetConstantBuffers(0, 1, &m_SDFVoxelHashCB);
 	ID3D11Buffer* CBGlobalAppState = GlobalAppState::getInstance().MapAndGetConstantBuffer(context);
 	context->CSSetConstantBuffers(8, 1, &CBGlobalAppState);
-
+	//这个compute shader里面涉及了新voxel的分配和合并
 	context->CSSetShader(s_SDFVoxelHashIntegrate, NULL, 0);
+
 	//groupThreads = BLOCK_SIZE_SCENE_REP*BLOCK_SIZE_SCENE_REP;
 	//dimX = (m_NumOccupiedHashEntries + groupThreads - 1) / groupThreads;
-
 	unsigned int dimX = NUM_GROUPS_X;
 	unsigned int dimY = (m_NumOccupiedHashEntries + NUM_GROUPS_X - 1) / NUM_GROUPS_X;
 	assert(dimX <= D3D11_CS_DISPATCH_MAX_THREAD_GROUPS_PER_DIMENSION);	
@@ -657,6 +670,9 @@ void DX11SceneRepHashSDF::IntegrateDepthMap( ID3D11DeviceContext* context, ID3D1
 	context->CSSetShaderResources(4, 1, nullSRV);
 	context->CSSetUnorderedAccessViews(1, 1, nullUAV, NULL);
 	context->CSSetUnorderedAccessViews(7, 1, nullUAV, NULL);
+	//wei add
+	context->CSSetUnorderedAccessViews(3, 1, nullUAV, NULL);
+
 	context->CSSetConstantBuffers(0, 1, nullCB);
 	context->CSSetConstantBuffers(8, 1, nullCB);
 	context->CSSetShader(0, 0, 0);
@@ -905,7 +921,6 @@ HRESULT DX11SceneRepHashSDF::CreateBuffers( ID3D11Device* pd3dDevice )
 	V_RETURN(pd3dDevice->CreateUnorderedAccessView(m_HashCompactified, &descUAV, &m_HashCompactifiedUAV));
 
 	if (!m_JustHashAndNoSDFBlocks)	{
-
 		//create hash mutex
 		ZeroMemory(&descBUF, sizeof(D3D11_BUFFER_DESC));
 		descBUF.BindFlags	= D3D11_BIND_UNORDERED_ACCESS | D3D11_BIND_SHADER_RESOURCE;
@@ -1017,7 +1032,6 @@ HRESULT DX11SceneRepHashSDF::CreateBuffers( ID3D11Device* pd3dDevice )
 		descUAV.Buffer.FirstElement = 0;
 		descUAV.Buffer.NumElements =  m_SDFBlockSize * m_SDFBlockSize * m_SDFBlockSize * m_SDFNumBlocks;
 
-
 		ZeroMemory( &InitData, sizeof(D3D11_SUBRESOURCE_DATA) );
 		cpuNull = new int[m_SDFBlockSize * m_SDFBlockSize * m_SDFBlockSize * m_SDFNumBlocks];
 		ZeroMemory(cpuNull, sizeof(int) * m_SDFBlockSize * m_SDFBlockSize * m_SDFBlockSize * m_SDFNumBlocks);
@@ -1028,6 +1042,37 @@ HRESULT DX11SceneRepHashSDF::CreateBuffers( ID3D11Device* pd3dDevice )
 		V_RETURN(pd3dDevice->CreateShaderResourceView(m_SDFBlocksSDF, &descSRV, &m_SDFBlocksSDFSRV));
 		V_RETURN(pd3dDevice->CreateUnorderedAccessView(m_SDFBlocksSDF, &descUAV, &m_SDFBlocksSDFUAV));
 
+		//wei add， create id part
+		ZeroMemory(&descBUF, sizeof(D3D11_BUFFER_DESC));
+		descBUF.BindFlags = D3D11_BIND_UNORDERED_ACCESS | D3D11_BIND_SHADER_RESOURCE;
+		descBUF.Usage = D3D11_USAGE_DEFAULT;
+		descBUF.CPUAccessFlags = 0;
+		descBUF.MiscFlags = 0;
+		descBUF.ByteWidth = (sizeof(float)) * m_SDFBlockSize * m_SDFBlockSize * m_SDFBlockSize * m_SDFNumBlocks;
+		descBUF.StructureByteStride = sizeof(int);
+
+		ZeroMemory(&descSRV, sizeof(D3D11_SHADER_RESOURCE_VIEW_DESC));
+		descSRV.Format = DXGI_FORMAT_R32_FLOAT;
+		descSRV.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
+		descSRV.Buffer.FirstElement = 0;
+		descSRV.Buffer.NumElements = m_SDFBlockSize * m_SDFBlockSize * m_SDFBlockSize * m_SDFNumBlocks;
+
+		ZeroMemory(&descUAV, sizeof(D3D11_UNORDERED_ACCESS_VIEW_DESC));
+		descUAV.Format = DXGI_FORMAT_R32_FLOAT;
+		descUAV.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
+		descUAV.Buffer.FirstElement = 0;
+		descUAV.Buffer.NumElements = m_SDFBlockSize * m_SDFBlockSize * m_SDFBlockSize * m_SDFNumBlocks;
+
+		ZeroMemory(&InitData, sizeof(D3D11_SUBRESOURCE_DATA));
+		cpuNull = new int[m_SDFBlockSize * m_SDFBlockSize * m_SDFBlockSize * m_SDFNumBlocks];
+		ZeroMemory(cpuNull, sizeof(int) * m_SDFBlockSize * m_SDFBlockSize * m_SDFBlockSize * m_SDFNumBlocks);
+		InitData.pSysMem = cpuNull;
+		V_RETURN(pd3dDevice->CreateBuffer(&descBUF, &InitData, &m_SDFBlocksID));
+		SAFE_DELETE_ARRAY(cpuNull);
+
+		V_RETURN(pd3dDevice->CreateShaderResourceView(m_SDFBlocksID, &descSRV, &m_SDFBlocksIDSRV));
+		V_RETURN(pd3dDevice->CreateUnorderedAccessView(m_SDFBlocksID, &descUAV, &m_SDFBlocksIDUAV));
+		std::cout << "wei successfully create sdfBlock ID SRV and UAV." << std::endl;
 
 		//create sdf blocks (8x8x8 -> 8 byte per voxel: RGBW part)
 		ZeroMemory(&descBUF, sizeof(D3D11_BUFFER_DESC));

@@ -85,6 +85,9 @@ public:
 	ID3D11UnorderedAccessView* GetSDFBlocksRGBWUAV() {
 		return m_SDFBlocksRGBWUAV;
 	}
+	ID3D11UnorderedAccessView*	GetSDFBlocksIDUAV() {
+		return m_SDFBlocksIDUAV;
+	}
 	ID3D11UnorderedAccessView*	GetHeapUAV() {
 		return m_HeapUAV;
 	}
@@ -179,6 +182,7 @@ public:
 			float sdf;
 			vec3uc color;
 			unsigned char weight;
+			int id; //wei add
 		};
 		struct VoxelBlock 
 		{
@@ -188,7 +192,9 @@ public:
 		HashEntry* hashEntries = (HashEntry*)CreateAndCopyToDebugBuf(DXUTGetD3D11Device(), DXUTGetD3D11DeviceContext(), m_Hash, true);
 		float*	voxelsSDF = (float*)CreateAndCopyToDebugBuf(DXUTGetD3D11Device(), DXUTGetD3D11DeviceContext(), m_SDFBlocksSDF, true);
 		int*	voxelsRGBW = (int*)CreateAndCopyToDebugBuf(DXUTGetD3D11Device(), DXUTGetD3D11DeviceContext(), m_SDFBlocksRGBW, true);
-		
+		//wei add 这里可以测试voxelID设置的对不对了
+		int * voxelsID = (int*)CreateAndCopyToDebugBuf(DXUTGetD3D11Device(), DXUTGetD3D11DeviceContext(), m_SDFBlocksID, true);
+
 		const unsigned int numHashEntries = m_HashNumBuckets * m_HashBucketSize;
 		const unsigned int numVoxels = m_SDFNumBlocks * SDF_BLOCK_SIZE * SDF_BLOCK_SIZE * SDF_BLOCK_SIZE;
 
@@ -203,6 +209,7 @@ public:
 				//每个sdfBlock又由8 * 8 * 8个小的voxel组成
 				for (unsigned int j = 0; j < SDF_BLOCK_SIZE*SDF_BLOCK_SIZE*SDF_BLOCK_SIZE; j++) {
 					vBlock.voxels[j].sdf = voxelsSDF[ptr+j];
+
 					int last = voxelsRGBW[ptr+j];
 					vBlock.voxels[j].weight = last & 0x000000ff;
 					last >>= 0x8;
@@ -211,6 +218,9 @@ public:
 					vBlock.voxels[j].color.y = last & 0x000000ff;
 					last >>= 0x8;
 					vBlock.voxels[j].color.z = last & 0x000000ff;
+					//wei add
+					if (voxelsID[ptr + j] == 2)
+						std::cout << "sw voxel id: " << voxelsID[ptr + j] << std::endl;
 				}
 
 				vec3i coord(hashEntries[i].pos.x, hashEntries[i].pos.y, hashEntries[i].pos.z);
@@ -529,6 +539,10 @@ private:
 	ID3D11ShaderResourceView*	m_SDFBlocksRGBWSRV;
 	ID3D11UnorderedAccessView*	m_SDFBlocksRGBWUAV;
 
+	//wei add
+	ID3D11Buffer*				m_SDFBlocksID;
+	ID3D11ShaderResourceView*	m_SDFBlocksIDSRV;
+	ID3D11UnorderedAccessView*	m_SDFBlocksIDUAV;
 
 	ID3D11Buffer*				m_SDFVoxelHashCB;
 

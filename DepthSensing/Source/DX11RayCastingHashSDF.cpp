@@ -293,6 +293,7 @@ HRESULT DX11RayCastingHashSDF::RenderToTexture(ID3D11DeviceContext* context, ID3
 	context->CSSetConstantBuffers(1, 1, &s_ConstantBufferSplatting);
 	ID3D11Buffer* CBGlobalAppState = GlobalAppState::getInstance().MapAndGetConstantBuffer(context);
 	context->CSSetConstantBuffers(8, 1, &CBGlobalAppState);
+	//这个shader程序通过访问全局变量，设置后面要输出的内容
 	context->CSSetShader(m_pComputeShader, 0, 0);
 
 	// Run compute shader

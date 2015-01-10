@@ -1561,68 +1561,70 @@ void CameraParaDlg::runGraphCut()
 
 int CameraParaDlg::getUpdateData()
 {
-	
-	PointCloudPtr_RGB_NORMAL cloud(new PointCloud_RGB_NORMAL);
-	loadPointCloud_normal_ply("data/1.ply", cloud);
+  Visualizer vs;
+  vs.viewer->removeAllPointClouds();
+  vs.viewer->removeCoordinateSystem();
+  vs.viewer->setBackgroundColor(0,0,0);
 
-	PointCloudPtr_RGB_NORMAL cloud_mark(new PointCloud_RGB_NORMAL);
-	pcl::copyPointCloud(*cloud,*cloud_mark);
+  PointCloudPtr_RGB_NORMAL cloud(new PointCloud_RGB_NORMAL);
+  loadPointCloud_normal_ply("data/big_table_normal.ply", cloud);
 
-	/******************detect table************************/
-	PointCloudPtr_RGB_NORMAL tabletopCloud(new PointCloud_RGB_NORMAL());
-	PointCloudPtr_RGB_NORMAL planeCloud(new PointCloud_RGB_NORMAL());
-	//detect_table_plane_r(cloud, planeCloud, tabletopCloud);
-	detect_table_plane(cloud, planeCloud, tabletopCloud);
-	//showPointClound(planeCloud,"planeCloud");
+  /******************detect table************************/
+  PointCloudPtr_RGB_NORMAL tabletopCloud(new PointCloud_RGB_NORMAL());
+  PointCloudPtr_RGB_NORMAL planeCloud(new PointCloud_RGB_NORMAL());
+  PointCloudPtr rect_cloud(new PointCloud());
+  PointCloudPtr_RGB_NORMAL remainingCloud(new PointCloud_RGB_NORMAL());
+  pcl::ModelCoefficients coefficients;
 
-	pcl::ModelCoefficients::Ptr coefficients_plane(new pcl::ModelCoefficients);
-	pcl::PointIndices::Ptr inliers_plane(new pcl::PointIndices);
-	detect_table(cloud, coefficients_plane, inliers_plane);
+  detect_table(cloud, coefficients, planeCloud, rect_cloud, remainingCloud);
 
-	PointCloudPtr_RGB_NORMAL table_cloud(new PointCloud_RGB_NORMAL());
+  PointCloudPtr_RGB pc(new PointCloud_RGB);
 
-	pcl::ExtractIndices<Point_RGB_NORMAL> extract0;// Create the filtering object
-	// Extract the inliers
-	extract0.setInputCloud (cloud);
-	extract0.setIndices (inliers_plane);
-	extract0.setNegative (false);
-	extract0.filter (*table_cloud);
+  for(int i=0;i<planeCloud->size();i++){
+    Point_RGB pr;
+    pr.x=planeCloud->at(i).x;
+    pr.y=planeCloud->at(i).y;
+    pr.z=planeCloud->at(i).z;
+    pr.r=planeCloud->at(i).r;
+    pr.g=planeCloud->at(i).g;
+    pr.b=planeCloud->at(i).b;
+    pc->push_back(pr);
+  }
 
-	PointCloudPtr_RGB pc(new PointCloud_RGB);
-
-	for(int i=0;i<table_cloud->size();i++){
-		Point_RGB pr;
-		pr.x=table_cloud->at(i).x;
-		pr.y=table_cloud->at(i).y;
-		pr.z=table_cloud->at(i).z;
-		pr.r=table_cloud->at(i).r;
-		pr.g=table_cloud->at(i).g;
-		pr.b=table_cloud->at(i).b;
-		pc->push_back(pr);
-	}
+  vs.viewer->addPointCloud (pc, "table_cloud");
 
 
-	float voxel_resolution = 0.004f;
-	float seed_resolution = 0.06f;
-	float color_importance = 0.2f;
-	float spatial_importance = 0.4f;
-	float normal_importance = 1.0f;
+  Eigen::Matrix4f matrix_transform;
+  Eigen::Matrix4f matrix_transform_r;
 
-	/******************Euclidean Cluster Extraction************************/
-	std::vector<PointCloudPtr_RGB_NORMAL> cluster_points;
+  getTemTransformMatrix(coefficients, matrix_transform, matrix_transform_r);
 
-	vector<MyPointCloud_RGB_NORMAL> vecPatchPoint;
-	vector<pcl::Normal> vecPatcNormal;
+  getCloudOnTable(remainingCloud, rect_cloud, matrix_transform, matrix_transform_r, tabletopCloud);
 
+  float voxel_resolution = 0.004f;
+  float seed_resolution = 0.06f;
+  float color_importance = 0.2f;
+  float spatial_importance = 0.4f;
+  float normal_importance = 1.0f;
 
-	object_seg_ECE(tabletopCloud, cluster_points);
+  /******************Euclidean Cluster Extraction************************/
+  std::vector<MyPointCloud_RGB_NORMAL> cluster_points;
 
-	for(int i=0;i<cluster_points.size();i++){
+  object_seg_ECE(tabletopCloud, cluster_points);
 
-		PointCloudT::Ptr colored_cloud(new PointCloudT);
-		vector<MyPointCloud_RGB_NORMAL> patch_clouds;
-		PointNCloudT::Ptr normal_cloud(new PointNCloudT);
-		VCCS_over_segmentation(cluster_points.at(i),voxel_resolution,seed_resolution,color_importance,spatial_importance,normal_importance,patch_clouds,colored_cloud,normal_cloud);
+  for(int i=0;i<cluster_points.size();i++){
+    if(cluster_points.at(i).mypoints.size()<200){
+      continue;
+    }
+
+    PointCloudT::Ptr colored_cloud(new PointCloudT);
+    vector<MyPointCloud_RGB_NORMAL> patch_clouds;
+    PointNCloudT::Ptr normal_cloud(new PointNCloudT);
+
+    PointCloudPtr_RGB_NORMAL ct(new PointCloud_RGB_NORMAL);
+    MyPointCloud_RGB_NORMAL2PointCloud_RGB_NORMAL(cluster_points.at(i), ct);
+
+    VCCS_over_segmentation(ct,voxel_resolution,seed_resolution,color_importance,spatial_importance,normal_importance,patch_clouds,colored_cloud,normal_cloud);
 
 		std::stringstream str;
 		str<<"colored_voxel_cloud"<<i;
@@ -1660,60 +1662,39 @@ void CameraParaDlg::runOverSegmentation()
   vs.viewer->setBackgroundColor(0,0,0);
 
   PointCloudPtr_RGB_NORMAL cloud(new PointCloud_RGB_NORMAL);
-  //loadPointCloud_normal_ply("data/big_table_normal.ply", cloud);
-  loadPointCloud_normal_ply("data/table0.ply", cloud);
-
-  PointCloudPtr_RGB_NORMAL cloud_mark(new PointCloud_RGB_NORMAL);
-  pcl::copyPointCloud(*cloud,*cloud_mark);
-
-
+  loadPointCloud_normal_ply("data/big_table_normal.ply", cloud);
 
   /******************detect table************************/
   PointCloudPtr_RGB_NORMAL tabletopCloud(new PointCloud_RGB_NORMAL());
   PointCloudPtr_RGB_NORMAL planeCloud(new PointCloud_RGB_NORMAL());
-  //detect_table_plane_r(cloud, planeCloud, tabletopCloud);
-  detect_table_plane(cloud, planeCloud, tabletopCloud);
-  //showPointClound(planeCloud,"planeCloud");
+  PointCloudPtr rect_cloud(new PointCloud());
+  PointCloudPtr_RGB_NORMAL remainingCloud(new PointCloud_RGB_NORMAL());
+  pcl::ModelCoefficients coefficients;
 
-  pcl::ModelCoefficients::Ptr coefficients_plane(new pcl::ModelCoefficients);
-  pcl::PointIndices::Ptr inliers_plane(new pcl::PointIndices);
-  detect_table(cloud, coefficients_plane, inliers_plane);
-
-  PointCloudPtr_RGB_NORMAL table_cloud(new PointCloud_RGB_NORMAL());
-
-  pcl::ExtractIndices<Point_RGB_NORMAL> extract0;// Create the filtering object
-  // Extract the inliers
-  extract0.setInputCloud (cloud);
-  extract0.setIndices (inliers_plane);
-  extract0.setNegative (false);
-  extract0.filter (*table_cloud);
+  detect_table(cloud, coefficients, planeCloud, rect_cloud, remainingCloud);
 
   PointCloudPtr_RGB pc(new PointCloud_RGB);
-  
-  for(int i=0;i<table_cloud->size();i++){
+
+  for(int i=0;i<planeCloud->size();i++){
     Point_RGB pr;
-    pr.x=table_cloud->at(i).x;
-    pr.y=table_cloud->at(i).y;
-    pr.z=table_cloud->at(i).z;
-    pr.r=table_cloud->at(i).r;
-    pr.g=table_cloud->at(i).g;
-    pr.b=table_cloud->at(i).b;
+    pr.x=planeCloud->at(i).x;
+    pr.y=planeCloud->at(i).y;
+    pr.z=planeCloud->at(i).z;
+    pr.r=planeCloud->at(i).r;
+    pr.g=planeCloud->at(i).g;
+    pr.b=planeCloud->at(i).b;
     pc->push_back(pr);
   }
 
   vs.viewer->addPointCloud (pc, "table_cloud");
 
-  //add table cloud
-  MyPointCloud_RGB_NORMAL tableCloud;
-  for(int i=0;i<table_cloud->size();i++){
-	  MyPt_RGB_NORMAL point;
-	  point.x = table_cloud->at(i).x;
-	  point.y = table_cloud->at(i).y;
-	  point.z = table_cloud->at(i).z;
-	  tableCloud.mypoints.push_back(point);
-  }
-  cPointCloudAnalysis.cBinarySeg.AddTable(tableCloud);
 
+  Eigen::Matrix4f matrix_transform;
+  Eigen::Matrix4f matrix_transform_r;
+
+  getTemTransformMatrix(coefficients, matrix_transform, matrix_transform_r);
+
+  getCloudOnTable(remainingCloud, rect_cloud, matrix_transform, matrix_transform_r, tabletopCloud);
 
   float voxel_resolution = 0.004f;
   float seed_resolution = 0.06f;
@@ -1722,44 +1703,47 @@ void CameraParaDlg::runOverSegmentation()
   float normal_importance = 1.0f;
 
   /******************Euclidean Cluster Extraction************************/
-  std::vector<PointCloudPtr_RGB_NORMAL> cluster_points;
-
-  vector<MyPointCloud_RGB_NORMAL> vecPatchPoint;
-  vector<pcl::Normal> vecPatcNormal;
-
+  std::vector<MyPointCloud_RGB_NORMAL> cluster_points;
 
   object_seg_ECE(tabletopCloud, cluster_points);
 
   for(int i=0;i<cluster_points.size();i++){
+    if(cluster_points.at(i).mypoints.size()<200){
+      continue;
+    }
 
     PointCloudT::Ptr colored_cloud(new PointCloudT);
     vector<MyPointCloud_RGB_NORMAL> patch_clouds;
     PointNCloudT::Ptr normal_cloud(new PointNCloudT);
-    VCCS_over_segmentation(cluster_points.at(i),voxel_resolution,seed_resolution,color_importance,spatial_importance,normal_importance,patch_clouds,colored_cloud,normal_cloud);
-	
+
+    PointCloudPtr_RGB_NORMAL ct(new PointCloud_RGB_NORMAL);
+    MyPointCloud_RGB_NORMAL2PointCloud_RGB_NORMAL(cluster_points.at(i), ct);
+
+    VCCS_over_segmentation(ct,voxel_resolution,seed_resolution,color_importance,spatial_importance,normal_importance,patch_clouds,colored_cloud,normal_cloud);
+
     std::stringstream str;
     str<<"colored_voxel_cloud"<<i;
     std::string id_pc=str.str();
 
     vs.viewer->addPointCloud (colored_cloud, id_pc);
 
-	//add normal, point cloud, cluster patch num
-	for(int i=0;i<patch_clouds.size();i++)
-	{
-		Normalt nor;
-		pcl::PointNormal pn=normal_cloud->at(i);
-		nor.normal_x = pn.normal_x;
-		nor.normal_y = pn.normal_y;
-		nor.normal_z = pn.normal_z;
-		double normalizeValue = pow(nor.normal_x,2) + pow(nor.normal_y,2) + pow(nor.normal_z,2);
-		nor.normal_x /= normalizeValue;
-		nor.normal_y /= normalizeValue;
-		nor.normal_z /= normalizeValue;
-		cPointCloudAnalysis.cBinarySeg.vecPatcNormal.push_back(nor);
-	}
+	////add normal, point cloud, cluster patch num
+	//for(int i=0;i<patch_clouds.size();i++)
+	//{
+	//	Normalt nor;
+	//	pcl::PointNormal pn=normal_cloud->at(i);
+	//	nor.normal_x = pn.normal_x;
+	//	nor.normal_y = pn.normal_y;
+	//	nor.normal_z = pn.normal_z;
+	//	double normalizeValue = pow(nor.normal_x,2) + pow(nor.normal_y,2) + pow(nor.normal_z,2);
+	//	nor.normal_x /= normalizeValue;
+	//	nor.normal_y /= normalizeValue;
+	//	nor.normal_z /= normalizeValue;
+	//	cPointCloudAnalysis.cBinarySeg.vecPatcNormal.push_back(nor);
+	//}
 
-	cPointCloudAnalysis.cBinarySeg.vecPatchPoint.insert(cPointCloudAnalysis.cBinarySeg.vecPatchPoint.end(),patch_clouds.begin(),patch_clouds.end());
-	cPointCloudAnalysis.cBinarySeg.clusterPatchNum.push_back(patch_clouds.size());
+	//cPointCloudAnalysis.cBinarySeg.vecPatchPoint.insert(cPointCloudAnalysis.cBinarySeg.vecPatchPoint.end(),patch_clouds.begin(),patch_clouds.end());
+	//cPointCloudAnalysis.cBinarySeg.clusterPatchNum.push_back(patch_clouds.size());
   }
 
   vs.show();
