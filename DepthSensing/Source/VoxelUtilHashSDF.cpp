@@ -61,7 +61,7 @@ vec3i VoxelUtilHelper::virtualVoxelPosToSDFBlock(vec3i virtualVoxelPos)
 	if (virtualVoxelPos.y < 0) virtualVoxelPos.y -= SDF_BLOCK_SIZE-1;
 	if (virtualVoxelPos.z < 0) virtualVoxelPos.z -= SDF_BLOCK_SIZE-1;
 
-	return virtualVoxelPos / SDF_BLOCK_SIZE;
+	return virtualVoxelPos / SDF_BLOCK_SIZE; 
 }
 
 //整形的3为voxel坐标转换到浮点数的world坐标
