@@ -63,7 +63,6 @@ float4 PhongPS(VS_OUTPUT Input) : SV_TARGET
 	float3 color = inputColors.Sample(g_PointSampler, Input.vTexcoord).xyz;
 
 	//在color的r分量重取出 patch_id的信息
-	//int id = asint(color.x)%16;//(asint(color.x)); //% 16; // + 3; 如果什么都不赋值的话，前面取模结果为0
 	int id = color.x;
 
 	if(position.x != MINF && color.x != MINF && normal.x != MINF)
@@ -72,17 +71,7 @@ float4 PhongPS(VS_OUTPUT Input) : SV_TARGET
 
 		if(g_useMaterial == 1)
 		{
-			if(id == 19){
-				material = float4(1.0f, 0.0f, 0.0f, 0.0f);
-			}else if(id == 1){
-				material = float4(0.0f, 1.0f, 0.0f, 0.0f);
-			}else if(id == 2){
-				material = float4(0.0f, 0.0f, 1.0f, 0.0f);//colorTable[id];
-			}else{
-				material = float4(1.0f, 1.0f, 0.0f, 0.0f);
-			}
-
-			//material = colorTable[asint(id)]; //float4(0.00f, 0.00f, 1.00f, 0.0f);
+			material = colorTable[id]; //float4(0.00f, 0.00f, 1.00f, 0.0f);
 			//material = float4(color, 1.0f);
 		}
 
