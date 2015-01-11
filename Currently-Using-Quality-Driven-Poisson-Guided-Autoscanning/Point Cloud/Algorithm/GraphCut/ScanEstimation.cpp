@@ -194,6 +194,8 @@ void CScanEstimation::ComputeScore()
 
 void CScanEstimation::ComputeObjectness(int m)
 {
+	ofstream outFiles("Output\\Objectness.txt",ios::app);
+
 	double objectness = 0;
 	double fSum = 0;
 	double concaveSum = 0;
@@ -202,6 +204,7 @@ void CScanEstimation::ComputeObjectness(int m)
 		int patchIndex = vecvecMultiResult[m][i];
 		fSum += vecPatchConfidenceScore[patchIndex];
 	}
+	outFiles << "1 " <<  endl;
 
 	double edgeNum = 0;
 	for(int i = 0;i < vecpairPatchConnection.size();i++)
@@ -222,6 +225,8 @@ void CScanEstimation::ComputeObjectness(int m)
 				concaveSum += vecSmoothValue[i];
 		}
 	}
+	outFiles << "2 " <<  endl;
+
 	if(edgeNum > 0)
 		concaveSum /= edgeNum;
 	else
@@ -234,14 +239,20 @@ void CScanEstimation::ComputeObjectness(int m)
 
 	objectness = fSum * concaveSum; 
 
-	
+	outFiles << "3 " <<  endl;
+
 	vecObjectHypo[m].objectness = objectness;
+
+	outFiles << "4 " <<  endl;
+	outFiles.close();
 }
 
 void CScanEstimation::ComputeSeparateness(int m,int n)
 {
 	double separateness = 0;
 	int hypoIndex;
+
+	
 
 	for(int i = 0;i < vecEdgeHypo.size();i++)
 	{
