@@ -24,7 +24,8 @@ Voxel VoxelUtilHelper::getVoxel(const SDFBlock& sdfBlocks, unsigned int id)
 
 void VoxelUtilHelper::setVoxel(SDFBlock& sdfBlocks, unsigned int id, const Voxel& voxel)
 {
-	unsigned int* f = (unsigned int*)&voxel.sdf; sdfBlocks.data[2*id+0] = *f;
+	unsigned int* f = (unsigned int*)&voxel.sdf; 
+	sdfBlocks.data[2*id+0] = *f;
 	int last = 0;
 	last |= voxel.color.z & 0x000000ff;
 	last <<= 8;

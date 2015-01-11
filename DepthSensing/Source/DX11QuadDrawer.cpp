@@ -258,6 +258,7 @@ void DX11QuadDrawer::RenderQuad( ID3D11DeviceContext* pd3dDeviceContext, ID3D11P
 	pd3dDeviceContext->IASetVertexBuffers(0, 1, &s_VertexBuffer, &stride, &offset);
 	pd3dDeviceContext->IASetIndexBuffer(s_IndexBuffer, DXGI_FORMAT_R32_UINT, 0);
 
+	//´Ó10ºÅslot¿ªÊ¼
 	pd3dDeviceContext->PSSetShaderResources(10, numShaderResourceViews, srvs);
 	pd3dDeviceContext->PSSetSamplers(10, 1, &s_PointSampler);
 

@@ -128,7 +128,7 @@ void traverseCoarseGridSimpleSampleAllMultiLayer(float3 worldCamPos, float3 worl
 						if(abs(dist) < g_thresDist)
 						{
 							g_output[dTid.xy] = alpha/depthToRayLength; // Convert ray length to depth depthToRayLength
-							g_outputColor[dTid.xy] = float4(color/255.0f, 1.0f);
+							g_outputColor[dTid.xy] = float4(color, 1.0f);
 
 							if(g_useGradients == 1)
 							{
@@ -187,7 +187,7 @@ void traverseCoarseGridSimpleSampleAll(float3 worldCamPos, float3 worldDir, floa
 					if(abs(dist) < g_thresDist)
 					{
 						g_output[dTid.xy] = alpha/depthToRayLength; // Convert ray length to depth depthToRayLength
-						g_outputColor[dTid.xy] = float4(color/255.0f, 1.0f);
+						g_outputColor[dTid.xy] = float4(color, 1.0f);
 
 						if(g_useGradients == 1)
 						{
