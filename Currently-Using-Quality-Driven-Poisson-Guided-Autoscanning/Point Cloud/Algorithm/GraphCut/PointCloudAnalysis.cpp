@@ -26,6 +26,21 @@ void CPointCloudAnalysis::MainStep(bool initFlag,int newAreNum)
 	ScanEstimation();
 	outFile1 <<  "  5" <<endl;
 	outFile1.close();
+
+// 	ofstream outFile("Output\\ccjn.txt");
+// 	for(int i=0;i<cMultiSeg.vecObjectHypo.size();i++)
+// 	{
+// 		for(int j=0;j<cMultiSeg.vecObjectHypo[i].patchIndex.size();j++)
+// 		{
+// 			int patchIndex = cMultiSeg.vecObjectHypo[i].patchIndex[j];
+// 			for(int k=0;k<cMultiSeg.vecPatchPoint[patchIndex].mypoints.size();k++)
+// 			{
+// 				MyPt_RGB_NORMAL point = cMultiSeg.vecPatchPoint[patchIndex].mypoints[k];
+// 				outFile << setiosflags(ios::fixed) << setprecision(6) << point.x << " " << point.y << " " << point.z << " " << i << endl;
+// 			}
+// 		}
+// 	}
+// 	outFile.close();
 }
 
 
