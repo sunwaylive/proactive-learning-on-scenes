@@ -118,6 +118,18 @@ HRESULT DX11RayCastingHashSDF::Render( ID3D11DeviceContext* context, ID3D11Shade
 		m_pSSAOMapSRV, m_pSSAOMapUAV, m_pSSAOMapFilteredUAV);
 }
 
+//wei add, override
+HRESULT DX11RayCastingHashSDF::Render( ID3D11DeviceContext* context, ID3D11ShaderResourceView* hash, ID3D11ShaderResourceView *PCXYZID, ID3D11ShaderResourceView* hashCompact, ID3D11ShaderResourceView* sdfBlocksSDF, ID3D11ShaderResourceView* sdfBlocksRGBW, unsigned int hashNumValidBuckets, unsigned int renderTargetWidth, unsigned int renderTargetHeight, const mat4f* lastRigidTransform, ID3D11Buffer* CBsceneRepSDF )
+{
+	return RenderToTexture( context, hash, PCXYZID, hashCompact, sdfBlocksSDF, sdfBlocksRGBW, hashNumValidBuckets, renderTargetWidth, renderTargetHeight, lastRigidTransform, CBsceneRepSDF,
+		s_pDepthStencilSplattingMinSRV, s_pDepthStencilSplattingMaxSRV,
+		s_pDepthStencilSplattingMinDSV, s_pDepthStencilSplattingMaxDSV,
+		m_pOutputImage2DSRV, m_pOutputImage2DUAV,
+		s_pPositionsSRV, s_pPositionsUAV,
+		s_pColorsUAV,
+		s_pNormalsSRV, s_pNormalsUAV,
+		m_pSSAOMapSRV, m_pSSAOMapUAV, m_pSSAOMapFilteredUAV);
+}
 
 HRESULT DX11RayCastingHashSDF::RenderStereo( ID3D11DeviceContext* context, ID3D11ShaderResourceView* hash, ID3D11ShaderResourceView* hashCompact, ID3D11ShaderResourceView* sdfBlocksSDF, ID3D11ShaderResourceView* sdfBlocksRGBW, unsigned int hashNumValidBuckets, unsigned int renderTargetWidth, unsigned int renderTargetHeight, const mat4f* lastRigidTransform, ID3D11Buffer* CBsceneRepSDF )
 {
@@ -337,7 +349,7 @@ HRESULT DX11RayCastingHashSDF::RenderToTexture( ID3D11DeviceContext* context, ID
 	return hr;
 }
 
-//重载, 添加了pointcloud xyzid
+//wei add override, 添加了pointcloud xyzid
 HRESULT DX11RayCastingHashSDF::RenderToTexture( ID3D11DeviceContext* context, ID3D11ShaderResourceView* hash, ID3D11ShaderResourceView *PCXYZID, ID3D11ShaderResourceView* hashCompact, ID3D11ShaderResourceView* sdfBlocksSDF, ID3D11ShaderResourceView* sdfBlocksRGBW, unsigned int hashNumValidBuckets, unsigned int renderTargetWidth, unsigned int renderTargetHeight, const mat4f* lastRigidTransform, ID3D11Buffer* CBsceneRepSDF, ID3D11ShaderResourceView* pDepthStencilSplattingMinSRV, ID3D11ShaderResourceView* pDepthStencilSplattingMaxSRV, ID3D11DepthStencilView* pDepthStencilSplattingMinDSV, ID3D11DepthStencilView* pDepthStencilSplattingMaxDSV, ID3D11ShaderResourceView* pOutputImage2DSRV, ID3D11UnorderedAccessView* pOutputImage2DUAV, ID3D11ShaderResourceView* pPositionsSRV, ID3D11UnorderedAccessView* pPositionsUAV, ID3D11UnorderedAccessView* pColorsUAV, ID3D11ShaderResourceView* pNormalsSRV, ID3D11UnorderedAccessView* pNormalsUAV, ID3D11ShaderResourceView* pSSAOMapSRV, ID3D11UnorderedAccessView* pSSAOMapUAV, ID3D11UnorderedAccessView* pSSAOMapFilteredUAV )
 {
 	HRESULT hr = S_OK;
@@ -370,6 +382,9 @@ HRESULT DX11RayCastingHashSDF::RenderToTexture( ID3D11DeviceContext* context, ID
 
 	// Setup pipeline
 	context->CSSetShaderResources(0, 1, &hash);
+	//wei add
+	context->CSSetShaderResources(7, 1, &PCXYZID);
+
 	context->CSSetShaderResources(1, 1, &sdfBlocksSDF);
 	context->CSSetShaderResources(4, 1, &sdfBlocksRGBW);
 	context->CSSetShaderResources(2, 1, &pDepthStencilSplattingMinSRV);
@@ -420,6 +435,9 @@ HRESULT DX11RayCastingHashSDF::RenderToTexture( ID3D11DeviceContext* context, ID
 	context->CSSetShaderResources(0, 5, nullSRV);
 	context->CSSetShaderResources(5, 1, nullSRV);
 	context->CSSetShaderResources(6, 1, nullSRV);
+	//wei add
+	context->CSSetShaderResources(7, 1, nullSRV);
+
 	context->CSSetUnorderedAccessViews(0, 1, nullUAV, 0);
 	context->CSSetUnorderedAccessViews(1, 1, nullUAV, 0);
 	context->CSSetUnorderedAccessViews(2, 1, nullUAV, 0);

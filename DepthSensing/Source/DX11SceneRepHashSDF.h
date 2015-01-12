@@ -58,6 +58,7 @@ public:
 
 	HRESULT DumpPointCloud(const std::string &filename, ID3D11Device* pDevice, ID3D11DeviceContext* pd3dImmediateContext, unsigned int minWeight = 1, bool justOccupied = false);
 
+	HRESULT LoadPointCloud( const std::string &filename, ID3D11Device* pDevice, ID3D11DeviceContext* pd3dImmediateContext, unsigned int minWeight /*= 1*/, bool justOccupied /*= false*/ );
 
 	const mat4f& GetLastRigidTransform() const	{	
 		return m_LastRigidTransform;
@@ -70,9 +71,20 @@ public:
 	ID3D11ShaderResourceView*	GetHashSRV() {
 		return m_HashSRV;
 	}
+
 	ID3D11UnorderedAccessView*	GetHashUAV() {
 		return m_HashUAV;
 	}
+
+	//wei add
+	ID3D11ShaderResourceView* GetPCXYZIDSRV(){
+		return m_PCXYZIDSRV;
+	}
+
+	ID3D11UnorderedAccessView*	GetPCXYZIDUAV() {
+		return m_PCXYZIDUAV;
+	}
+
 	ID3D11ShaderResourceView*	GetSDFBlocksSDFSRV() {
 		return m_SDFBlocksSDFSRV;
 	}
@@ -484,6 +496,11 @@ private:
 	ID3D11Buffer*				m_Hash;
 	ID3D11UnorderedAccessView*	m_HashUAV;
 	ID3D11ShaderResourceView*	m_HashSRV;
+
+	//wei add
+	ID3D11Buffer*               m_PCXYZID;
+	ID3D11UnorderedAccessView*  m_PCXYZIDUAV;
+	ID3D11ShaderResourceView*   m_PCXYZIDSRV;
 
 	//! for allocation phase to lock has buckets
 	ID3D11Buffer*				m_HashBucketMutex;

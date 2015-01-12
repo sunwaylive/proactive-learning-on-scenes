@@ -36,6 +36,11 @@ DX11SceneRepHashSDF::DX11SceneRepHashSDF()
 	m_HashUAV = NULL;
 	m_HashSRV = NULL;
 
+	//wei add
+	m_PCXYZID = NULL;
+	m_PCXYZIDUAV = NULL;
+	m_PCXYZIDSRV = NULL;	
+
 	m_HashBucketMutex = NULL;
 	m_HashBucketMutexUAV = NULL;
 	m_HashBucketMutexSRV = NULL;
@@ -176,6 +181,11 @@ void DX11SceneRepHashSDF::Destroy()
 	SAFE_RELEASE(m_Hash);
 	SAFE_RELEASE(m_HashSRV);
 	SAFE_RELEASE(m_HashUAV);
+	
+	//wei add
+	SAFE_RELEASE(m_PCXYZID);
+	SAFE_RELEASE(m_PCXYZIDSRV);
+	SAFE_RELEASE(m_PCXYZIDUAV);
 
 	SAFE_RELEASE(m_HashBucketMutex);
 	SAFE_RELEASE(m_HashBucketMutexSRV);
@@ -409,7 +419,7 @@ HRESULT DX11SceneRepHashSDF::DumpPointCloud( const std::string &filename, ID3D11
 {
 	HRESULT hr = S_OK;
 
-	ID3D11Buffer* pBuffer = m_Hash;
+	ID3D11Buffer* pBuffer = m_Hash;//数据在m_Hash中
 
 	ID3D11Buffer* debugbuf = NULL;
 
@@ -420,18 +430,22 @@ HRESULT DX11SceneRepHashSDF::DumpPointCloud( const std::string &filename, ID3D11
 	desc.Usage = D3D11_USAGE_STAGING;
 	desc.BindFlags = 0;
 	desc.MiscFlags = 0;
-	V_RETURN(pDevice->CreateBuffer(&desc, NULL, &debugbuf));
+	V_RETURN(pDevice->CreateBuffer(&desc, NULL, &debugbuf));//debugbuf 是最好返回的指向创建的buffer的指针
 
-	pd3dImmediateContext->CopyResource( debugbuf, pBuffer );
-	unsigned int numElements = desc.ByteWidth/sizeof(INT);
+	pd3dImmediateContext->CopyResource( debugbuf, pBuffer );//把m_hash中的内容拷贝到debugbuffer中来
+	unsigned int numElements = desc.ByteWidth/sizeof(INT); //desc的bytewidth难道就是所存的总共的字节数？？
 
 
-	INT *cpuMemory = new INT[numElements];
+	INT *cpuMemory = new INT[numElements]; //在CPU端分配出对应的内存
+
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
+	//这个是在CPU端获取对debugbuf的读取权限， 后面就可以用mappedResource来访问指定内存
 	V(pd3dImmediateContext->Map(debugbuf, D3D11CalcSubresource(0,0,0), D3D11_MAP_READ, 0, &mappedResource));	
+	//把内存拷贝到cupMemory中
 	memcpy((void*)cpuMemory, (void*)mappedResource.pData, desc.ByteWidth);
+	//得到数据之后， 返还权限给GPU
 	pd3dImmediateContext->Unmap( debugbuf, 0 );
-
+	 
 	PointCloudf points;
 	for (unsigned int i = 0; i < numElements / 3; i++) {
 		if (cpuMemory[3*i+2] == -2)	continue;	//ignore non-allocated voxels
@@ -459,6 +473,69 @@ HRESULT DX11SceneRepHashSDF::DumpPointCloud( const std::string &filename, ID3D11
 	SAFE_DELETE_ARRAY(cpuMemory);
 
 	return hr;
+}
+
+HRESULT DX11SceneRepHashSDF::LoadPointCloud(const std::string &filename, ID3D11Device* pDevice, ID3D11DeviceContext* pd3dImmediateContext, unsigned int minWeight , bool justOccupied )
+{
+	HRESULT hr = S_OK;
+
+	//步骤1:读入带有path_id的数据
+	MeshDataf mesh_with_id;
+	MeshIOf::loadFromPLY("./Scans/scan.ply", mesh_with_id);
+	std::cout<<"position vert size: " <<mesh_with_id.m_Vertices.size() <<std::endl;
+	std::cout<<"color vert size: " <<mesh_with_id.m_Colors.size() <<std::endl;
+
+	//步骤2：把数据写入到buffer中去
+	D3D11_BUFFER_DESC descBUF;
+	D3D11_SHADER_RESOURCE_VIEW_DESC descSRV;
+	D3D11_UNORDERED_ACCESS_VIEW_DESC descUAV;
+
+	//create buf, 需要根据点云的数量创建对应大小的buff
+	int nPoints = (int)mesh_with_id.m_Vertices.size();
+	const int nelements_for_each_point = 5; //x y z patch_id object_id
+
+	ZeroMemory(&descBUF, sizeof(D3D11_BUFFER_DESC));
+	descBUF.BindFlags	= D3D11_BIND_UNORDERED_ACCESS | D3D11_BIND_SHADER_RESOURCE;
+	descBUF.Usage	= D3D11_USAGE_DEFAULT;
+	descBUF.CPUAccessFlags = 0;
+	descBUF.MiscFlags	= 0;
+	descBUF.ByteWidth	= sizeof(float) * ( 1 + nelements_for_each_point * nPoints);//第1个元素放点云的数量，后面对应每个点放点的 x y z patch_id obj_id
+	descBUF.StructureByteStride = sizeof(int);
+
+	//这块数据需要用读进来的pointcloud去显示
+	D3D11_SUBRESOURCE_DATA InitData;
+	ZeroMemory( &InitData, sizeof(D3D11_SUBRESOURCE_DATA) );
+	float* cpuNull = new float[nelements_for_each_point * nPoints];//cpuNULL 是初始化那块内存的数据
+	cpuNull[0] = static_cast<float>(nPoints); //第一个位置上放点的数量， 后面每5个位置对应一个点的数据
+	for (int i = 0; i < nPoints; i++) {
+		vec3f &pt = mesh_with_id.m_Vertices[i];
+		cpuNull[1 + nelements_for_each_point * i + 0] = pt.x;
+		cpuNull[1 + nelements_for_each_point * i + 1] = pt.y;
+		cpuNull[1 + nelements_for_each_point * i + 2] = pt.z;
+		cpuNull[1 + nelements_for_each_point * i + 3] = pt.r; //红色分量被用作 patch_id
+		cpuNull[1 + nelements_for_each_point * i + 4] = -2.0f;   //这个分量目前没有被用到
+	}
+	InitData.pSysMem = cpuNull;
+	V_RETURN(pDevice->CreateBuffer(&descBUF, &InitData, &m_PCXYZID));//用initData这块内存去初始化
+	SAFE_DELETE_ARRAY(cpuNull);                                      //!!!!create完了之后就可以释放了!!!
+
+	//create srv
+	ZeroMemory( &descSRV, sizeof(D3D11_SHADER_RESOURCE_VIEW_DESC) );
+	descSRV.Format = DXGI_FORMAT_R32_FLOAT;
+	descSRV.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
+	descSRV.Buffer.FirstElement = 0;
+	descSRV.Buffer.NumElements = nelements_for_each_point * nPoints;
+	V_RETURN(pDevice->CreateShaderResourceView(m_PCXYZID, &descSRV, &m_PCXYZIDSRV));
+
+	//create uav
+	ZeroMemory( &descUAV, sizeof(D3D11_UNORDERED_ACCESS_VIEW_DESC) );
+	descUAV.Format = DXGI_FORMAT_R32_FLOAT;
+	descUAV.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
+	descUAV.Buffer.FirstElement = 0;
+	descUAV.Buffer.NumElements =  nelements_for_each_point * nPoints;
+	V_RETURN(pDevice->CreateUnorderedAccessView(m_PCXYZID, &descUAV, &m_PCXYZIDUAV));
+
+	return S_OK;
 }
 
 void DX11SceneRepHashSDF::MapConstantBuffer( ID3D11DeviceContext* context )
@@ -884,7 +961,6 @@ HRESULT DX11SceneRepHashSDF::CreateBuffers( ID3D11Device* pd3dDevice )
 	V_RETURN(pd3dDevice->CreateUnorderedAccessView(m_HashCompactified, &descUAV, &m_HashCompactifiedUAV));
 
 	if (!m_JustHashAndNoSDFBlocks)	{
-
 		//create hash mutex
 		ZeroMemory(&descBUF, sizeof(D3D11_BUFFER_DESC));
 		descBUF.BindFlags	= D3D11_BIND_UNORDERED_ACCESS | D3D11_BIND_SHADER_RESOURCE;
