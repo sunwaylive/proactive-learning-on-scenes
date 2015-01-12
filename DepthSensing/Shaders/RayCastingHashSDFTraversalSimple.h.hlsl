@@ -186,6 +186,10 @@ void traverseCoarseGridSimpleSampleAll(float3 worldCamPos, float3 worldDir, floa
 				{
 					if(abs(dist) < g_thresDist)
 					{
+						//for () {
+						//	currentPosWorld,gg_PCXYZID()
+						//}
+
 						g_output[dTid.xy] = alpha/depthToRayLength; // Convert ray length to depth depthToRayLength
 						g_outputColor[dTid.xy] = float4(color, 1.0f);
 
@@ -194,6 +198,10 @@ void traverseCoarseGridSimpleSampleAll(float3 worldCamPos, float3 worldDir, floa
 							float3 normal = gradientForPoint(currentIso);
 							g_outputNormals[dTid.xy] = float4(mul(float4(normal,0.0f), g_ViewMat).xyz, 1.0f);
 						}
+
+					//	int3 sdfB = worldToSDFBlock(currentPosWorld);
+
+						
 
 						return;
 					}

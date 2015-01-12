@@ -672,7 +672,7 @@ HRESULT DX11SceneRepChunkGrid::mapID(ID3D11DeviceContext* context, const std::st
 	for (size_t pi = 0; pi < mesh_with_id.m_Vertices.size(); ++pi)
 	{
 		vec3f world_pos = mesh_with_id.m_Vertices[pi];
-		int red = (static_cast<int>(mesh_with_id.m_Colors[pi].x * 255) + 2) % 16; //rand() % 16; //(static_cast<int>(mesh_with_id.m_Colors[pi].x * 255) + 1) % 16;
+		int red = 2; //(static_cast<int>(mesh_with_id.m_Colors[pi].x * 255) + 2) % 16; //rand() % 16; //(static_cast<int>(mesh_with_id.m_Colors[pi].x * 255) + 1) % 16;
 		
 		vec3i chunk = worldToChunks(world_pos);
 

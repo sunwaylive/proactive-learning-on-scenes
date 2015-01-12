@@ -4,6 +4,8 @@ Buffer<float>	 g_SDFBlocksSDF		: register( t1 );
 Texture2D<float> g_RayIntervalMin   : register( t2 );
 Texture2D<float> g_RayIntervalMax   : register( t3 );
 Buffer<int>		 g_SDFBlocksRGBW	: register( t4 );
+//wei add
+//Buffer<int>		 g_PCXYZID			: register( t7 );
  
 Buffer<int>		g_FragmentPrefixSumBufferSRV	: register( t5 );
 Buffer<float>	g_FragmentSortedDepthBufferSRV	: register( t6 );
@@ -25,7 +27,7 @@ cbuffer cbConstant : register(b1)
 	uint		g_RenderTargetWidth;
 	uint		g_RenderTargetHeight;
 	uint		g_splatMinimum;
-	uint		g_dummyRayInteveral337;
+	uint		g_dummyRayInteveral;
 };
 
 #include "RayCastingHashSDFTraversalSimple.h.hlsl"
