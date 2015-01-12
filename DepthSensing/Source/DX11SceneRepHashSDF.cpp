@@ -475,15 +475,17 @@ HRESULT DX11SceneRepHashSDF::DumpPointCloud( const std::string &filename, ID3D11
 	return hr;
 }
 
-HRESULT DX11SceneRepHashSDF::LoadPointCloud(const std::string &filename, ID3D11Device* pDevice, ID3D11DeviceContext* pd3dImmediateContext, unsigned int minWeight , bool justOccupied )
+HRESULT DX11SceneRepHashSDF::LoadPointCloud( ID3D11Device* pDevice )
 {
 	HRESULT hr = S_OK;
 
 	//步骤1:读入带有path_id的数据
 	MeshDataf mesh_with_id;
-	MeshIOf::loadFromPLY("./Scans/scan.ply", mesh_with_id);
+	mesh_with_id.m_Vertices.push_back(vec3f(1.0f, 1.0f, 1.0f));
+	mesh_with_id.m_Colors.push_back(vec3f(2.0f, 0.0f, 0.0f));
+	/*MeshIOf::loadFromPLY("./Scans/scan.ply", mesh_with_id);
 	std::cout<<"position vert size: " <<mesh_with_id.m_Vertices.size() <<std::endl;
-	std::cout<<"color vert size: " <<mesh_with_id.m_Colors.size() <<std::endl;
+	std::cout<<"color vert size: " <<mesh_with_id.m_Colors.size() <<std::endl;*/
 
 	//步骤2：把数据写入到buffer中去
 	D3D11_BUFFER_DESC descBUF;
@@ -508,11 +510,13 @@ HRESULT DX11SceneRepHashSDF::LoadPointCloud(const std::string &filename, ID3D11D
 	float* cpuNull = new float[nelements_for_each_point * nPoints];//cpuNULL 是初始化那块内存的数据
 	cpuNull[0] = static_cast<float>(nPoints); //第一个位置上放点的数量， 后面每5个位置对应一个点的数据
 	for (int i = 0; i < nPoints; i++) {
-		vec3f &pt = mesh_with_id.m_Vertices[i];
-		cpuNull[1 + nelements_for_each_point * i + 0] = pt.x;
-		cpuNull[1 + nelements_for_each_point * i + 1] = pt.y;
-		cpuNull[1 + nelements_for_each_point * i + 2] = pt.z;
-		cpuNull[1 + nelements_for_each_point * i + 3] = pt.r; //红色分量被用作 patch_id
+		vec3f &pt_pos = mesh_with_id.m_Vertices[i];
+		float color_red = mesh_with_id.m_Colors[i].x;
+		cpuNull[1 + nelements_for_each_point * i + 0] = pt_pos.x;
+		cpuNull[1 + nelements_for_each_point * i + 1] = pt_pos.y;
+		cpuNull[1 + nelements_for_each_point * i + 2] = pt_pos.z;
+		std::cout<<"color_red: "<<color_red <<std::endl;
+		cpuNull[1 + nelements_for_each_point * i + 3] = color_red; //红色分量被用作 patch_id
 		cpuNull[1 + nelements_for_each_point * i + 4] = -2.0f;   //这个分量目前没有被用到
 	}
 	InitData.pSysMem = cpuNull;
@@ -906,6 +910,8 @@ HRESULT DX11SceneRepHashSDF::CreateBuffers( ID3D11Device* pd3dDevice )
 
 	m_LastRigidTransform.setIdentity();
 
+	//wei add
+	LoadPointCloud(pd3dDevice );
 
 	D3D11_BUFFER_DESC bDesc;
 	ZeroMemory(&bDesc, sizeof(D3D11_BUFFER_DESC));

@@ -272,8 +272,6 @@ void StopScanningAndExtractIsoSurfaceMC()
 	//导出Iso Surface
 	DX11MarchingCubesChunkGrid::extractIsoSurface(DXUTGetD3D11DeviceContext(), g_SceneRepChunkGrid, g_SceneRepSDFLocal, p, GlobalAppState::getInstance().s_StreamingRadius, "./Scans/scan.ply", &rigidTransform);
 
-
-
 	std::cout << "Mesh Processing Time " << t.getElapsedTime() << " seconds" << std::endl;
 
 	g_SceneRepChunkGrid.startMultiThreading(DXUTGetD3D11DeviceContext());
@@ -573,8 +571,6 @@ bool CALLBACK IsD3D11DeviceAcceptable( const CD3D11EnumAdapterInfo *AdapterInfo,
 {
 	return true;
 }
-
-
 
 //--------------------------------------------------------------------------------------
 // Create any D3D11 resources that aren't dependent on the back buffer

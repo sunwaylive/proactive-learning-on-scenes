@@ -36,25 +36,7 @@ struct VS_OUTPUT
 };
 
 #define MINF asfloat(0xff800000)
-//颜色表, 不加static const就错。
-static const float4 colorTable[16] = {
-	float4(0.53f, 0.81f, 1.00f, 0.0f),
-    float4(1.00f, 0.08f, 0.58f, 0.0f),
-    float4(0.00f, 0.00f, 1.00f, 0.0f),
-    float4(0.00f, 1.00f, 0.00f, 0.0f),
-    float4(1.00f, 1.00f, 0.00f, 0.0f),
-    float4(1.00f, 0.00f, 0.00f, 0.0f),
-    float4(0.63f, 0.13f, 0.94f, 0.0f),
-    float4(0.00f, 0.00f, 0.00f, 0.0f),
-    float4(0.93f, 0.68f, 0.05f, 0.0f),
-    float4(1.00f, 0.50f, 0.14f, 0.0f),
-    float4(1.00f, 0.71f, 0.77f, 0.0f),
-    float4(0.00f, 0.55f, 0.55f, 0.0f),
-    float4(0.55f, 0.49f, 0.48f, 0.0f),
-    float4(1.00f, 0.87f, 0.68f, 0.0f),
-    float4(0.42f, 0.56f, 0.14f, 0.0f),
-    float4(0.00f, 1.00f, 1.00f, 0.0f)
-};
+
 
 float4 PhongPS(VS_OUTPUT Input) : SV_TARGET
 {
@@ -63,7 +45,7 @@ float4 PhongPS(VS_OUTPUT Input) : SV_TARGET
 	float3 color = inputColors.Sample(g_PointSampler, Input.vTexcoord).xyz;
 
 	//在color的r分量重取出 patch_id的信息
-	int id = color.x;
+	//int id = color.x;
 
 	if(position.x != MINF && color.x != MINF && normal.x != MINF)
 	{
@@ -71,8 +53,8 @@ float4 PhongPS(VS_OUTPUT Input) : SV_TARGET
 
 		if(g_useMaterial == 1)
 		{
-			material = colorTable[id]; //float4(0.00f, 0.00f, 1.00f, 0.0f);
-			//material = float4(color, 1.0f);
+			//material = colorTable[id]; //float4(0.00f, 0.00f, 1.00f, 0.0f);
+			material = float4(color, 1.0f);
 		}
 
 		float4 lightAmbientMod = lightAmbient;

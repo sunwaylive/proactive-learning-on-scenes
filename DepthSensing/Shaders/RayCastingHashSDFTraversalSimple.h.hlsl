@@ -2,6 +2,27 @@
 //static const float g_thresSampleDist = 1.5f*rayIncrement;
 //static const float g_thresDist = 1.5f*rayIncrement;
 
+//颜色表, 不加static const就错。
+static const float4 colorTable[16] = {
+	float4(0.53f, 0.81f, 1.00f, 0.0f),
+    float4(1.00f, 0.08f, 0.58f, 0.0f),
+    float4(0.00f, 0.00f, 1.00f, 0.0f),
+    float4(0.00f, 1.00f, 0.00f, 0.0f),
+    float4(1.00f, 1.00f, 0.00f, 0.0f),
+    float4(1.00f, 0.00f, 0.00f, 0.0f),
+    float4(0.63f, 0.13f, 0.94f, 0.0f),
+    float4(0.00f, 0.00f, 0.00f, 0.0f),
+    float4(0.93f, 0.68f, 0.05f, 0.0f),
+    float4(1.00f, 0.50f, 0.14f, 0.0f),
+    float4(1.00f, 0.71f, 0.77f, 0.0f),
+    float4(0.00f, 0.55f, 0.55f, 0.0f),
+    float4(0.55f, 0.49f, 0.48f, 0.0f),
+    float4(1.00f, 0.87f, 0.68f, 0.0f),
+    float4(0.42f, 0.56f, 0.14f, 0.0f),
+    float4(0.00f, 1.00f, 1.00f, 0.0f)
+};
+
+
 float3 gradientForPoint(float3 pos)
 {
 	float3 offset = g_VirtualVoxelSize;
@@ -208,7 +229,16 @@ void traverseCoarseGridSimpleSampleAll(float3 worldCamPos, float3 worldDir, floa
 						}
 
 						//根据patch_id设置颜色
-						g_outputColor[dTid.xy] = float4(color, 1.0f);
+						if(nearest_patch_id == 1){
+							g_outputColor[dTid.xy] = float4(float3(0.0f, 1.0f, 0.0f), 1.0f);
+						}else{
+							g_outputColor[dTid.xy] = float4(float3(1.0f, 0.0f, 0.0f), 1.0f);
+						}
+
+						/*if(nearest_patch_id >=0 && nearest_patch_id < 16){
+							g_outputColor[dTid.xy] = colorTable[nearest_patch_id];
+						}*/
+
 						g_output[dTid.xy] = alpha/depthToRayLength; // Convert ray length to depth depthToRayLength
 						
 

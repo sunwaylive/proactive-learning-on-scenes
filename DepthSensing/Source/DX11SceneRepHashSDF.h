@@ -58,7 +58,7 @@ public:
 
 	HRESULT DumpPointCloud(const std::string &filename, ID3D11Device* pDevice, ID3D11DeviceContext* pd3dImmediateContext, unsigned int minWeight = 1, bool justOccupied = false);
 
-	HRESULT LoadPointCloud( const std::string &filename, ID3D11Device* pDevice, ID3D11DeviceContext* pd3dImmediateContext, unsigned int minWeight /*= 1*/, bool justOccupied /*= false*/ );
+	HRESULT LoadPointCloud( ID3D11Device* pDevice);
 
 	const mat4f& GetLastRigidTransform() const	{	
 		return m_LastRigidTransform;
