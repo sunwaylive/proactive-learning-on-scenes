@@ -1,11 +1,12 @@
 
-Buffer<int>	g_Hash					: register( t0 );
+Buffer<int>	     g_Hash					: register( t0 );
+//wei add
+Buffer<int>		 g_PCXYZID			: register( t7 );
+
 Buffer<float>	 g_SDFBlocksSDF		: register( t1 );
 Texture2D<float> g_RayIntervalMin   : register( t2 );
 Texture2D<float> g_RayIntervalMax   : register( t3 );
 Buffer<int>		 g_SDFBlocksRGBW	: register( t4 );
-//wei add
-//Buffer<int>		 g_PCXYZID			: register( t7 );
  
 Buffer<int>		g_FragmentPrefixSumBufferSRV	: register( t5 );
 Buffer<float>	g_FragmentSortedDepthBufferSRV	: register( t6 );
@@ -30,6 +31,7 @@ cbuffer cbConstant : register(b1)
 	uint		g_dummyRayInteveral;
 };
 
+//这个是最下面调用的函数traverseCoarseGridSimpleSampleAll所在的文件
 #include "RayCastingHashSDFTraversalSimple.h.hlsl"
  
 // rayCurrent and rayEnd need to be be the intersections between ray and the coarse grid box

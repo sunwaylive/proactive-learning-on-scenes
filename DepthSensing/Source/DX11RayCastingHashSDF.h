@@ -34,6 +34,15 @@ class DX11RayCastingHashSDF
 										ID3D11ShaderResourceView* pNormalsSRV, ID3D11UnorderedAccessView* pNormalsUAV,
 										ID3D11ShaderResourceView* pSSAOMapSRV, ID3D11UnorderedAccessView* pSSAOMapUAV, ID3D11UnorderedAccessView* pSSAOMapFilteredUAV);
 
+		static HRESULT RenderToTexture(ID3D11DeviceContext* context, ID3D11ShaderResourceView* hash, ID3D11ShaderResourceView *PCXYZID, ID3D11ShaderResourceView* hashCompact, ID3D11ShaderResourceView* sdfBlocksSDF, ID3D11ShaderResourceView* sdfBlocksRGBW, unsigned int hashNumValidBuckets, unsigned int renderTargetWidth, unsigned int renderTargetHeight, const mat4f* lastRigidTransform, ID3D11Buffer* CBsceneRepSDF,
+			                            ID3D11ShaderResourceView* pDepthStencilSplattingMinSRV, ID3D11ShaderResourceView* pDepthStencilSplattingMaxSRV,
+			                            ID3D11DepthStencilView* pDepthStencilSplattingMinDSV, ID3D11DepthStencilView* pDepthStencilSplattingMaxDSV,
+			                            ID3D11ShaderResourceView* pOutputImage2DSRV, ID3D11UnorderedAccessView* pOutputImage2DUAV,
+			                            ID3D11ShaderResourceView* pPositionsSRV, ID3D11UnorderedAccessView* pPositionsUAV,
+			                            ID3D11UnorderedAccessView* pColorsUAV,
+			                            ID3D11ShaderResourceView* pNormalsSRV, ID3D11UnorderedAccessView* pNormalsUAV,
+			                            ID3D11ShaderResourceView* pSSAOMapSRV, ID3D11UnorderedAccessView* pSSAOMapUAV, ID3D11UnorderedAccessView* pSSAOMapFilteredUAV);
+
 		// Depth
 		static ID3D11ShaderResourceView* getDepthImageSRV()	{
 			return m_pOutputImage2DSRV;

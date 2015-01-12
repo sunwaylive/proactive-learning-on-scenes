@@ -337,6 +337,119 @@ HRESULT DX11RayCastingHashSDF::RenderToTexture( ID3D11DeviceContext* context, ID
 	return hr;
 }
 
+//ÖØÔØ, Ìí¼ÓÁËpointcloud xyzid
+HRESULT DX11RayCastingHashSDF::RenderToTexture( ID3D11DeviceContext* context, ID3D11ShaderResourceView* hash, ID3D11ShaderResourceView *PCXYZID, ID3D11ShaderResourceView* hashCompact, ID3D11ShaderResourceView* sdfBlocksSDF, ID3D11ShaderResourceView* sdfBlocksRGBW, unsigned int hashNumValidBuckets, unsigned int renderTargetWidth, unsigned int renderTargetHeight, const mat4f* lastRigidTransform, ID3D11Buffer* CBsceneRepSDF, ID3D11ShaderResourceView* pDepthStencilSplattingMinSRV, ID3D11ShaderResourceView* pDepthStencilSplattingMaxSRV, ID3D11DepthStencilView* pDepthStencilSplattingMinDSV, ID3D11DepthStencilView* pDepthStencilSplattingMaxDSV, ID3D11ShaderResourceView* pOutputImage2DSRV, ID3D11UnorderedAccessView* pOutputImage2DUAV, ID3D11ShaderResourceView* pPositionsSRV, ID3D11UnorderedAccessView* pPositionsUAV, ID3D11UnorderedAccessView* pColorsUAV, ID3D11ShaderResourceView* pNormalsSRV, ID3D11UnorderedAccessView* pNormalsUAV, ID3D11ShaderResourceView* pSSAOMapSRV, ID3D11UnorderedAccessView* pSSAOMapUAV, ID3D11UnorderedAccessView* pSSAOMapFilteredUAV )
+{
+	HRESULT hr = S_OK;
+
+	// Splat Ray Interval Images
+	if(GlobalAppState::getInstance().s_enableMultiLayerSplatting)
+	{
+		// TODO !!! adapt to stereo setup !!!
+		//V_RETURN(DX11RayMarchingStepsSplatting::rayMarchingStepsSplatting(context, hashCompact, sdfBlocksSDF, sdfBlocksRGBW, hashNumValidBuckets, lastRigidTransform, renderTargetWidth, renderTargetHeight, CBsceneRepSDF));
+	}
+	else
+	{
+		V_RETURN(rayIntervalSplattingRenderToTexture(context, hashCompact, hashNumValidBuckets, lastRigidTransform, renderTargetWidth, renderTargetHeight, CBsceneRepSDF, pDepthStencilSplattingMinDSV, pDepthStencilSplattingMaxDSV));
+
+		//V_RETURN(rayIntervalSplatting(context, hashCompact, hashNumValidBuckets, lastRigidTransform, renderTargetWidth, renderTargetHeight, CBsceneRepSDF));
+		//DX11QuadDrawer::RenderQuad(context, s_pDepthStencilSplattingMinSRV);
+	}
+
+	// Initialize constant buffer
+	D3D11_MAPPED_SUBRESOURCE mappedResource;
+	V_RETURN(context->Map(s_ConstantBufferSplatting, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource));
+	CBuffer *cbuffer = (CBuffer*)mappedResource.pData;
+	cbuffer->m_RenderTargetWidth = renderTargetWidth;
+	cbuffer->m_RenderTargetHeight = renderTargetHeight;
+	mat4f worldToLastKinectSpace = lastRigidTransform->getInverse();
+	memcpy(&cbuffer->m_ViewMat, &worldToLastKinectSpace, sizeof(mat4f));
+	memcpy(&cbuffer->m_ViewMatInverse, lastRigidTransform, sizeof(mat4f));
+	cbuffer->m_SplatMinimum = 1;				
+	context->Unmap(s_ConstantBufferSplatting, 0);
+
+	// Setup pipeline
+	context->CSSetShaderResources(0, 1, &hash);
+	context->CSSetShaderResources(1, 1, &sdfBlocksSDF);
+	context->CSSetShaderResources(4, 1, &sdfBlocksRGBW);
+	context->CSSetShaderResources(2, 1, &pDepthStencilSplattingMinSRV);
+	context->CSSetShaderResources(3, 1, &pDepthStencilSplattingMaxSRV);
+	ID3D11ShaderResourceView* srvPrefix = DX11RayMarchingStepsSplatting::getFragmentPrefixSumBufferSRV();
+	ID3D11ShaderResourceView* srvSortedDepth = DX11RayMarchingStepsSplatting::getFragmentSortedDepthBufferSRV();
+	context->CSSetShaderResources(5, 1, &srvPrefix);
+	context->CSSetShaderResources(6, 1, &srvSortedDepth);
+	context->CSSetUnorderedAccessViews(0, 1, &pOutputImage2DUAV, 0);
+	context->CSSetUnorderedAccessViews(1, 1, &pColorsUAV, 0);
+	context->CSSetUnorderedAccessViews(2, 1, &pNormalsUAV, 0);
+
+	//context->CSSetConstantBuffers(0, 1, &m_constantBuffer);
+	context->CSSetConstantBuffers(0, 1, &CBsceneRepSDF);
+	context->CSSetConstantBuffers(1, 1, &s_ConstantBufferSplatting);
+	ID3D11Buffer* CBGlobalAppState = GlobalAppState::getInstance().MapAndGetConstantBuffer(context);
+	context->CSSetConstantBuffers(8, 1, &CBGlobalAppState);
+	context->CSSetShader(m_pComputeShader, 0, 0);
+
+	// Run compute shader
+	unsigned int dimX = (unsigned int)ceil(((float)renderTargetWidth)/m_blockSize);
+	unsigned int dimY = (unsigned int)ceil(((float)renderTargetHeight)/m_blockSize);
+
+	// Start query for timing
+	if(GlobalAppState::getInstance().s_timingsDetailledEnabled)
+	{
+		GlobalAppState::getInstance().WaitForGPU();
+		m_timer.start();
+	}
+
+	context->Dispatch(dimX, dimY, 1);
+	assert(dimX <= D3D11_CS_DISPATCH_MAX_THREAD_GROUPS_PER_DIMENSION);
+	assert(dimY <= D3D11_CS_DISPATCH_MAX_THREAD_GROUPS_PER_DIMENSION);
+
+	// Wait for query
+	if(GlobalAppState::getInstance().s_timingsDetailledEnabled)
+	{
+		GlobalAppState::getInstance().WaitForGPU();
+		TimingLog::totalTimeRayCast+=m_timer.getElapsedTimeMS();
+		TimingLog::countRayCast++;
+	}
+
+	// Cleanup
+	ID3D11ShaderResourceView* nullSRV[] = {NULL, NULL, NULL, NULL, NULL};
+	ID3D11UnorderedAccessView* nullUAV[] = {NULL};
+	ID3D11Buffer* nullB[] = {NULL, NULL};
+
+	context->CSSetShaderResources(0, 5, nullSRV);
+	context->CSSetShaderResources(5, 1, nullSRV);
+	context->CSSetShaderResources(6, 1, nullSRV);
+	context->CSSetUnorderedAccessViews(0, 1, nullUAV, 0);
+	context->CSSetUnorderedAccessViews(1, 1, nullUAV, 0);
+	context->CSSetUnorderedAccessViews(2, 1, nullUAV, 0);
+	context->CSSetConstantBuffers(0, 2, nullB);
+	context->CSSetConstantBuffers(8, 1, nullB);
+	context->CSSetShader(0, 0, 0);
+
+	// Output
+	if(GlobalAppState::getInstance().s_currentlyInStereoMode)
+	{
+		DX11ImageHelper::StereoCameraSpaceProjection(context, pOutputImage2DSRV, pPositionsUAV, renderTargetWidth, renderTargetHeight);
+	}
+	else
+	{
+		DX11ImageHelper::applyCameraSpaceProjection(context, pOutputImage2DSRV, pPositionsUAV, renderTargetWidth, renderTargetHeight);
+	}
+
+	if(!GlobalAppState::getInstance().s_useGradients)
+	{
+		DX11ImageHelper::applyNormalComputation(context, pPositionsSRV, pNormalsUAV, renderTargetWidth, renderTargetHeight);
+	}
+
+	// Compute SSAO Maps
+	DX11ImageHelper::applySSAOMap(context, pOutputImage2DSRV, pSSAOMapUAV, renderTargetWidth, renderTargetHeight);
+	DX11ImageHelper::applyBilateralFilterForSSAO(context, pOutputImage2DSRV, pSSAOMapSRV, pSSAOMapFilteredUAV, renderTargetWidth, renderTargetHeight, 2.0f, 0.1f);
+
+	return hr;
+}
+
+
 HRESULT DX11RayCastingHashSDF::initialize( ID3D11Device* pd3dDevice )
 {
 	HRESULT hr = S_OK;

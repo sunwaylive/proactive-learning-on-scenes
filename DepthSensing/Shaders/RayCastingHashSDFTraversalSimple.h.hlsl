@@ -186,6 +186,7 @@ void traverseCoarseGridSimpleSampleAll(float3 worldCamPos, float3 worldDir, floa
 				{
 					if(abs(dist) < g_thresDist)
 					{
+						//遍历所有pointcloud中的点，找出距离当前raycasting的点最近的位置
 						//for () {
 						//	currentPosWorld,gg_PCXYZID()
 						//}
@@ -199,7 +200,7 @@ void traverseCoarseGridSimpleSampleAll(float3 worldCamPos, float3 worldDir, floa
 							g_outputNormals[dTid.xy] = float4(mul(float4(normal,0.0f), g_ViewMat).xyz, 1.0f);
 						}
 
-					//	int3 sdfB = worldToSDFBlock(currentPosWorld);
+						//	int3 sdfB = worldToSDFBlock(currentPosWorld);
 
 						
 
