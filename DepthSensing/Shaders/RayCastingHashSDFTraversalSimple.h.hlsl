@@ -189,18 +189,28 @@ void traverseCoarseGridSimpleSampleAll(float3 worldCamPos, float3 worldDir, floa
 						//遍历所有pointcloud中的点，找出距离当前raycasting的点最近的位置
 						int nelements_for_each_point = 5;
 						int nPoints = g_PCXYZID[0]; //取出第一个字节，得到点云的数量
+						float nearest_distance = MAXF;
+						int nearest_patch_id = -1;
+
 						for(int i = 0; i < nPoints; i++){
 							float3 pt;
 							pt.x = g_PCXYZID[1 + nelements_for_each_point * i + 0];
 							pt.y = g_PCXYZID[1 + nelements_for_each_point * i + 1];
 							pt.z = g_PCXYZID[1 + nelements_for_each_point * i + 2];
 
-							int patchi_id = g_PCXYZID[1 + nelements_for_each_point * i + 3];
+							int cur_patch_id = g_PCXYZID[1 + nelements_for_each_point * i + 3];
 							
+							double cur_dist = distance(pt, currentPosWorld);//distance为内置函数
+							if(cur_dist < nearest_distance){
+								nearest_distance = cur_dist;
+								nearest_patch_id = cur_patch_id;
+							}
 						}
 
-						g_output[dTid.xy] = alpha/depthToRayLength; // Convert ray length to depth depthToRayLength
+						//根据patch_id设置颜色
 						g_outputColor[dTid.xy] = float4(color, 1.0f);
+						g_output[dTid.xy] = alpha/depthToRayLength; // Convert ray length to depth depthToRayLength
+						
 
 						if(g_useGradients == 1)
 						{

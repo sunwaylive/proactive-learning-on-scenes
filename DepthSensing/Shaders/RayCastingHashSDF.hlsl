@@ -32,6 +32,9 @@ cbuffer cbConstant : register(b1)
 };
 
 //这个是最下面调用的函数traverseCoarseGridSimpleSampleAll所在的文件
+#define MINF asfloat(0xff800000)
+#define MAXF asfloat(0x7F7FFFFF)
+
 #include "RayCastingHashSDFTraversalSimple.h.hlsl"
  
 // rayCurrent and rayEnd need to be be the intersections between ray and the coarse grid box
