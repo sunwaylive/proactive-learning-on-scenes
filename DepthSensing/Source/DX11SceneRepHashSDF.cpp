@@ -649,22 +649,30 @@ HRESULT DX11SceneRepHashSDF::SetVoxelID( ID3D11Device *pd3dDevice, ID3D11DeviceC
 	D3D_SHADER_MACRO Shader_Macros[] = { "D3D11", "1" , NULL, NULL };
 	ID3DBlob* pBlob = NULL;
 	ID3D11ComputeShader* m_setVoxelIDComputeShader = NULL;
-	V_RETURN(CompileShaderFromFile(L"Shaders\\RayCastingHashSDF.hlsl", "renderCS", "cs_5_0", &pBlob, Shader_Macros)); //, D3DCOMPILE_SKIP_VALIDATION | D3DCOMPILE_SKIP_OPTIMIZATION | D3DCOMPILE_PREFER_FLOW_CONTROL | D3DCOMPILE_OPTIMIZATION_LEVEL0));
+	V_RETURN(CompileShaderFromFile(L"Shaders\\RayCastingHashSDF.hlsl", "SetVoxelIDByPointCloud", "cs_5_0", &pBlob, Shader_Macros)); //, D3DCOMPILE_SKIP_VALIDATION | D3DCOMPILE_SKIP_OPTIMIZATION | D3DCOMPILE_PREFER_FLOW_CONTROL | D3DCOMPILE_OPTIMIZATION_LEVEL0));
 	V_RETURN(pd3dDevice->CreateComputeShader(pBlob->GetBufferPointer(), pBlob->GetBufferSize(), NULL, &m_setVoxelIDComputeShader));
 	SAFE_RELEASE(pBlob);
 
-	//context->CSSetUnorderedAccessViews();
 	context->CSSetShaderResources(7, 1, &m_PCXYZIDSRV);
 	context->CSSetUnorderedAccessViews(8, 1, &m_PointBIDUAV, NULL);
 	context->CSSetUnorderedAccessViews(9, 1, &m_BIDArrayUAV, NULL);
+	//context->CSSetUnorderedAccessViews(1, 1, &m_SDFBlocksSDFUAV, NULL);
+	//context->CSSetUnorderedAccessViews(4, 1, &m_SDFBlocksRGBWUAV, NULL);
+	ID3D11Buffer* CBGlobalAppState = GlobalAppState::getInstance().MapAndGetConstantBuffer(context);
+	context->CSSetConstantBuffers(8, 1, &CBGlobalAppState);
 
 	context->CSSetShader(m_setVoxelIDComputeShader, 0, 0);
 	context->Dispatch(1, 1, 1);
 
+	//clean up
 	ID3D11UnorderedAccessView* nullUAV[] = { NULL, NULL, NULL, NULL, NULL, NULL };
+	ID3D11Buffer* nullB[1] = {NULL};
 	context->CSSetUnorderedAccessViews(7, 1, nullUAV, 0);
 	context->CSSetUnorderedAccessViews(8, 1, nullUAV, 0);
-	context->CSSetUnorderedAccessViews(8, 1, nullUAV, 0);
+	context->CSSetUnorderedAccessViews(9, 1, nullUAV, 0);
+	/*context->CSSetUnorderedAccessViews(1, 1, nullUAV, 0);
+	context->CSSetUnorderedAccessViews(4, 1, nullUAV, 0);*/
+	context->CSSetConstantBuffers(8, 1, nullB);
 
 	context->CSSetShader(0, 0, 0);
 	return S_OK;

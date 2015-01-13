@@ -8,7 +8,7 @@ RWBuffer<int>    BIDArray           : register( t9 );
 Buffer<float>	 g_SDFBlocksSDF		: register( t1 );
 Texture2D<float> g_RayIntervalMin   : register( t2 );
 Texture2D<float> g_RayIntervalMax   : register( t3 );
-Buffer<int>		 g_SDFBlocksRGBW	: register( t4 );
+Buffer<int>	 g_SDFBlocksRGBW	: register( t4 );
  
 Buffer<int>		g_FragmentPrefixSumBufferSRV	: register( t5 );
 Buffer<float>	g_FragmentSortedDepthBufferSRV	: register( t6 );
@@ -18,7 +18,15 @@ Buffer<float>	g_FragmentSortedDepthBufferSRV	: register( t6 );
 #include "KinectCameraUtil.h.hlsl"
 #include "VoxelUtilHashSDF.h.hlsl"
 #include "RayCastingUtilHashSDF.h.hlsl"
-      
+
+//wei add
+int linearizeIndex(int3 idx)
+{
+	return idx.x 
+		+ idx.y * m_gridDimensions.x 
+		+ idx.z * m_gridDimensions.x * m_gridDimensions.y;
+}
+
 RWTexture2D<float> g_output : register(u0);
 RWTexture2D<float4> g_outputColor : register(u1);
 RWTexture2D<float4> g_outputNormals : register(u2);

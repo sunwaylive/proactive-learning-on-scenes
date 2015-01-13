@@ -189,58 +189,69 @@ void SetVoxelIDByPointCloud()
 
 	//int *PointBID = new int[nPoints](-1);全局已经分配，在RaycastingHashSF.hlsl中
 	//int *BIDArray = new int[nPoints](-1);
-	/*for(int i = 0; i < nPoints; i++){
+	for(int i = 0; i < nPoints; i++){
 		float3 pt;
 		pt.x = g_PCXYZID[1 + nelements_for_each_point * i + 0];
 		pt.y = g_PCXYZID[1 + nelements_for_each_point * i + 1];
 		pt.z = g_PCXYZID[1 + nelements_for_each_point * i + 2];
-		PointBID[i] = linearizeIndex(worldToSDFBlock(pt);
-	}*/
+		//PointBID[i] = linearizeIndex(worldToSDFBlock(pt);
+		int3 tmp = worldToSDFBlock(pt);
+		int tmp2 = linearizeIndex(tmp);
+		PointBID[i] = tmp2;
+	}
 
-	//int nBID = 0;
-	//for(int i = 0; i < nPoints; i++){
-	//	for (int j= 0; j < nBID; j++) {
-	//		if (BIDArray[j] == PointBID[i]) {
-	//			break;
-	//		}
-	//	}
-	//	if (j == nBID) { // not found
-	//		BIDArry[nBID++] = PointBID[i];
-	//	}
-	//}
+	int nBID = 0;
+	for(int i = 0; i < nPoints; i++)
+	{
+		int j;
+		for (j = 0; j < nBID; j++) 
+		{
+			if (BIDArray[j] == PointBID[i]) //BIDArray默认是-1
+			{
+				break;
+			}
+		}
 
-	//for(int i = 0; i < nBID; i++){
-	//	HashEntry entry = getHashEntryForSDFBlockPos(g_Hash, BIDArry[i]);
+		if (j == nBID) { // not found
+			BIDArray[nBID] = PointBID[i];
+			nBID++;
+		}
+	}
 
-	//	if(entry.ptr != FREE_ENTRY)
-	//	{
-	//		int3 pi_base = SDFBlockToVirtualVoxelPos(entry.pos);
-	//		for (int j=0; j<512; j++) {
-	//			int3 pi = pi_base + delinearizeVoxelIndex(j);
-	//			float3 pf = virtualVoxelPosToWorld(pi);
-	//			float min_dist = 100000000.0;
-	//			int cpi = -1;
-	//			for(int k = 0; k < nPoints; k++){
-	//				if (PointBID[k] == BIDArry[i]) {
-	//					float3 pt;
-	//					pt.x = g_PCXYZID[1 + nelements_for_each_point * k + 0];
-	//					pt.y = g_PCXYZID[1 + nelements_for_each_point * k + 1];
-	//					pt.z = g_PCXYZID[1 + nelements_for_each_point * k + 2];
-	//					float dist = (pf.x-pt.x)*(pf.x-pt.x) + (pf.y-pt.y)*(pf.y-pt.y) + (pf.z-pt.z)*(pf.z-pt.z);
-	//					if (dist < min_dist) {
-	//						min_dist = dist;
-	//						cpi = k;
-	//					}
-	//				}
-	//			}
-	//			if (cpi != -1) {
-	//				Voxel	v = getVoxel(g_SDFBlocksSDF, g_SDFBlocksRGBW, j);
-	//				v.color.x = g_PCXYZID[1 + nelements_for_each_point * cpi + 3];
-	//				setVoxel(g_SDFBlocksSDF, g_SDFBlocksRGBW, j, v);
-	//			}
-	//		}
-	//	}
-	//}
+	for(int i = 0; i < nBID; i++){
+		HashEntry entry = getHashEntryForSDFBlockPos(g_Hash, BIDArray[i]);
+
+		if(entry.ptr != FREE_ENTRY)
+		{
+			int3 pi_base = SDFBlockToVirtualVoxelPos(entry.pos);
+			for (int j = 0; j < 512; j++) {
+				int3 pi = pi_base + delinearizeVoxelIndex(j);
+				float3 pf = virtualVoxelPosToWorld(pi);
+				float min_dist = 100000000.0;
+				int cpi = -1;
+
+				for(int k = 0; k < nPoints; k++){
+					if (PointBID[k] == BIDArray[i]) {
+						float3 pt;
+						pt.x = g_PCXYZID[1 + nelements_for_each_point * k + 0];
+						pt.y = g_PCXYZID[1 + nelements_for_each_point * k + 1];
+						pt.z = g_PCXYZID[1 + nelements_for_each_point * k + 2];
+						float dist = (pf.x-pt.x)*(pf.x-pt.x) + (pf.y-pt.y)*(pf.y-pt.y) + (pf.z-pt.z)*(pf.z-pt.z);
+						if (dist < min_dist) {
+							min_dist = dist;
+							cpi = k;
+						}
+					}
+				}
+
+				if (cpi != -1) {
+					Voxel	v = getVoxel(g_SDFBlocksSDF, g_SDFBlocksRGBW, j);
+					v.color.x = g_PCXYZID[1 + nelements_for_each_point * cpi + 3];
+					//setVoxel(g_SDFBlocksSDF, g_SDFBlocksRGBW, j, v);
+				}
+			}
+		}
+	}
 }
 
 void traverseCoarseGridSimpleSampleAll(float3 worldCamPos, float3 worldDir, float3 camDir, int3 dTid)
