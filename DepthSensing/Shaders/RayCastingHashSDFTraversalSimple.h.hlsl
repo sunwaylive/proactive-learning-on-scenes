@@ -229,15 +229,17 @@ void traverseCoarseGridSimpleSampleAll(float3 worldCamPos, float3 worldDir, floa
 						}
 
 						//根据patch_id设置颜色
-						if(nearest_patch_id == 1){
+						/*if(nearest_patch_id == 1){
 							g_outputColor[dTid.xy] = float4(float3(0.0f, 1.0f, 0.0f), 1.0f);
 						}else{
 							g_outputColor[dTid.xy] = float4(float3(1.0f, 0.0f, 0.0f), 1.0f);
-						}
-
-						/*if(nearest_patch_id >=0 && nearest_patch_id < 16){
-							g_outputColor[dTid.xy] = colorTable[nearest_patch_id];
 						}*/
+
+						if(nearest_patch_id >=0 && nearest_patch_id < 16){
+							g_outputColor[dTid.xy] = colorTable[nearest_patch_id];
+						}else{
+							g_outputColor[dTid.xy] = float4(1.0f, 0.0f, 0.0f, 1.0f);
+						}
 
 						g_output[dTid.xy] = alpha/depthToRayLength; // Convert ray length to depth depthToRayLength
 						

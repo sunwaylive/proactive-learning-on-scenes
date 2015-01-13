@@ -479,66 +479,81 @@ HRESULT DX11SceneRepHashSDF::LoadPointCloud( ID3D11Device* pDevice )
 {
 	HRESULT hr = S_OK;
 
+	/*std::cout<<"directy return S_OK in LoadPointCloud" <<std::endl;
+	return hr;*/
+
 	//步骤1:读入带有path_id的数据
-	MeshDataf mesh_with_id;
-	mesh_with_id.m_Vertices.push_back(vec3f(1.0f, 1.0f, 1.0f));
-	mesh_with_id.m_Colors.push_back(vec3f(2.0f, 0.0f, 0.0f));
-	/*MeshIOf::loadFromPLY("./Scans/scan.ply", mesh_with_id);
-	std::cout<<"position vert size: " <<mesh_with_id.m_Vertices.size() <<std::endl;
-	std::cout<<"color vert size: " <<mesh_with_id.m_Colors.size() <<std::endl;*/
+	{
+		MeshDataf mesh_with_id;
+		mesh_with_id.m_Vertices.push_back(vec3f(0.724041, 0.50689, 1.41012));
+		mesh_with_id.m_Colors.push_back(vec3f(1.0f, 0.0f, 0.0f));
 
-	//步骤2：把数据写入到buffer中去
-	D3D11_BUFFER_DESC descBUF;
-	D3D11_SHADER_RESOURCE_VIEW_DESC descSRV;
-	D3D11_UNORDERED_ACCESS_VIEW_DESC descUAV;
 
-	//create buf, 需要根据点云的数量创建对应大小的buff
-	int nPoints = (int)mesh_with_id.m_Vertices.size();
-	const int nelements_for_each_point = 5; //x y z patch_id object_id
+		mesh_with_id.m_Vertices.push_back(vec3f(0.0906226, 0.0550402, 0.418263));
+		mesh_with_id.m_Colors.push_back(vec3f(2.0f, 0.0f, 0.0f));
 
-	ZeroMemory(&descBUF, sizeof(D3D11_BUFFER_DESC));
-	descBUF.BindFlags	= D3D11_BIND_UNORDERED_ACCESS | D3D11_BIND_SHADER_RESOURCE;
-	descBUF.Usage	= D3D11_USAGE_DEFAULT;
-	descBUF.CPUAccessFlags = 0;
-	descBUF.MiscFlags	= 0;
-	descBUF.ByteWidth	= sizeof(float) * ( 1 + nelements_for_each_point * nPoints);//第1个元素放点云的数量，后面对应每个点放点的 x y z patch_id obj_id
-	descBUF.StructureByteStride = sizeof(int);
+		mesh_with_id.m_Vertices.push_back(vec3f(0.13409, 0.16703, 0.489359));
+		mesh_with_id.m_Colors.push_back(vec3f(3.0f, 0.0f, 0.0f));
 
-	//这块数据需要用读进来的pointcloud去显示
-	D3D11_SUBRESOURCE_DATA InitData;
-	ZeroMemory( &InitData, sizeof(D3D11_SUBRESOURCE_DATA) );
-	float* cpuNull = new float[nelements_for_each_point * nPoints];//cpuNULL 是初始化那块内存的数据
-	cpuNull[0] = static_cast<float>(nPoints); //第一个位置上放点的数量， 后面每5个位置对应一个点的数据
-	for (int i = 0; i < nPoints; i++) {
-		vec3f &pt_pos = mesh_with_id.m_Vertices[i];
-		float color_red = mesh_with_id.m_Colors[i].x;
-		cpuNull[1 + nelements_for_each_point * i + 0] = pt_pos.x;
-		cpuNull[1 + nelements_for_each_point * i + 1] = pt_pos.y;
-		cpuNull[1 + nelements_for_each_point * i + 2] = pt_pos.z;
-		std::cout<<"color_red: "<<color_red <<std::endl;
-		cpuNull[1 + nelements_for_each_point * i + 3] = color_red; //红色分量被用作 patch_id
-		cpuNull[1 + nelements_for_each_point * i + 4] = -2.0f;   //这个分量目前没有被用到
+		mesh_with_id.m_Vertices.push_back(vec3f(0.146088, 0.175028, 0.479096));
+		mesh_with_id.m_Colors.push_back(vec3f(4.0f, 0.0f, 0.0f));
+		
+		/*MeshIOf::loadFromPLY("./Scans/scan.ply", mesh_with_id);
+		std::cout<<"position vert size: " <<mesh_with_id.m_Vertices.size() <<std::endl;
+		std::cout<<"color vert size: " <<mesh_with_id.m_Colors.size() <<std::endl;*/
+
+		//步骤2：把数据写入到buffer中去
+		D3D11_BUFFER_DESC descBUF;
+		D3D11_SHADER_RESOURCE_VIEW_DESC descSRV;
+		D3D11_UNORDERED_ACCESS_VIEW_DESC descUAV;
+
+		//create buf, 需要根据点云的数量创建对应大小的buff
+		int nPoints = (int)mesh_with_id.m_Vertices.size();
+		const int nelements_for_each_point = 5; //x y z patch_id object_id
+
+		ZeroMemory(&descBUF, sizeof(D3D11_BUFFER_DESC));
+		descBUF.BindFlags	= D3D11_BIND_UNORDERED_ACCESS | D3D11_BIND_SHADER_RESOURCE;
+		descBUF.Usage	= D3D11_USAGE_DEFAULT;
+		descBUF.CPUAccessFlags = 0;
+		descBUF.MiscFlags	= 0;
+		descBUF.ByteWidth	= sizeof(float) * ( 1 + nelements_for_each_point * nPoints);//第1个元素放点云的数量，后面对应每个点放点的 x y z patch_id obj_id
+		descBUF.StructureByteStride = sizeof(int);
+
+		//这块数据需要用读进来的pointcloud去显示
+		D3D11_SUBRESOURCE_DATA InitData;
+		ZeroMemory( &InitData, sizeof(D3D11_SUBRESOURCE_DATA) );
+		float* cpuNull = new float[1 + nelements_for_each_point * nPoints];//cpuNULL 是初始化那块内存的数据
+		cpuNull[0] = static_cast<float>(nPoints); //第一个位置上放点的数量， 后面每5个位置对应一个点的数据
+		for (int i = 0; i < nPoints; i++) {
+			vec3f &pt_pos = mesh_with_id.m_Vertices[i];
+			float color_red = mesh_with_id.m_Colors[i].x;
+			cpuNull[1 + nelements_for_each_point * i + 0] = pt_pos.x;
+			cpuNull[1 + nelements_for_each_point * i + 1] = pt_pos.y;
+			cpuNull[1 + nelements_for_each_point * i + 2] = pt_pos.z;
+			//std::cout<<"color_red: "<<color_red <<std::endl;
+			cpuNull[1 + nelements_for_each_point * i + 3] = color_red; //红色分量被用作 patch_id
+			cpuNull[1 + nelements_for_each_point * i + 4] = -2.0f;   //这个分量目前没有被用到
+		}
+		InitData.pSysMem = cpuNull;
+		V_RETURN(pDevice->CreateBuffer(&descBUF, &InitData, &m_PCXYZID));//用initData这块内存去初始化
+		SAFE_DELETE_ARRAY(cpuNull);                                      //!!!!create完了之后就可以释放了!!!
+
+		//create srv
+		ZeroMemory( &descSRV, sizeof(D3D11_SHADER_RESOURCE_VIEW_DESC) );
+		descSRV.Format = DXGI_FORMAT_R32_FLOAT;
+		descSRV.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
+		descSRV.Buffer.FirstElement = 0;
+		descSRV.Buffer.NumElements = nelements_for_each_point * nPoints;
+		V_RETURN(pDevice->CreateShaderResourceView(m_PCXYZID, &descSRV, &m_PCXYZIDSRV));
+
+		//create uav
+		ZeroMemory( &descUAV, sizeof(D3D11_UNORDERED_ACCESS_VIEW_DESC) );
+		descUAV.Format = DXGI_FORMAT_R32_FLOAT;
+		descUAV.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
+		descUAV.Buffer.FirstElement = 0;
+		descUAV.Buffer.NumElements =  nelements_for_each_point * nPoints;
+		V_RETURN(pDevice->CreateUnorderedAccessView(m_PCXYZID, &descUAV, &m_PCXYZIDUAV));
 	}
-	InitData.pSysMem = cpuNull;
-	V_RETURN(pDevice->CreateBuffer(&descBUF, &InitData, &m_PCXYZID));//用initData这块内存去初始化
-	SAFE_DELETE_ARRAY(cpuNull);                                      //!!!!create完了之后就可以释放了!!!
-
-	//create srv
-	ZeroMemory( &descSRV, sizeof(D3D11_SHADER_RESOURCE_VIEW_DESC) );
-	descSRV.Format = DXGI_FORMAT_R32_FLOAT;
-	descSRV.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
-	descSRV.Buffer.FirstElement = 0;
-	descSRV.Buffer.NumElements = nelements_for_each_point * nPoints;
-	V_RETURN(pDevice->CreateShaderResourceView(m_PCXYZID, &descSRV, &m_PCXYZIDSRV));
-
-	//create uav
-	ZeroMemory( &descUAV, sizeof(D3D11_UNORDERED_ACCESS_VIEW_DESC) );
-	descUAV.Format = DXGI_FORMAT_R32_FLOAT;
-	descUAV.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
-	descUAV.Buffer.FirstElement = 0;
-	descUAV.Buffer.NumElements =  nelements_for_each_point * nPoints;
-	V_RETURN(pDevice->CreateUnorderedAccessView(m_PCXYZID, &descUAV, &m_PCXYZIDUAV));
-
 	return S_OK;
 }
 
@@ -910,9 +925,6 @@ HRESULT DX11SceneRepHashSDF::CreateBuffers( ID3D11Device* pd3dDevice )
 
 	m_LastRigidTransform.setIdentity();
 
-	//wei add
-	LoadPointCloud(pd3dDevice );
-
 	D3D11_BUFFER_DESC bDesc;
 	ZeroMemory(&bDesc, sizeof(D3D11_BUFFER_DESC));
 	bDesc.BindFlags	= D3D11_BIND_CONSTANT_BUFFER;
@@ -1122,6 +1134,73 @@ HRESULT DX11SceneRepHashSDF::CreateBuffers( ID3D11Device* pd3dDevice )
 		V_RETURN(pd3dDevice->CreateShaderResourceView(m_SDFBlocksRGBW, &descSRV, &m_SDFBlocksRGBWSRV));
 		V_RETURN(pd3dDevice->CreateUnorderedAccessView(m_SDFBlocksRGBW, &descUAV, &m_SDFBlocksRGBWUAV));
 
+		//wei add
+		LoadPointCloud(pd3dDevice);
+
+		//{
+		//	MeshDataf mesh_with_id;
+		//	mesh_with_id.m_Vertices.push_back(vec3f(0.00650914, -0.001944, 0.462739));
+		//	mesh_with_id.m_Colors.push_back(vec3f(1.0f, 0.0f, 0.0f));
+
+
+		//	mesh_with_id.m_Vertices.push_back(vec3f(-0.0293826, 0.0620402, 0.430715));
+		//	mesh_with_id.m_Colors.push_back(vec3f(3.0f, 0.0f, 0.0f));
+		//	/*MeshIOf::loadFromPLY("./Scans/scan.ply", mesh_with_id);
+		//	std::cout<<"position vert size: " <<mesh_with_id.m_Vertices.size() <<std::endl;
+		//	std::cout<<"color vert size: " <<mesh_with_id.m_Colors.size() <<std::endl;*/
+
+		//	//步骤2：把数据写入到buffer中去
+		//	D3D11_BUFFER_DESC descBUF;
+		//	D3D11_SHADER_RESOURCE_VIEW_DESC descSRV;
+		//	D3D11_UNORDERED_ACCESS_VIEW_DESC descUAV;
+
+		//	//create buf, 需要根据点云的数量创建对应大小的buff
+		//	int nPoints = (int)mesh_with_id.m_Vertices.size();
+		//	const int nelements_for_each_point = 5; //x y z patch_id object_id
+
+		//	ZeroMemory(&descBUF, sizeof(D3D11_BUFFER_DESC));
+		//	descBUF.BindFlags	= D3D11_BIND_UNORDERED_ACCESS | D3D11_BIND_SHADER_RESOURCE;
+		//	descBUF.Usage	= D3D11_USAGE_DEFAULT;
+		//	descBUF.CPUAccessFlags = 0;
+		//	descBUF.MiscFlags	= 0;
+		//	descBUF.ByteWidth	= sizeof(float) * ( 1 + nelements_for_each_point * nPoints);//第1个元素放点云的数量，后面对应每个点放点的 x y z patch_id obj_id
+		//	descBUF.StructureByteStride = sizeof(int);
+
+		//	//这块数据需要用读进来的pointcloud去显示
+		//	D3D11_SUBRESOURCE_DATA InitData;
+		//	ZeroMemory( &InitData, sizeof(D3D11_SUBRESOURCE_DATA) );
+		//	int* cpuNull = new int[1 + nelements_for_each_point * nPoints];//cpuNULL 是初始化那块内存的数据
+		//	cpuNull[0] = nPoints; //static_cast<int>(nPoints); //第一个位置上放点的数量， 后面每5个位置对应一个点的数据
+		//	for (int i = 0; i < nPoints; i++) {
+		//		vec3f &pt_pos = mesh_with_id.m_Vertices[i];
+		//		float color_red = mesh_with_id.m_Colors[i].x;
+		//		cpuNull[1 + nelements_for_each_point * i + 0] = pt_pos.x;
+		//		cpuNull[1 + nelements_for_each_point * i + 1] = pt_pos.y;
+		//		cpuNull[1 + nelements_for_each_point * i + 2] = pt_pos.z;
+		//		//std::cout<<"color_red: "<<color_red <<std::endl;
+		//		cpuNull[1 + nelements_for_each_point * i + 3] = color_red; //红色分量被用作 patch_id
+		//		cpuNull[1 + nelements_for_each_point * i + 4] = -2.0f;   //这个分量目前没有被用到
+		//	}
+		//	InitData.pSysMem = cpuNull;
+		//	V_RETURN(pd3dDevice->CreateBuffer(&descBUF, &InitData, &m_PCXYZID));//用initData这块内存去初始化
+		//	SAFE_DELETE_ARRAY(cpuNull);                                      //!!!!create完了之后就可以释放了!!!
+
+		//	//create srv
+		//	ZeroMemory( &descSRV, sizeof(D3D11_SHADER_RESOURCE_VIEW_DESC) );
+		//	descSRV.Format = DXGI_FORMAT_R32_FLOAT;
+		//	descSRV.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
+		//	descSRV.Buffer.FirstElement = 0;
+		//	descSRV.Buffer.NumElements = nelements_for_each_point * nPoints;
+		//	V_RETURN(pd3dDevice->CreateShaderResourceView(m_PCXYZID, &descSRV, &m_PCXYZIDSRV));
+
+		//	//create uav
+		//	ZeroMemory( &descUAV, sizeof(D3D11_UNORDERED_ACCESS_VIEW_DESC) );
+		//	descUAV.Format = DXGI_FORMAT_R32_FLOAT;
+		//	descUAV.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
+		//	descUAV.Buffer.FirstElement = 0;
+		//	descUAV.Buffer.NumElements =  nelements_for_each_point * nPoints;
+		//	V_RETURN(pd3dDevice->CreateUnorderedAccessView(m_PCXYZID, &descUAV, &m_PCXYZIDUAV));
+		//}
 	}
 
 	////////////////
