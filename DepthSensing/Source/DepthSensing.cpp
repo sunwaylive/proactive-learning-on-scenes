@@ -534,7 +534,11 @@ void CALLBACK OnKeyboard( UINT nChar, bool bKeyDown, bool bAltDown, void* pUserC
 			break;
 		case 'A':
 			{
-				StopScanningAndMapID();
+				//StopScanningAndMapID();
+
+				//这些全局的东西为了简化，都被DXUT包装了， 直接到DXUT中找全局函数就可以了
+				g_SceneRepSDFLocal.LoadPointCloud(DXUTGetD3D11Device());
+				g_SceneRepSDFLocal.SetVoxelID(DXUTGetD3D11Device(), DXUTGetD3D11DeviceContext());
 			}
 		default:
 			break;

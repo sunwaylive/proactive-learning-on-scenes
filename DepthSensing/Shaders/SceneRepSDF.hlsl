@@ -1,7 +1,4 @@
 
-
-
-
 Texture2D<float>				g_InputDepth : register( t0 );
 Texture2D<float3>				g_InputColor	: register( t1 );
 Buffer<int>						g_PrefixSum		: register( t2 );

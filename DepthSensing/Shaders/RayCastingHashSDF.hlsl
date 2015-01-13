@@ -1,7 +1,9 @@
 
-Buffer<int>	     g_Hash					: register( t0 );
+Buffer<int>	     g_Hash				: register( t0 );
 //wei add
 Buffer<float>	 g_PCXYZID			: register( t7 ); //第1个字节放点云的数量，后面对应每个点放点的 x y z patch_id obj_id
+RWBuffer<int>    PointBID           : register( t8 );
+RWBuffer<int>    BIDArray           : register( t9 );
 
 Buffer<float>	 g_SDFBlocksSDF		: register( t1 );
 Texture2D<float> g_RayIntervalMin   : register( t2 );

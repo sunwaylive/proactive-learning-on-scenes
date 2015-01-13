@@ -668,6 +668,23 @@ HRESULT DX11SceneRepChunkGrid::mapID(ID3D11DeviceContext* context, const std::st
 	//	}
 	//}
 
+	//for (size_t pi = 0; pi < mesh_with_id.m_Vertices.size(); ++pi)
+	//{
+	//	vec3f world_pos = mesh_with_id.m_Vertices[pi];
+	//	vec3i chunk = worldToChunks(world_pos);
+	//	if (containsSDFBlocksChunk(chunk)) {
+	//		unsigned int index = linearizeChunkPos(chunk);
+	//		if (m_grid[index] != NULL && m_grid[index]->isStreamedOut()){//这个其实是和上面的containsSDFBlocksChunk重复
+	//			ChunkDesc *chunkDesc = m_grid[index];
+	//			//std::cout<<"chunk containing sdfBlock size: " <<chunkDesc->getNElements() <<std::endl;
+
+	//			//遍历所有的sdfBlock, 直接找个最近的距离的Block不行，要找在某个radius范围内的
+	//			std::vector<int> voxel_in_radius;
+	//			double radius = 0.1f;
+	//			double min_dist = INT_MAX;
+	//			for (size_t i = 0; i < chunkDesc->m_ChunkDesc.size(); i++) {
+	//}
+
 	//步骤2：遍历所有mesh中的点
 	for (size_t pi = 0; pi < mesh_with_id.m_Vertices.size(); ++pi)
 	{
@@ -732,6 +749,7 @@ HRESULT DX11SceneRepChunkGrid::mapID(ID3D11DeviceContext* context, const std::st
 					for (int b = 0; b < voxel_in_radius.size(); ++b)
 					{
 						SDFBlock &block = chunkDesc->m_SDFBlocks[voxel_in_radius[b]];
+						
 						for (unsigned int j = 0; j < SDF_BLOCK_SIZE * SDF_BLOCK_SIZE * SDF_BLOCK_SIZE; ++j){
 							int &last = block.data[2 * j + 1];
 							last &= 0xffff00ff;     //先清空颜色的r分量

@@ -179,6 +179,70 @@ void traverseCoarseGridSimpleSampleAllMultiLayer(float3 worldCamPos, float3 worl
 	}
 }
 
+void SetVoxelIDByPointCloud()
+{
+	//////遍历所有pointcloud中的点，找出距离当前raycasting的点最近的位置
+	int nelements_for_each_point = 5;
+	int nPoints = g_PCXYZID[0]; //取出第一个字节，得到点云的数量
+	/*float nearest_distance = MAXF;
+	int nearest_patch_id = -1;*/
+
+	//int *PointBID = new int[nPoints](-1);全局已经分配，在RaycastingHashSF.hlsl中
+	//int *BIDArray = new int[nPoints](-1);
+	/*for(int i = 0; i < nPoints; i++){
+		float3 pt;
+		pt.x = g_PCXYZID[1 + nelements_for_each_point * i + 0];
+		pt.y = g_PCXYZID[1 + nelements_for_each_point * i + 1];
+		pt.z = g_PCXYZID[1 + nelements_for_each_point * i + 2];
+		PointBID[i] = linearizeIndex(worldToSDFBlock(pt);
+	}*/
+
+	//int nBID = 0;
+	//for(int i = 0; i < nPoints; i++){
+	//	for (int j= 0; j < nBID; j++) {
+	//		if (BIDArray[j] == PointBID[i]) {
+	//			break;
+	//		}
+	//	}
+	//	if (j == nBID) { // not found
+	//		BIDArry[nBID++] = PointBID[i];
+	//	}
+	//}
+
+	//for(int i = 0; i < nBID; i++){
+	//	HashEntry entry = getHashEntryForSDFBlockPos(g_Hash, BIDArry[i]);
+
+	//	if(entry.ptr != FREE_ENTRY)
+	//	{
+	//		int3 pi_base = SDFBlockToVirtualVoxelPos(entry.pos);
+	//		for (int j=0; j<512; j++) {
+	//			int3 pi = pi_base + delinearizeVoxelIndex(j);
+	//			float3 pf = virtualVoxelPosToWorld(pi);
+	//			float min_dist = 100000000.0;
+	//			int cpi = -1;
+	//			for(int k = 0; k < nPoints; k++){
+	//				if (PointBID[k] == BIDArry[i]) {
+	//					float3 pt;
+	//					pt.x = g_PCXYZID[1 + nelements_for_each_point * k + 0];
+	//					pt.y = g_PCXYZID[1 + nelements_for_each_point * k + 1];
+	//					pt.z = g_PCXYZID[1 + nelements_for_each_point * k + 2];
+	//					float dist = (pf.x-pt.x)*(pf.x-pt.x) + (pf.y-pt.y)*(pf.y-pt.y) + (pf.z-pt.z)*(pf.z-pt.z);
+	//					if (dist < min_dist) {
+	//						min_dist = dist;
+	//						cpi = k;
+	//					}
+	//				}
+	//			}
+	//			if (cpi != -1) {
+	//				Voxel	v = getVoxel(g_SDFBlocksSDF, g_SDFBlocksRGBW, j);
+	//				v.color.x = g_PCXYZID[1 + nelements_for_each_point * cpi + 3];
+	//				setVoxel(g_SDFBlocksSDF, g_SDFBlocksRGBW, j, v);
+	//			}
+	//		}
+	//	}
+	//}
+}
+
 void traverseCoarseGridSimpleSampleAll(float3 worldCamPos, float3 worldDir, float3 camDir, int3 dTid)
 {
 	// Last Sample
@@ -207,39 +271,34 @@ void traverseCoarseGridSimpleSampleAll(float3 worldCamPos, float3 worldDir, floa
 				{
 					if(abs(dist) < g_thresDist)
 					{
-						//遍历所有pointcloud中的点，找出距离当前raycasting的点最近的位置
-						int nelements_for_each_point = 5;
-						int nPoints = g_PCXYZID[0]; //取出第一个字节，得到点云的数量
-						float nearest_distance = MAXF;
-						int nearest_patch_id = -1;
+						////遍历所有pointcloud中的点，找出距离当前raycasting的点最近的位置
+						//int nelements_for_each_point = 5;
+						//int nPoints = g_PCXYZID[0]; //取出第一个字节，得到点云的数量
+						//float nearest_distance = MAXF;
+						//int nearest_patch_id = -1;
 
-						for(int i = 0; i < nPoints; i++){
-							float3 pt;
-							pt.x = g_PCXYZID[1 + nelements_for_each_point * i + 0];
-							pt.y = g_PCXYZID[1 + nelements_for_each_point * i + 1];
-							pt.z = g_PCXYZID[1 + nelements_for_each_point * i + 2];
+						//for(int i = 0; i < nPoints; i++){
+						//	float3 pt;
+						//	pt.x = g_PCXYZID[1 + nelements_for_each_point * i + 0];
+						//	pt.y = g_PCXYZID[1 + nelements_for_each_point * i + 1];
+						//	pt.z = g_PCXYZID[1 + nelements_for_each_point * i + 2];
 
-							int cur_patch_id = g_PCXYZID[1 + nelements_for_each_point * i + 3];
-							
-							double cur_dist = distance(pt, currentPosWorld);//distance为内置函数
-							if(cur_dist < nearest_distance){
-								nearest_distance = cur_dist;
-								nearest_patch_id = cur_patch_id;
-							}
-						}
+						//	int cur_patch_id = g_PCXYZID[1 + nelements_for_each_point * i + 3];
+						//	
+						//	double cur_dist = distance(pt, currentPosWorld);//distance为内置函数
+						//	if(cur_dist < nearest_distance){
+						//		nearest_distance = cur_dist;
+						//		nearest_patch_id = cur_patch_id;
+						//	}
+						//}
 
-						//根据patch_id设置颜色
-						/*if(nearest_patch_id == 1){
-							g_outputColor[dTid.xy] = float4(float3(0.0f, 1.0f, 0.0f), 1.0f);
-						}else{
-							g_outputColor[dTid.xy] = float4(float3(1.0f, 0.0f, 0.0f), 1.0f);
-						}*/
+						//if(nearest_patch_id >=0 && nearest_patch_id < 16){
+						//	g_outputColor[dTid.xy] = colorTable[nearest_patch_id];
+						//}else{
+						//	g_outputColor[dTid.xy] = float4(1.0f, 0.0f, 0.0f, 1.0f);
+						//}
 
-						if(nearest_patch_id >=0 && nearest_patch_id < 16){
-							g_outputColor[dTid.xy] = colorTable[nearest_patch_id];
-						}else{
-							g_outputColor[dTid.xy] = float4(1.0f, 0.0f, 0.0f, 1.0f);
-						}
+						g_outputColor[dTid.xy] = float4(1.0f, 0.0f, 0.0f, 1.0f);
 
 						g_output[dTid.xy] = alpha/depthToRayLength; // Convert ray length to depth depthToRayLength
 						
@@ -249,11 +308,6 @@ void traverseCoarseGridSimpleSampleAll(float3 worldCamPos, float3 worldDir, floa
 							float3 normal = gradientForPoint(currentIso);
 							g_outputNormals[dTid.xy] = float4(mul(float4(normal,0.0f), g_ViewMat).xyz, 1.0f);
 						}
-
-						//	int3 sdfB = worldToSDFBlock(currentPosWorld);
-
-						
-
 						return;
 					}
 				}

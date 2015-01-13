@@ -270,8 +270,10 @@ HRESULT DX11RayCastingHashSDF::RenderToTexture( ID3D11DeviceContext* context, ID
 
 	// Setup pipeline
 	context->CSSetShaderResources(0, 1, &hash);
+	//这两个传递了voxel的相关数据
 	context->CSSetShaderResources(1, 1, &sdfBlocksSDF);
 	context->CSSetShaderResources(4, 1, &sdfBlocksRGBW);
+
 	context->CSSetShaderResources(2, 1, &pDepthStencilSplattingMinSRV);
 	context->CSSetShaderResources(3, 1, &pDepthStencilSplattingMaxSRV);
 	ID3D11ShaderResourceView* srvPrefix = DX11RayMarchingStepsSplatting::getFragmentPrefixSumBufferSRV();
@@ -287,6 +289,7 @@ HRESULT DX11RayCastingHashSDF::RenderToTexture( ID3D11DeviceContext* context, ID
 	context->CSSetConstantBuffers(1, 1, &s_ConstantBufferSplatting);
 	ID3D11Buffer* CBGlobalAppState = GlobalAppState::getInstance().MapAndGetConstantBuffer(context);
 	context->CSSetConstantBuffers(8, 1, &CBGlobalAppState);
+	//这里是shader
 	context->CSSetShader(m_pComputeShader, 0, 0);
 
 	// Run compute shader

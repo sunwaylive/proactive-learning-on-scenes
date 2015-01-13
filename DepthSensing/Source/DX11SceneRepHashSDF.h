@@ -58,7 +58,10 @@ public:
 
 	HRESULT DumpPointCloud(const std::string &filename, ID3D11Device* pDevice, ID3D11DeviceContext* pd3dImmediateContext, unsigned int minWeight = 1, bool justOccupied = false);
 
+	//wei add
 	HRESULT LoadPointCloud( ID3D11Device* pDevice);
+
+	HRESULT SetVoxelID(ID3D11Device *pd3dDevice, ID3D11DeviceContext* context);
 
 	const mat4f& GetLastRigidTransform() const	{	
 		return m_LastRigidTransform;
@@ -501,6 +504,15 @@ private:
 	ID3D11Buffer*               m_PCXYZID;
 	ID3D11UnorderedAccessView*  m_PCXYZIDUAV;
 	ID3D11ShaderResourceView*   m_PCXYZIDSRV;
+
+	ID3D11Buffer*               m_PointBID;
+	ID3D11UnorderedAccessView*  m_PointBIDUAV;
+	ID3D11ShaderResourceView*   m_PointBIDSRV;
+
+	ID3D11Buffer*               m_BIDArray;
+	ID3D11UnorderedAccessView*  m_BIDArrayUAV;
+	ID3D11ShaderResourceView*   m_BIDArraySRV;
+	//wei end
 
 	//! for allocation phase to lock has buckets
 	ID3D11Buffer*				m_HashBucketMutex;
