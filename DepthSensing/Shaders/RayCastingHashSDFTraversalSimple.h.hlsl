@@ -245,9 +245,9 @@ void SetVoxelIDByPointCloud()
 				}
 
 				if (cpi != -1) {
-					Voxel	v = getVoxel(g_SDFBlocksSDF, g_SDFBlocksRGBW, j);
+					Voxel	v = getVoxel(g_SDFBlocksSDF_RW, g_SDFBlocksRGBW_RW, j);
 					v.color.x = g_PCXYZID[1 + nelements_for_each_point * cpi + 3];
-					//setVoxel(g_SDFBlocksSDF, g_SDFBlocksRGBW, j, v);
+					setVoxel(g_SDFBlocksSDF_RW, g_SDFBlocksRGBW_RW, j, v);
 				}
 			}
 		}

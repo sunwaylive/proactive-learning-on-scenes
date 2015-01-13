@@ -4,11 +4,14 @@ Buffer<int>	     g_Hash				: register( t0 );
 Buffer<float>	 g_PCXYZID			: register( t7 ); //第1个字节放点云的数量，后面对应每个点放点的 x y z patch_id obj_id
 RWBuffer<int>    PointBID           : register( t8 );
 RWBuffer<int>    BIDArray           : register( t9 );
+RWBuffer<float>  g_SDFBlocksSDF_RW  : register( t10);
+RWBuffer<int>    g_SDFBlocksRGBW_RW : register( t11);
+
 
 Buffer<float>	 g_SDFBlocksSDF		: register( t1 );
 Texture2D<float> g_RayIntervalMin   : register( t2 );
 Texture2D<float> g_RayIntervalMax   : register( t3 );
-Buffer<int>	 g_SDFBlocksRGBW	: register( t4 );
+Buffer<int>	     g_SDFBlocksRGBW	: register( t4 );
  
 Buffer<int>		g_FragmentPrefixSumBufferSRV	: register( t5 );
 Buffer<float>	g_FragmentSortedDepthBufferSRV	: register( t6 );

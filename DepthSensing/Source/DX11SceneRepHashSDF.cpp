@@ -656,8 +656,8 @@ HRESULT DX11SceneRepHashSDF::SetVoxelID( ID3D11Device *pd3dDevice, ID3D11DeviceC
 	context->CSSetShaderResources(7, 1, &m_PCXYZIDSRV);
 	context->CSSetUnorderedAccessViews(8, 1, &m_PointBIDUAV, NULL);
 	context->CSSetUnorderedAccessViews(9, 1, &m_BIDArrayUAV, NULL);
-	//context->CSSetUnorderedAccessViews(1, 1, &m_SDFBlocksSDFUAV, NULL);
-	//context->CSSetUnorderedAccessViews(4, 1, &m_SDFBlocksRGBWUAV, NULL);
+	context->CSSetUnorderedAccessViews(10, 1, &m_SDFBlocksSDFUAV, NULL);
+	context->CSSetUnorderedAccessViews(11, 1, &m_SDFBlocksRGBWUAV, NULL);
 	ID3D11Buffer* CBGlobalAppState = GlobalAppState::getInstance().MapAndGetConstantBuffer(context);
 	context->CSSetConstantBuffers(8, 1, &CBGlobalAppState);
 
@@ -670,8 +670,8 @@ HRESULT DX11SceneRepHashSDF::SetVoxelID( ID3D11Device *pd3dDevice, ID3D11DeviceC
 	context->CSSetUnorderedAccessViews(7, 1, nullUAV, 0);
 	context->CSSetUnorderedAccessViews(8, 1, nullUAV, 0);
 	context->CSSetUnorderedAccessViews(9, 1, nullUAV, 0);
-	/*context->CSSetUnorderedAccessViews(1, 1, nullUAV, 0);
-	context->CSSetUnorderedAccessViews(4, 1, nullUAV, 0);*/
+	context->CSSetUnorderedAccessViews(10, 1, nullUAV, 0);
+	context->CSSetUnorderedAccessViews(11, 1, nullUAV, 0);
 	context->CSSetConstantBuffers(8, 1, nullB);
 
 	context->CSSetShader(0, 0, 0);
