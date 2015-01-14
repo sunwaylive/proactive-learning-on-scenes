@@ -31,6 +31,7 @@ cbuffer consts : register(b1)
 #define groupthreads 1
 #endif
 
+//
 bool integrateHashEntry(RWBuffer<int> hash, in HashEntry entry)
 {
 	uint h = computeHashPos(entry.pos);

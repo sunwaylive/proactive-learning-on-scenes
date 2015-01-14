@@ -21,7 +21,7 @@ cbuffer consts : register(cb0)
 #include "GlobalAppStateShaderBuffer.h.hlsl"
 #include "KinectCameraUtil.h.hlsl"
 
-Buffer<int> g_voxelBuffer : register(t0);
+Buffer<int>        g_voxelBuffer : register(t0);
 RWTexture2D<float> g_output : register(u0);
 RWTexture2D<float4> g_outputNormals : register(u1);
 RWTexture2D<float4> g_outputColors : register(u2);
