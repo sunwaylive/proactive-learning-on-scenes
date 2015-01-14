@@ -414,6 +414,19 @@
       <string>Alt+E</string>
      </property>
     </widget>
+    <widget class="QPushButton" name="pushButton_update_graphcut">
+     <property name="geometry">
+      <rect>
+       <x>40</x>
+       <y>550</y>
+       <width>191</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>GraphCut Update</string>
+     </property>
+    </widget>
    </widget>
    <widget class="QWidget" name="tab">
     <attribute name="title">

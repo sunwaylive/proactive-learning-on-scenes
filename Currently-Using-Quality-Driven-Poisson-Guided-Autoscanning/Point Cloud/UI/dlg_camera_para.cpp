@@ -88,6 +88,7 @@ void CameraParaDlg::initConnects()
   connect(ui->pushButton_compute_scene_nbv, SIGNAL(clicked()), this, SLOT(computeSceneNBV()));
   connect(ui->pushButton_save_pickpoint_to_iso, SIGNAL(clicked()), this, SLOT(savePickPointToIso()));
   connect(ui->pushButton_detect_changed_points, SIGNAL(clicked()), this, SLOT(detectChangedPoints()));
+   connect(ui->pushButton_update_graphcut, SIGNAL(clicked()), this, SLOT(updateGraphCut()));
   connect(ui->pushButton_test_graphcut, SIGNAL(clicked()), this, SLOT(runGraphCut()));
   connect(ui->pushButton_over_segment, SIGNAL(clicked()), this, SLOT(runOverSegmentation()));
   connect(ui->pushButton_segment_scene, SIGNAL(clicked()), this, SLOT(runSceneSegmentation()));
@@ -1293,7 +1294,11 @@ void CameraParaDlg::prepareSDFSlicePlane()
 void CameraParaDlg::loadScene()
 {
   //load scene to original
-  loadToOriginal();
+	int x = 0x7fffffff;
+	std::cout<<x <<std::endl;
+	std::cout<<INT_MAX <<std::endl;
+	return;
+	loadToOriginal();
 }
 
 void CameraParaDlg::detectPlane()
@@ -1362,70 +1367,27 @@ void CameraParaDlg::detectChangedPoints()
 
 }
 
-void CameraParaDlg::runGraphCut()
+void CameraParaDlg::updateShowModel()
 {
-	std::cout<<"test graph cut" <<std::endl;	
-
-	ofstream outFileg("Output\\RunGraphCut.txt");
-	outFileg << "let's begin :) " << endl;
-
-
-	/////////////////////////////////////run graph cut
-	cPointCloudAnalysis.MainStep(true,0);
-
-	outFileg << "MainStep finished :)   " << endl;
-	/////////////////////////////////////compute the score,sorting
-	CMesh *original = area->dataMgr.getCurrentOriginal();
-
-	for(int i = 0;i < cPointCloudAnalysis.cMultiSeg.vecvecMultiResult.size();i++)
-	{
-		cout<<"iteration:"<<i<<endl;
-		GlobalFun::clearCMesh(*original);
-		cPointCloudAnalysis.cScanEstimation.saveMultiResultToOriginal(original, i);
-		area->dataMgr.downSamplesByNum();
-		global_paraMgr.data.setValue("CGrid Radius", DoubleValue(0.036));
-		runStep2CombinedPoissonConfidence();
-
-
-		CMesh *iso_point = area->dataMgr.getCurrentIsoPoints();
-		OBJECTISOPOINT objectIsoPointTemp;
-		for(int j = 0;j < iso_point->vert.size();j++)
-		{
-			ISOPOINT isoPointTemp;
-			isoPointTemp.f = iso_point->vert[j].eigen_confidence;
-			isoPointTemp.objectIndex = j;
-			isoPointTemp.x = iso_point->vert[j].P()[0];
-			isoPointTemp.y = iso_point->vert[j].P()[1];
-			isoPointTemp.z = iso_point->vert[j].P()[2];
-			objectIsoPointTemp.objectIsoPoint.push_back(isoPointTemp);
-		}
-		cPointCloudAnalysis.cScanEstimation.vecObjectIsoPoint.push_back(objectIsoPointTemp);
-	}
-	outFileg << "Poisson finished :)   " << endl;
-
-	cPointCloudAnalysis.cScanEstimation.ScoreUpdate();
-	outFileg << "ScoreUpdate finished :)   " << endl;
-
-	//action according to the score
-	int pushArea = 0;
-
-	////////////////////////////////////show the results
+	/////////////////////////////////////show the results
 	CMesh *graphCutResult_mesh = area->dataMgr.getCurrentGraphCutResult();
 	GRAPHSHOW *contractionGraph = area->dataMgr.getContractionGraph();
 	GRAPHSHOW *patchGraph = area->dataMgr.getPatchGraph();
 
-
 	srand((unsigned)time(0));
-	for(int i = 0; i < cPointCloudAnalysis.cMultiSeg.vecvecMultiResult.size();i++)
+	graphCutResult_mesh->Clear();
+	for(int i = 0; i < cPointCloudAnalysis.cScanEstimation.vecObjectHypo.size();i++)
 	{
+		if(cPointCloudAnalysis.cScanEstimation.vecObjectHypo[i].mergeFlag)	continue;
+
 		double r,g,b;
 		r = double(rand()%255);
 		g = double(rand()%255);
 		b = double(rand()%255);
 
-		for(int j = 0; j < cPointCloudAnalysis.cMultiSeg.vecvecMultiResult[i].size();j++)
+		for(int j = 0; j < cPointCloudAnalysis.cScanEstimation.vecObjectHypo[i].patchIndex.size();j++)
 		{
-			int patchIndex = cPointCloudAnalysis.cMultiSeg.vecvecMultiResult[i][j];
+			int patchIndex = cPointCloudAnalysis.cScanEstimation.vecObjectHypo[i].patchIndex[j];
 			for(int k = 0; k < cPointCloudAnalysis.cMultiSeg.vecPatchPoint[patchIndex].mypoints.size();k++)
 			{
 				MyPoint_RGB_NORMAL point = cPointCloudAnalysis.cMultiSeg.vecPatchPoint[patchIndex].mypoints[k];
@@ -1469,95 +1431,183 @@ void CameraParaDlg::runGraphCut()
 		graphCutResult_mesh->vert.push_back(new_point);
 		graphCutResult_mesh->bbox.Add(new_point.P());
 	}
-
 	graphCutResult_mesh->vn = graphCutResult_mesh->vert.size();
-	outFileg << "Show results finished :)   " << endl;
 
-	contractionGraph->vecEdgeColor = cPointCloudAnalysis.cScanEstimation.graphContract.vecEdgeColor;
-	contractionGraph->vecEdges = cPointCloudAnalysis.cScanEstimation.graphContract.vecEdges;
-	contractionGraph->vecNodes = cPointCloudAnalysis.cScanEstimation.graphContract.vecNodes;
+// 	contractionGraph->vecEdgeColor = cPointCloudAnalysis.cScanEstimation.graphContract.vecEdgeColor;
+// 	contractionGraph->vecEdges = cPointCloudAnalysis.cScanEstimation.graphContract.vecEdges;
+// 	contractionGraph->vecNodes = cPointCloudAnalysis.cScanEstimation.graphContract.vecNodes;
+// 	contractionGraph->vecEdgeFlag = cPointCloudAnalysis.cScanEstimation.graphContract.vecEdgeFlag;
+// 	contractionGraph->vecNodeFlag = cPointCloudAnalysis.cScanEstimation.graphContract.vecNodeFlag;
+
+	contractionGraph->vecEdgeColor = cPointCloudAnalysis.cMultiSeg.graphContract.vecEdgeColor;
+	contractionGraph->vecEdges = cPointCloudAnalysis.cMultiSeg.graphContract.vecEdges;
+	contractionGraph->vecNodes = cPointCloudAnalysis.cMultiSeg.graphContract.vecNodes;
+	contractionGraph->vecEdgeFlag = cPointCloudAnalysis.cMultiSeg.graphContract.vecEdgeFlag;
+	contractionGraph->vecNodeFlag = cPointCloudAnalysis.cMultiSeg.graphContract.vecNodeFlag;
 
 	patchGraph->vecEdgeColor = cPointCloudAnalysis.cBinarySeg.graphInit.vecEdgeColor;
 	patchGraph->vecEdges = cPointCloudAnalysis.cBinarySeg.graphInit.vecEdges;
 	patchGraph->vecNodes = cPointCloudAnalysis.cBinarySeg.graphInit.vecNodes;
+}
 
+void CameraParaDlg::runGraphCut()
+{
+	std::cout<<"test graph cut" <<std::endl;	
+
+	ofstream outFileg("Output\\RunGraphCut.txt");
+	outFileg << "let's begin :) " << endl;
+
+	/////////////////////////////////////run graph cut
+	cPointCloudAnalysis.MainStep(true,0);
+	outFileg << "MainStep finished :)   " << endl;
+
+	/////////////////////////////////////compute the score,sorting
+	CMesh *original = area->dataMgr.getCurrentOriginal();
+	for(int i = 0;i < cPointCloudAnalysis.cMultiSeg.vecvecMultiResult.size();i++)
+	{
+		cout<<"iteration:"<<i<<endl;
+		GlobalFun::clearCMesh(*original);
+		cPointCloudAnalysis.cScanEstimation.saveMultiResultToOriginal(original, i);
+		area->dataMgr.downSamplesByNum();
+		global_paraMgr.data.setValue("CGrid Radius", DoubleValue(0.036));
+		runStep2CombinedPoissonConfidence();
+
+		CMesh *iso_point = area->dataMgr.getCurrentIsoPoints();
+		OBJECTISOPOINT objectIsoPointTemp;
+		for(int j = 0;j < iso_point->vert.size();j++)
+		{
+			ISOPOINT isoPointTemp;
+			isoPointTemp.f = iso_point->vert[j].eigen_confidence;
+			isoPointTemp.objectIndex = j;
+			isoPointTemp.x = iso_point->vert[j].P()[0];
+			isoPointTemp.y = iso_point->vert[j].P()[1];
+			isoPointTemp.z = iso_point->vert[j].P()[2];
+			objectIsoPointTemp.objectIsoPoint.push_back(isoPointTemp);
+		}
+		cPointCloudAnalysis.cScanEstimation.vecObjectIsoPoint.push_back(objectIsoPointTemp);
+	}
+	outFileg << "Poisson finished :)   " << endl;
+
+	cPointCloudAnalysis.cScanEstimation.ScoreUpdate();
+	outFileg << "ScoreUpdate finished :)   " << endl;
+
+	/////////////////////////////////////show result
+	updateShowModel();
+	outFileg << "Show results finished :)   " << endl;
+
+	/////////////////////////////////////action according to the score
+	//输出点和方向
 
 	outFileg << "First round finished :) " << endl;
+	outFileg.close();
 
 
+// 	CMesh moving_mesh; 
+// 	CMesh *static_mesh;
 
-	//isSeparate
-	ofstream outFile1("Output\\isSeparate.txt",ios::app);
-	outFile1 << "let's begin  " << endl;
+// 	int mask= tri::io::Mask::IOM_VERTNORMAL;
+// 	int err = tri::io::Importer<CMesh>::Open(moving_mesh, "diff_moving.ply",mask);  
+// 	outFile1 << "get moving mesh  " << endl;
+//  
+// 	int begin = cPointCloudAnalysis.cScanEstimation.clusterPatchInitIndex[pushArea];
+// 	int end = cPointCloudAnalysis.cScanEstimation.clusterPatchInitIndex[pushArea] + cPointCloudAnalysis.cScanEstimation.clusterPatchNum[pushArea];
+// 	for(int i = begin;i < end;i++)
+// 	{
+// 		for(int k = 0; k < cPointCloudAnalysis.cBinarySeg.vecPatchPoint[i].mypoints.size();k++)
+// 		{
+// 			MyPoint_RGB_NORMAL point = cPointCloudAnalysis.cBinarySeg.vecPatchPoint[i].mypoints[k];
+// 			CVertex new_point;
+// 			new_point.P()[0] = point.x;
+// 			new_point.P()[1] = point.y;
+// 			new_point.P()[2] = point.z;
+// 			new_point.N()[0] = point.normal_x;
+// 			new_point.N()[1] = point.normal_y;
+// 			new_point.N()[2] = point.normal_z;
+// 
+// 			new_point.m_index = i;
+// 			new_point.is_original = true;
+// 			static_mesh->vert.push_back(new_point);
+// 			static_mesh->bbox.Add(new_point.P());
+// 		}
+// 	}
+// 	static_mesh->vn = static_mesh->vert.size();
+// 	outFile1 << "get static mesh  " << endl;
+// 
+// 	double error;
+// 	GlobalFun::computeICPNoNormal(moving_mesh, static_mesh, error);
+// 	outFile1 << "get error:  " << error << endl;
+// 
+// 	if(error < 0.005)
+// 		separateFlag = false;
+// 	else 
+// 		separateFlag = true;
+}
 
+void CameraParaDlg::updateGraphCut()
+{
+	std::cout<<"update graph cut" <<std::endl;
+
+	ofstream outFileg("Output\\UpdateGraphCut.txt");
+	outFileg << "let's begin :) " << endl;
+
+	/////////////////////////////////////get new cloud and separateFlag
+	int pushArea = 0;
 	bool separateFlag;
-	CMesh moving_mesh; 
-	CMesh *static_mesh;
-
-	// 	int mask= tri::io::Mask::IOM_VERTNORMAL;
-	// 	int err = tri::io::Importer<CMesh>::Open(moving_mesh, "diff_moving.ply",mask);  
-	// 	outFile1 << "get moving mesh  " << endl;
-	//  
-	// 	int begin = cPointCloudAnalysis.cScanEstimation.clusterPatchInitIndex[pushArea];
-	// 	int end = cPointCloudAnalysis.cScanEstimation.clusterPatchInitIndex[pushArea] + cPointCloudAnalysis.cScanEstimation.clusterPatchNum[pushArea];
-	// 	for(int i = begin;i < end;i++)
-	// 	{
-	// 		for(int k = 0; k < cPointCloudAnalysis.cBinarySeg.vecPatchPoint[i].mypoints.size();k++)
-	// 		{
-	// 			MyPoint_RGB_NORMAL point = cPointCloudAnalysis.cBinarySeg.vecPatchPoint[i].mypoints[k];
-	// 			CVertex new_point;
-	// 			new_point.P()[0] = point.x;
-	// 			new_point.P()[1] = point.y;
-	// 			new_point.P()[2] = point.z;
-	// 			new_point.N()[0] = point.normal_x;
-	// 			new_point.N()[1] = point.normal_y;
-	// 			new_point.N()[2] = point.normal_z;
-	// 
-	// 			new_point.m_index = i;
-	// 			new_point.is_original = true;
-	// 			static_mesh->vert.push_back(new_point);
-	// 			static_mesh->bbox.Add(new_point.P());
-	// 		}
-	// 	}
-	// 	static_mesh->vn = static_mesh->vert.size();
-	// 	outFile1 << "get static mesh  " << endl;
-	// 
-	// 	double error;
-	// 	GlobalFun::computeICPNoNormal(moving_mesh, static_mesh, error);
-	// 	outFile1 << "get error:  " << error << endl;
-	outFile1.close();
-	// 
-	// 	if(error < 0.005)
-	// 		separateFlag = false;
-	// 	else 
-	// 		separateFlag = true;
-
 	separateFlag = true;
 
+	/////////////////////////////////////recompute
+	int newAreaNum = 0;
+	if(!separateFlag)	
+	{
+		outFileg << "Merge start:) " << endl;
+		cPointCloudAnalysis.Merge(pushArea);
+		outFileg << "Merge finished  :) " << endl;
+	}
+	else
+	{
+		outFileg << "ReAnalysis start:) " << endl;
+		cPointCloudAnalysis.ReAnalysis(pushArea);
 
-	// 	int newAreaNum = 0;
-	// 	//recompute
-	// 	if(!separateFlag)	
-	// 	{
-	// 		outFileg << "Merge start:) " << endl;
-	// 		cPointCloudAnalysis.Merge(pushArea);
-	// 		outFileg << "Merge finished  :) " << endl;
-	// 		
-	// 	}
-	// 	else
-	// 	{
-	// 		outFileg << "ReAnalysis start:) " << endl;
-	// 		cPointCloudAnalysis.ReAnalysis(pushArea);
-	// 
-	// 		outFileg << "Get new data :) " << endl;
-	// 		//over-segmentation again
-	// 		newAreaNum += getUpdateData();
-	// 
-	// 		outFileg << "Begin Again :) " << endl;
-	// 		cPointCloudAnalysis.MainStep(false,newAreaNum);
-	// 	}
-	// 
-	// 	outFileg << "HOHOHO~ :) " << endl;
+		outFileg << "Get new data :) " << endl;
+		//over-segmentation again
+		newAreaNum += getUpdateData();
+
+		outFileg << "Begin Again :) " << endl;
+		cPointCloudAnalysis.MainStep(false,newAreaNum);
+	}
+
+	CMesh *original = area->dataMgr.getCurrentOriginal();
+	for(int i = 0;i < cPointCloudAnalysis.cMultiSeg.vecvecMultiResult.size();i++)
+	{
+		cout<<"iteration:"<<i<<endl;
+		GlobalFun::clearCMesh(*original);
+		cPointCloudAnalysis.cScanEstimation.saveMultiResultToOriginal(original, i);
+		area->dataMgr.downSamplesByNum();
+		global_paraMgr.data.setValue("CGrid Radius", DoubleValue(0.036));
+		runStep2CombinedPoissonConfidence();
+
+		CMesh *iso_point = area->dataMgr.getCurrentIsoPoints();
+		OBJECTISOPOINT objectIsoPointTemp;
+		for(int j = 0;j < iso_point->vert.size();j++)
+		{
+			ISOPOINT isoPointTemp;
+			isoPointTemp.f = iso_point->vert[j].eigen_confidence;
+			isoPointTemp.objectIndex = j;
+			isoPointTemp.x = iso_point->vert[j].P()[0];
+			isoPointTemp.y = iso_point->vert[j].P()[1];
+			isoPointTemp.z = iso_point->vert[j].P()[2];
+			objectIsoPointTemp.objectIsoPoint.push_back(isoPointTemp);
+		}
+		cPointCloudAnalysis.cScanEstimation.vecObjectIsoPoint.push_back(objectIsoPointTemp);
+	}
+	outFileg << "Poisson finished :)   " << endl;
+
+	cPointCloudAnalysis.cScanEstimation.ScoreUpdate();
+	outFileg << "ScoreUpdate finished :)   " << endl;
+
+	updateShowModel();
+	outFileg << "Show results finished :)   " << endl;
+
 	outFileg.close();
 }
 
@@ -1569,7 +1619,7 @@ int CameraParaDlg::getUpdateData()
   vs.viewer->setBackgroundColor(0,0,0);
 
   PointCloudPtr_RGB_NORMAL cloud(new PointCloud_RGB_NORMAL);
-  loadPointCloud_normal_ply("data/big_table_normal.ply", cloud);
+  loadPointCloud_normal_ply("data/1.ply", cloud);
 
   /******************detect table************************/
   PointCloudPtr_RGB_NORMAL tabletopCloud(new PointCloud_RGB_NORMAL());
@@ -1578,30 +1628,30 @@ int CameraParaDlg::getUpdateData()
   PointCloudPtr_RGB_NORMAL remainingCloud(new PointCloud_RGB_NORMAL());
   pcl::ModelCoefficients coefficients;
 
-  detect_table(cloud, coefficients, planeCloud, rect_cloud, remainingCloud);
-
-  PointCloudPtr_RGB pc(new PointCloud_RGB);
-
-  for(int i=0;i<planeCloud->size();i++){
-    Point_RGB pr;
-    pr.x=planeCloud->at(i).x;
-    pr.y=planeCloud->at(i).y;
-    pr.z=planeCloud->at(i).z;
-    pr.r=planeCloud->at(i).r;
-    pr.g=planeCloud->at(i).g;
-    pr.b=planeCloud->at(i).b;
-    pc->push_back(pr);
-  }
-
-  vs.viewer->addPointCloud (pc, "table_cloud");
-
-
-  Eigen::Matrix4f matrix_transform;
-  Eigen::Matrix4f matrix_transform_r;
-
-  getTemTransformMatrix(coefficients, matrix_transform, matrix_transform_r);
-
-  getCloudOnTable(remainingCloud, rect_cloud, matrix_transform, matrix_transform_r, tabletopCloud);
+//   detect_table(cloud, coefficients, planeCloud, rect_cloud, remainingCloud);
+// 
+//   PointCloudPtr_RGB pc(new PointCloud_RGB);
+// 
+//   for(int i=0;i<planeCloud->size();i++){
+//     Point_RGB pr;
+//     pr.x=planeCloud->at(i).x;
+//     pr.y=planeCloud->at(i).y;
+//     pr.z=planeCloud->at(i).z;
+//     pr.r=planeCloud->at(i).r;
+//     pr.g=planeCloud->at(i).g;
+//     pr.b=planeCloud->at(i).b;
+//     pc->push_back(pr);
+//   }
+// 
+//   vs.viewer->addPointCloud (pc, "table_cloud");
+// 
+// 
+//   Eigen::Matrix4f matrix_transform;
+//   Eigen::Matrix4f matrix_transform_r;
+// 
+//   getTemTransformMatrix(coefficients, matrix_transform, matrix_transform_r);
+// 
+//   getCloudOnTable(remainingCloud, rect_cloud, matrix_transform, matrix_transform_r, tabletopCloud);
 
   float voxel_resolution = 0.004f;
   float seed_resolution = 0.06f;
@@ -1612,7 +1662,10 @@ int CameraParaDlg::getUpdateData()
   /******************Euclidean Cluster Extraction************************/
   std::vector<MyPointCloud_RGB_NORMAL> cluster_points;
 
-  object_seg_ECE(tabletopCloud, cluster_points);
+  object_seg_ECE(cloud, cluster_points);
+
+/*  std::cout<<"cloud num: " << cloud-.size() << std::endl;*/
+  std::cout<<"cluster_points num: " << cluster_points.size() << std::endl;
 
   for(int i=0;i<cluster_points.size();i++){
     if(cluster_points.at(i).mypoints.size()<200){
@@ -1632,6 +1685,7 @@ int CameraParaDlg::getUpdateData()
 		str<<"colored_voxel_cloud"<<i;
 		std::string id_pc=str.str();
 
+		
 
 		//add normal, point cloud, cluster patch num
 		for(int i=0;i<patch_clouds.size();i++)
@@ -1647,13 +1701,12 @@ int CameraParaDlg::getUpdateData()
 			nor.normal_z /= normalizeValue;
 			cPointCloudAnalysis.cBinarySeg.vecPatcNormal.push_back(nor);
 		}
-
+		
 		cPointCloudAnalysis.cBinarySeg.vecPatchPoint.insert(cPointCloudAnalysis.cBinarySeg.vecPatchPoint.end(),patch_clouds.begin(),patch_clouds.end());
 		cPointCloudAnalysis.cBinarySeg.clusterPatchNum.push_back(patch_clouds.size());
 	}
-
+ 
 	return cluster_points.size();
-
 }
 
 void CameraParaDlg::runOverSegmentation()
@@ -1664,7 +1717,7 @@ void CameraParaDlg::runOverSegmentation()
   vs.viewer->setBackgroundColor(0,0,0);
 
   PointCloudPtr_RGB_NORMAL cloud(new PointCloud_RGB_NORMAL);
-  loadPointCloud_normal_ply("data/0.ply", cloud);
+  loadPointCloud_normal_ply("data/GraphUpdate/init.ply", cloud);
 
   /******************detect table************************/
   PointCloudPtr_RGB_NORMAL tabletopCloud(new PointCloud_RGB_NORMAL());

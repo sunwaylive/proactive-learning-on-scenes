@@ -27,20 +27,20 @@ void CPointCloudAnalysis::MainStep(bool initFlag,int newAreNum)
 	outFile1 <<  "  5" <<endl;
 	outFile1.close();
 
-// 	ofstream outFile("Output\\ccjn.txt");
-// 	for(int i=0;i<cMultiSeg.vecObjectHypo.size();i++)
-// 	{
-// 		for(int j=0;j<cMultiSeg.vecObjectHypo[i].patchIndex.size();j++)
-// 		{
-// 			int patchIndex = cMultiSeg.vecObjectHypo[i].patchIndex[j];
-// 			for(int k=0;k<cMultiSeg.vecPatchPoint[patchIndex].mypoints.size();k++)
-// 			{
-// 				MyPt_RGB_NORMAL point = cMultiSeg.vecPatchPoint[patchIndex].mypoints[k];
-// 				outFile << setiosflags(ios::fixed) << setprecision(6) << point.x << " " << point.y << " " << point.z << " " << i << endl;
-// 			}
-// 		}
-// 	}
-// 	outFile.close();
+	ofstream outFile("Output\\ccjn.txt");
+	for(int i=0;i<cMultiSeg.vecObjectHypo.size();i++)
+	{
+		for(int j=0;j<cMultiSeg.vecObjectHypo[i].patchIndex.size();j++)
+		{
+			int patchIndex = cMultiSeg.vecObjectHypo[i].patchIndex[j];
+			for(int k=0;k<cMultiSeg.vecPatchPoint[patchIndex].mypoints.size();k++)
+			{
+				MyPt_RGB_NORMAL point = cMultiSeg.vecPatchPoint[patchIndex].mypoints[k];
+				outFile << setiosflags(ios::fixed) << setprecision(6) << point.x << " " << point.y << " " << point.z << " " << i << endl;
+			}
+		}
+	}
+	outFile.close();
 }
 
 
@@ -286,6 +286,8 @@ void CPointCloudAnalysis::MultiSegmentation()
 	cMultiSeg.boundingBoxSize = cBinarySeg.boundingBoxSize;
 	cMultiSeg.clusterPatchNum = cBinarySeg.clusterPatchNum;
 	cMultiSeg.clusterPatchInitIndex = cBinarySeg.clusterPatchInitIndex;
+	cMultiSeg.clusterPatchNumLocal = cBinarySeg.clusterPatchNumLocal;
+	cMultiSeg.clusterPatchInitIndexLocal = cBinarySeg.clusterPatchInitIndexLocal;
 	cMultiSeg.vecvecPatchConnectFlag = cBinarySeg.vecvecPatchConnectFlag;
 	cMultiSeg.xMax = cBinarySeg.xMax;
 	cMultiSeg.xMin = cBinarySeg.xMin;
@@ -317,6 +319,8 @@ void CPointCloudAnalysis::ScanEstimation()
 	cScanEstimation.vecvecMultiResult = cMultiSeg.vecvecMultiResult;
 	cScanEstimation.clusterPatchNum = cMultiSeg.clusterPatchNum;
 	cScanEstimation.clusterPatchInitIndex = cMultiSeg.clusterPatchInitIndex;
+	cScanEstimation.clusterPatchNumLocal = cMultiSeg.clusterPatchNumLocal;
+	cScanEstimation.clusterPatchInitIndexLocal = cMultiSeg.clusterPatchInitIndexLocal;
 	cScanEstimation.vecvecPatchConnectFlag = cMultiSeg.vecvecPatchConnectFlag;
 	cScanEstimation.vecpairPatchConnection = cMultiSeg.vecpairPatchConnection;
 	cScanEstimation.graphContract = cMultiSeg.graphContract;
@@ -328,26 +332,72 @@ void CPointCloudAnalysis::ScanEstimation()
 
 void CPointCloudAnalysis::Merge(int pushArea)
 {
+	ofstream outFileg("Output\\Merge.txt");
+	outFileg << "let's begin :) " << endl;
+
 	//merge area
 	cBinarySeg.vecAreaInterest[pushArea].Merge();
+	outFileg << "1 " << endl;
+
+	//invaild some objecthypo
+	for(int i = 0;i < cScanEstimation.vecObjectHypo.size();i++)
+	{
+		if(cScanEstimation.vecObjectHypo[i].areaIndex == pushArea)
+		{
+			cScanEstimation.vecObjectHypo[i].mergeFlag = true;
+		}
+	}
+	outFileg << "2 " << endl;
 
 	//add a objecthypo
 	ObjectHypo objectHypo;
 	objectHypo.areaIndex = pushArea;
 	objectHypo.objectness = 0;
-	objectHypo.patchIndex.clear();
-	objectHypo.mergeFlag = true;
-	cScanEstimation.vecObjectHypo.push_back(objectHypo);
-
-	//delete some objecthypo
-	for(int i = 0;i < cScanEstimation.vecObjectHypo.size();)
+	objectHypo.mergeFlag = false;
+	for(int i = 0;i < cScanEstimation.vecObjectHypo.size();i++)
 	{
 		if(cScanEstimation.vecObjectHypo[i].areaIndex == pushArea)
-			cScanEstimation.vecObjectHypo.erase(cScanEstimation.vecObjectHypo.begin() + i);
-		else
-			i++;
+		{
+			objectHypo.patchIndex.insert(objectHypo.patchIndex.end(),cScanEstimation.vecObjectHypo[i].patchIndex.begin(),cScanEstimation.vecObjectHypo[i].patchIndex.end());
+		}
 	}
+	cScanEstimation.vecObjectHypo.push_back(objectHypo);
+	outFileg << "3 " << endl;
 
+	//invaild some nodes
+	for(int i = 0;i < cScanEstimation.vecObjectHypo.size();i++)
+	{
+		if(cScanEstimation.vecObjectHypo[i].areaIndex == pushArea)
+		{
+			cScanEstimation.graphContract.vecNodeFlag[i] = false;
+		}
+	}
+	outFileg << "4 " << endl;
+
+	//invaild some edges
+	for(int i = 0; i < cScanEstimation.graphContract.vecEdges.size();i++)
+	{
+		pair<int,int> edge = cScanEstimation.graphContract.vecEdges[i];
+		if(cScanEstimation.vecObjectHypo[edge.first].areaIndex == pushArea)
+			cScanEstimation.graphContract.vecEdgeFlag[i] = false;
+		if(cScanEstimation.vecObjectHypo[edge.second].areaIndex == pushArea)
+			cScanEstimation.graphContract.vecEdgeFlag[i] = false;
+	}
+	outFileg << "5 " << endl;
+
+	//add a node
+	MyPt_RGB_NORMAL point;
+	point.x = (cBinarySeg.vecAreaInterest[pushArea].xMax + cBinarySeg.vecAreaInterest[pushArea].xMin) * 0.5;
+	point.y = (cBinarySeg.vecAreaInterest[pushArea].yMax + cBinarySeg.vecAreaInterest[pushArea].yMin) * 0.5;
+	point.z = (cBinarySeg.vecAreaInterest[pushArea].zMax + cBinarySeg.vecAreaInterest[pushArea].zMin) * 0.5;
+	point.x -= (cBinarySeg.xMax + cBinarySeg.xMin)/2;
+	point.y -= (cBinarySeg.yMax + cBinarySeg.yMin)/2;
+	point.z -= (cBinarySeg.zMax + cBinarySeg.zMin)/2;
+	point.r = 0.0;
+	point.g = 0.0;
+	point.b = 1.0;
+	cScanEstimation.graphContract.vecNodes.push_back(point);
+	cScanEstimation.graphContract.vecNodeFlag.push_back(true);
 }
 
 void CPointCloudAnalysis::ReAnalysis(int pushArea)
@@ -355,12 +405,12 @@ void CPointCloudAnalysis::ReAnalysis(int pushArea)
 	//invalid the area
 	cBinarySeg.vecAreaInterest[pushArea].Invalidt();
 
-	//delete some objecthypo
-	for(int i = 0;i < cScanEstimation.vecObjectHypo.size();)
-	{
-		if(cScanEstimation.vecObjectHypo[i].areaIndex == pushArea)
-			cScanEstimation.vecObjectHypo.erase(cScanEstimation.vecObjectHypo.begin() + i);
-		else
-			i++;
-	}
+	//invaild some objecthypo
+// 	for(int i = 0;i < cScanEstimation.vecObjectHypo.size();i++)
+// 	{
+// 		if(cScanEstimation.vecObjectHypo[i].areaIndex == pushArea)
+// 		{
+// 			cScanEstimation.vecObjectHypo[i].mergeFlag = true;
+// 		}
+// 	}
 }

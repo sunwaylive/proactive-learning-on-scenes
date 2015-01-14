@@ -120,6 +120,31 @@ void CAreaInterest::PointCloudPreprocess()
 		}
 	}
 
+	ofstream outFiles("Output\\MinDis.txt",ios::app);
+	outFiles << "/////////////////" <<endl;
+	for(int i = 0;i < patchNum;i++)
+	{
+		for(int j = 0;j < patchNum;j++)
+		{
+			outFiles << vecvecPatchMinDis[i][j] << "  " ;
+		}
+		outFiles << endl;
+	}
+
+	for(int i = 0;i < patchNum;i++)
+	{
+		for(int j = 0;j < patchNum;j++)
+		{
+			outFiles << vecvecPatchCenDis[i][j] << "  " ;
+		}
+		outFiles << endl;
+	}
+	outFiles << endl;
+	outFiles << endl;
+	outFiles << endl;
+	outFiles << endl;
+	outFiles << endl;
+	outFiles.close();
 }
 
 double CAreaInterest::GetMinDisBetPatch(int m,int n,bool &stable)

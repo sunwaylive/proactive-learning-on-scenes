@@ -907,13 +907,17 @@ void GLDrawer::drawGraphShow(GRAPHSHOW *graphcut, int graphType)
   }
 
   //draw dot in sphere
-  for (int i = 0; i < graphcut->vecNodes.size(); ++i){
+  for (int i = 0; i < graphcut->vecNodes.size(); ++i)
+  {
+	if(!graphcut->vecNodeFlag[i])  continue;
     MyPt_RGB_NORMAL &pt = graphcut->vecNodes[i];
     glDrawSphere(Point3f(pt.x, pt.y, pt.z), GLColor(pt.r, pt.g, pt.b), sphere_radius, 80);
   }
 
   //draw edges
-  for(int i = 0; i < graphcut->vecEdges.size(); ++i){
+  for(int i = 0; i < graphcut->vecEdges.size(); ++i)
+  {
+	if(!graphcut->vecEdgeFlag[i])  continue;
     int s_idx = graphcut->vecEdges[i].first;
     int e_idx = graphcut->vecEdges[i].second;
     MyPt_RGB_NORMAL &s_pt = graphcut->vecNodes[s_idx];

@@ -28,6 +28,9 @@ public:
 	vector<double> vecColorSimilarity;
 	vector<double> vecObjectCount;
 
+	vector<int> clusterPatchNumLocal;
+	vector<int> clusterPatchInitIndexLocal;
+
 	vector<int> clusterPatchNum;
 	vector<int> clusterPatchInitIndex;
 	vector<int> clusterPatchInterval;

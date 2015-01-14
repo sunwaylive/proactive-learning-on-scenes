@@ -136,6 +136,8 @@ signals:
     void runSceneConfidence();
     void runSceneConfidenceViaOriginal();
 	void runGraphCut();
+	void updateGraphCut();
+	void updateShowModel();
 	int getUpdateData();
     void runOverSegmentation();
     void runSceneSegmentation();

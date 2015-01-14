@@ -57,6 +57,7 @@ struct ObjectHypo
 	int areaIndex;
 	double objectness;
 	bool mergeFlag;
+	MyPoint cenPoint;
 };
 
 struct EdgeHypo

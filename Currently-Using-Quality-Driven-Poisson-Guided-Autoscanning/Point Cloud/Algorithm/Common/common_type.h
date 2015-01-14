@@ -132,7 +132,9 @@ void CopyMyPointCloud(MyPointCloud& source, MyPointCloud& target);
 struct GRAPHSHOW
 {
   vector<MyPt_RGB_NORMAL> vecNodes;
+  vector<bool> vecNodeFlag;
   vector<pair<int,int> > vecEdges;
+  vector<bool> vecEdgeFlag;
   vector<float> vecEdgeColor; 
 };
 

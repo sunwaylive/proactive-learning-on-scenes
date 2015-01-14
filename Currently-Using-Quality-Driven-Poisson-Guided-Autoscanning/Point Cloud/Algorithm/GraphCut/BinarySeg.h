@@ -17,6 +17,8 @@ public:
 	vector<MyPointCloud_RGB_NORMAL> vecPatchPoint;
 	vector<int> clusterPatchNum;
 	vector<int> clusterPatchInitIndex;
+	vector<int> clusterPatchNumLocal;
+	vector<int> clusterPatchInitIndexLocal;
 	MyPointCloud_RGB_NORMAL tablePoint;
 	vector<Normalt> vecPatcNormal;
 	vector<MyPoint> vecPatchCenPoint;
@@ -67,6 +69,7 @@ public:
 	vector<vector<int>> vecvecObjectPool;
 
 	double maxSV,minSV;
+
 public:
 	void AddTable(MyPointCloud_RGB_NORMAL &table);
 	void AddClusterPoints(vector<MyPointCloud_RGB_NORMAL> &points);

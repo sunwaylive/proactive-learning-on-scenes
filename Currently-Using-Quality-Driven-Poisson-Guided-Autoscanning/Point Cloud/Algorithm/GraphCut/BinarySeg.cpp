@@ -35,11 +35,11 @@ CBinarySeg::~CBinarySeg(void)
 
 void CBinarySeg::AddClusterPoints(vector<MyPointCloud_RGB_NORMAL> &points)
 {
-	for(int i=0;i<points.size();i++)
-	{
-		vecPatchPoint.push_back(points[i]);
-	}
-	clusterPatchNum.push_back(points.size());
+// 	for(int i=0;i<points.size();i++)
+// 	{
+// 		vecPatchPoint.push_back(points[i]);
+// 	}
+// 	clusterPatchNum.push_back(points.size());
 }
 
 void CBinarySeg::AddPatchNormal(vector<Normalt> &normal)
@@ -49,7 +49,6 @@ void CBinarySeg::AddPatchNormal(vector<Normalt> &normal)
 
 void CBinarySeg::Clear()
 {
-	vecPatchPoint.clear();
 	vecPatcNormal.clear();
 	vecvecPatchMinDis.clear();
 	vecvecPatchCenDis.clear();
@@ -65,6 +64,9 @@ void CBinarySeg::Clear()
 	vecIfConnectTable.clear();
 	graphInit.vecEdges.clear();
 	graphInit.vecNodes.clear();
+	graphInit.vecEdgeColor.clear();
+	graphInit.vecEdgeFlag.clear();
+	graphInit.vecNodeFlag.clear();
 	vecvecObjectPool.clear();
 }
 
@@ -80,12 +82,12 @@ void CBinarySeg::MainStep(bool initFlag,int newAreaNum)
 		UpdateAreaInterest(newAreaNum);
 
 	time[1] = clock();
-
+	
 	CollectAreaInterest();
 	time[2] = clock();
-
+	
 	ConstructGraph();
-
+	
 	vecvecObjectPool.clear();
 	for(int i =0; i <vecPatchPoint.size(); i ++)
 	{
@@ -98,6 +100,7 @@ void CBinarySeg::MainStep(bool initFlag,int newAreaNum)
 			double cutEnergy;
 			vecObjectHypo.clear();
 			ComputeDataValue();
+			
 			GraphCutSolve(vecObjectHypo,cutEnergy);
 			if(vecObjectHypo.size() > paraMinPatchInObject && cutEnergy < paraMaxCutEnergy)
 			{
@@ -164,7 +167,7 @@ void CBinarySeg::InitAreaInterest()
 	}
 }
 
-void CBinarySeg::UpdateAreaInterest(int newAreaNum) //要改
+void CBinarySeg::UpdateAreaInterest(int newAreaNum) 
 {
 	Clear();
 	int initIndex = 0;
@@ -183,30 +186,59 @@ void CBinarySeg::UpdateAreaInterest(int newAreaNum) //要改
 
 		vector<MyPointCloud_RGB_NORMAL> patchPoint;
 		vector<Normalt> patcNormal;
+
+
 		for(int j = patchBegin;j < patchEnd;j++)
 		{
 			patchPoint.push_back(vecPatchPoint[j]);
 			patcNormal.push_back(vecPatcNormal[j]);
 		}
+		
 		CAreaInterest cAreaInterest(patchPoint,patcNormal);
 		vecAreaInterest.push_back(cAreaInterest);
 	}
 }
 
-
 void CBinarySeg::CollectAreaInterest()
 {
+	ofstream outFiles("Output\\SuperCode.txt");
+
 	vecPatchPoint.clear();
+	clusterPatchNumLocal.clear();
+	clusterPatchInitIndexLocal.clear();
+
+	int start = 0;
+	int end;
 	for(int i = 0;i < vecAreaInterest.size();i++)
 	{
-		vecPatchPoint.insert(vecPatchPoint.end(),vecAreaInterest[i].vecPatchPoint.begin(),vecAreaInterest[i].vecPatchPoint.end());
+		if(!vecAreaInterest[i].validFlag)	continue;
+
+		end = start + vecAreaInterest[i].vecPatchPoint.size();
+		clusterPatchNumLocal.push_back(vecAreaInterest[i].vecPatchPoint.size());
+		clusterPatchInitIndexLocal.push_back(start);
+		start = end;
 	}
+
+	for(int i = 0;i < clusterPatchNumLocal.size();i++)
+	{
+		outFiles << "clusterPatchInitIndexLocal: " <<  clusterPatchInitIndexLocal[i] << endl;
+		outFiles << "clusterPatchNumLocal: " <<  clusterPatchNumLocal[i] << endl;
+	}
+
+	for(int i = 0;i < vecAreaInterest.size();i++)
+	{
+		if(!vecAreaInterest[i].validFlag)	continue;
+		vecPatchPoint.insert(vecPatchPoint.end(),vecAreaInterest[i].vecPatchPoint.begin(),vecAreaInterest[i].vecPatchPoint.end());
+		outFiles << "i: " <<  i << endl;
+	}
+	outFiles << "1 " << endl;
 
 	vecvecPatchMinDis.resize(vecPatchPoint.size());
 	vecvecPatchCenDis.resize(vecPatchPoint.size());
 	vecvecPatchConnectFlag.resize(vecPatchPoint.size());
 	for(int i = 0;i <vecPatchPoint.size();i++)
 	{
+		outFiles << "i: " <<  i << endl;
 		vecvecPatchMinDis[i].resize(vecPatchPoint.size(),LARGE_NUM);
 		vecvecPatchCenDis[i].resize(vecPatchPoint.size(),LARGE_NUM);
 		vecvecPatchConnectFlag[i].resize(vecPatchPoint.size(),false);
@@ -214,8 +246,14 @@ void CBinarySeg::CollectAreaInterest()
 
 	xMin = yMin = zMin = LARGE_NUM;
 	xMax = yMax = zMax = SMALL_NUM;
+	int count0 = 0;
 	for(int i = 0;i < vecAreaInterest.size();i++)
 	{
+		while(!vecAreaInterest[i].validFlag)
+		{
+			i++;
+		}
+		
 		vecPatcNormal.insert(vecPatcNormal.end(),vecAreaInterest[i].vecPatchNormal.begin(),vecAreaInterest[i].vecPatchNormal.end());
 		vecSmoothValue.insert(vecSmoothValue.end(),vecAreaInterest[i].vecSmoothValue.begin(),vecAreaInterest[i].vecSmoothValue.end());
 		vecAppearenceValue.insert(vecAppearenceValue.end(),vecAreaInterest[i].vecAppearenceValue.begin(),vecAreaInterest[i].vecAppearenceValue.end());
@@ -224,13 +262,24 @@ void CBinarySeg::CollectAreaInterest()
 		vecPatchCenPoint.insert(vecPatchCenPoint.end(),vecAreaInterest[i].vecPatchCenPoint.begin(),vecAreaInterest[i].vecPatchCenPoint.end());
 		vecPatchColor.insert(vecPatchColor.end(),vecAreaInterest[i].vecPatchColor.begin(),vecAreaInterest[i].vecPatchColor.end());
 
+		outFiles << "i: " << i << "count0: " << count0 << endl;
+
 		int patchBegin,patchEnd;
-		patchBegin = clusterPatchInitIndex[i];
-		patchEnd = clusterPatchInitIndex[i] + clusterPatchNum[i];
-		AddMatrixIn(vecAreaInterest[i].vecvecPatchMinDis,vecvecPatchMinDis,patchBegin,patchEnd);
+		patchBegin = clusterPatchInitIndexLocal[count0];
+		patchEnd = clusterPatchInitIndexLocal[count0] + clusterPatchNumLocal[count0];
+		outFiles << "patchBegin: " <<  patchBegin << "patchEnd: " <<  patchEnd << endl;
+		outFiles << "vecvecPatchMinDis: " << vecAreaInterest[i].vecvecPatchCenDis.size() << endl;
+		outFiles << "vecvecPatchCenDis: " <<  vecAreaInterest[i].vecvecPatchMinDis.size() << endl;
+		outFiles << "vecvecPatchConnectFlag: " <<  vecvecPatchConnectFlag.size() << endl;
+		outFiles << "vecpairPatchConnection: " <<  vecpairPatchConnection.size() << endl;
 		AddMatrixIn(vecAreaInterest[i].vecvecPatchCenDis,vecvecPatchCenDis,patchBegin,patchEnd);
+		outFiles << "i: " <<  i << endl;
+		AddMatrixIn(vecAreaInterest[i].vecvecPatchMinDis,vecvecPatchMinDis,patchBegin,patchEnd);
+		outFiles << "i: " <<  i << endl;
 		AddMatrixInBool(vecAreaInterest[i].vecvecPatchConnectFlag,vecvecPatchConnectFlag,patchBegin,patchEnd);
+		outFiles << "i: " <<  i << endl;
 		AddConnectionIn(vecAreaInterest[i].vecpairPatchConnection,vecpairPatchConnection,patchBegin,patchEnd);
+
 
 		if(xMax < vecAreaInterest[i].xMax) xMax = vecAreaInterest[i].xMax;
 		if(yMax < vecAreaInterest[i].yMax) yMax = vecAreaInterest[i].yMax;
@@ -239,9 +288,13 @@ void CBinarySeg::CollectAreaInterest()
 		if(yMin > vecAreaInterest[i].yMin) yMin = vecAreaInterest[i].yMin;
 		if(zMin > vecAreaInterest[i].zMin) zMin = vecAreaInterest[i].zMin;
 
+		outFiles << "i: " <<  i << endl;
+
+		count0++;
 	}
 	boundingBoxSize = sqrt((xMax-xMin) * (xMax-xMin) + (yMax-yMin) * (yMax-yMin) + (zMax-zMin) * (zMax-zMin));
 
+	outFiles.close();
 	NomalizeAppearence();
 	NomalizeSmooth();
 
@@ -283,13 +336,19 @@ void CBinarySeg::CollectAreaInterest()
 
 void CBinarySeg::AddMatrixIn(vector<vector<double>>  &matrixSmall,vector<vector<double>> &matrixBig,int beginIndex,int endIndex)
 {
+	ofstream outFiles("Output\\AddMI.txt",ios::app);
 	for(int i = 0;i < (endIndex - beginIndex);i++)
 	{
 		for(int j = 0;j < (endIndex - beginIndex);j++)
 		{
+			outFiles << "i: " << i << " j: " << j<<endl;
+			outFiles << "matrixBig[i + beginIndex][j + beginIndex]: " <<matrixBig[i + beginIndex][j + beginIndex] << endl;
+			outFiles << "matrixSmall[i][j]: " << matrixSmall[i][j] << endl;
 			matrixBig[i + beginIndex][j + beginIndex] = matrixSmall[i][j];
+			outFiles << "i: " << i << " j: " << j<<endl;
 		}
 	}
+	outFiles.close();
 }
 
 void CBinarySeg::AddMatrixInBool(vector<vector<bool>>  &matrixSmall,vector<vector<bool>> &matrixBig,int beginIndex,int endIndex)
@@ -496,8 +555,9 @@ void CBinarySeg::ConstructGraph()
 		point.g = 0.0;
 		point.b = 0.0;
 		graphInit.vecNodes.push_back(point);
+		graphInit.vecNodeFlag.push_back(true);
 	}
 
 	graphInit.vecEdges = vecpairPatchConnection;
-
+	graphInit.vecEdgeFlag.resize(graphInit.vecEdges.size(),true);
 }

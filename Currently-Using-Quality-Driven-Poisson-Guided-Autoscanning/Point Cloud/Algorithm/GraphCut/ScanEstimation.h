@@ -18,7 +18,9 @@ public:
 	vector<vector<ISOPOINT>> vecvecIsoPoint;
 	vector<int> clusterPatchNum;
 	vector<int> clusterPatchInitIndex;
-
+	vector<int> clusterPatchNumLocal;
+	vector<int> clusterPatchInitIndexLocal;
+	
 	vector<pair<int,int>> vecpairPatchConnection;
 	vector<vector<bool>> vecvecPatchConnectFlag;
 

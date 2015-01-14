@@ -52,14 +52,6 @@ void CScanEstimation::saveMultiResultToOriginal( CMesh *original, int m )
 
 void CScanEstimation::ScoreUpdate()
 {
-	ofstream outFilegs("Output\\SmoothValue.txt",ios::app);
-	for(int i = 0;i < vecSmoothValue.size();i++)
-	{
-		outFilegs << "vecSmoothValue: " << vecSmoothValue[i] << endl;
-	}
-	outFilegs.close();
-
-
 	ofstream outFileg("Output\\RunSU.txt");
 	outFileg << "let's begin :) " << endl;
 
@@ -139,23 +131,13 @@ double CScanEstimation::ComputePointConfidenceScore(int objectIndex, MyPoint_RGB
 
 void CScanEstimation::ComputeScore()
 {
+	ofstream outFileh("Output\\ObjectHypo.txt");
 	for(int i = 0;i < vecvecMultiResult.size();i++)
 	{
 		ComputeObjectness(i); 
+		outFileh << i << "  size  " << vecvecMultiResult.size() <<  endl;
 	}
 
-	for(int i = 0;i < vecvecMultiResult.size();i++)
-	{
-		for(int j = 0;j < vecvecMultiResult.size();j++)
-		{
-			if(i == j)	continue;
-			ComputeSeparateness(i,j);
-		}
-	}
-
-	Sorting(vecObjectHypo,vecEdgeHypo,vecObjectSorting,vecEdgeSorting);
-
-	ofstream outFileh("Output\\ObjectHypo.txt");
 	for(int i = 0;i < vecObjectHypo.size();i++)
 	{
 		ObjectHypo objectHypo;
@@ -166,7 +148,18 @@ void CScanEstimation::ComputeScore()
 	}
 	outFileh.close();
 
+
 	ofstream outFilee("Output\\EdgeHypo.txt");
+	for(int i = 0;i < vecvecMultiResult.size();i++)
+	{
+		for(int j = 0;j < vecvecMultiResult.size();j++)
+		{
+			if(i == j)	continue;
+			ComputeSeparateness(i,j);
+			outFilee << i << "  xx  " << j <<  endl;
+		}
+	}
+
 	for(int i = 0;i < vecEdgeHypo.size();i++)
 	{
 		EdgeHypo edgeHypo;
@@ -175,9 +168,10 @@ void CScanEstimation::ComputeScore()
 		outFilee << "edgeHypo.end " << edgeHypo.end <<  endl;
 		outFilee << "edgeHypo.areaIndex " << edgeHypo.areaIndex <<  endl;
 		outFilee << "edgeHypo.separateness " << edgeHypo.separateness <<  endl;
-
 	}
 	outFilee.close();
+
+	Sorting(vecObjectHypo,vecEdgeHypo,vecObjectSorting,vecEdgeSorting);
 
 	ofstream outFiles("Output\\Sorting.txt");
 	for(int i = 0;i < vecObjectSorting.size();i++)
@@ -194,8 +188,6 @@ void CScanEstimation::ComputeScore()
 
 void CScanEstimation::ComputeObjectness(int m)
 {
-	ofstream outFiles("Output\\Objectness.txt",ios::app);
-
 	double objectness = 0;
 	double fSum = 0;
 	double concaveSum = 0;
@@ -204,7 +196,6 @@ void CScanEstimation::ComputeObjectness(int m)
 		int patchIndex = vecvecMultiResult[m][i];
 		fSum += vecPatchConfidenceScore[patchIndex];
 	}
-	outFiles << "1 " <<  endl;
 
 	double edgeNum = 0;
 	for(int i = 0;i < vecpairPatchConnection.size();i++)
@@ -225,7 +216,6 @@ void CScanEstimation::ComputeObjectness(int m)
 				concaveSum += vecSmoothValue[i];
 		}
 	}
-	outFiles << "2 " <<  endl;
 
 	if(edgeNum > 0)
 		concaveSum /= edgeNum;
@@ -239,41 +229,47 @@ void CScanEstimation::ComputeObjectness(int m)
 
 	objectness = fSum * concaveSum; 
 
-	outFiles << "3 " <<  endl;
+
 
 	vecObjectHypo[m].objectness = objectness;
 
-	outFiles << "4 " <<  endl;
-	outFiles.close();
 }
 
 void CScanEstimation::ComputeSeparateness(int m,int n)
 {
-	double separateness = 0;
-	int hypoIndex;
+	ofstream outFilee("Output\\ComputeSeparateness.txt");
 
-	
+	double separateness = 0;
+	int hypoIndex = -1;
 
 	for(int i = 0;i < vecEdgeHypo.size();i++)
 	{
+		outFilee << "i: " << i << endl;
 		if(vecEdgeHypo[i].begin == m && vecEdgeHypo[i].end == n)
 		{
 			hypoIndex = i;
+			outFilee << "yes" << endl;
 		}
 	}
 
+	if(hypoIndex == -1)		return;
+
+	outFilee << "1" <<endl;
 	for(int i = 0;i < vecEdgeHypo[hypoIndex].pairPatch.size();i++)
 	{
 		for(int j = 0;j < vecpairPatchConnection.size();j++)
 		{
+			outFilee << "i: " << i << "j: " << j << endl;
 			if(vecEdgeHypo[hypoIndex].pairPatch[i].first == vecpairPatchConnection[j].first && vecEdgeHypo[hypoIndex].pairPatch[i].second == vecpairPatchConnection[j].second)
 			{
 				separateness += vecSmoothValue[j];
+				outFilee << "break " << endl;
 				break;
 			}
 		}
 	}
 	
+	outFilee << "2" <<endl;
 	vecEdgeHypo[hypoIndex].separateness = separateness;
 }
 
@@ -287,9 +283,9 @@ double CScanEstimation::GaussianFunction(double x)
 
 int CScanEstimation::GetAreaIndex(int patchIndex)
 {
-	for(int i = 0;i < clusterPatchInitIndex.size();i++)
+	for(int i = 0;i < clusterPatchInitIndexLocal.size();i++)
 	{
-		if(patchIndex >= clusterPatchInitIndex[i] && patchIndex < clusterPatchInitIndex[i] + clusterPatchNum[i])
+		if(patchIndex >= clusterPatchInitIndexLocal[i] && patchIndex < clusterPatchInitIndexLocal[i] + clusterPatchNumLocal[i])
 			return i;
 	}
 }

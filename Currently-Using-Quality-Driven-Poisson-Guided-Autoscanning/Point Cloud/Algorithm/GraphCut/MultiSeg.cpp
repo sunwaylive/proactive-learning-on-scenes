@@ -63,6 +63,8 @@ void CMultiSeg::Clear()
 	graphContract.vecEdgeColor.clear();
 	graphContract.vecEdges.clear();
 	graphContract.vecNodes.clear();
+	graphContract.vecNodeFlag.clear();
+	graphContract.vecEdgeFlag.clear();
 	vecvecMultiResult.clear();
 }
 
@@ -214,12 +216,12 @@ double CMultiSeg::GetMultiDataValue(int SiteID,int LableID)
 void CMultiSeg::GraphCutSolve()
 {	
 	clusterPatchInterval.push_back(0);
-	for(int i = 0;i < clusterPatchNum.size();i++)
+	for(int i = 0;i < clusterPatchNumLocal.size();i++)
 	{
 		int interval = 0;
 		for(int j = 0;j <= i;j++)
 		{
-			interval += clusterPatchNum[j];
+			interval += clusterPatchNumLocal[j];
 		}
 		clusterPatchInterval.push_back(interval);
 	}
@@ -426,7 +428,12 @@ void CMultiSeg::ConstructGraph()
 		point.g = 0.2;
 		point.b = 1.0;
 
+		vecObjectHypo[i].cenPoint.x = point.x;
+		vecObjectHypo[i].cenPoint.y = point.y;
+		vecObjectHypo[i].cenPoint.z = point.z;
+
 		graphContract.vecNodes.push_back(point);
+		graphContract.vecNodeFlag.push_back(true);
 	}
 
 	for(int i = 0; i < vecEdgeHypo.size();i++)
@@ -434,15 +441,17 @@ void CMultiSeg::ConstructGraph()
 		pair<int,int> edge;
 		edge.second = vecEdgeHypo[i].end;
 		edge.first = vecEdgeHypo[i].begin;
+
 		graphContract.vecEdges.push_back(edge);
+		graphContract.vecEdgeFlag.push_back(true);
 	}
 }
 
 int CMultiSeg::GetAreaIndex(int patchIndex)
 {
-	for(int i = 0;i < clusterPatchInitIndex.size();i++)
+	for(int i = 0;i < clusterPatchInitIndexLocal.size();i++)
 	{
-		if(patchIndex >= clusterPatchInitIndex[i] && patchIndex < clusterPatchInitIndex[i] + clusterPatchNum[i])
+		if(patchIndex >= clusterPatchInitIndexLocal[i] && patchIndex < clusterPatchInitIndexLocal[i] + clusterPatchNumLocal[i])
 			return i;
 	}
 }
