@@ -773,6 +773,8 @@ class DX11SceneRepChunkGrid
 
 		vec3f chunkToWorld(vec3i posChunk)
 		{
+			//这里输出是1
+			//std::cout<<m_voxelExtends <<std::endl;
 			vec3f res;
 			res.x = posChunk.x*m_voxelExtends.x;
 			res.y = posChunk.y*m_voxelExtends.y;

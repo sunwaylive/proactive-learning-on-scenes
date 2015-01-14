@@ -272,8 +272,6 @@ void StopScanningAndExtractIsoSurfaceMC()
 	//导出Iso Surface
 	DX11MarchingCubesChunkGrid::extractIsoSurface(DXUTGetD3D11DeviceContext(), g_SceneRepChunkGrid, g_SceneRepSDFLocal, p, GlobalAppState::getInstance().s_StreamingRadius, "./Scans/scan.ply", &rigidTransform);
 
-
-
 	std::cout << "Mesh Processing Time " << t.getElapsedTime() << " seconds" << std::endl;
 
 	g_SceneRepChunkGrid.startMultiThreading(DXUTGetD3D11DeviceContext());
@@ -536,7 +534,11 @@ void CALLBACK OnKeyboard( UINT nChar, bool bKeyDown, bool bAltDown, void* pUserC
 			break;
 		case 'A':
 			{
-				StopScanningAndMapID();
+				//StopScanningAndMapID();
+
+				//这些全局的东西为了简化，都被DXUT包装了， 直接到DXUT中找全局函数就可以了
+				g_SceneRepSDFLocal.LoadPointCloud(DXUTGetD3D11Device());
+				g_SceneRepSDFLocal.SetVoxelID(DXUTGetD3D11Device(), DXUTGetD3D11DeviceContext());
 			}
 		default:
 			break;
@@ -573,8 +575,6 @@ bool CALLBACK IsD3D11DeviceAcceptable( const CD3D11EnumAdapterInfo *AdapterInfo,
 {
 	return true;
 }
-
-
 
 //--------------------------------------------------------------------------------------
 // Create any D3D11 resources that aren't dependent on the back buffer
@@ -928,8 +928,13 @@ void CALLBACK OnD3D11FrameRender( ID3D11Device* pd3dDevice, ID3D11DeviceContext*
 				GlobalAppState::getInstance().s_Timer.start();
 			}
 
-			DX11RayCastingHashSDF::Render(pd3dImmediateContext, g_SceneRepSDFLocal.GetHashSRV(), g_SceneRepSDFLocal.GetHashCompactifiedSRV(), g_SceneRepSDFLocal.GetSDFBlocksSDFSRV(), g_SceneRepSDFLocal.GetSDFBlocksRGBWSRV(), g_SceneRepSDFLocal.GetNumOccupiedHashEntries(), DXUTGetWindowWidth(), DXUTGetWindowHeight(), &trans, g_SceneRepSDFLocal.MapAndGetConstantBuffer(pd3dImmediateContext));
+			//这句是光线投射得到最后需要显示在屏幕上的内容
+			//DX11RayCastingHashSDF::Render(pd3dImmediateContext, g_SceneRepSDFLocal.GetHashSRV(), g_SceneRepSDFLocal.GetHashCompactifiedSRV(), g_SceneRepSDFLocal.GetSDFBlocksSDFSRV(), g_SceneRepSDFLocal.GetSDFBlocksRGBWSRV(), g_SceneRepSDFLocal.GetNumOccupiedHashEntries(), DXUTGetWindowWidth(), DXUTGetWindowHeight(), &trans, g_SceneRepSDFLocal.MapAndGetConstantBuffer(pd3dImmediateContext));
+			
+			//需要把上面这句话替换成, 我们只需要在这个之前，把点云信息读入进 pointcloud id srv中
+			DX11RayCastingHashSDF::Render(pd3dImmediateContext, g_SceneRepSDFLocal.GetHashSRV(), g_SceneRepSDFLocal.GetPCXYZIDSRV(), g_SceneRepSDFLocal.GetHashCompactifiedSRV(), g_SceneRepSDFLocal.GetSDFBlocksSDFSRV(), g_SceneRepSDFLocal.GetSDFBlocksRGBWSRV(), g_SceneRepSDFLocal.GetNumOccupiedHashEntries(), DXUTGetWindowWidth(), DXUTGetWindowHeight(), &trans, g_SceneRepSDFLocal.MapAndGetConstantBuffer(pd3dImmediateContext));
 
+			//这句进去之后，其实是直接返回的
 			DX11RayCastingHashSDF::RenderStereo(pd3dImmediateContext, g_SceneRepSDFLocal.GetHashSRV(), g_SceneRepSDFLocal.GetHashCompactifiedSRV(), g_SceneRepSDFLocal.GetSDFBlocksSDFSRV(), g_SceneRepSDFLocal.GetSDFBlocksRGBWSRV(), g_SceneRepSDFLocal.GetNumOccupiedHashEntries(), GlobalAppState::getInstance().s_windowWidthStereo, GlobalAppState::getInstance().s_windowHeightStereo, &trans, g_SceneRepSDFLocal.MapAndGetConstantBuffer(pd3dImmediateContext));
 
 			if (GlobalAppState::getInstance().s_timingsStepsEnabled) {

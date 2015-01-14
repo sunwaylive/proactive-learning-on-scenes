@@ -45,7 +45,9 @@ HRESULT DX11MarchingCubesChunkGrid::extractIsoSurface( ID3D11DeviceContext* cont
 	//上面是用marching cube算法得到mesh的数据
 
 	//DX11MarchingCubesHashSDF::mapPatchID2Voxel();
-	//DX11MarchingCubesHashSDF::saveMesh(filename, transform);
+
+
+	DX11MarchingCubesHashSDF::saveMesh(filename, transform);
 	
 
 	DX11MarchingCubesHashSDF::clearMeshBuffer();

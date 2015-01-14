@@ -1293,12 +1293,56 @@ void CameraParaDlg::prepareSDFSlicePlane()
 
 void CameraParaDlg::loadScene()
 {
+  unsigned short color = 2;
+  int last = 0;//chunkDesc->m_SDFBlocks[i].data[2 * j + 1];
+  last &= 0xffff00ff;           //先清空颜色的r分量
+  color &= 0x000000ff;      //取出颜色的bit位
+  last |= (color << 0x8);            //更新颜色的r分量
+  std::cout<<((last & 0x0000ff00) >> 0x8) <<std::endl;
+  return;
+
   //load scene to original
+<<<<<<< .mine
 	int x = 0x7fffffff;
 	std::cout<<x <<std::endl;
 	std::cout<<INT_MAX <<std::endl;
 	return;
 	loadToOriginal();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+=======
+  ifstream color_in("color_in.txt");
+  ofstream color_out("color_out.txt");
+  string line;
+  int r, g, b;
+  while(getline(color_in, line)){
+    stringstream ss(line);
+    ss>>r >>g >>b;
+    char tmp[50];
+    sprintf(tmp, "float4(%.2ff, %.2ff, %.2ff, 0.0f),\n", r / 255.0f, g / 255.0f, b / 255.0f);
+    color_out<<tmp;
+  }
+
+  color_in.close();
+  color_out.close();
+  return;
+
+
+
+  loadToOriginal();
+>>>>>>> .theirs
 }
 
 void CameraParaDlg::detectPlane()

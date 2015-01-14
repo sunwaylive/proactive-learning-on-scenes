@@ -24,7 +24,8 @@ Voxel VoxelUtilHelper::getVoxel(const SDFBlock& sdfBlocks, unsigned int id)
 
 void VoxelUtilHelper::setVoxel(SDFBlock& sdfBlocks, unsigned int id, const Voxel& voxel)
 {
-	unsigned int* f = (unsigned int*)&voxel.sdf; sdfBlocks.data[2*id+0] = *f;
+	unsigned int* f = (unsigned int*)&voxel.sdf; 
+	sdfBlocks.data[2*id+0] = *f;
 	int last = 0;
 	last |= voxel.color.z & 0x000000ff;
 	last <<= 8;
@@ -61,7 +62,7 @@ vec3i VoxelUtilHelper::virtualVoxelPosToSDFBlock(vec3i virtualVoxelPos)
 	if (virtualVoxelPos.y < 0) virtualVoxelPos.y -= SDF_BLOCK_SIZE-1;
 	if (virtualVoxelPos.z < 0) virtualVoxelPos.z -= SDF_BLOCK_SIZE-1;
 
-	return virtualVoxelPos / SDF_BLOCK_SIZE;
+	return virtualVoxelPos / SDF_BLOCK_SIZE; 
 }
 
 //整形的3为voxel坐标转换到浮点数的world坐标

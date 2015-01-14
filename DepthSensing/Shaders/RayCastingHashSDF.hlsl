@@ -1,9 +1,17 @@
 
-Buffer<int>	g_Hash					: register( t0 );
+Buffer<int>	     g_Hash				: register( t0 );
+//wei add
+Buffer<float>	 g_PCXYZID			: register( t7 ); //第1个字节放点云的数量，后面对应每个点放点的 x y z patch_id obj_id
+RWBuffer<int>    PointBID           : register( t8 );
+RWBuffer<int>    BIDArray           : register( t9 );
+RWBuffer<float>  g_SDFBlocksSDF_RW  : register( t10);
+RWBuffer<int>    g_SDFBlocksRGBW_RW : register( t11);
+
+
 Buffer<float>	 g_SDFBlocksSDF		: register( t1 );
 Texture2D<float> g_RayIntervalMin   : register( t2 );
 Texture2D<float> g_RayIntervalMax   : register( t3 );
-Buffer<int>		 g_SDFBlocksRGBW	: register( t4 );
+Buffer<int>	     g_SDFBlocksRGBW	: register( t4 );
  
 Buffer<int>		g_FragmentPrefixSumBufferSRV	: register( t5 );
 Buffer<float>	g_FragmentSortedDepthBufferSRV	: register( t6 );
@@ -13,7 +21,15 @@ Buffer<float>	g_FragmentSortedDepthBufferSRV	: register( t6 );
 #include "KinectCameraUtil.h.hlsl"
 #include "VoxelUtilHashSDF.h.hlsl"
 #include "RayCastingUtilHashSDF.h.hlsl"
-      
+
+//wei add
+int linearizeIndex(int3 idx)
+{
+	return idx.x 
+		+ idx.y * m_gridDimensions.x 
+		+ idx.z * m_gridDimensions.x * m_gridDimensions.y;
+}
+
 RWTexture2D<float> g_output : register(u0);
 RWTexture2D<float4> g_outputColor : register(u1);
 RWTexture2D<float4> g_outputNormals : register(u2);
@@ -25,8 +41,12 @@ cbuffer cbConstant : register(b1)
 	uint		g_RenderTargetWidth;
 	uint		g_RenderTargetHeight;
 	uint		g_splatMinimum;
-	uint		g_dummyRayInteveral337;
+	uint		g_dummyRayInteveral;
 };
+
+//这个是最下面调用的函数traverseCoarseGridSimpleSampleAll所在的文件
+#define MINF asfloat(0xff800000)
+#define MAXF asfloat(0x7F7FFFFF)
 
 #include "RayCastingHashSDFTraversalSimple.h.hlsl"
  
@@ -108,6 +128,73 @@ void traverseCoarseGridSimple(float3 worldCamPos, float3 worldDir, float3 camDir
 		rayCurrent+=rayIncrement;
 	}
 }*/
+
+////#define MAX asint(0x7fffffff)
+//void traverseCoarseGridSimpleSampleAll(float3 worldCamPos, float3 worldDir, float3 camDir, int3 dTid)
+//{
+//	// Last Sample
+//	Sample lastSample; lastSample.sdf = 0.0f; lastSample.alpha = 0.0f; lastSample.weight = 0; // lastSample.color = int3(0, 0, 0);
+//	const float depthToRayLength = 1.0f/camDir.z; // scale factor to convert from depth to ray length
+//
+//	float rayCurrent = depthToRayLength*max(g_SensorDepthWorldMin, kinectProjZToCamera(g_RayIntervalMin[dTid.xy])); // Convert depth to raylength
+//	float rayEnd = depthToRayLength*min(g_SensorDepthWorldMax, kinectProjZToCamera(g_RayIntervalMax[dTid.xy])); // Convert depth to raylength
+// 
+//	[allow_uav_condition]
+//	while(rayCurrent < rayEnd)
+//	{
+//		float3 currentPosWorld = worldCamPos+rayCurrent*worldDir;
+//		HashEntry entry = getHashEntryForSDFBlockPos(g_Hash, worldToSDFBlock(currentPosWorld));
+//		float dist;	float3 color;
+//		if(trilinearInterpolationSimpleFastFast(currentPosWorld, dist, color))
+//		//if(trilinearInterpolation(currentPosWorld, dist, color))
+//		{
+//			if(lastSample.weight > 0 && lastSample.sdf > 0.0f && dist < 0.0f) // current sample is always valid here
+//			{					
+//				float alpha; // = findIntersectionLinear(lastSample.alpha, rayCurrent, lastSample.sdf, dist);
+//				findIntersectionBisection(worldCamPos, worldDir, lastSample.sdf, lastSample.alpha, dist, rayCurrent, alpha);
+//					
+//				float3 currentIso = worldCamPos+alpha*worldDir;
+//				if(abs(lastSample.sdf - dist) < g_thresSampleDist)
+//				{
+//					if(abs(dist) < g_thresDist)
+//					{
+//						g_output[dTid.xy] = alpha/depthToRayLength; // Convert ray length to depth depthToRayLength
+//
+//						int id = color.x; //asint(color.x);
+//						if (id == 19) g_outputColor[dTid.xy] = float4(0.0,1.0,0.0, 1.0f); //青色
+//						else if (id < 20) g_outputColor[dTid.xy] = float4(0.0,1.0,1.0, 1.0f); //青色
+//						//else if (id > 10 && id <= 11) g_outputColor[dTid.xy] = float4(0.0,0.0,1.0, 1.0f);//blue
+//						//else if (id > 20 && id < 2147483647) g_outputColor[dTid.xy] = float4(1.0,0.0,1.0, 1.0f);//purple
+//						//else if (id == 10) g_outputColor[dTid.xy] = float4(0.0, 0.0, 1.0, 1.0f); //green
+//						else g_outputColor[dTid.xy] = float4(color.x, 0.0, 0.0, 1.0f);//red
+//					//	g_outputColor[dTid.xy] = float4(color, 1.0f);
+//						if(g_useGradients == 1)
+//						{
+//							float3 normal = gradientForPoint(currentIso);
+//							g_outputNormals[dTid.xy] = float4(mul(float4(normal,0.0f), g_ViewMat).xyz, 1.0f);
+//						}
+//
+//						return;
+//					}
+//				}
+//			}
+//
+//			lastSample.sdf = dist;
+//			lastSample.alpha = rayCurrent;
+//			// lastSample.color = color;
+//			lastSample.weight = 1;
+//			rayCurrent+=rayIncrement;
+//		}
+//		else
+//		{
+//			lastSample.weight = 0;
+//			rayCurrent+=rayIncrement;
+//		}
+//
+//		//rayCurrent+=rayIncrement; //0.6f*getTruncation(rayCurrent);
+//	}
+//}
+//
 
 [numthreads(groupthreads, groupthreads, 1)]
 void renderCS(int3 dTid : SV_DispatchThreadID)

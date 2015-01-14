@@ -46,6 +46,7 @@ struct Voxel
 };
 
 //! computes the (local) virtual voxel pos of an index; idx in [0;511]
+//根据1维的线性化索引转换成3维的索引 0 ~ 8
 int3 delinearizeVoxelIndex(uint idx)
 {
 	uint x = idx % SDF_BLOCK_SIZE;
@@ -55,6 +56,7 @@ int3 delinearizeVoxelIndex(uint idx)
 }
 
 //! computes the linearized index of a local virtual voxel pos; pos in [0;7]^3
+//根据int3的voxel索引(每个维度0 ~ 8), 线性化成0 ~ 511的索引
 uint linearizeVoxelPos(int3 virtualVoxelPos)
 {
 	return  virtualVoxelPos.z * SDF_BLOCK_SIZE * SDF_BLOCK_SIZE +
@@ -62,6 +64,7 @@ uint linearizeVoxelPos(int3 virtualVoxelPos)
 			virtualVoxelPos.x;
 }
 
+//获取对应位置上的HashEntry
 HashEntry getHashEntry(Buffer<int> hash, in uint id)
 {
 	HashEntry entry;
@@ -82,6 +85,7 @@ HashEntry getHashEntry(Buffer<int> hash, in uint id)
 	return entry;
 }
 
+//read write
 HashEntry getHashEntry(RWBuffer<int> hash, in uint id)
 {
 	HashEntry entry;
@@ -186,9 +190,8 @@ void deleteVoxel(RWBuffer<float> sdfBlocksSDF, RWBuffer<int> sdfBlocksRGBW, in u
 
 float3 worldToVirtualVoxelPosFloat(in float3 pos)
 {
-	return pos*g_VirtualVoxelResolutionScalar;
+	return pos * g_VirtualVoxelResolutionScalar;
 }
-
 
 //VirtualVoxelResolutionScalar = 1.0f/m_VirtualVoxelSize;
 int3 worldToVirtualVoxelPos(in float3 pos)
@@ -197,6 +200,7 @@ int3 worldToVirtualVoxelPos(in float3 pos)
 	return (int3)(p+sign(p)*0.5f);
 }
 
+//根据voxel pos int3 转换成其所在的SDFBlock pos int3
 int3 virtualVoxelPosToSDFBlock(int3 virtualVoxelPos)
 {
 	if (virtualVoxelPos.x < 0) virtualVoxelPos.x -= SDF_BLOCK_SIZE-1;
@@ -207,21 +211,25 @@ int3 virtualVoxelPosToSDFBlock(int3 virtualVoxelPos)
 }
 
 // Computes virtual voxel position of corner sample position
+//SDFBlock pos int3 转换成Voxel pos int3
 int3 SDFBlockToVirtualVoxelPos(int3 sdfBlock)
 {
-	return sdfBlock*SDF_BLOCK_SIZE;
+	return sdfBlock * SDF_BLOCK_SIZE;
 }
 
+//int3的voxel坐标转成world pos
 float3 virtualVoxelPosToWorld(in int3 pos)
 {
-	return float3(pos)*g_VirtualVoxelSize;
+	return float3(pos) * g_VirtualVoxelSize;
 }
 
+//int3的sdfBlock 坐标转成 世界坐标float3
 float3 SDFBlockToWorld(int3 sdfBlock)
 {
 	return virtualVoxelPosToWorld(SDFBlockToVirtualVoxelPos(sdfBlock));
 }
 
+//世界坐标转成sdfBlock坐标
 int3 worldToSDFBlock(float3 worldPos)
 {
 	const int3 virtualVoxelPos = worldToVirtualVoxelPos(worldPos);

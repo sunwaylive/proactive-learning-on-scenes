@@ -136,6 +136,28 @@ bool trilinearInterpolationSimpleFastFast(float3 pos, out float dist, out float3
 	return true;
 }
 
+//wei add
+//bool setVoxelPatchID()
+//{
+//	const float oSet = g_VirtualVoxelSize;
+//	float3 pt_pos = float3(1.0f, 0.0f, 0.0f);;//这里要替换成点云中每个点的坐标
+//	int pt_patch_id = 1;
+//
+//	float3 posDual = pt_pos - float3(oSet/2.0f, oSet/2.0f, oSet/2.0f);
+//
+//	int3 virtualVoxelPos = worldToVirtualVoxelPos(posDual + float3(0.0f, 0.0f, 0.0f));
+//	int ptr = getHashEntryForSDFBlockPos(g_Hash, virtualVoxelPosToSDFBlock(virtualVoxelPos)).ptr; 
+//	if(ptr == FREE_ENTRY) 
+//		return false;
+//
+//	int	linearMemoryIndex = ptr + virtualVoxelPosToLocalSDFBlockIndex(virtualVoxelPos);
+//	Voxel v = getVoxel(g_SDFBlocksSDF, g_SDFBlocksRGBW, linearMemoryIndex);
+//	////这里将point cloud上的patch_id赋值给voxel
+//	v.color.x = pt_patch_id;
+//	setVoxel(g_SDFBlocksSDF, g_SDFBlocksRGBW, linearMemoryIndex, v);//这两个buffer只能读不能写
+//	return true;
+//}
+
 // Takes a world space position pos -> returns false if not all samples were available
 /*bool trilinearInterpolationSimpleFast(float3 pos, out float dist, out float3 color)
 {

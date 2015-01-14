@@ -107,6 +107,7 @@ HRESULT DX11SceneRepChunkGrid::StreamOutToCPUPass0GPU(ID3D11DeviceContext* conte
 	context->CSSetConstantBuffers(1, 1, &m_constantBufferIntegrateFromGlobalHash);
 	ID3D11Buffer* CBGlobalAppState = GlobalAppState::getInstance().MapAndGetConstantBuffer(context);
 	context->CSSetConstantBuffers(8, 1, &CBGlobalAppState);
+	//shader在此
 	context->CSSetShader(m_pComputeShaderIntegrateFromGlobalHashPass1, 0, 0);
 	
 	// Run compute shader
@@ -158,6 +159,7 @@ HRESULT DX11SceneRepChunkGrid::StreamOutToCPUPass0GPU(ID3D11DeviceContext* conte
 		context->CSSetConstantBuffers(0, 1, &CBsceneRepSDF);
 		context->CSSetConstantBuffers(1, 1, &m_constantBufferIntegrateFromGlobalHash);
 		context->CSSetConstantBuffers(8, 1, &CBGlobalAppState);
+
 		context->CSSetShader(m_pComputeShaderIntegrateFromGlobalHashPass2, 0, 0);
 
 		// Run compute shader
@@ -243,10 +245,10 @@ HRESULT DX11SceneRepChunkGrid::StreamOutToCPU(ID3D11DeviceContext* context, DX11
 
 void DX11SceneRepChunkGrid::IntegrateInChunkGrid(const int* desc, const int* block, unsigned int nSDFBlocks)
 {	
-	const unsigned int descSize = 4;
+	const unsigned int descSize = 4;//1个pos=3个字节，1个ptr=1个字节
 	for(unsigned int i = 0; i < nSDFBlocks; i++)
 	{
-		vec3i pos(&desc[i * descSize]);
+		vec3i pos(&desc[i * descSize]);//构造函数自动取前3个字节
 		//真实3D场景的坐标
 		vec3f posWorld = VoxelUtilHelper::SDFBlockToWorld(pos);
 		//根据3D场景的坐标得到所在的grid的坐标
@@ -593,7 +595,7 @@ unsigned int DX11SceneRepChunkGrid::IntegrateInHash(int* descOuput, int* blockOu
 
 HRESULT DX11SceneRepChunkGrid::mapID(ID3D11DeviceContext* context, const std::string &filename, DX11SceneRepHashSDF& hash, const vec3f& camPos, float radius, float dumpRadius, vec3f dumpCenter)
 {
-	std::cout<<"map id in DX11SceneRepChunkGrid.cpp!" <<std::endl;
+	std::cout<<"Map id in DX11SceneRepChunkGrid.cpp!" <<std::endl;
 
 	HRESULT hr = S_OK;
 	struct HashEntry
@@ -614,175 +616,162 @@ HRESULT DX11SceneRepChunkGrid::mapID(ID3D11DeviceContext* context, const std::st
 	};
 
 	unsigned int occupiedBlocks = 0;
-	SparseGrid3D<VoxelBlock> grid;
 
 	vec3i minGridPos = getMinGridPos();
 	vec3i maxGridPos = getMaxGridPos();
 
 	V_RETURN(StreamOutToCPUAll(context, hash));
 
-	vec3f test_pos(0.0f, 0.0f, 0.0f);
-	int color = rand() % 16; 
+	//步骤1:读入带有path_id的数据
+	MeshDataf mesh_with_id;
+	MeshIOf::loadFromPLY("./Scans/scan.ply", mesh_with_id);
+	std::cout<<"position vert size: " <<mesh_with_id.m_Vertices.size() <<std::endl;
+	std::cout<<"color vert size: " <<mesh_with_id.m_Colors.size() <<std::endl;
 
-	//vec3i chunk = worldToChunks(test_pos);
-
-	for (int x = minGridPos.x; x<maxGridPos.x; x+=1)	{
-		for (int y = minGridPos.y; y<maxGridPos.y; y+=1)	{
-			for (int z = minGridPos.z; z<maxGridPos.z; z+=1)	{
-				vec3i chunk(x, y, z);
-				if (containsSDFBlocksChunk(chunk)){
-					//std::cout<<"Cur point on chunk (" << chunk.x << ", " << chunk.y << ", " << chunk.z << ") " << std::endl;
-					unsigned int index = linearizeChunkPos(chunk);
-					if (m_grid[index] != NULL && m_grid[index]->isStreamedOut()){
-						ChunkDesc *chunkDesc = m_grid[index];
-
-						//？？这里需要找到对应的sdfBlock
-						for (size_t i = 0; i < chunkDesc->m_ChunkDesc.size(); i++) {
-							SDFDesc& sdfDesc = chunkDesc->m_ChunkDesc[i];
-							//const unsigned int ptr = sdfDesc.ptr;
-
-							//遍历sdfBlock中所有的voxel，把Block中的所有颜色的r分量设成点的颜色的r分量
-							for (unsigned int j = 0; j < SDF_BLOCK_SIZE * SDF_BLOCK_SIZE * SDF_BLOCK_SIZE; ++j){
-								int &last = chunkDesc->m_SDFBlocks[i].data[2 * j + 1];
-								last &= 0xffff00ff;           //先清空颜色的r分量
-								color &= 0x000000ff;      //取出颜色的bit位
-								last |= (color << 0x8);            //更新颜色的r分量
-								//std::cout<<((last & 0x0000ff00) >> 0x8) <<std::endl;
-							}//end for j
-
-						}//end for i
-					}//end for m_grid if
-
-
-				}//end for contains if
-			}
-		}
-	}
-	unsigned int nStreamedBlock;
-	V_RETURN(StreamInToGPUAll(context, hash, camPos, radius, true, nStreamedBlock));
-
-	return S_OK;
-
-
+	//步骤2：设置所有的voxel的颜色为给定颜色
+	//vec3f test_pos(0.0f, 0.0f, 0.0f);
+	//unsigned short color = 19;
+	//std::cout<<color << std::endl;
+	////vec3i chunk = worldToChunks(test_pos);
+	//int k = 0;
 	//for (int x = minGridPos.x; x<maxGridPos.x; x+=1)	{
 	//	for (int y = minGridPos.y; y<maxGridPos.y; y+=1)	{
 	//		for (int z = minGridPos.z; z<maxGridPos.z; z+=1)	{
 	//			vec3i chunk(x, y, z);
-	//			if (containsSDFBlocksChunk(chunk))	{
-	//				std::cout << "Dump Hash on chunk (" << x << ", " << y << ", " << z << ") " << std::endl;
+	//			if (containsSDFBlocksChunk(chunk)){
+	//				//std::cout<<"Cur point on chunk (" << chunk.x << ", " << chunk.y << ", " << chunk.z << ") " << std::endl;
+	//				unsigned int index = linearizeChunkPos(chunk);
+	//				if (m_grid[index] != NULL && m_grid[index]->isStreamedOut()){
+	//					ChunkDesc *chunkDesc = m_grid[index];
 
-	//				vec3f& chunkCenter = getWorldPosChunk(chunk);
-	//				vec3f& voxelExtends = getVoxelExtends();
-	//				float virtualVoxelSize = getVirtualVoxelSize();
-
-	//				vec3f minCorner = chunkCenter-voxelExtends/2.0f-vec3f(virtualVoxelSize, virtualVoxelSize, virtualVoxelSize)*SDF_BLOCK_SIZE;
-	//				vec3f maxCorner = chunkCenter+voxelExtends/2.0f+vec3f(virtualVoxelSize, virtualVoxelSize, virtualVoxelSize)*SDF_BLOCK_SIZE;
-
-
-	//				unsigned int index = linearizeChunkPos(vec3i(x, y, z));
-	//				if(m_grid[index] != NULL && m_grid[index]->isStreamedOut()) // As been allocated and has streamed out blocks
-	//				{
-	//					ChunkDesc* chunkDesc = m_grid[index];
+	//					//？？这里需要找到对应的sdfBlock
 	//					for (size_t i = 0; i < chunkDesc->m_ChunkDesc.size(); i++) {
 	//						SDFDesc& sdfDesc = chunkDesc->m_ChunkDesc[i];
-	//						const unsigned int ptr = sdfDesc.ptr;
+	//						//const unsigned int ptr = sdfDesc.ptr;
 
-	//						//if (ptr != -2) {
-	//						VoxelBlock vBlock;
-	//						//memcpy(vBlock.voxels, &voxels[ptr], sizeof(VoxelBlock));
-	//						for (unsigned int j = 0; j < SDF_BLOCK_SIZE*SDF_BLOCK_SIZE*SDF_BLOCK_SIZE; j++) {
-	//							int first = chunkDesc->m_SDFBlocks[i].data[2*j+0];
-	//							vBlock.voxels[j].sdf = *(float*)(&first);
-	//							int last = chunkDesc->m_SDFBlocks[i].data[2*j+1];
-	//							vBlock.voxels[j].weight = last & 0x000000ff;
-	//							last >>= 0x8;
-	//							vBlock.voxels[j].color.x = last & 0x000000ff;
-	//							last >>= 0x8;
-	//							vBlock.voxels[j].color.y = last & 0x000000ff;
-	//							last >>= 0x8;
-	//							vBlock.voxels[j].color.z = last & 0x000000ff;
+	//						//遍历sdfBlock中所有的voxel，把Block中的所有颜色的r分量设成点的颜色的r分量
+	//						for (unsigned int j = 0; j < SDF_BLOCK_SIZE * SDF_BLOCK_SIZE * SDF_BLOCK_SIZE; ++j){
+	//							int &last = chunkDesc->m_SDFBlocks[i].data[2 * j + 1];
+	//							last &= 0x000000ff;           //先清空颜色的r分量
+	//							color &= 0x000000ff;      //取出颜色的bit位
+	//							last |= (color << 0x8);            //更新颜色的r分量
+	//						//	int temp = last & 0x000000ff;
+	//						//	last = 	0x00f00000 | temp;
+	//						}//end for j
 
-	//							//std::cout << vBlock.voxels[j].sdf << std::endl;
-	//						}
-
-	//						vec3i coord(sdfDesc.pos.x, sdfDesc.pos.y, sdfDesc.pos.z);
-
-	//						//std::cout << coord << std::endl;
-	//						//上面其实是取出voxel的数据, radius默认是0, 所以数据会进入grid中，人后sparse grid有一个成员函数是写出到文件
-	//						if (dumpRadius == 0.0f) {
-	//							grid(coord) = vBlock;
-	//						} else {
-	//							//vec3f center = GetLastRigidTransform()*dumpCenter;
-	//							vec3f center = dumpCenter;
-	//							vec3f coordf = vec3f(coord * SDF_BLOCK_SIZE) * m_VirtualVoxelSize;
-	//							if (vec3f::dist(center, coordf) <= dumpRadius) {
-	//								grid(coord) = vBlock;
-	//							}					
-	//						}
-
-	//						occupiedBlocks++;
-	//						//}
-	//					}
-	//				}
+	//					}//end for i
+	//				}//end for m_grid if
 
 
-	//				//V_RETURN(chunkGrid.StreamInToGPUChunkNeighborhood(context, hash, chunk, 1));
-	//				//V_RETURN(DX11MarchingCubesHashSDF::extractIsoSurface(context, hash.GetHashSRV(), hash.GetSDFBlocksSDFSRV(), hash.GetSDFBlocksRGBWSRV(), hash.MapAndGetConstantBuffer(context), hash.GetHashNumBuckets(), hash.GetHashBucketSize(), minCorner, maxCorner, true));
-	//				//V_RETURN(chunkGrid.StreamOutToCPUAll(context, hash));
-	//			}
+	//			}//end for contains if
 	//		}
 	//	}
-	//}		
-
-	//std::cout << "found " << occupiedBlocks << " voxel blocks   "; 
-	//grid.writeBinaryDump(filename);
-
-	//unsigned int nStreamedBlock;
-	//V_RETURN(StreamInToGPUAll(context, hash, camPos, radius, true, nStreamedBlock));
-
-	//return hr;
-
-
-
-
-
-
-
-	//return S_OK;
-
-
-
-
-	//int grid_size = m_grid.size();
-	//for(int i = 0; i < grid_size; ++i){
-	//	if(m_grid[i] == NULL){
-	//		//std::cout<<"m_gird[i] == NULL" <<std::endl;
-	//		continue;
-	//	}
-	//	std::cout<<"in grid " <<i <<" " <<"There are " <<m_grid[i]->getSDFBlock(i).data[0] <<"sdfBlocks" <<std::endl;
 	//}
-	//std::cout<<"map ID ends" <<std::endl;
-	//return S_OK;
 
-	////遍历所有点
-	//vec3f test_pos(0.0f, 0.0f, 0.0f);
-	//int color_red = 255; 
+	//for (size_t pi = 0; pi < mesh_with_id.m_Vertices.size(); ++pi)
+	//{
+	//	vec3f world_pos = mesh_with_id.m_Vertices[pi];
+	//	vec3i chunk = worldToChunks(world_pos);
+	//	if (containsSDFBlocksChunk(chunk)) {
+	//		unsigned int index = linearizeChunkPos(chunk);
+	//		if (m_grid[index] != NULL && m_grid[index]->isStreamedOut()){//这个其实是和上面的containsSDFBlocksChunk重复
+	//			ChunkDesc *chunkDesc = m_grid[index];
+	//			//std::cout<<"chunk containing sdfBlock size: " <<chunkDesc->getNElements() <<std::endl;
 
-	//unsigned int index = linearizeChunkPos(worldToChunks(test_pos));
-	////该grid中有sdfBlock, 如果没有错误肯定是有的
-	//if(m_grid[index] != NULL && m_grid[index]->isStreamedOut()){
-	//	ChunkDesc *chunkDesc = m_grid[index];
-	//	//找到该点所在的sdfBlock或者直接找到voxel
-	//	int voxelIdx = 0; //???need_compute;
-	//	SDFBlock &v = chunkDesc->m_SDFBlocks[voxelIdx];
-	//	
-	//	//取第二个字节，更新这个voxel的颜色的r分量，用来放patch_id
-	//	//该字节的布局：bgrw
-
-	//	int &last = chunkDesc->m_SDFBlocks[voxelIdx].data[2 * voxelIdx + 1];
-	//	last &= 0xffff00ff;           //先清空颜色的r分量
-	//	color_red &= 0x000000ff;      //取出颜色的bit位
-	//	last |= color_red;            //更新颜色的r分量
+	//			//遍历所有的sdfBlock, 直接找个最近的距离的Block不行，要找在某个radius范围内的
+	//			std::vector<int> voxel_in_radius;
+	//			double radius = 0.1f;
+	//			double min_dist = INT_MAX;
+	//			for (size_t i = 0; i < chunkDesc->m_ChunkDesc.size(); i++) {
 	//}
-	//return S_OK;
+
+	//步骤2：遍历所有mesh中的点
+	for (size_t pi = 0; pi < mesh_with_id.m_Vertices.size(); ++pi)
+	{
+		vec3f world_pos = mesh_with_id.m_Vertices[pi];
+		int red = 2; //(static_cast<int>(mesh_with_id.m_Colors[pi].x * 255) + 2) % 16; //rand() % 16; //(static_cast<int>(mesh_with_id.m_Colors[pi].x * 255) + 1) % 16;
+		
+		vec3i chunk = worldToChunks(world_pos);
+
+		if (containsSDFBlocksChunk(chunk)){
+			//std::cout<<"Cur point on chunk (" << chunk.x << ", " << chunk.y << ", " << chunk.z << ") " << std::endl;
+
+			unsigned int index = linearizeChunkPos(chunk);
+			if (m_grid[index] != NULL && m_grid[index]->isStreamedOut()){//这个其实是和上面的containsSDFBlocksChunk重复
+				ChunkDesc *chunkDesc = m_grid[index];
+				//std::cout<<"chunk containing sdfBlock size: " <<chunkDesc->getNElements() <<std::endl;
+
+				//遍历所有的sdfBlock, 直接找个最近的距离的Block不行，要找在某个radius范围内的
+
+				std::vector<int> voxel_in_radius;
+				double radius = 0.1f;
+				double min_dist = INT_MAX;
+
+				for (size_t i = 0; i < chunkDesc->m_ChunkDesc.size(); i++) {
+					SDFDesc& sdfDesc = chunkDesc->m_ChunkDesc[i];
+					vec3i sdfBlock_pos = sdfDesc.pos;
+					vec3f sdfBlock_world_pos = VoxelUtilHelper::SDFBlockToWorld(sdfBlock_pos);
+					//std::cout<<"sdfBlock World pos: " <<sdfBlock_world_pos<<std::endl;
+
+					double d = vec3f::dist(sdfBlock_world_pos, world_pos);
+					
+					//更新最近的SDFBlock的索引
+					if (d < radius){
+						voxel_in_radius.push_back((int)i);
+						/*min_dist = d;
+						nearest_block_idx = i;*/
+					}
+
+					if (d < min_dist){
+						min_dist = d;
+					}
+				}
+
+				//way1
+				//if (nearest_block_idx == -1){
+				//	std::cout<<"没有找到最近的SDFBlock" <<std::endl;
+				//	return S_FALSE;
+				//}else{
+				//	//遍历最近的sdfBlock中所有的voxel，把Block中的所有颜色的r分量设成点的颜色的r分量
+				//	//std::cout<<"找到了最近的SDFBlock, 开始遍历Block设置所有voxel的颜色为patch_id."  <<std::endl;
+				//	SDFBlock &block = chunkDesc->m_SDFBlocks[nearest_block_idx];
+				//	for (unsigned int j = 0; j < SDF_BLOCK_SIZE * SDF_BLOCK_SIZE * SDF_BLOCK_SIZE; ++j){
+				//		int &last = block.data[2 * j + 1];
+				//		last &= 0xffff00ff;       //先清空颜色的r分量
+				//		red &= 0x000000ff;      //取出颜色的bit位
+				//		last |= (red << 0x8);   //更新颜色的r分量
+				//	}//end for j
+				//}
+
+				//way2, search in radius
+				if (!voxel_in_radius.empty()){
+					//std::cout<<voxel_in_radius.size() <<" is in the radius" <<std::endl;
+					for (int b = 0; b < voxel_in_radius.size(); ++b)
+					{
+						SDFBlock &block = chunkDesc->m_SDFBlocks[voxel_in_radius[b]];
+						
+						for (unsigned int j = 0; j < SDF_BLOCK_SIZE * SDF_BLOCK_SIZE * SDF_BLOCK_SIZE; ++j){
+							int &last = block.data[2 * j + 1];
+							last &= 0xffff00ff;     //先清空颜色的r分量
+							red &= 0x000000ff;      //取出颜色的bit位
+							last |= (red << 0x8);   //更新颜色的r分量
+						}
+					}	
+					//std::cout<<"for point " <<pi <<" || min dist: " <<min_dist <<std::endl;
+				}else
+				{
+					//std::cout<<"没有找到最近的SDFBlock" <<std::endl;
+				}
+				//end for if voxel in radius
+
+				
+			}//end for m_grid if
+
+		}//end for contains if
+	}
+	
+	unsigned int nStreamedBlock;
+	V_RETURN(StreamInToGPUAll(context, hash, camPos, radius, true, nStreamedBlock));
+
+	return S_OK;
 }

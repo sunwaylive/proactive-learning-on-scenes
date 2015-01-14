@@ -25,7 +25,7 @@ typedef pcl::PointXYZL PointLT;
 typedef pcl::PointCloud<PointLT> PointLCloudT;
 
 typedef pcl::Normal Normal;
-typedef pcl::PointCloud<pcl::Normal> NormalCloudT;
+typedef pcl::PointCloud<Normal> NormalCloudT;
 typedef NormalCloudT::Ptr NormalCloudTPtr;
 typedef NormalCloudT::ConstPtr NormalCloudTConstPtr;
 
@@ -33,11 +33,6 @@ typedef pcl::PointXYZRGBNormal Point_RGB_NORMAL;
 typedef pcl::PointCloud<Point_RGB_NORMAL> PointCloud_RGB_NORMAL;
 typedef PointCloud_RGB_NORMAL::Ptr PointCloudPtr_RGB_NORMAL;
 typedef PointCloud_RGB_NORMAL::ConstPtr PointCloudConstPtr_RGB_NORMAL;
-
-struct Normalt 
-{
-  float normal_x, normal_y, normal_z;
-};
 
 typedef struct MyPoint{
   float x;
@@ -52,6 +47,7 @@ typedef struct MyPoint_RGB{
   float r;
   float g;
   float b;
+  float a;
 }MyPt_RGB;
 
 typedef struct MyPoint_RGB_NORMAL{
@@ -61,6 +57,7 @@ typedef struct MyPoint_RGB_NORMAL{
   float r;
   float g;
   float b;
+  float a;
   float normal_x;
   float normal_y;
   float normal_z;
@@ -68,8 +65,8 @@ typedef struct MyPoint_RGB_NORMAL{
 
 class MyPointCloud{
 public:
-  MyPointCloud(){}
-  ~MyPointCloud(){}
+  MyPointCloud();
+  ~MyPointCloud();
 
 public:
   vector<MyPt> mypoints;
@@ -77,8 +74,8 @@ public:
 
 class MyPointCloud_RGB{
 public:
-  MyPointCloud_RGB(){}
-  ~MyPointCloud_RGB(){}
+  MyPointCloud_RGB();
+  ~MyPointCloud_RGB();
 
 public:
   vector<MyPt_RGB> mypoints;
@@ -86,8 +83,8 @@ public:
 
 class MyPointCloud_RGB_NORMAL{
 public:
-  MyPointCloud_RGB_NORMAL(){}
-  ~MyPointCloud_RGB_NORMAL(){}
+  MyPointCloud_RGB_NORMAL();
+  ~MyPointCloud_RGB_NORMAL();
 
 public:
   vector<MyPt_RGB_NORMAL> mypoints;
