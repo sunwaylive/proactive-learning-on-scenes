@@ -30,6 +30,7 @@
 
 #include "Algorithm/GraphCut/PointCloudAnalysis.h"
 #include "Algorithm/GraphCut/GraphCutBasicStruct.h"
+#include "Algorithm/GraphCut/MeasureConstruction.h"
 
 #include <stdlib.h> 
 #include <time.h>  
@@ -135,10 +136,15 @@ signals:
     void detectChangedPoints();
     void runSceneConfidence();
     void runSceneConfidenceViaOriginal();
+	void getFaceShow();
+	void getNewFaceShow(int newAreaNum, int deletedAreaNum);
+	void getOneFaceShow(int areaIndex);
 	void runGraphCut();
 	void updateGraphCut();
+	void switchShowModel();
 	void updateShowModel();
 	int getUpdateData();
+	void runMeasureConstruction();
     void runOverSegmentation();
     void runSceneSegmentation();
 
@@ -149,4 +155,6 @@ private:
   OneKeyNBVBack m_nbv;
   QReadWriteLock nbv_mutex;
   CPointCloudAnalysis cPointCloudAnalysis;
+  vector<bool> vecVertexExist;
+  vector<ColorType> vecVertexColor;
 };

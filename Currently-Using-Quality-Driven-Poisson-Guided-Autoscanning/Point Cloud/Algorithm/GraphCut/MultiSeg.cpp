@@ -71,8 +71,8 @@ void CMultiSeg::Clear()
 void CMultiSeg::MainStep()
 {
 	GetColorModel();
- 	GraphCutSolve();
- 	ComputeHypo();
+	GraphCutSolve();
+	ComputeHypo();
 	ConstructGraph();
 }
 
@@ -410,40 +410,40 @@ void CMultiSeg::ConstructGraph()
 {
 	for(int i = 0;i < vecvecMultiResult.size();i++)
 	{
-		MyPt_RGB_NORMAL point;
-		point.x = point.y = point.z = 0;
-		for(int j = 0;j < vecvecMultiResult[i].size();j++)
-		{
-			point.x += vecPatchCenPoint[vecvecMultiResult[i][j]].x;
-			point.y += vecPatchCenPoint[vecvecMultiResult[i][j]].y;
-			point.z += vecPatchCenPoint[vecvecMultiResult[i][j]].z;
-		}
-		point.x /= vecvecMultiResult[i].size();
-		point.y /= vecvecMultiResult[i].size();
-		point.z /= vecvecMultiResult[i].size();
-		point.x -= (xMax + xMin)/2;
-		point.y -= (yMax + yMin)/2;
-		point.z -= (zMax + zMin)/2;
-		point.r = 0.2;
-		point.g = 0.2;
-		point.b = 1.0;
-
-		vecObjectHypo[i].cenPoint.x = point.x;
-		vecObjectHypo[i].cenPoint.y = point.y;
-		vecObjectHypo[i].cenPoint.z = point.z;
-
-		graphContract.vecNodes.push_back(point);
-		graphContract.vecNodeFlag.push_back(true);
+// 		MyPt_RGB_NORMAL point;
+// 		point.x = point.y = point.z = 0;
+// 		for(int j = 0;j < vecvecMultiResult[i].size();j++)
+// 		{
+// 			point.x += vecPatchCenPoint[vecvecMultiResult[i][j]].x;
+// 			point.y += vecPatchCenPoint[vecvecMultiResult[i][j]].y;
+// 			point.z += vecPatchCenPoint[vecvecMultiResult[i][j]].z;
+// 		}
+// 		point.x /= vecvecMultiResult[i].size();
+// 		point.y /= vecvecMultiResult[i].size();
+// 		point.z /= vecvecMultiResult[i].size();
+// 		point.x -= (xMax + xMin)/2;
+// 		point.y -= (yMax + yMin)/2;
+// 		point.z -= (zMax + zMin)/2;
+// 		point.r = 0.2;
+// 		point.g = 0.2;
+// 		point.b = 1.0;
+// 
+// 		vecObjectHypo[i].cenPoint.x = point.x;
+// 		vecObjectHypo[i].cenPoint.y = point.y;
+// 		vecObjectHypo[i].cenPoint.z = point.z;
+// 
+// 		graphContract.vecNodes.push_back(point);
+// 		graphContract.vecNodeFlag.push_back(true);
 	}
 
 	for(int i = 0; i < vecEdgeHypo.size();i++)
 	{
-		pair<int,int> edge;
-		edge.second = vecEdgeHypo[i].end;
-		edge.first = vecEdgeHypo[i].begin;
-
-		graphContract.vecEdges.push_back(edge);
-		graphContract.vecEdgeFlag.push_back(true);
+// 		pair<int,int> edge;
+// 		edge.second = vecEdgeHypo[i].end;
+// 		edge.first = vecEdgeHypo[i].begin;
+// 
+// 		graphContract.vecEdges.push_back(edge);
+// 		graphContract.vecEdgeFlag.push_back(true);
 	}
 }
 

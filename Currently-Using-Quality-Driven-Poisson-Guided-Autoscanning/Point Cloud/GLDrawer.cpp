@@ -1,5 +1,10 @@
 #include "GLDrawer.h"
 
+extern MeshFace meshFace;
+extern MeshVertex vertexShow;
+
+extern MeshFace meshFaceExtra;
+extern MeshVertex vertexExtraShow;
 
 GLDrawer::GLDrawer(RichParameterSet* _para)
 {
@@ -335,7 +340,7 @@ void GLDrawer::drawDot(CVertex& v)
 	glBegin(GL_POINTS);
 	GLColor color = getColorByType(v);
 	glColor4f(float(v.C()[0])/255, float(v.C()[1])/255, float(v.C()[2])/255, 1);
-	
+//	glColor4f(1, 0, 0, 1);
 
 	Point3f p = v.P();
 
@@ -708,8 +713,8 @@ void RenderBone(float x0, float y0, float z0, float x1, float y1, float z1, doub
 void GLDrawer::glDrawCylinder(Point3f& p0, Point3f& p1, GLColor color, double width)
 {
 	glColor3f(color.r, color.g, color.b);
-//	RenderBone(p0[0], p0[1], p0[2], p1[0], p1[1], p1[2], width);
-	DrawChannel(p0[0], p0[1], p0[2], p1[0], p1[1], p1[2], width);
+	RenderBone(p0[0], p0[1], p0[2], p1[0], p1[1], p1[2], width);
+//	DrawChannel(p0[0], p0[1], p0[2], p1[0], p1[1], p1[2], width);
 }
 
 
@@ -722,10 +727,10 @@ void GLDrawer::glDrawSphere(Point3f& p, GLColor color, double radius, int slide)
 	glPushMatrix();      
 	glTranslatef(p[0], p[1], p[2]);
 	glPointSize(radius);
-	glBegin(GL_POINTS);
-	glVertex3f(0,0,0);
-	glEnd();
-//	glutSolidSphere(radius, slide, slide);
+// 	glBegin(GL_POINTS);
+// 	glVertex3f(0,0,0);
+// 	glEnd();
+	glutSolidSphere(radius, slide, slide);
 	glPopMatrix();
 }
 
@@ -899,32 +904,28 @@ void GLDrawer::drawGraphShow(GRAPHSHOW *graphcut, int graphType)
   double line_thickness = 0.0f;
 
   if (graphType == 0/*PATCH_GRAPH*/){
-	  sphere_radius = 12;
-	  line_thickness = 0.1;
+	  sphere_radius = 0.005;
+	  line_thickness = 0.001;
   }else if(graphType == 1/*CONTRACTION_GRAPH*/){
-    sphere_radius = 24;
-    line_thickness = 0.3;
+    sphere_radius = 0.01;
+    line_thickness = 0.002;
   }
 
   //draw dot in sphere
   for (int i = 0; i < graphcut->vecNodes.size(); ++i)
   {
-	if(!graphcut->vecNodeFlag[i])  continue;
     MyPt_RGB_NORMAL &pt = graphcut->vecNodes[i];
-    glDrawSphere(Point3f(pt.x, pt.y, pt.z), GLColor(pt.r, pt.g, pt.b), sphere_radius, 80);
+    glDrawSphere(Point3f(pt.x, pt.y, pt.z), GLColor(pt.r, pt.g, pt.b), sphere_radius, 100);
   }
 
   //draw edges
   for(int i = 0; i < graphcut->vecEdges.size(); ++i)
   {
-	if(!graphcut->vecEdgeFlag[i])  continue;
-    int s_idx = graphcut->vecEdges[i].first;
-    int e_idx = graphcut->vecEdges[i].second;
-    MyPt_RGB_NORMAL &s_pt = graphcut->vecNodes[s_idx];
-    MyPt_RGB_NORMAL &e_pt = graphcut->vecNodes[e_idx];
+    MyPt_RGB_NORMAL &s_pt = graphcut->vecEdges[i].first;
+    MyPt_RGB_NORMAL &e_pt = graphcut->vecEdges[i].second;
 
 	float r,g,b;
-	if(graphcut->vecEdgeColor.size())
+	if(/*graphcut->vecEdgeColor.size()*/0)
 	{
 		r = graphcut->vecEdgeColor[3 * i];
 		g = graphcut->vecEdgeColor[3 * i + 1];
@@ -937,9 +938,70 @@ void GLDrawer::drawGraphShow(GRAPHSHOW *graphcut, int graphType)
 		b = 1.0;
 	}
 
- //   glDrawCylinder(Point3f(s_pt.x, s_pt.y, s_pt.z), Point3f(e_pt.x, e_pt.y, e_pt.z), GLColor(r, g, b), line_thickness);
-	glDrawLine(Point3f(s_pt.x, s_pt.y, s_pt.z), Point3f(e_pt.x, e_pt.y, e_pt.z), GLColor(r, g, b), line_thickness);
+    glDrawCylinder(Point3f(s_pt.x, s_pt.y, s_pt.z), Point3f(e_pt.x, e_pt.y, e_pt.z), GLColor(r, g, b), line_thickness);
+	//glDrawLine(Point3f(s_pt.x, s_pt.y, s_pt.z), Point3f(e_pt.x, e_pt.y, e_pt.z), GLColor(r, g, b), line_thickness);
   }
+}
+
+void GLDrawer::drawMesh()
+{
+	glShadeModel(GL_SMOOTH);
+	glMaterialf(GL_FRONT, GL_SHININESS, 100);
+	glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
+
+	glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
+	glBegin(GL_TRIANGLES);
+	for(int i=0;i<meshFace.vecFace.size();i++)
+	{
+		if(!meshFace.vecFace[i].validFlag)  continue;
+
+		int p0,p1,p2;
+		p0 = meshFace.vecFace[i].p0;
+		p1 = meshFace.vecFace[i].p1;
+		p2 = meshFace.vecFace[i].p2;
+
+		Point_RGB_NORMAL pv0,pv1,pv2,pCenter;
+		pv0 = vertexShow.vecVertex[p0];
+		pv1 = vertexShow.vecVertex[p1];
+		pv2 = vertexShow.vecVertex[p2];
+
+		glColor4f(float(meshFace.vecFace[i].r)/255,float(meshFace.vecFace[i].g)/255,float(meshFace.vecFace[i].b)/255,1);
+
+		glNormal3f(pv0.normal_x, pv0.normal_y,pv0.normal_z);
+		glVertex3f(pv0.x, pv0.y, pv0.z);
+
+		glNormal3f(pv1.normal_x, pv1.normal_y, pv1.normal_z);
+		glVertex3f(pv1.x, pv1.y, pv1.z);
+
+		glNormal3f(pv2.normal_x, pv2.normal_y, pv2.normal_z);
+		glVertex3f(pv2.x, pv2.y, pv2.z);
+
+	}
+
+	for(int i=0;i<meshFaceExtra.vecFace.size();i++)
+	{
+		int p0,p1,p2;
+		p0 = meshFaceExtra.vecFace[i].p0;
+		p1 = meshFaceExtra.vecFace[i].p1;
+		p2 = meshFaceExtra.vecFace[i].p2;
+
+		Point_RGB_NORMAL pv0,pv1,pv2,pCenter;
+		pv0 = vertexExtraShow.vecVertex[p0];
+		pv1 = vertexExtraShow.vecVertex[p1];
+		pv2 = vertexExtraShow.vecVertex[p2];
+
+		glColor4f(float(meshFaceExtra.vecFace[i].r)/255,float(meshFaceExtra.vecFace[i].g)/255,float(meshFaceExtra.vecFace[i].b)/255,1);
+
+		glNormal3f(pv0.normal_x, pv0.normal_y,pv0.normal_z);
+		glVertex3f(pv0.x, pv0.y, pv0.z);
+
+		glNormal3f(pv1.normal_x, pv1.normal_y, pv1.normal_z);
+		glVertex3f(pv1.x, pv1.y, pv1.z);
+
+		glNormal3f(pv2.normal_x, pv2.normal_y, pv2.normal_z);
+		glVertex3f(pv2.x, pv2.y, pv2.z);
+	}
+	glEnd(); 
 }
 
 void GLDrawer::drawMeshLables(CMesh *mesh, QPainter *painter)

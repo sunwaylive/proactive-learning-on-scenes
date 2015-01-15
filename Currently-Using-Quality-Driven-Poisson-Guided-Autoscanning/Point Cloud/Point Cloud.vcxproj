@@ -278,6 +278,7 @@
     <ClCompile Include="Algorithm\GraphCut\kdtree.cpp" />
     <ClCompile Include="Algorithm\GraphCut\LinkedBlockList.cpp" />
     <ClCompile Include="Algorithm\GraphCut\maxflow.cpp" />
+    <ClCompile Include="Algorithm\GraphCut\MeasureConstruction.cpp" />
     <ClCompile Include="Algorithm\GraphCut\MultiSeg.cpp" />
     <ClCompile Include="Algorithm\GraphCut\PointCloudAnalysis.cpp" />
     <ClCompile Include="Algorithm\GraphCut\ScanEstimation.cpp" />
@@ -515,6 +516,7 @@
     <ClInclude Include="Algorithm\GraphCut\kdtree.h" />
     <ClInclude Include="Algorithm\GraphCut\LinkedBlockList.h" />
     <ClInclude Include="Algorithm\GraphCut\matrix.h" />
+    <ClInclude Include="Algorithm\GraphCut\MeasureConstruction.h" />
     <ClInclude Include="Algorithm\GraphCut\MultiSeg.h" />
     <ClInclude Include="Algorithm\GraphCut\MyClass.h" />
     <ClInclude Include="Algorithm\GraphCut\PointCloudAnalysis.h" />
@@ -805,7 +807,7 @@
   </ImportGroup>
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties UicDir=".\GeneratedFiles" MocDir=".\GeneratedFiles\$(ConfigurationName)" MocOptions="" RccDir=".\GeneratedFiles" lupdateOnBuild="0" lupdateOptions="" lreleaseOptions="" QtVersion_x0020_x64="QT-4.8.0" QtVersion_x0020_Win32="QT-32" Qt5Version_x0020_x64="QT4.8" />
+      <UserProperties UicDir=".\GeneratedFiles" MocDir=".\GeneratedFiles\$(ConfigurationName)" MocOptions="" RccDir=".\GeneratedFiles" lupdateOnBuild="0" lupdateOptions="" lreleaseOptions="" QtVersion_x0020_x64="QT-4.8.0" QtVersion_x0020_Win32="QT-32" Qt5Version_x0020_x64="QT_4_8" />
     </VisualStudio>
   </ProjectExtensions>
 </Project>

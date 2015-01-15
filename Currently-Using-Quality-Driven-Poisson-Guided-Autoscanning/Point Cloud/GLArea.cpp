@@ -3,7 +3,7 @@
 //shiyifei
 extern GRAPHSHOW graphInit;
 extern GRAPHSHOW graphContract;
-
+extern int g_switchModel;
 //#include "Poisson/MultiGridOctreeData.h"
 #define PI 3.1415926535897932384
 
@@ -69,7 +69,7 @@ void GLArea::initializeGL()
   glEnable(GL_COLOR_MATERIAL);  
 
   glShadeModel (GL_SMOOTH);
-  glShadeModel(GL_FLAT);
+//  glShadeModel(GL_FLAT);
 
   //glHint( GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST ); 
   GLfloat mat_ambient[4] = {0.1745, 0.01175, 0.01175,1.0}; 
@@ -77,7 +77,7 @@ void GLArea::initializeGL()
   GLfloat mat_specular[] = {0.727811, 0.626959, 0.626959, 1.0 };
   GLfloat shininess = 0.6*128;
 
-  glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_ambient);
+//  glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_ambient);
   glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_diffuse); 
   glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
   glMaterialf(GL_FRONT, GL_SHININESS, shininess);
@@ -108,9 +108,9 @@ void GLArea::initializeGL()
   glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
   glEnable(GL_LINE_SMOOTH);
   glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
-  glEnable(GL_POLYGON_SMOOTH);
+/*  glEnable(GL_POLYGON_SMOOTH);
   glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
-
+*/
   glDisable(GL_LIGHTING);
 
   glLoadIdentity(); 
@@ -511,28 +511,30 @@ void GLArea::paintGL()
     if (para->getBool("Show GraphCut Related"))
     {
       //1. show graph cut result
-      if(!dataMgr.isGraphCutResultEmpty())
+      if(!dataMgr.isGraphCutResultEmpty() && g_switchModel%3 == 0)
       {
-        if(para->getBool("Show Samples Quad"))
-          glDrawer.draw(GLDrawer::QUADE, dataMgr.getCurrentGraphCutResult());
-        if(para->getBool("Show Samples Dot"))
-          glDrawer.draw(GLDrawer::DOT, dataMgr.getCurrentGraphCutResult());
-        if(para->getBool("Show Samples Circle"))
-          glDrawer.draw(GLDrawer::CIRCLE, dataMgr.getCurrentGraphCutResult());
-        if (para->getBool("Show Samples Sphere"))
-          glDrawer.draw(GLDrawer::SPHERE, dataMgr.getCurrentGraphCutResult());	
+//         if(para->getBool("Show Samples Quad"))
+//           glDrawer.draw(GLDrawer::QUADE, dataMgr.getCurrentGraphCutResult());
+//         if(para->getBool("Show Samples Dot"))
+//           glDrawer.draw(GLDrawer::DOT, dataMgr.getCurrentGraphCutResult());
+//         if(para->getBool("Show Samples Circle"))
+//           glDrawer.draw(GLDrawer::CIRCLE, dataMgr.getCurrentGraphCutResult());
+//         if (para->getBool("Show Samples Sphere"))
+//           glDrawer.draw(GLDrawer::SPHERE, dataMgr.getCurrentGraphCutResult());	
+
+		glDrawer.drawMesh();
       }
 
       //2. show contraction graph
-	  if(!dataMgr.isContractionGraphEmpty())
+	  if(!dataMgr.isContractionGraphEmpty()&& g_switchModel%3 == 1)
 	  {
 		  glDrawer.drawGraphShow(dataMgr.getContractionGraph(),1);
 	  }
 
       //3. show patch graph
-	  if(!dataMgr.isPatchGraphEmpty())
+	  if(!dataMgr.isPatchGraphEmpty()&& g_switchModel%3 == 2)
 	  {
-//		  glDrawer.drawGraphShow(dataMgr.getPatchGraph(),0);
+		  glDrawer.drawGraphShow(dataMgr.getPatchGraph(),0);
 	  }
 
     }
@@ -1095,8 +1097,8 @@ void GLArea::drawLightBall()
         glVertex3f(-1.0f+i*2.0/lineNum,-1.0f+j*2.0/lineNum,-2);
         glVertex3f(-1.0f+i*2.0/lineNum,-1.0f+j*2.0/lineNum, 2);
       }
-      glEnd();
-      glPopAttrib();
+	glEnd();
+	glPopAttrib();
   }
   glPopMatrix();
 }

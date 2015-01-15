@@ -8,7 +8,6 @@
 #include <QtOpenGL/QGLWidget>
 #include <iostream>
 #include <GL/glut.h>
-//#include <GL/GLAUX.H>
 
 #include "Algorithm/Camera.h"
 #include "Algorithm/Common/common_type.h"
@@ -82,6 +81,7 @@ public:
   GLColor getColorByType(CVertex& v);
   //shiyifei
   void drawGraphShow(GRAPHSHOW *graphcut, int graphType);
+  void drawMesh();
 
 private:
 	

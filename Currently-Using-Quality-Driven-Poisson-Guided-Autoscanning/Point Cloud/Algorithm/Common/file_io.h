@@ -10,6 +10,6 @@
 
 bool loadPointCloud_pcd(char* fileName, PointCloudPtr_RGB_NORMAL cloud);
 bool loadPointCloud_ply(char* fileName, PointCloudPtr_RGB cloud);
-bool loadPointCloud_normal_ply(char* fileName, PointCloudPtr_RGB_NORMAL cloud);
+bool loadPointCloud_normal_ply(char* fileName, PointCloudPtr_RGB_NORMAL cloud,MeshFace &meshFace,MeshVertex &meshVertex);
 
 #endif // FILE_IO_H

@@ -18,7 +18,7 @@ MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags)
   //to avoid unclear UI at start
   lightOnOff(false);
   lightOnOff(true);
-  lightOnOff(false);
+  lightOnOff(true);
 }
 
 MainWindow::~MainWindow()

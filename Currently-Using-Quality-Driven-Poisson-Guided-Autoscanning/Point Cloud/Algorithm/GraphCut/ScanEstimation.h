@@ -15,7 +15,7 @@ public:
 	vector<MyPointCloud_RGB_NORMAL> vecPatchPoint;
 	vector<MyPoint> vecPatchCenPoint;
 	vector<vector<int>> vecvecMultiResult;
-	vector<vector<ISOPOINT>> vecvecIsoPoint;
+	vector<vector<IsoPoint>> vecvecIsoPoint;
 	vector<int> clusterPatchNum;
 	vector<int> clusterPatchInitIndex;
 	vector<int> clusterPatchNumLocal;
@@ -38,7 +38,7 @@ public:
 	double paraConfidence;
 	double paraSmoothAdjust;
 
-	vector<OBJECTISOPOINT> vecObjectIsoPoint;
+	vector<ObjectIsoPoint> vecObjectIsoPoint;
 	vector<double> vecPatchConfidenceScore;
 
 	vector<ObjectHypo> vecObjectHypo;

@@ -363,7 +363,7 @@
      <property name="geometry">
       <rect>
        <x>40</x>
-       <y>590</y>
+       <y>360</y>
        <width>191</width>
        <height>31</height>
       </rect>
@@ -376,7 +376,7 @@
      <property name="geometry">
       <rect>
        <x>40</x>
-       <y>630</y>
+       <y>310</y>
        <width>191</width>
        <height>31</height>
       </rect>
@@ -418,13 +418,39 @@
      <property name="geometry">
       <rect>
        <x>40</x>
-       <y>550</y>
+       <y>410</y>
        <width>191</width>
        <height>31</height>
       </rect>
      </property>
      <property name="text">
       <string>GraphCut Update</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pushButton_switch_showmodel">
+     <property name="geometry">
+      <rect>
+       <x>40</x>
+       <y>460</y>
+       <width>191</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Switch Show Model</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pushButton_measure_construction">
+     <property name="geometry">
+      <rect>
+       <x>40</x>
+       <y>620</y>
+       <width>191</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Over-Segment</string>
      </property>
     </widget>
    </widget>

@@ -277,6 +277,9 @@
     <ClCompile Include="Algorithm\GraphCut\GraphCutBasicStruct.cpp">
       <Filter>Algorithm\GraphCut</Filter>
     </ClCompile>
+    <ClCompile Include="Algorithm\GraphCut\MeasureConstruction.cpp">
+      <Filter>Algorithm\GraphCut</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="mainwindow.h">
@@ -531,6 +534,9 @@
       <Filter>Algorithm\Common</Filter>
     </ClInclude>
     <ClInclude Include="Algorithm\GraphCut\GraphCutBasicStruct.h">
+      <Filter>Algorithm\GraphCut</Filter>
+    </ClInclude>
+    <ClInclude Include="Algorithm\GraphCut\MeasureConstruction.h">
       <Filter>Algorithm\GraphCut</Filter>
     </ClInclude>
   </ItemGroup>

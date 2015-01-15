@@ -17,7 +17,7 @@ void CScanEstimation::Clear()
 {
 	vecPatchConfidenceScore.clear();
 	vecvecIsoPoint.clear();
-	vecObjectIsoPoint.clear();
+//	vecObjectIsoPoint.clear();
 	vecObjectHypo.clear();
 	vecEdgeHypo.clear();
 	vecObjectSorting.clear();
@@ -115,16 +115,16 @@ double CScanEstimation::ComputePatchConfidenceScore(int objectIndex,int patchInd
 double CScanEstimation::ComputePointConfidenceScore(int objectIndex, MyPoint_RGB_NORMAL point)
 {
 	double confidenceScore = 0;
-	for(int k = 0;k < vecObjectIsoPoint[objectIndex].objectIsoPoint.size();k++)
-	{
-		double distance;
-		distance = sqrt((vecObjectIsoPoint[objectIndex].objectIsoPoint[k].x - point.x) * (vecObjectIsoPoint[objectIndex].objectIsoPoint[k].x - point.x)
-					  + (vecObjectIsoPoint[objectIndex].objectIsoPoint[k].y - point.y) * (vecObjectIsoPoint[objectIndex].objectIsoPoint[k].y - point.y)
-					  + (vecObjectIsoPoint[objectIndex].objectIsoPoint[k].z - point.z) * (vecObjectIsoPoint[objectIndex].objectIsoPoint[k].z - point.z));
-		double weight;
-		weight = GaussianFunction(distance);
-		confidenceScore += weight* vecObjectIsoPoint[objectIndex].objectIsoPoint[k].f;
-	}
+// 	for(int k = 0;k < vecObjectIsoPoint[objectIndex].objectIsoPoint.size();k++)
+// 	{
+//  		double distance;
+// // 		distance = sqrt((vecObjectIsoPoint[objectIndex].objectIsoPoint[k].x - point.x) * (vecObjectIsoPoint[objectIndex].objectIsoPoint[k].x - point.x)
+// // 					  + (vecObjectIsoPoint[objectIndex].objectIsoPoint[k].y - point.y) * (vecObjectIsoPoint[objectIndex].objectIsoPoint[k].y - point.y)
+// // 					  + (vecObjectIsoPoint[objectIndex].objectIsoPoint[k].z - point.z) * (vecObjectIsoPoint[objectIndex].objectIsoPoint[k].z - point.z));
+// 		double weight;
+// 		weight = GaussianFunction(distance);
+// 		confidenceScore += weight* vecObjectIsoPoint[objectIndex].objectIsoPoint[k].f;
+// 	}
 
 	return confidenceScore;
 }
@@ -356,7 +356,6 @@ void CScanEstimation::GetColour(double v,double vmin,double vmax,double &r,doubl
 
 }
 
-
 void CScanEstimation::UpdateGraph()
 {
 	double objMax,objMin,sepaMax,sepaMin;
@@ -385,24 +384,24 @@ void CScanEstimation::UpdateGraph()
 	sepaMin = 0;
 
 
-	for(int i = 0;i < vecObjectHypo.size();i++)
-	{
-		if(vecObjectHypo[i].objectness < 0)
-			vecObjectHypo[i].objectness = 0;
-		double r,g,b;
-		GetColour(vecObjectHypo[i].objectness,objMin,objMax,r,g,b);
-		graphContract.vecNodes[i].r = r;
-		graphContract.vecNodes[i].g = g;
-		graphContract.vecNodes[i].b = b;
-	}
-
-	for(int i = 0;i < vecEdgeHypo.size();i++)
-	{
-		double r,g,b;
-		GetColour(vecEdgeHypo[i].separateness,sepaMin,sepaMax,r,g,b);
-		graphContract.vecEdgeColor.push_back(r);
-		graphContract.vecEdgeColor.push_back(g);
-		graphContract.vecEdgeColor.push_back(b);
-	}
+// 	for(int i = 0;i < vecObjectHypo.size();i++)
+// 	{
+// 		if(vecObjectHypo[i].objectness < 0)
+// 			vecObjectHypo[i].objectness = 0;
+// 		double r,g,b;
+// 		GetColour(vecObjectHypo[i].objectness,objMin,objMax,r,g,b);
+// 		graphContract.vecNodes[i].r = r;
+// 		graphContract.vecNodes[i].g = g;
+// 		graphContract.vecNodes[i].b = b;
+// 	}
+// 
+// 	for(int i = 0;i < vecEdgeHypo.size();i++)
+// 	{
+// 		double r,g,b;
+// 		GetColour(vecEdgeHypo[i].separateness,sepaMin,sepaMax,r,g,b);
+// 		graphContract.vecEdgeColor.push_back(r);
+// 		graphContract.vecEdgeColor.push_back(g);
+// 		graphContract.vecEdgeColor.push_back(b);
+// 	}
 
 }

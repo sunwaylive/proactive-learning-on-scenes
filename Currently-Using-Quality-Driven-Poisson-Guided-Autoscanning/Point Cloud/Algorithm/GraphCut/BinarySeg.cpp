@@ -193,7 +193,7 @@ void CBinarySeg::UpdateAreaInterest(int newAreaNum)
 			patchPoint.push_back(vecPatchPoint[j]);
 			patcNormal.push_back(vecPatcNormal[j]);
 		}
-		
+
 		CAreaInterest cAreaInterest(patchPoint,patcNormal);
 		vecAreaInterest.push_back(cAreaInterest);
 	}
@@ -542,22 +542,22 @@ void CBinarySeg::NomalizeSmooth()
 
 void CBinarySeg::ConstructGraph()
 {
-	graphInit.vecNodes.clear();
-	graphInit.vecEdges.clear();
+// 	graphInit.vecNodes.clear();
+// 	graphInit.vecEdges.clear();
+// 
+// 	MyPt_RGB_NORMAL point;
+// 	for(int i = 0;i < vecPatchCenPoint.size();i++)
+// 	{
+// 		point.x = vecPatchCenPoint[i].x - (xMax + xMin)/2;
+// 		point.y = vecPatchCenPoint[i].y - (yMax + yMin)/2;
+// 		point.z = vecPatchCenPoint[i].z - (zMax + zMin)/2;
+// 		point.r = 0.9;
+// 		point.g = 0.0;
+// 		point.b = 0.0;
+// 		graphInit.vecNodes.push_back(point);
+// 		graphInit.vecNodeFlag.push_back(true);
+// 	}
 
-	MyPt_RGB_NORMAL point;
-	for(int i = 0;i < vecPatchCenPoint.size();i++)
-	{
-		point.x = vecPatchCenPoint[i].x - (xMax + xMin)/2;
-		point.y = vecPatchCenPoint[i].y - (yMax + yMin)/2;
-		point.z = vecPatchCenPoint[i].z - (zMax + zMin)/2;
-		point.r = 0.9;
-		point.g = 0.0;
-		point.b = 0.0;
-		graphInit.vecNodes.push_back(point);
-		graphInit.vecNodeFlag.push_back(true);
-	}
-
-	graphInit.vecEdges = vecpairPatchConnection;
-	graphInit.vecEdgeFlag.resize(graphInit.vecEdges.size(),true);
+// 	graphInit.vecEdges = vecpairPatchConnection;
+// 	graphInit.vecEdgeFlag.resize(graphInit.vecEdges.size(),true);
 }

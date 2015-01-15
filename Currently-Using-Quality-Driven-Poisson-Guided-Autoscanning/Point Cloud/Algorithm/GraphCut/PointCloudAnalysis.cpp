@@ -1,8 +1,12 @@
 #include "PointCloudAnalysis.h"
 
+double maxSV,minSV;
 
 CPointCloudAnalysis::CPointCloudAnalysis(void)
 {
+	paraGeometry = 0.4;
+	paraAppearence = 0.3;
+	paraSmoothAdjust = 0.7;
 }
 
 
@@ -10,39 +14,235 @@ CPointCloudAnalysis::~CPointCloudAnalysis(void)
 {
 }
 
-
 void CPointCloudAnalysis::MainStep(bool initFlag,int newAreNum)
 {
 	//output
-	ofstream outFile1("Output\\MainStep.txt",ios::app);
+	ofstream outFile("Output\\CCA.txt");
 
-	outFile1 <<  "  1" <<endl;
-	BinarySegmentation(initFlag,newAreNum);
-	outFile1 <<  "  2" <<endl;
-	Clustering();
-	outFile1 <<  "  3" <<endl;
-	MultiSegmentation();
-	outFile1 <<  "  4" <<endl;
-	ScanEstimation();
-	outFile1 <<  "  5" <<endl;
-	outFile1.close();
+	InitAreaInterest();
+	outFile <<  "1" <<endl;
+	
+	ComputeObjectHypo();
+	outFile <<  "2" <<endl;
 
-	ofstream outFile("Output\\ccjn.txt");
-	for(int i=0;i<cMultiSeg.vecObjectHypo.size();i++)
+	outFile.close();
+}
+
+void CPointCloudAnalysis::ScanEstimation()
+{
+	for(int i = 0;i < vecAreaInterest.size();i++)
 	{
-		for(int j=0;j<cMultiSeg.vecObjectHypo[i].patchIndex.size();j++)
+		ofstream outFileg("Output\\ObjectnessSeparateness.txt",ios::app);
+		outFileg << "area: " <<  i << endl;
+		vecAreaInterest[i].ScoreUpdate();
+		outFileg.close();
+	}
+}
+
+void CPointCloudAnalysis::GraphUpdate()
+{
+	patchGraph.vecNodes.clear();
+	patchGraph.vecEdges.clear();
+	patchGraph.vecEdgeColor.clear();
+	for(int i = 0;i < vecAreaInterest.size();i++)
+	{
+		if(!vecAreaInterest[i].validFlag)	continue;
+		patchGraph.vecNodes.insert(patchGraph.vecNodes.end(),vecAreaInterest[i].graphInit.vecNodes.begin(),vecAreaInterest[i].graphInit.vecNodes.end());
+		patchGraph.vecEdges.insert(patchGraph.vecEdges.end(),vecAreaInterest[i].graphInit.vecEdges.begin(),vecAreaInterest[i].graphInit.vecEdges.end());
+	}
+
+	contractionGraph.vecNodes.clear();
+	contractionGraph.vecEdges.clear();
+	contractionGraph.vecEdgeColor.clear();
+	for(int i = 0;i < vecAreaInterest.size();i++)
+	{
+		if(!vecAreaInterest[i].validFlag)	continue;
+		contractionGraph.vecNodes.insert(contractionGraph.vecNodes.end(),vecAreaInterest[i].graphContract.vecNodes.begin(),vecAreaInterest[i].graphContract.vecNodes.end());
+		contractionGraph.vecEdges.insert(contractionGraph.vecEdges.end(),vecAreaInterest[i].graphContract.vecEdges.begin(),vecAreaInterest[i].graphContract.vecEdges.end());
+		contractionGraph.vecEdgeColor.insert(contractionGraph.vecEdgeColor.end(),vecAreaInterest[i].graphContract.vecEdgeColor.begin(),vecAreaInterest[i].graphContract.vecEdgeColor.end());
+	}
+}
+
+void CPointCloudAnalysis::InitAreaInterest()
+{
+	ofstream outFile("Output\\InitAreaInterest.txt");
+
+	int initIndex = 0;
+	for(int i = 0;i < clusterPatchNum.size(); i++)
+	{
+		clusterPatchInitIndex.push_back(initIndex);
+		initIndex += clusterPatchNum[i];
+	}
+	outFile <<  "1" <<endl;
+
+	//init areainterest
+	for(int i = 0;i < clusterPatchInitIndex.size();i++)
+	{
+		outFile <<  i <<endl;
+		int patchBegin,patchEnd;
+		patchBegin = clusterPatchInitIndex[i];
+		patchEnd = clusterPatchInitIndex[i] + clusterPatchNum[i];
+		outFile <<  i <<endl;
+		vector<MyPointCloud_RGB_NORMAL> patchPoint;
+		vector<Normalt> patcNormal;
+		for(int j = patchBegin;j < patchEnd;j++)
 		{
-			int patchIndex = cMultiSeg.vecObjectHypo[i].patchIndex[j];
-			for(int k=0;k<cMultiSeg.vecPatchPoint[patchIndex].mypoints.size();k++)
-			{
-				MyPt_RGB_NORMAL point = cMultiSeg.vecPatchPoint[patchIndex].mypoints[k];
-				outFile << setiosflags(ios::fixed) << setprecision(6) << point.x << " " << point.y << " " << point.z << " " << i << endl;
-			}
+			patchPoint.push_back(vecPatchPoint[j]);
+			patcNormal.push_back(vecPatcNormal[j]);
 		}
+		outFile <<  i <<endl;
+
+		CAreaInterest cAreaInterest(patchPoint,patcNormal);
+		vecAreaInterest.push_back(cAreaInterest);
+		outFile <<  i <<endl;
+	}
+
+	//bounding box
+	xMax = yMax = zMax = SMALL_NUM;
+	xMin = yMin = zMin = LARGE_NUM;
+	for(int i = 0;i < vecAreaInterest.size();i++)
+	{
+		if(xMax < vecAreaInterest[i].xMax)
+			xMax = vecAreaInterest[i].xMax;
+		if(yMax < vecAreaInterest[i].yMax)
+			yMax = vecAreaInterest[i].yMax;
+		if(zMax < vecAreaInterest[i].zMax)
+			zMax = vecAreaInterest[i].zMax;
+		if(xMin > vecAreaInterest[i].xMin)
+			xMin = vecAreaInterest[i].xMin;
+		if(yMin > vecAreaInterest[i].yMin)
+			yMin = vecAreaInterest[i].yMin;
+		if(zMin > vecAreaInterest[i].zMin)
+			zMin = vecAreaInterest[i].zMin;
+	}
+
+	outFile.close();
+}
+
+void CPointCloudAnalysis::ComputeObjectHypo()
+{
+	ofstream outFile("Output\\COH.txt");
+
+	outFile <<  "1" <<endl;
+	NormalizeAppearanceTerm();
+	outFile <<  "2" <<endl;
+	NormalizeSmoothTerm();
+	outFile <<  "3" <<endl;
+
+	for(int i = 0;i < vecAreaInterest.size();i++)
+	{
+		outFile << i <<endl;
+		vecAreaInterest[i].MainStep();
+	}
+
+	for(int i = 0;i < vecAreaInterest.size();i++)
+	{
+		contractionGraph.vecNodes.insert(contractionGraph.vecNodes.end(),vecAreaInterest[i].graphContract.vecNodes.begin(),vecAreaInterest[i].graphContract.vecNodes.end());
+		contractionGraph.vecEdges.insert(contractionGraph.vecEdges.end(),vecAreaInterest[i].graphContract.vecEdges.begin(),vecAreaInterest[i].graphContract.vecEdges.end());
+	}
+
+	outFile.close();
+}
+
+void CPointCloudAnalysis::NormalizeAppearanceTerm()
+{
+	maxAV = SMALL_NUM;
+	for(int i = 0;i < vecAreaInterest.size();i++)
+	{
+		for(int j = 0;j < vecAreaInterest[i].vecAppearenceValue.size();j++)
+		{
+			if(maxAV < vecAreaInterest[i].vecAppearenceValue[j])
+				maxAV = vecAreaInterest[i].vecAppearenceValue[j];
+		}
+	}
+
+	for(int i = 0;i < vecAreaInterest.size();i++)
+	{
+		for(int j = 0;j < vecAreaInterest[i].vecAppearenceValue.size();j++)
+		{
+			vecAreaInterest[i].vecAppearenceValue[j] = vecAreaInterest[i].vecAppearenceValue[j] / maxAV;
+			vecAreaInterest[i].vecAppearenceValue[j] = 1 - vecAreaInterest[i].vecAppearenceValue[j];
+		}
+	}
+
+	for(int i = 0;i < vecAreaInterest.size();i++)
+	{
+		for(int j = 0;j < vecAreaInterest[i].vecAppearenceValue.size();j++)
+		{
+			vecAreaInterest[i].vecAppearenceValue[j] = vecAreaInterest[i].vecAppearenceValue[j] / maxAV;
+			vecAreaInterest[i].vecAppearenceValue[j] = 1 - vecAreaInterest[i].vecAppearenceValue[j];
+
+			vecAreaInterest[i].vecGeometryValue[j] = paraGeometry * vecAreaInterest[i].vecGeometryValue[j];
+			vecAreaInterest[i].vecAppearenceValue[j] = paraAppearence * vecAreaInterest[i].vecAppearenceValue[j];
+			vecAreaInterest[i].vecSmoothValue[j] = vecAreaInterest[i].vecGeometryValue[j] + vecAreaInterest[i].vecAppearenceValue[j];
+		}
+	}
+
+
+	ofstream outFile("Output\\smooth0.txt");
+	outFile << "maxAV: " << maxAV << endl;
+	outFile << "maxSV: " << maxSV << endl;
+	outFile << "minSV: " << minSV << endl;
+	for(int i = 0;i < vecAreaInterest.size();i++)
+	{
+		outFile << "/////////////////////////// " << endl;
+		for(int j = 0;j < vecAreaInterest[i].vecSmoothValue.size();j++)
+		{
+			outFile <<  "vecGeometryValue:  " << vecAreaInterest[i].vecGeometryValue[j] << endl;
+			outFile <<  "vecAppearenceValue:  " << vecAreaInterest[i].vecAppearenceValue[j] << endl;
+			outFile <<  "vecSmoothValue:  " << vecAreaInterest[i].vecSmoothValue[j] << endl;
+			outFile << endl;
+		}
+
 	}
 	outFile.close();
 }
 
+void CPointCloudAnalysis::NormalizeSmoothTerm()
+{
+	maxSV = SMALL_NUM;
+	minSV = LARGE_NUM;
+
+	double para = 0.3;
+	for(int i = 0;i < vecAreaInterest.size();i++)
+	{
+		for(int j = 0;j < vecAreaInterest[i].vecSmoothValue.size();j++)
+		{
+		if(maxSV < vecAreaInterest[i].vecSmoothValue[j])
+			maxSV = vecAreaInterest[i].vecSmoothValue[j];
+		if(minSV > vecAreaInterest[i].vecSmoothValue[j])
+			minSV = vecAreaInterest[i].vecSmoothValue[j];
+		}
+	}
+
+	for(int i = 0;i < vecAreaInterest.size();i++)
+	{
+		for(int j = 0;j < vecAreaInterest[i].vecSmoothValue.size();j++)
+		{
+			vecAreaInterest[i].vecSmoothValue[j] =  (vecAreaInterest[i].vecSmoothValue[j] - minSV)/(maxSV - minSV);
+			vecAreaInterest[i].vecSmoothValue[j] = paraSmoothAdjust * pow(2.7183,- (1 - vecAreaInterest[i].vecSmoothValue[j]) * (1 - vecAreaInterest[i].vecSmoothValue[j]) / para /para);
+		}
+	}	
+
+	ofstream outFile("Output\\smooth1.txt");
+	outFile << "maxAV: " << maxAV << endl;
+	outFile << "maxSV: " << maxSV << endl;
+	outFile << "minSV: " << minSV << endl;
+	for(int i = 0;i < vecAreaInterest.size();i++)
+	{
+		outFile << "/////////////////////////// " << endl;
+		for(int j = 0;j < vecAreaInterest[i].vecSmoothValue.size();j++)
+		{
+			outFile <<  "vecGeometryValue:  " << vecAreaInterest[i].vecGeometryValue[j] << endl;
+			outFile <<  "vecAppearenceValue:  " << vecAreaInterest[i].vecAppearenceValue[j] << endl;
+			outFile <<  "vecSmoothValue:  " << vecAreaInterest[i].vecSmoothValue[j] << endl;
+			outFile << endl;
+		}
+		
+	}
+	outFile.close();
+
+}
 
 void CPointCloudAnalysis::DataIn()
 {
@@ -169,7 +369,6 @@ void CPointCloudAnalysis::DataIn()
 	outFile1.close();
 }
 
-
 int CPointCloudAnalysis::DataUpdate()
 {
 	ifstream inFile("Input\\PatchPoint-table0.txt",std::ios::in);
@@ -258,8 +457,6 @@ int CPointCloudAnalysis::DataUpdate()
 	return newAreaNum;
 }
 
-
-
 void CPointCloudAnalysis::BinarySegmentation(bool initFlag, int newAreaNum)
 {
 	cBinarySeg.MainStep(initFlag,newAreaNum);
@@ -278,17 +475,17 @@ void CPointCloudAnalysis::MultiSegmentation()
 {
 	cMultiSeg.Clear();
 
-	cMultiSeg.vecPatchPoint = cBinarySeg.vecPatchPoint;
-	cMultiSeg.vecpairPatchConnection = cBinarySeg.vecpairPatchConnection;
-	cMultiSeg.vecSmoothValue = cBinarySeg.vecSmoothValue;
-	cMultiSeg.vecPatchCenPoint = cBinarySeg.vecPatchCenPoint;
-	cMultiSeg.vecPatchColor = cBinarySeg.vecPatchColor;
-	cMultiSeg.boundingBoxSize = cBinarySeg.boundingBoxSize;
-	cMultiSeg.clusterPatchNum = cBinarySeg.clusterPatchNum;
-	cMultiSeg.clusterPatchInitIndex = cBinarySeg.clusterPatchInitIndex;
-	cMultiSeg.clusterPatchNumLocal = cBinarySeg.clusterPatchNumLocal;
-	cMultiSeg.clusterPatchInitIndexLocal = cBinarySeg.clusterPatchInitIndexLocal;
-	cMultiSeg.vecvecPatchConnectFlag = cBinarySeg.vecvecPatchConnectFlag;
+// 	cMultiSeg.vecPatchPoint = cBinarySeg.vecPatchPoint;
+// 	cMultiSeg.vecpairPatchConnection = cBinarySeg.vecpairPatchConnection;
+// 	cMultiSeg.vecSmoothValue = cBinarySeg.vecSmoothValue;
+// 	cMultiSeg.vecPatchCenPoint = cBinarySeg.vecPatchCenPoint;
+// 	cMultiSeg.vecPatchColor = cBinarySeg.vecPatchColor;
+// 	cMultiSeg.boundingBoxSize = cBinarySeg.boundingBoxSize;
+// 	cMultiSeg.clusterPatchNum = cBinarySeg.clusterPatchNum;
+// 	cMultiSeg.clusterPatchInitIndex = cBinarySeg.clusterPatchInitIndex;
+// 	cMultiSeg.clusterPatchNumLocal = cBinarySeg.clusterPatchNumLocal;
+// 	cMultiSeg.clusterPatchInitIndexLocal = cBinarySeg.clusterPatchInitIndexLocal;
+// 	cMultiSeg.vecvecPatchConnectFlag = cBinarySeg.vecvecPatchConnectFlag;
 	cMultiSeg.xMax = cBinarySeg.xMax;
 	cMultiSeg.xMin = cBinarySeg.xMin;
 	cMultiSeg.yMax = cBinarySeg.yMax;
@@ -303,114 +500,146 @@ void CPointCloudAnalysis::MultiSegmentation()
 
 }
 
-void CPointCloudAnalysis::ScanEstimation()
-{
-	cScanEstimation.Clear();
-
-	cScanEstimation.vecSmoothValue = cBinarySeg.vecSmoothValue;
-	cScanEstimation.vecGeometryConvex = cBinarySeg.vecGeometryConvex;
-	cScanEstimation.vecGeometryValue = cBinarySeg.vecGeometryValue;
-	cScanEstimation.vecAppearenceValue = cBinarySeg.vecAppearenceValue;
-	cScanEstimation.maxSV = cBinarySeg.maxSV;
-	cScanEstimation.minSV = cBinarySeg.minSV;
-
-
-	cScanEstimation.vecPatchPoint = cMultiSeg.vecPatchPoint;
-	cScanEstimation.vecvecMultiResult = cMultiSeg.vecvecMultiResult;
-	cScanEstimation.clusterPatchNum = cMultiSeg.clusterPatchNum;
-	cScanEstimation.clusterPatchInitIndex = cMultiSeg.clusterPatchInitIndex;
-	cScanEstimation.clusterPatchNumLocal = cMultiSeg.clusterPatchNumLocal;
-	cScanEstimation.clusterPatchInitIndexLocal = cMultiSeg.clusterPatchInitIndexLocal;
-	cScanEstimation.vecvecPatchConnectFlag = cMultiSeg.vecvecPatchConnectFlag;
-	cScanEstimation.vecpairPatchConnection = cMultiSeg.vecpairPatchConnection;
-	cScanEstimation.graphContract = cMultiSeg.graphContract;
-	cScanEstimation.vecObjectHypo = cMultiSeg.vecObjectHypo;
-	cScanEstimation.vecEdgeHypo = cMultiSeg.vecEdgeHypo;
-	
-		
-}
-
 void CPointCloudAnalysis::Merge(int pushArea)
 {
 	ofstream outFileg("Output\\Merge.txt");
 	outFileg << "let's begin :) " << endl;
 
 	//merge area
-	cBinarySeg.vecAreaInterest[pushArea].Merge();
-	outFileg << "1 " << endl;
+	vecAreaInterest[pushArea].mergeFlag = true;
+	vecAreaInterest[pushArea].GetNewOneObjectPly();
+	vecAreaInterest[pushArea].ComputeOverallHypo();
+//	vecAreaInterest[pushArea].ComputeNewContractGraph();
 
-	//invaild some objecthypo
-	for(int i = 0;i < cScanEstimation.vecObjectHypo.size();i++)
-	{
-		if(cScanEstimation.vecObjectHypo[i].areaIndex == pushArea)
-		{
-			cScanEstimation.vecObjectHypo[i].mergeFlag = true;
-		}
-	}
-	outFileg << "2 " << endl;
-
-	//add a objecthypo
-	ObjectHypo objectHypo;
-	objectHypo.areaIndex = pushArea;
-	objectHypo.objectness = 0;
-	objectHypo.mergeFlag = false;
-	for(int i = 0;i < cScanEstimation.vecObjectHypo.size();i++)
-	{
-		if(cScanEstimation.vecObjectHypo[i].areaIndex == pushArea)
-		{
-			objectHypo.patchIndex.insert(objectHypo.patchIndex.end(),cScanEstimation.vecObjectHypo[i].patchIndex.begin(),cScanEstimation.vecObjectHypo[i].patchIndex.end());
-		}
-	}
-	cScanEstimation.vecObjectHypo.push_back(objectHypo);
-	outFileg << "3 " << endl;
-
-	//invaild some nodes
-	for(int i = 0;i < cScanEstimation.vecObjectHypo.size();i++)
-	{
-		if(cScanEstimation.vecObjectHypo[i].areaIndex == pushArea)
-		{
-			cScanEstimation.graphContract.vecNodeFlag[i] = false;
-		}
-	}
-	outFileg << "4 " << endl;
-
-	//invaild some edges
-	for(int i = 0; i < cScanEstimation.graphContract.vecEdges.size();i++)
-	{
-		pair<int,int> edge = cScanEstimation.graphContract.vecEdges[i];
-		if(cScanEstimation.vecObjectHypo[edge.first].areaIndex == pushArea)
-			cScanEstimation.graphContract.vecEdgeFlag[i] = false;
-		if(cScanEstimation.vecObjectHypo[edge.second].areaIndex == pushArea)
-			cScanEstimation.graphContract.vecEdgeFlag[i] = false;
-	}
-	outFileg << "5 " << endl;
-
-	//add a node
-	MyPt_RGB_NORMAL point;
-	point.x = (cBinarySeg.vecAreaInterest[pushArea].xMax + cBinarySeg.vecAreaInterest[pushArea].xMin) * 0.5;
-	point.y = (cBinarySeg.vecAreaInterest[pushArea].yMax + cBinarySeg.vecAreaInterest[pushArea].yMin) * 0.5;
-	point.z = (cBinarySeg.vecAreaInterest[pushArea].zMax + cBinarySeg.vecAreaInterest[pushArea].zMin) * 0.5;
-	point.x -= (cBinarySeg.xMax + cBinarySeg.xMin)/2;
-	point.y -= (cBinarySeg.yMax + cBinarySeg.yMin)/2;
-	point.z -= (cBinarySeg.zMax + cBinarySeg.zMin)/2;
-	point.r = 0.0;
-	point.g = 0.0;
-	point.b = 1.0;
-	cScanEstimation.graphContract.vecNodes.push_back(point);
-	cScanEstimation.graphContract.vecNodeFlag.push_back(true);
+	outFileg.close();
 }
 
-void CPointCloudAnalysis::ReAnalysis(int pushArea)
+void CPointCloudAnalysis::ReAnalysis(int pushArea,int newAreaNum)
 {
-	//invalid the area
-	cBinarySeg.vecAreaInterest[pushArea].Invalidt();
+	ofstream outFile("Output\\ReAnalysis.txt");
 
-	//invaild some objecthypo
-// 	for(int i = 0;i < cScanEstimation.vecObjectHypo.size();i++)
-// 	{
-// 		if(cScanEstimation.vecObjectHypo[i].areaIndex == pushArea)
-// 		{
-// 			cScanEstimation.vecObjectHypo[i].mergeFlag = true;
-// 		}
-// 	}
+	//invalid the area
+	vecAreaInterest[pushArea].Invalidt();
+	outFile << "1" << endl;
+
+	int initIndex = 0;
+	clusterPatchInitIndex.clear();
+	for(int i = 0;i < clusterPatchNum.size(); i++)
+	{
+		clusterPatchInitIndex.push_back(initIndex);
+		initIndex += clusterPatchNum[i];
+	}
+	outFile << "2" << endl;
+
+	for(int i = clusterPatchInitIndex.size() - newAreaNum;i < clusterPatchInitIndex.size();i++)
+	{
+		outFile << "i:" << i << endl;
+		int patchBegin,patchEnd;
+		patchBegin = clusterPatchInitIndex[i];
+		patchEnd = clusterPatchInitIndex[i] + clusterPatchNum[i];
+
+		outFile << "i:" << i << endl;
+		vector<MyPointCloud_RGB_NORMAL> patchPoint;
+		vector<Normalt> patcNormal;
+
+		outFile << "i:" << i << endl;
+		for(int j = patchBegin;j < patchEnd;j++)
+		{
+			patchPoint.push_back(vecPatchPoint[j]);
+			patcNormal.push_back(vecPatcNormal[j]);
+		}
+
+		outFile << "i:" << i << endl;
+		CAreaInterest cAreaInterest(patchPoint,patcNormal);
+		vecAreaInterest.push_back(cAreaInterest);
+
+		outFile << "i:" << i << endl;
+	}
+	outFile << "3" << endl;
+
+	for(int i = clusterPatchInitIndex.size() - newAreaNum;i < clusterPatchInitIndex.size();i++)
+	{
+		NormalizeNewAppearanceTerm(i);
+		NormalizeNewSmoothTerm(i);
+	}
+	outFile << "4" << endl;
+
+	for(int i = clusterPatchInitIndex.size() - newAreaNum;i < clusterPatchInitIndex.size();i++)
+	{
+		vecAreaInterest[i].MainStep();
+	}
+	outFile << "5" << endl;
+
+	outFile.close();
+}
+
+void CPointCloudAnalysis::NormalizeNewAppearanceTerm(int areaIndex)
+{
+	for(int i = 0;i < vecAreaInterest[areaIndex].vecAppearenceValue.size();i++)
+	{
+		vecAreaInterest[areaIndex].vecAppearenceValue[i] = vecAreaInterest[areaIndex].vecAppearenceValue[i] / maxAV;
+		vecAreaInterest[areaIndex].vecAppearenceValue[i] = 1 - vecAreaInterest[areaIndex].vecAppearenceValue[i];
+	}
+
+
+	for(int i = 0;i < vecAreaInterest[areaIndex].vecAppearenceValue.size();i++)
+	{
+		vecAreaInterest[areaIndex].vecAppearenceValue[i] = vecAreaInterest[areaIndex].vecAppearenceValue[i] / maxAV;
+		vecAreaInterest[areaIndex].vecAppearenceValue[i] = 1 - vecAreaInterest[areaIndex].vecAppearenceValue[i];
+
+		vecAreaInterest[areaIndex].vecGeometryValue[i] = paraGeometry * vecAreaInterest[areaIndex].vecGeometryValue[i];
+		vecAreaInterest[areaIndex].vecAppearenceValue[i] = paraAppearence * vecAreaInterest[areaIndex].vecAppearenceValue[i];
+		vecAreaInterest[areaIndex].vecSmoothValue[i] = vecAreaInterest[areaIndex].vecGeometryValue[i] + vecAreaInterest[areaIndex].vecAppearenceValue[i];
+	}
+
+	ofstream outFile("Output\\smooth2.txt");
+	outFile << "maxAV: " << maxAV << endl;
+	outFile << "maxSV: " << maxSV << endl;
+	outFile << "minSV: " << minSV << endl;
+	for(int i = 0;i < vecAreaInterest.size();i++)
+	{
+		outFile << "/////////////////////////// " << endl;
+		for(int j = 0;j < vecAreaInterest[i].vecSmoothValue.size();j++)
+		{
+			outFile <<  "vecGeometryValue:  " << vecAreaInterest[i].vecGeometryValue[j] << endl;
+			outFile <<  "vecAppearenceValue:  " << vecAreaInterest[i].vecAppearenceValue[j] << endl;
+			outFile <<  "vecSmoothValue:  " << vecAreaInterest[i].vecSmoothValue[j] << endl;
+			outFile << endl;
+		}
+
+	}
+	outFile.close();
+}
+
+void CPointCloudAnalysis::NormalizeNewSmoothTerm(int areaIndex)
+{
+	double para = 0.3;
+	for(int i = 0;i < vecAreaInterest[areaIndex].vecSmoothValue.size();i++)
+	{
+		vecAreaInterest[areaIndex].vecSmoothValue[i] =  (vecAreaInterest[areaIndex].vecSmoothValue[i] - minSV)/(maxSV - minSV);
+		vecAreaInterest[areaIndex].vecSmoothValue[i] = paraSmoothAdjust * pow(2.7183,- (1 - vecAreaInterest[areaIndex].vecSmoothValue[i]) * (1 - vecAreaInterest[areaIndex].vecSmoothValue[i]) / para /para);
+	}
+
+	ofstream outFile("Output\\smooth3.txt");
+	for(int i = 0;i < vecAreaInterest.size();i++)
+	{
+		outFile << "/////////////////////////// " << endl;
+		for(int j = 0;j < vecAreaInterest[i].vecSmoothValue.size();j++)
+		{
+			outFile <<  "vecGeometryValue:  " << vecAreaInterest[i].vecGeometryValue[j] << endl;
+			outFile <<  "vecAppearenceValue:  " << vecAreaInterest[i].vecAppearenceValue[j] << endl;
+			outFile <<  "vecSmoothValue:  " << vecAreaInterest[i].vecSmoothValue[j] << endl;
+			outFile << endl;
+		}
+
+	}
+	outFile.close();
+}
+
+void CPointCloudAnalysis::ScanEstimation(int areaIndex)
+{
+	ofstream outFileg("Output\\ObjectnessSeparateness.txt",ios::app);
+	vecAreaInterest[areaIndex].ScoreUpdate();
+	outFileg << "area: " <<  areaIndex << endl;
+	outFileg.close();
 }

@@ -57,7 +57,7 @@ bool loadPointCloud_ply(char* fileName, PointCloudPtr_RGB cloud){
   return true;
 }
 
-bool loadPointCloud_normal_ply(char* fileName, PointCloudPtr_RGB_NORMAL cloud){
+bool loadPointCloud_normal_ply(char* fileName, PointCloudPtr_RGB_NORMAL cloud,MeshFace &meshFace,MeshVertex &meshVertex){
 
   std::ifstream input(fileName) ;
   if(input.fail()) {
@@ -67,8 +67,10 @@ bool loadPointCloud_normal_ply(char* fileName, PointCloudPtr_RGB_NORMAL cloud){
 
   int num_header = 17;
   int num_points = 0;
+  int num_faces = 0;
   // this line contains point number
   int line_num = 3;
+  int face_num = 14;
 
   for (int i=0; i<num_header; ++i) {
     std::string line;
@@ -82,6 +84,14 @@ bool loadPointCloud_normal_ply(char* fileName, PointCloudPtr_RGB_NORMAL cloud){
 
       printf("num_points:%d\n",num_points);
     }
+	if (i==face_num) {
+		std::istringstream line_input(line);
+		std::string dummy1;
+		std::string dummy2;
+		line_input >> dummy1 >> dummy2 >>num_faces;
+
+		printf("num_faces:%d\n",num_faces);
+	}
   }
 
   std::cout<< "===========================" <<std::endl;
@@ -96,8 +106,21 @@ bool loadPointCloud_normal_ply(char* fileName, PointCloudPtr_RGB_NORMAL cloud){
     point_tem.r=r;
     point_tem.g=g;
     point_tem.b=b;
+	point_tem.a=i;//save point index
 
     cloud->push_back(point_tem);
+
+	meshVertex.vecVertex.push_back(point_tem);
+  }
+
+  for (int i=0; i<num_faces; ++i) {
+	  Face3 face_tem;
+	  int temp;
+	  int r,g,b;
+
+	  input >> temp >> face_tem.p0 >> face_tem.p1 >>face_tem.p2;
+
+	 meshFace.vecFace.push_back(face_tem);
   }
 
   return true;
