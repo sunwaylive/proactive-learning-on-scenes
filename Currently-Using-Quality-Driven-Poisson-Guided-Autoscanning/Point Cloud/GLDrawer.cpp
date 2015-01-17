@@ -5,6 +5,7 @@ extern MeshVertex vertexShow;
 
 extern MeshFace meshFaceExtra;
 extern MeshVertex vertexExtraShow;
+extern int g_switchModel;
 
 GLDrawer::GLDrawer(RichParameterSet* _para)
 {
@@ -951,9 +952,11 @@ void GLDrawer::drawMesh()
 
 	glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
 	glBegin(GL_TRIANGLES);
+
 	for(int i=0;i<meshFace.vecFace.size();i++)
 	{
 		if(!meshFace.vecFace[i].validFlag)  continue;
+		if(g_switchModel%5 > 2)	continue;
 
 		int p0,p1,p2;
 		p0 = meshFace.vecFace[i].p0;
@@ -965,42 +968,64 @@ void GLDrawer::drawMesh()
 		pv1 = vertexShow.vecVertex[p1];
 		pv2 = vertexShow.vecVertex[p2];
 
-		glColor4f(float(meshFace.vecFace[i].r)/255,float(meshFace.vecFace[i].g)/255,float(meshFace.vecFace[i].b)/255,1);
+		ColorType color0,color1,color2;
 
+		if(g_switchModel%5 == 0)
+		{
+			color0 = vertexShow.objectColor[p0];
+			color1 = vertexShow.objectColor[p1];
+			color2 = vertexShow.objectColor[p2];
+		}
+		else if(g_switchModel%5 == 1)
+		{
+			color0 = vertexShow.objectnessColor[p0];
+			color1 = vertexShow.objectnessColor[p1];
+			color2 = vertexShow.objectnessColor[p2];
+		}
+		else if(g_switchModel%5 == 2)
+		{
+			color0 = vertexShow.patchColor[p0];
+			color1 = vertexShow.patchColor[p1];
+			color2 = vertexShow.patchColor[p2];
+		}
+
+		glColor4f(float(color0.mRed)/255,float(color0.mGreen)/255,float(color0.mBlue)/255,1);
 		glNormal3f(pv0.normal_x, pv0.normal_y,pv0.normal_z);
 		glVertex3f(pv0.x, pv0.y, pv0.z);
 
+		glColor4f(float(color1.mRed)/255,float(color1.mGreen)/255,float(color1.mBlue)/255,1);
 		glNormal3f(pv1.normal_x, pv1.normal_y, pv1.normal_z);
 		glVertex3f(pv1.x, pv1.y, pv1.z);
 
-		glNormal3f(pv2.normal_x, pv2.normal_y, pv2.normal_z);
-		glVertex3f(pv2.x, pv2.y, pv2.z);
-
-	}
-
-	for(int i=0;i<meshFaceExtra.vecFace.size();i++)
-	{
-		int p0,p1,p2;
-		p0 = meshFaceExtra.vecFace[i].p0;
-		p1 = meshFaceExtra.vecFace[i].p1;
-		p2 = meshFaceExtra.vecFace[i].p2;
-
-		Point_RGB_NORMAL pv0,pv1,pv2,pCenter;
-		pv0 = vertexExtraShow.vecVertex[p0];
-		pv1 = vertexExtraShow.vecVertex[p1];
-		pv2 = vertexExtraShow.vecVertex[p2];
-
-		glColor4f(float(meshFaceExtra.vecFace[i].r)/255,float(meshFaceExtra.vecFace[i].g)/255,float(meshFaceExtra.vecFace[i].b)/255,1);
-
-		glNormal3f(pv0.normal_x, pv0.normal_y,pv0.normal_z);
-		glVertex3f(pv0.x, pv0.y, pv0.z);
-
-		glNormal3f(pv1.normal_x, pv1.normal_y, pv1.normal_z);
-		glVertex3f(pv1.x, pv1.y, pv1.z);
-
+		glColor4f(float(color2.mRed)/255,float(color2.mGreen)/255,float(color2.mBlue)/255,1);
 		glNormal3f(pv2.normal_x, pv2.normal_y, pv2.normal_z);
 		glVertex3f(pv2.x, pv2.y, pv2.z);
 	}
+
+	
+// 	for(int i=0;i<meshFaceExtra.vecFace.size();i++)
+// 	{
+// 		int p0,p1,p2;
+// 		p0 = meshFaceExtra.vecFace[i].p0;
+// 		p1 = meshFaceExtra.vecFace[i].p1;
+// 		p2 = meshFaceExtra.vecFace[i].p2;
+// 
+// 		Point_RGB_NORMAL pv0,pv1,pv2,pCenter;
+// 		pv0 = vertexExtraShow.vecVertex[p0];
+// 		pv1 = vertexExtraShow.vecVertex[p1];
+// 		pv2 = vertexExtraShow.vecVertex[p2];
+// 
+// 		glColor4f(float(meshFaceExtra.vecFace[i].r)/255,float(meshFaceExtra.vecFace[i].g)/255,float(meshFaceExtra.vecFace[i].b)/255,1);
+// 
+// 		glNormal3f(pv0.normal_x, pv0.normal_y,pv0.normal_z);
+// 		glVertex3f(pv0.x, pv0.y, pv0.z);
+// 
+// 		glNormal3f(pv1.normal_x, pv1.normal_y, pv1.normal_z);
+// 		glVertex3f(pv1.x, pv1.y, pv1.z);
+// 
+// 		glNormal3f(pv2.normal_x, pv2.normal_y, pv2.normal_z);
+// 		glVertex3f(pv2.x, pv2.y, pv2.z);
+// 	}
 	glEnd(); 
 }
 

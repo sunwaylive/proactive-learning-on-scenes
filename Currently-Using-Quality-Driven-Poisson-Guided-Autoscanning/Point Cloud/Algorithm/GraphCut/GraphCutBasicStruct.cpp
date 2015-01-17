@@ -36,7 +36,6 @@ CAreaInterest::CAreaInterest(vector<MyPointCloud_RGB_NORMAL> &pointCloud, vector
 
 	//scanestimation
 	paraConfidence = 2;
-	paraSmoothAdjust = 0.75;
 
 	maxSV = SMALL_NUM;
 	minSV = LARGE_NUM;
@@ -994,36 +993,35 @@ void CAreaInterest::ScoreUpdate()
 	ofstream outFileg("Output\\ScoreUpdate.txt");
 	outFileg << "let's begin :) " << endl;
 
-	//get confidence score for each patch
-	vecPatchConfidenceScore.resize(vecPatchPoint.size(),0);
-	for(int i = 0;i < vecvecMultiResult.size();i++)
-	{
-		for(int j = 0;j < vecvecMultiResult[i].size();j++)
-		{
-			int patchIndex = vecvecMultiResult[i][j];
-			vecPatchConfidenceScore[patchIndex] = ComputePatchConfidenceScore(i,patchIndex);
-		}
-	}
-
-	//update the smooth term
-	for(int i = 0;i < vecpairPatchConnection.size();i++)
-	{
-		double confidenceScore;
-		confidenceScore = vecPatchConfidenceScore[vecpairPatchConnection[i].first] + vecPatchConfidenceScore[vecpairPatchConnection[i].second];
-
-		if(vecGeometryConvex[i])
-			vecGeometryValue[i] *= confidenceScore;
-		else
-			vecGeometryValue[i] /= confidenceScore;
-
-		double valueBefore = vecSmoothValue[i];
-		vecSmoothValue[i] = vecGeometryValue[i] + vecAppearenceValue[i];
-
-		double para = 0.3;
-		vecSmoothValue[i] =  (vecSmoothValue[i] - minSV)/(maxSV - minSV);
-		vecSmoothValue[i] = paraSmoothAdjust * pow(2.7183,- (1 - vecSmoothValue[i]) * (1 - vecSmoothValue[i]) / para /para);
-
-	}
+// 	//get confidence score for each patch
+// 	vecPatchConfidenceScore.resize(vecPatchPoint.size(),0);
+// 	for(int i = 0;i < vecvecMultiResult.size();i++)
+// 	{
+// 		for(int j = 0;j < vecvecMultiResult[i].size();j++)
+// 		{
+// 			int patchIndex = vecvecMultiResult[i][j];
+// 			vecPatchConfidenceScore[patchIndex] = ComputePatchConfidenceScore(i,patchIndex);
+// 		}
+// 	}
+// 
+// 	//update the smooth term
+// 	for(int i = 0;i < vecpairPatchConnection.size();i++)
+// 	{
+// 		double confidenceScore;
+// 		confidenceScore = vecPatchConfidenceScore[vecpairPatchConnection[i].first] + vecPatchConfidenceScore[vecpairPatchConnection[i].second];
+// 
+// 		if(vecGeometryConvex[i])
+// 			vecGeometryValue[i] *= confidenceScore;
+// 		else
+// 			vecGeometryValue[i] /= confidenceScore;
+// 
+// 		double valueBefore = vecSmoothValue[i];
+// 		vecSmoothValue[i] = vecGeometryValue[i] + vecAppearenceValue[i];
+// 
+// 		double para = 0.3;
+// 		vecSmoothValue[i] =  (vecSmoothValue[i] - minSV)/(maxSV - minSV);
+// 		vecSmoothValue[i] = paraSmoothAdjust * pow(2.7183,- (1 - vecSmoothValue[i]) * (1 - vecSmoothValue[i]) / para /para);
+// 	}
 
 	outFileg << "let's begin 2:) " << endl;
 	ComputeScore();
@@ -1145,8 +1143,8 @@ void CAreaInterest::UpdateObjectness(int m)
 		if(firstFlag && secondFlag)
 		{
 			edgeNum++;
-			if(!vecGeometryConvex[i])
-				concaveSum += vecSmoothValue[i];
+//			if(!vecGeometryConvex[i])
+				concaveSum += 1 - vecSmoothValue[i];
 		}
 	}
 
@@ -1160,9 +1158,8 @@ void CAreaInterest::UpdateObjectness(int m)
 	if(concaveSum < 0.000001)
 		concaveSum = 0;
 
-	objectness = fSum * concaveSum; 
-
-
+//	objectness = fSum * concaveSum; 
+	objectness = concaveSum; 
 
 	vecObjectHypo[m].objectness = objectness;
 
@@ -1214,7 +1211,7 @@ void CAreaInterest::UpdateSeparateness(int m,int n)
 
 double CAreaInterest::GaussianFunction(double x)
 {
-	double para = 0.05;
+	double para = 1;
 	double value = pow(2.7183,- x * x / para / para);
 
 	return value;
@@ -1234,8 +1231,8 @@ void CAreaInterest::UpdateGraph()
 		if(objMin > vecObjectHypo[i].objectness)
 			objMin = vecObjectHypo[i].objectness;
 	}
-// 	objMax = 135;
-// 	objMin = 0;
+	objMax = 3000;
+	objMin = 0;
 
 	for(int i = 0;i < vecEdgeHypo.size();i++)
 	{

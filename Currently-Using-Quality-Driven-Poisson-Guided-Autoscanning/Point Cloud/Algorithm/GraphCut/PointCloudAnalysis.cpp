@@ -30,13 +30,16 @@ void CPointCloudAnalysis::MainStep(bool initFlag,int newAreNum)
 
 void CPointCloudAnalysis::ScanEstimation()
 {
+	ofstream outFileg("Output\\ScanEstimation.txt",ios::app);
 	for(int i = 0;i < vecAreaInterest.size();i++)
 	{
-		ofstream outFileg("Output\\ObjectnessSeparateness.txt",ios::app);
-		outFileg << "area: " <<  i << endl;
 		vecAreaInterest[i].ScoreUpdate();
-		outFileg.close();
 	}
+	
+	double objectnessMax = SMALL_NUM;
+	double objectnessMin = LARGE_NUM;
+
+	outFileg.close();
 }
 
 void CPointCloudAnalysis::GraphUpdate()
@@ -116,6 +119,24 @@ void CPointCloudAnalysis::InitAreaInterest()
 			zMin = vecAreaInterest[i].zMin;
 	}
 
+	//color set
+	ColorShow colorTemp;
+
+	double colorChoice[16][3] = {
+		{130, 130, 240}, {255, 120, 120}, {46, 254, 100}, {250, 88, 172},
+		{250, 172, 88}, {129, 247, 216}, {150, 150, 50}, {226, 169, 143}, {8, 138, 41}, 
+		{1, 223, 215}, {11, 76, 95}, {190, 182, 90},
+		{245, 169, 242}, {75, 138, 8}, {247, 254, 46}, {88, 172, 250}
+	};
+
+	for(int i=0;i<16;i++)
+	{
+		colorTemp.r = colorChoice[i][0];	
+		colorTemp.g = colorChoice[i][1]; 
+		colorTemp.b = colorChoice[i][2]; 
+		colorSet.color.push_back(colorTemp);
+	}
+
 	outFile.close();
 }
 
@@ -155,6 +176,7 @@ void CPointCloudAnalysis::NormalizeAppearanceTerm()
 				maxAV = vecAreaInterest[i].vecAppearenceValue[j];
 		}
 	}
+	maxAV = 1162;
 
 	for(int i = 0;i < vecAreaInterest.size();i++)
 	{
@@ -214,6 +236,9 @@ void CPointCloudAnalysis::NormalizeSmoothTerm()
 			minSV = vecAreaInterest[i].vecSmoothValue[j];
 		}
 	}
+	maxSV = 0.7;
+	minSV = 0.1;
+
 
 	for(int i = 0;i < vecAreaInterest.size();i++)
 	{

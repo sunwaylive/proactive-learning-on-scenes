@@ -112,6 +112,10 @@ bool loadPointCloud_normal_ply(char* fileName, PointCloudPtr_RGB_NORMAL cloud,Me
 
 	meshVertex.vecVertex.push_back(point_tem);
   }
+  meshVertex.objectColor.resize(num_points);
+  meshVertex.objectnessColor.resize(num_points);
+  meshVertex.patchColor.resize(num_points);
+
 
   for (int i=0; i<num_faces; ++i) {
 	  Face3 face_tem;

@@ -34,6 +34,8 @@ public:
 	GRAPHSHOW patchGraph;
 	GRAPHSHOW contractionGraph;
 
+	ColorSet colorSet;
+
 public:
 	CPointCloudAnalysis(void);
 	~CPointCloudAnalysis(void);

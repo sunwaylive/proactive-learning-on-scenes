@@ -511,7 +511,7 @@ void GLArea::paintGL()
     if (para->getBool("Show GraphCut Related"))
     {
       //1. show graph cut result
-      if(!dataMgr.isGraphCutResultEmpty() && g_switchModel%3 == 0)
+      if(!dataMgr.isGraphCutResultEmpty())
       {
 //         if(para->getBool("Show Samples Quad"))
 //           glDrawer.draw(GLDrawer::QUADE, dataMgr.getCurrentGraphCutResult());
@@ -526,13 +526,13 @@ void GLArea::paintGL()
       }
 
       //2. show contraction graph
-	  if(!dataMgr.isContractionGraphEmpty()&& g_switchModel%3 == 1)
+	  if(!dataMgr.isContractionGraphEmpty()&& g_switchModel%5 == 3)
 	  {
 		  glDrawer.drawGraphShow(dataMgr.getContractionGraph(),1);
 	  }
 
-      //3. show patch graph
-	  if(!dataMgr.isPatchGraphEmpty()&& g_switchModel%3 == 2)
+	  //3. show patch graph
+	  if(!dataMgr.isPatchGraphEmpty()&& g_switchModel%5 == 4)
 	  {
 		  glDrawer.drawGraphShow(dataMgr.getPatchGraph(),0);
 	  }

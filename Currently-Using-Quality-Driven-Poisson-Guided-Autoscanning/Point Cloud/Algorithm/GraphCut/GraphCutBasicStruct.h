@@ -75,6 +75,17 @@ struct EdgeHypo
 	double separateness;
 };
 
+struct ColorShow
+{
+	double r,g,b;
+};
+
+struct ColorSet
+{
+	vector<ColorShow> color;
+};
+
+
 class CAreaInterest
 {
 public:

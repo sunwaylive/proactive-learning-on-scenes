@@ -4,6 +4,7 @@
 #include <pcl/point_types.h>
 #include <pcl/io/pcd_io.h>
 #include <vector>
+#include "Algorithm/Common/color_op.h"
 
 using namespace std;
 
@@ -157,6 +158,9 @@ struct MeshFace
 struct MeshVertex
 {
 	vector<Point_RGB_NORMAL> vecVertex;
+	vector<ColorType> objectColor;
+	vector<ColorType> objectnessColor;
+	vector<ColorType> patchColor;
 };
 
 struct Face3V

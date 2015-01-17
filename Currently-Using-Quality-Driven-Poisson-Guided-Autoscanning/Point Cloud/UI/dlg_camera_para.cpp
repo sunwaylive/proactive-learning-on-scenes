@@ -6,6 +6,7 @@ MeshFace meshFace;
 MeshVertex meshVertex;
 MeshVertex vertexShow;
 
+
 MeshVertex vertexExtraShow;
 extern MeshVertex meshVertexExtra;
 
@@ -1511,6 +1512,7 @@ void CameraParaDlg::updateShowModel()
 		vertexShow.vecVertex[i].z -= (cPointCloudAnalysis.zMax + cPointCloudAnalysis.zMin)/2;
 	}
 
+	//vertex extra
 	vertexExtraShow = meshVertexExtra;
 	for(int i = 0;i < vertexExtraShow.vecVertex.size();i++)
 	{
@@ -1522,27 +1524,70 @@ void CameraParaDlg::updateShowModel()
 	outFileg.close();
 }
 
+void GetColour(double v,double vmin,double vmax,double &r,double &g,double &b)
+{
+	r = g = b =1.0;
+	double dv;
+
+	if (v < vmin)
+		v = vmin;
+	if (v > vmax)
+		v = vmax;
+	dv = vmax - vmin;
+
+	if (v < (vmin + 0.25 * dv)) {
+		r = 0;
+		g = 4 * (v - vmin) / dv;
+	} else if (v < (vmin + 0.5 * dv)) {
+		r = 0;
+		b = 1 + 4 * (vmin + 0.25 * dv - v) / dv;
+	} else if (v < (vmin + 0.75 * dv)) {
+		r = 4 * (v - vmin - 0.5 * dv) / dv;
+		b = 0;
+	} else {
+		g = 1 + 4 * (vmin + 0.75 * dv - v) / dv;
+		b = 0;
+	}
+
+}
+
 void CameraParaDlg::getFaceShow()
 {
 	ofstream outFileg("Output\\getFaceShow.txt");
 	outFileg << "let's begin :) " << endl;
-
+	
 	vecVertexExist.resize(meshVertex.vecVertex.size(),false);
 	vecVertexColor.resize(meshVertex.vecVertex.size());
 
+	int count0=0;
 #pragma omp parallel for
 	for(int i = 0; i < cPointCloudAnalysis.vecAreaInterest.size();i++)
 	{
 		if(!cPointCloudAnalysis.vecAreaInterest[i].validFlag)	continue;
 		for(int j = 0; j < cPointCloudAnalysis.vecAreaInterest[i].vecObjectHypo.size();j++)
 		{
-			double r,g,b;
-			r = double(rand()%255);
-			g = double(rand()%255);
-			b = double(rand()%255);
+			double rSeg,gSeg,bSeg;
+			double rObj,gObj,bObj;
+			double rPat,gPat,bPat;
+
+			ColorShow color = cPointCloudAnalysis.colorSet.color[count0%16];
+			count0++;
+			rSeg = double(color.r);
+			gSeg = double(color.g);
+			bSeg = double(color.b);
+
+			GetColour(cPointCloudAnalysis.vecAreaInterest[i].vecObjectHypo[j].objectness,300,350,rObj,gObj,bObj);
+			rObj *= 255;
+			gObj *= 255;
+			bObj *= 255;
 
 			for(int k = 0; k < cPointCloudAnalysis.vecAreaInterest[i].vecObjectHypo[j].patchIndex.size();k++)
 			{
+				ColorShow color = cPointCloudAnalysis.colorSet.color[rand()%16];
+				rPat = double(color.r);
+				gPat = double(color.g);
+				bPat = double(color.b);
+
 				int patchIndex = cPointCloudAnalysis.vecAreaInterest[i].vecObjectHypo[j].patchIndex[k];
 				for(int m = 0; m < cPointCloudAnalysis.vecAreaInterest[i].vecPatchPoint[patchIndex].mypoints.size();m++)
 				{
@@ -1557,10 +1602,22 @@ void CameraParaDlg::getFaceShow()
 						if(distance < 1e-13)
 						{
 							vecVertexExist[n] = true;
-							vecVertexColor[n].mRed = r;
-							vecVertexColor[n].mGreen = g;
-							vecVertexColor[n].mBlue = b;	
-							outFileg<<" vertex: " <<n<<endl;
+							vecVertexColor[n].mRed = rSeg;
+							vecVertexColor[n].mGreen = gSeg;
+							vecVertexColor[n].mBlue = bSeg;	
+
+							meshVertex.objectColor[n].mRed = rSeg;
+							meshVertex.objectColor[n].mGreen = gSeg;
+							meshVertex.objectColor[n].mBlue = bSeg;
+
+							meshVertex.objectnessColor[n].mRed = rObj;
+							meshVertex.objectnessColor[n].mGreen = gObj;
+							meshVertex.objectnessColor[n].mBlue = bObj;
+
+							meshVertex.patchColor[n].mRed = rPat;
+							meshVertex.patchColor[n].mGreen = gPat;
+							meshVertex.patchColor[n].mBlue = bPat;
+
 							break;
 						}
 					}
@@ -1568,6 +1625,7 @@ void CameraParaDlg::getFaceShow()
 			}
 		}
 	}
+		outFileg<<" 11111 "<<endl;
 
 #pragma omp parallel for
 	for(int i = 0; i < cPointCloudAnalysis.tablePoint.mypoints.size();i++)
@@ -1585,12 +1643,24 @@ void CameraParaDlg::getFaceShow()
 				vecVertexColor[n].mRed = 200;
 				vecVertexColor[n].mGreen = 200;
 				vecVertexColor[n].mBlue = 200;	
-				outFileg<<" table: " <<n<<endl;
+
+				meshVertex.objectColor[n].mRed = 200;
+				meshVertex.objectColor[n].mGreen = 200;
+				meshVertex.objectColor[n].mBlue = 200;
+
+				meshVertex.objectnessColor[n].mRed = 200;
+				meshVertex.objectnessColor[n].mGreen = 200;
+				meshVertex.objectnessColor[n].mBlue = 200;
+
+				meshVertex.patchColor[n].mRed = 200;
+				meshVertex.patchColor[n].mGreen = 200;
+				meshVertex.patchColor[n].mBlue = 200;
+
 				break;
 			}
 		}
 	}
-
+	outFileg<<" 2222 "<<endl;
 
 	for(int i = 0;i < meshFace.vecFace.size();i++)
 	{
@@ -1598,6 +1668,7 @@ void CameraParaDlg::getFaceShow()
 		p0 = meshFace.vecFace[i].p0;
 		p1 = meshFace.vecFace[i].p1;
 		p2 = meshFace.vecFace[i].p2;
+		meshFace.vecFace[i].validFlag = false;
 		if(vecVertexExist[p0] && vecVertexExist[p1] && vecVertexExist[p2])
 		{
 			Face3 face;
@@ -1613,7 +1684,7 @@ void CameraParaDlg::getFaceShow()
 	outFileg.close();
 }
 
-void CameraParaDlg::getNewFaceShow(int newAreaNum, int deletedAreaNum)
+void CameraParaDlg::getNewFaceShow(int newAreaNum, int deletedAreaNum, bool mergeFlag)
 {
 	ofstream outFileg("Output\\getNewFaceShow.txt");
 	outFileg << "let's begin :) " << endl;
@@ -1623,22 +1694,65 @@ void CameraParaDlg::getNewFaceShow(int newAreaNum, int deletedAreaNum)
 // 	vecVertexExist.resize(meshVertex.vecVertex.size(),false);
 // 	vecVertexColor.resize(meshVertex.vecVertex.size());
 
-
+	int count0=0;
 	for(int i = cPointCloudAnalysis.vecAreaInterest.size() - newAreaNum; i < cPointCloudAnalysis.vecAreaInterest.size();i++)
 	{
-//		if(!cPointCloudAnalysis.vecAreaInterest[i].validFlag)	continue;
+		outFileg << "i : " << i <<endl;
+
+		double rSeg,gSeg,bSeg;
+		double rObj,gObj,bObj;
+		double rPat,gPat,bPat;
+		ColorShow color = cPointCloudAnalysis.colorSet.color[count0%16];
+		count0++;
+		rSeg = double(color.r);
+		gSeg = double(color.g);
+		bSeg = double(color.b);
+
 		for(int j = 0; j < cPointCloudAnalysis.vecAreaInterest[i].vecObjectHypo.size();j++)
 		{
-			double r,g,b;
-			r = double(rand()%255);
-			g = double(rand()%255);
-			b = double(rand()%255);
+			outFileg << "j : " << j <<endl;
+
+			if(!mergeFlag)
+			{
+				GetColour(cPointCloudAnalysis.vecAreaInterest[i].vecObjectHypo[j].objectness,300,350,rObj,gObj,bObj);
+				rObj *= 255;
+				gObj *= 255;
+				bObj *= 255;
+
+				ColorShow color = cPointCloudAnalysis.colorSet.color[count0%16];
+				count0++;
+				rSeg = double(color.r);
+				gSeg = double(color.g);
+				bSeg = double(color.b);
+			}
+			else
+			{
+				rObj = 0;
+				gObj = 0;
+				bObj = 255;
+			}
 
 			for(int k = 0; k < cPointCloudAnalysis.vecAreaInterest[i].vecObjectHypo[j].patchIndex.size();k++)
 			{
+				outFileg << "k : " << k <<endl;
+				if(!mergeFlag)
+				{
+					ColorShow color = cPointCloudAnalysis.colorSet.color[rand()%16];
+					rPat = double(color.r);
+					gPat = double(color.g);
+					bPat = double(color.b);
+				}
+				else
+				{
+					rPat = rSeg;
+					gPat = gSeg;
+					bPat = bSeg;
+				}
+				
 				int patchIndex = cPointCloudAnalysis.vecAreaInterest[i].vecObjectHypo[j].patchIndex[k];
 				for(int m = 0; m < cPointCloudAnalysis.vecAreaInterest[i].vecPatchPoint[patchIndex].mypoints.size();m++)
 				{
+					outFileg << "m : " << m <<endl;
 					MyPoint_RGB_NORMAL point = cPointCloudAnalysis.vecAreaInterest[i].vecPatchPoint[patchIndex].mypoints[m];
 
 					for(int n = 0;n < meshVertex.vecVertex.size();n++)
@@ -1647,13 +1761,26 @@ void CameraParaDlg::getNewFaceShow(int newAreaNum, int deletedAreaNum)
 						distance = (meshVertex.vecVertex[n].x - point.x) * (meshVertex.vecVertex[n].x - point.x) + 
 							(meshVertex.vecVertex[n].y - point.y) * (meshVertex.vecVertex[n].y - point.y) + 
 							(meshVertex.vecVertex[n].z - point.z) * (meshVertex.vecVertex[n].z - point.z);
-						if(distance < 0.000000000001)
+						if(distance < 1e-13)
 						{
+							outFileg << "n : " << n <<endl;
 							vecVertexExist[n] = true;
-							vecVertexColor[n].mRed = r;
-							vecVertexColor[n].mGreen = g;
-							vecVertexColor[n].mBlue = b;	
-							outFileg<<" vertex: " <<n<<endl;
+							vecVertexColor[n].mRed = rSeg;
+							vecVertexColor[n].mGreen = gSeg;
+							vecVertexColor[n].mBlue = bSeg;	
+
+							meshVertex.objectColor[n].mRed = rSeg;
+							meshVertex.objectColor[n].mGreen = gSeg;
+							meshVertex.objectColor[n].mBlue = bSeg;
+
+							meshVertex.objectnessColor[n].mRed = rObj;
+							meshVertex.objectnessColor[n].mGreen = gObj;
+							meshVertex.objectnessColor[n].mBlue = bObj;
+
+							meshVertex.patchColor[n].mRed = rPat;
+							meshVertex.patchColor[n].mGreen = gPat;
+							meshVertex.patchColor[n].mBlue = bPat;
+
 							break;
 						}
 					}
@@ -1662,11 +1789,14 @@ void CameraParaDlg::getNewFaceShow(int newAreaNum, int deletedAreaNum)
 		}
 	}
 
+	outFileg << "11111111" << endl;
 
 	for(int i = deletedAreaNum; i < deletedAreaNum + 1;i++)
 	{
+		outFileg << "i : " << i <<endl;
 		for(int j = 0; j < cPointCloudAnalysis.vecAreaInterest[i].vecObjectHypo.size();j++)
 		{
+			outFileg << "j : " << j <<endl;
 			double r,g,b;
 			r = double(rand()%255);
 			g = double(rand()%255);
@@ -1688,10 +1818,6 @@ void CameraParaDlg::getNewFaceShow(int newAreaNum, int deletedAreaNum)
 						if(distance < 0.000000000001)
 						{
 							vecVertexExist[n] = false;
-							vecVertexColor[n].mRed = r;
-							vecVertexColor[n].mGreen = g;
-							vecVertexColor[n].mBlue = b;	
-							outFileg<<" vertex: " <<n<<endl;
 							break;
 						}
 					}
@@ -1700,6 +1826,7 @@ void CameraParaDlg::getNewFaceShow(int newAreaNum, int deletedAreaNum)
 		}
 	}
 
+	outFileg << "2222222" << endl;
 
 	for(int i = 0;i < meshFace.vecFace.size();i++)
 	{
@@ -1739,9 +1866,11 @@ void CameraParaDlg::getOneFaceShow(int areaIndex)
 		for(int j = 0; j < cPointCloudAnalysis.vecAreaInterest[i].vecObjectHypo.size();j++)
 		{
 			double r,g,b;
-			r = double(rand()%255);
-			g = double(rand()%255);
-			b = double(rand()%255);
+
+			GetColour(cPointCloudAnalysis.vecAreaInterest[i].vecObjectHypo[j].objectness,0,200,r,g,b);
+			r *=255;
+			g *=255;
+			b *=255;
 
 			for(int k = 0; k < cPointCloudAnalysis.vecAreaInterest[i].vecObjectHypo[j].patchIndex.size();k++)
 			{
@@ -1762,6 +1891,21 @@ void CameraParaDlg::getOneFaceShow(int areaIndex)
 							vecVertexColor[n].mRed = r;
 							vecVertexColor[n].mGreen = g;
 							vecVertexColor[n].mBlue = b;	
+
+
+							meshVertex.objectColor[n].mRed = 200;
+							meshVertex.objectColor[n].mGreen = 200;
+							meshVertex.objectColor[n].mBlue = 200;
+
+							meshVertex.objectnessColor[n].mRed = 200;
+							meshVertex.objectnessColor[n].mGreen = 200;
+							meshVertex.objectnessColor[n].mBlue = 200;
+
+							meshVertex.patchColor[n].mRed = 200;
+							meshVertex.patchColor[n].mGreen = 200;
+							meshVertex.patchColor[n].mBlue = 200;
+
+
 							outFileg<<" vertex: " <<n<<endl;
 							break;
 						}
@@ -1791,6 +1935,7 @@ void CameraParaDlg::getOneFaceShow(int areaIndex)
 		}
 	}
 
+
 	outFileg.close();
 }
 
@@ -1807,55 +1952,54 @@ void CameraParaDlg::runGraphCut()
 
 
 	/////////////////////////////////////compute the score,sorting
-	global_paraMgr.data.setValue("CGrid Radius", DoubleValue(0.036));
-	global_paraMgr.poisson.setValue("Run Poisson On Original", BoolValue(true));
-	global_paraMgr.poisson.setValue("Run Extract MC Points", BoolValue(true));
-	global_paraMgr.poisson.setValue("Run One Key PoissonConfidence", BoolValue(true));
-
-#pragma omp parallel for
-	for(int i = 0;i < cPointCloudAnalysis.vecAreaInterest.size();i++)
-	{
-		for(int j = 0;j < cPointCloudAnalysis.vecAreaInterest[i].vecObjectHypo.size();j++)
-		{
-			cout<<"iteration:"<<i<<endl;
-			GLArea * newarea = new GLArea(area);
-
-			CMesh *original = newarea->dataMgr.getCurrentOriginal();
-			GlobalFun::clearCMesh(*original);
-			cPointCloudAnalysis.vecAreaInterest[i].SaveObjectHypoToOriginal(original, j);
-			newarea->dataMgr.downSamplesByNum();
-
-			//runStep2CombinedPoissonConfidence();
-			newarea->runPoisson();
-
-			CMesh *iso_point = newarea->dataMgr.getCurrentIsoPoints();
-			ObjectIsoPoint objectIsoPointTemp;
-			for(int j = 0;j < iso_point->vert.size();j++)
-			{
-				IsoPoint isoPointTemp;
-				isoPointTemp.f = iso_point->vert[j].eigen_confidence;
-				isoPointTemp.objectIndex = j;
-				isoPointTemp.x = iso_point->vert[j].P()[0];
-				isoPointTemp.y = iso_point->vert[j].P()[1];
-				isoPointTemp.z = iso_point->vert[j].P()[2];
-				objectIsoPointTemp.vecPoints.push_back(isoPointTemp);
-			}
-			cPointCloudAnalysis.vecAreaInterest[i].vecObjectHypo[j].isoPoints = objectIsoPointTemp;
-
-			cout<<"number of iso points:"<<objectIsoPointTemp.vecPoints.size()<<endl;
-		}
-	}
+// 	global_paraMgr.data.setValue("CGrid Radius", DoubleValue(0.036));
+// 	global_paraMgr.poisson.setValue("Run Poisson On Original", BoolValue(true));
+// 	global_paraMgr.poisson.setValue("Run Extract MC Points", BoolValue(true));
+// 	global_paraMgr.poisson.setValue("Run One Key PoissonConfidence", BoolValue(true));
+// 
+// /*#pragma omp parallel for*/
+// 	for(int i = 0;i < cPointCloudAnalysis.vecAreaInterest.size();i++)
+// 	{
+// 		for(int j = 0;j < cPointCloudAnalysis.vecAreaInterest[i].vecObjectHypo.size();j++)
+// 		{
+// 			cout<<"iteration:"<<i<<endl;
+// 			GLArea * newarea = new GLArea(area);
+// 
+// 			CMesh *original = newarea->dataMgr.getCurrentOriginal();
+// 			GlobalFun::clearCMesh(*original);
+// 			cPointCloudAnalysis.vecAreaInterest[i].SaveObjectHypoToOriginal(original, j);
+// 			newarea->dataMgr.downSamplesByNum();
+// 
+// 			//runStep2CombinedPoissonConfidence();
+// 			newarea->runPoisson();
+// 
+// 			CMesh *iso_point = newarea->dataMgr.getCurrentIsoPoints();
+// 			ObjectIsoPoint objectIsoPointTemp;
+// 			for(int j = 0;j < iso_point->vert.size();j++)
+// 			{
+// 				IsoPoint isoPointTemp;
+// 				isoPointTemp.f = iso_point->vert[j].eigen_confidence;
+// 				isoPointTemp.objectIndex = j;
+// 				isoPointTemp.x = iso_point->vert[j].P()[0];
+// 				isoPointTemp.y = iso_point->vert[j].P()[1];
+// 				isoPointTemp.z = iso_point->vert[j].P()[2];
+// 				objectIsoPointTemp.vecPoints.push_back(isoPointTemp);
+// 			}
+// 			cPointCloudAnalysis.vecAreaInterest[i].vecObjectHypo[j].isoPoints = objectIsoPointTemp;
+// 
+// 			cout<<"number of iso points:"<<objectIsoPointTemp.vecPoints.size()<<endl;
+// 		}
+// 	}
 	CMesh *original = area->dataMgr.getCurrentOriginal();
 	GlobalFun::clearCMesh(*original);
 	cPointCloudAnalysis.vecAreaInterest[0].SaveObjectHypoToOriginal(original, 0);
 	area->dataMgr.downSamplesByNum();
 	area->runPoisson();
 
-	global_paraMgr.poisson.setValue("Run Extract MC Points", BoolValue(false));
-	global_paraMgr.poisson.setValue("Run Poisson On Original", BoolValue(false));
-	global_paraMgr.poisson.setValue("Run One Key PoissonConfidence", BoolValue(false));
-
-	outFileg << "Poisson finished :)   " << endl;
+// 	global_paraMgr.poisson.setValue("Run Extract MC Points", BoolValue(false));
+// 	global_paraMgr.poisson.setValue("Run Poisson On Original", BoolValue(false));
+// 	global_paraMgr.poisson.setValue("Run One Key PoissonConfidence", BoolValue(false));
+// 	outFileg << "Poisson finished :)   " << endl;
 
 	cPointCloudAnalysis.ScanEstimation();
 	outFileg << "ScoreUpdate finished :)   " << endl;
@@ -1897,15 +2041,34 @@ void CameraParaDlg::updateGraphCut()
 	int newAreaNum = 0;
 	if(!separateFlag)	
 	{
-		outFileg << "Merge start:) " << endl;
-		cPointCloudAnalysis.Merge(pushArea);
+// 		outFileg << "Merge start:) " << endl;
+// 		cPointCloudAnalysis.Merge(pushArea);
+// 		cPointCloudAnalysis.GraphUpdate();
+// 		getOneFaceShow(pushArea);
+// 		updateShowModel();
+// 		outFileg << "Merge finished  :) " << endl;
 
+
+		outFileg << "ReAnalysis start:) " << endl;
+		//over-segmentation again
+		newAreaNum += getUpdateData();
+		outFileg << "getUpdateData finished :) " << endl;
+		outFileg << "newAreaNum:" << newAreaNum << endl;
+
+		cPointCloudAnalysis.ReAnalysis(pushArea,newAreaNum);
+		outFileg << "ReAnalysis finished :) " << endl;
+
+		for(int i = cPointCloudAnalysis.vecAreaInterest.size() - newAreaNum;i < cPointCloudAnalysis.vecAreaInterest.size();i++)
+		{
+			cPointCloudAnalysis.ScanEstimation(i);
+		}
+		outFileg << "ScoreUpdate finished :)   " << endl;
 
 		cPointCloudAnalysis.GraphUpdate();
+		outFileg << "GraphUpdate finished :)   " << endl;
 
-		getOneFaceShow(pushArea);
+		getNewFaceShow(newAreaNum,pushArea,true);
 		updateShowModel();
-		outFileg << "Merge finished  :) " << endl;
 	}
 	else
 	{
@@ -1962,7 +2125,7 @@ void CameraParaDlg::updateGraphCut()
 		cPointCloudAnalysis.GraphUpdate();
 		outFileg << "GraphUpdate finished :)   " << endl;
 
-		getNewFaceShow(newAreaNum,pushArea);
+		getNewFaceShow(newAreaNum,pushArea,false);
 		updateShowModel();
 	}
 
@@ -1997,7 +2160,9 @@ int CameraParaDlg::getUpdateData()
   }
   meshFace.vecFace.insert(meshFace.vecFace.end(),meshFaceAdd.vecFace.begin(),meshFaceAdd.vecFace.end());
   meshVertex.vecVertex.insert(meshVertex.vecVertex.end(),meshVertexAdd.vecVertex.begin(),meshVertexAdd.vecVertex.end());
-
+  meshVertex.objectColor.insert(meshVertex.objectColor.end(),meshVertexAdd.objectColor.begin(),meshVertexAdd.objectColor.end());
+  meshVertex.objectnessColor.insert(meshVertex.objectnessColor.end(),meshVertexAdd.objectnessColor.begin(),meshVertexAdd.objectnessColor.end());
+  meshVertex.patchColor.insert(meshVertex.patchColor.end(),meshVertexAdd.patchColor.begin(),meshVertexAdd.patchColor.end());
 
   vector<bool> vecVertexExistAdd;
   vector<ColorType> vecVertexColorAdd;
@@ -2123,7 +2288,7 @@ void CameraParaDlg::runOverSegmentation()
   getCloudOnTable(remainingCloud, rect_cloud, matrix_transform, matrix_transform_r, tabletopCloud);
 
   float voxel_resolution = 0.004f;
-  float seed_resolution = 0.06f;
+  float seed_resolution = 0.04f;
   float color_importance = 0.2f;
   float spatial_importance = 0.4f;
   float normal_importance = 1.0f;

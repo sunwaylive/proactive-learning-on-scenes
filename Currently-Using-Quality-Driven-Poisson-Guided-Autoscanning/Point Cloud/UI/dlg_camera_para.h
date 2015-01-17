@@ -31,6 +31,7 @@
 #include "Algorithm/GraphCut/PointCloudAnalysis.h"
 #include "Algorithm/GraphCut/GraphCutBasicStruct.h"
 #include "Algorithm/GraphCut/MeasureConstruction.h"
+#include "Algorithm/Common/color_op.h"
 
 #include <stdlib.h> 
 #include <time.h>  
@@ -137,7 +138,7 @@ signals:
     void runSceneConfidence();
     void runSceneConfidenceViaOriginal();
 	void getFaceShow();
-	void getNewFaceShow(int newAreaNum, int deletedAreaNum);
+	void getNewFaceShow(int newAreaNum, int deletedAreaNum,bool mergeFlag);
 	void getOneFaceShow(int areaIndex);
 	void runGraphCut();
 	void updateGraphCut();

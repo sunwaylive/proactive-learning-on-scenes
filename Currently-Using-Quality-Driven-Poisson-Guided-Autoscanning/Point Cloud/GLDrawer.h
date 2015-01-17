@@ -11,6 +11,7 @@
 
 #include "Algorithm/Camera.h"
 #include "Algorithm/Common/common_type.h"
+#include "Algorithm/Common/color_op.h"
 
 using namespace std;
 using namespace vcg;
